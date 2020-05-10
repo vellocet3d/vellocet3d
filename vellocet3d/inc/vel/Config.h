@@ -14,17 +14,18 @@ namespace vel
 
 
     public:
-											Config(std::string userConfigPath);
+											Config();
         // Application defined
-        const bool							HEADLESS = false;
-        const bool							LOG_ENABLED = true;
+        bool								HEADLESS = false;
+        bool								LOG_ENABLED = true;
+		double								LOGIC_TICK = 30.0;
         const std::string					LOG_PATH = "data/log.txt";
         const std::string					SHADER_FILE_PATH = "data/shaders";
         const std::string					DEFAULT_VERTEX_SHADER = "default.vert";
         const std::string					DEFAULT_FRAGMENT_SHADER = "default.frag";
 		const std::string					DEFAULT_SKINNED_VERTEX_SHADER = "default_skinned.vert";
 		const std::string					DEFAULT_SKINNED_FRAGMENT_SHADER = "default_skinned.frag";
-        const double						LOGIC_TICK = 30.0;
+        
 
         // User defined via config.ini
         const int							SCREEN_WIDTH;

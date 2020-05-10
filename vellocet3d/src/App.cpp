@@ -7,20 +7,21 @@
 
 namespace vel
 {
+	App* App::instance = nullptr;
 
-    void App::init()
+    void App::init(Config conf)
     {
-        App::get();
+		static App inst(conf);
+		App::instance = &inst;
     }
     
     App& App::get()
     {
-        static App instance;
-        return instance;
+        return *App::instance;
     }
 
-    App::App() : 
-        config(Config("data/config.ini")),
+    App::App(Config conf) :
+        config(conf),
         logger(this->config.LOG_ENABLED, this->config.LOG_PATH),
         startTime(std::chrono::high_resolution_clock::now())
     {

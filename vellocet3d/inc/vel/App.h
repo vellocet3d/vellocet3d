@@ -23,7 +23,8 @@ namespace vel
 
 
     private:
-														App();
+														App(Config conf);
+		static App*										instance;
         std::optional<std::unique_ptr<Window>>			window;
         std::optional<std::unique_ptr<Scene>>			scene;
         std::optional<GPU>								gpu;
@@ -42,7 +43,7 @@ namespace vel
 
     public:
         static App&										get();
-        static void										init();
+        static void										init(Config conf);
 														App(App const&) = delete;
         void											operator=(App const&) = delete;
         void											setScene(Scene* scene);

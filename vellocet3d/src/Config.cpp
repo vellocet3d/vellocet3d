@@ -9,8 +9,8 @@
 
 namespace vel
 {
-    Config::Config(std::string userConfigPath) :
-        userConfigParams(this->loadFromFile(userConfigPath)),
+    Config::Config() :
+        userConfigParams(this->loadFromFile("data/config.ini")),
         SCREEN_WIDTH(userConfigParams.count("screenWidth") != 0 ? std::stoi(this->userConfigParams["screenWidth"]) : 1280),
         SCREEN_HEIGHT(userConfigParams.count("screenHeight") != 0 ? std::stoi(this->userConfigParams["screenHeight"]) : 720),
         FULLSCREEN(userConfigParams.count("fullScreen") != 0 ? (this->userConfigParams["fullScreen"] == "0" ? false : true) : false),
