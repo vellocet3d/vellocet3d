@@ -139,12 +139,6 @@ namespace vel
 
             this->newTime = this->time();
             this->frameTime = this->newTime - this->currentTime;
-			
-			if (this->scene && this->scene.value()->loaded && !this->config.HEADLESS)
-			{				
-				// update window, which includes capturing input state
-				this->window.value()->update();
-			}
 
             if (this->frameTime >= (1 / this->config.MAX_RENDER_FPS)) // cap max fps
             {
@@ -158,7 +152,7 @@ namespace vel
                     this->frameTime = 0.25;
                 }
 
-                this->accumulator += this->frameTime;                
+                this->accumulator += this->frameTime;
 
                 // process update logic
                 while (this->accumulator >= this->deltaTime)
@@ -179,9 +173,13 @@ namespace vel
                     this->accumulator -= this->deltaTime;
                 }
 
-                // perform draw (render) logic
+                
                 if (!this->config.HEADLESS)
                 {
+					// update window, which includes capturing input state
+					this->window.value()->update();
+
+					// perform draw (render) logic
                     this->gpu->enableDepthTest();
                     //this->gpu->drawLinesOnly();
                     this->gpu->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);

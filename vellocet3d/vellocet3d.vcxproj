@@ -100,10 +100,10 @@
       <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
-      <AdditionalDependencies>IrrXML.lib;zlibstatic.lib;assimp-vc140-mt.lib;glfw3.lib;opengl32.lib;</AdditionalDependencies>
+      <AdditionalDependencies>IrrXML.lib;zlibstaticd.lib;assimp-vc140-mt.lib;glfw3.lib;opengl32.lib;</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\debug;</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -121,10 +121,10 @@
       <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
-      <AdditionalDependencies>IrrXML.lib;zlibstatic.lib;assimp-vc140-mt.lib;glfw3.lib;opengl32.lib;</AdditionalDependencies>
+      <AdditionalDependencies>IrrXML.lib;zlibstaticd.lib;assimp-vc140-mt.lib;glfw3.lib;opengl32.lib;</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\debug;</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -149,7 +149,7 @@
       <AdditionalDependencies>IrrXML.lib;zlibstatic.lib;assimp-vc140-mt.lib;glfw3.lib;opengl32.lib;</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\release;</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -174,7 +174,7 @@
       <AdditionalDependencies>IrrXML.lib;zlibstatic.lib;assimp-vc140-mt.lib;glfw3.lib;opengl32.lib;</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)dep\lib\release;</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>

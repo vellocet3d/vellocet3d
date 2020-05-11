@@ -5,6 +5,8 @@
 #include <optional>
 #include <memory>
 
+#include "glm/glm.hpp"
+
 #include "vel/scene/stage/Actor.h"
 #include "vel/scene/stage/Camera.h"
 #include "vel/scene/stage/RenderCommand.h"
@@ -26,6 +28,7 @@ namespace vel::scene::stage
 		std::optional<size_t>                       renderCommandExists(size_t sI, size_t mI, size_t tI);
         size_t                                      addRenderCommand(RenderCommand rc);
 		std::vector<std::unique_ptr<Controller>>	controllers;
+		std::vector<glm::vec3>						debugVertices;
 
     public:
 													Stage(bool headless);
@@ -55,6 +58,7 @@ namespace vel::scene::stage
 		void										addController(Controller* controller);
 		void										executeControllers(float deltaTime);
 		void										savePreviousTransforms();
+		void										addDebugVertices(std::vector<glm::vec3> vertices);
 
     };
 }

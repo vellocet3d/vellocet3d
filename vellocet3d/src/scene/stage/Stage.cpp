@@ -34,6 +34,15 @@ namespace vel::scene::stage
 
     }
 
+	void Stage::addDebugVertices(std::vector<glm::vec3> vertices)
+	{
+		std::vector<glm::vec3> tmpVec;
+		tmpVec.reserve(this->debugVertices.size() + vertices.size());
+		tmpVec.insert(tmpVec.end(), this->debugVertices.begin(), this->debugVertices.end());
+		tmpVec.insert(tmpVec.end(), vertices.begin(), vertices.end());
+		this->debugVertices = tmpVec;
+	}
+
 	void Stage::executeControllers(float deltaTime)
 	{
 		for (auto& c : this->controllers)

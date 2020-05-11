@@ -106,6 +106,8 @@ namespace vel::scene
     {
         GPU& gpu = App::get().getGPU().value();
 
+
+
         for (auto& s : this->stages)
         {
 			if (!s.isVisible())
@@ -169,8 +171,6 @@ namespace vel::scene
                 }
 
             }
-
-            
             
         }
 

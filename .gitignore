@@ -1,3 +1,4 @@
 bin/x64/Debug/*
 bin/x64/Release/*
 .vs/*
+dep/lib/debug/*
