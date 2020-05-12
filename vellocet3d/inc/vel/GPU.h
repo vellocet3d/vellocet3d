@@ -46,7 +46,6 @@ namespace vel
         void								setShaderMat4(const std::string &name, glm::mat4 value) const;
         void								useMeshRenderable(size_t meshRenderableIndex);
         void								drawMeshRenderable();
-		void								drawDebugLines(std::vector<glm::vec3>& lines);
         void								wipe();
 
     };

@@ -46,6 +46,7 @@ namespace vel::scene
 		Animation&							getAnimation(size_t index);
 		void								updateAnimations(double runTime);
 		void								savePreviousTransforms();
+		void								executeOuterLoopControllers(float frameTime, float alphaTime);
 		void								draw(float alpha);
 		virtual void						load() = 0;
 		void								loop(float deltaTime);

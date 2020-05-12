@@ -352,42 +352,6 @@ namespace vel
         this->activeMeshRenderableIndex = -1;
         this->activeTextureIndex = -1;
     }
-
-	// untested
-	void GPU::drawDebugLines(std::vector<glm::vec3>& lines)
-	{
-		for (size_t i = 0; i < lines.size() - 1; i++)
-		{
-			unsigned int VBO2, VAO2;
-
-			GLfloat points[6];
-
-			points[0] = lines[i].x;
-			points[1] = lines[i].y;
-			points[2] = lines[i].z;
-			points[3] = lines[i + 1].x;
-			points[4] = lines[i + 1].y;
-			points[5] = lines[i + 1].z;
-
-			glGenVertexArrays(1, &VAO2);
-			glGenBuffers(1, &VBO2);
-			glBindVertexArray(VAO2);
-
-			glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
-
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
-			glEnableVertexAttribArray(0);
-
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-			glDrawArrays(GL_LINES, 0, 2);
-
-			glBindVertexArray(0);
-			glDeleteBuffers(1, &VBO2);
-			glDeleteVertexArrays(1, &VAO2);
-		}
-	}
 		
 	
 

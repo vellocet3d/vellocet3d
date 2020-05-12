@@ -16,7 +16,9 @@ namespace vel::scene::stage
 
     Stage::Stage(bool headless) :
         headless(headless),
-        visible(true)
+        visible(true),
+		controllers(std::vector<std::unique_ptr<Controller>>()),
+		outerLoopControllers(std::vector<std::unique_ptr<Controller>>())
     {
         // set default actors container to 1000 slots. If more space
         // is required, call setActorContainerSize before adding
@@ -34,13 +36,14 @@ namespace vel::scene::stage
 
     }
 
-	void Stage::addDebugVertices(std::vector<glm::vec3> vertices)
+	void Stage::executeOuterLoopControllers(float frameTime, float alphaTime)
 	{
-		std::vector<glm::vec3> tmpVec;
-		tmpVec.reserve(this->debugVertices.size() + vertices.size());
-		tmpVec.insert(tmpVec.end(), this->debugVertices.begin(), this->debugVertices.end());
-		tmpVec.insert(tmpVec.end(), vertices.begin(), vertices.end());
-		this->debugVertices = tmpVec;
+		for (auto& c : this->outerLoopControllers)
+		{
+			c->setDeltaTime(frameTime);
+			c->setAlphaTime(alphaTime);
+			c->logic();
+		}
 	}
 
 	void Stage::executeControllers(float deltaTime)
@@ -52,9 +55,14 @@ namespace vel::scene::stage
 		}
 	}
 
-	void Stage::addController(Controller* controller)
+	void Stage::addController(Controller* controller, bool forOuterLoop)
 	{
-		this->controllers.push_back(std::move(std::unique_ptr<Controller>(controller)));
+		if (!forOuterLoop)
+		{
+			this->controllers.push_back(std::move(std::unique_ptr<Controller>(controller)));
+			return;
+		}
+		this->outerLoopControllers.push_back(std::move(std::unique_ptr<Controller>(controller)));
 	}
 
 	void Stage::parentActorToActorBone(std::string childName, std::string parentName, std::string parentBoneName)

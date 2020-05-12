@@ -154,6 +154,12 @@ namespace vel
 
                 this->accumulator += this->frameTime;
 
+				if (!this->config.HEADLESS)
+				{
+					// update window, which includes capturing input state
+					this->window.value()->update();
+				}
+
                 // process update logic
                 while (this->accumulator >= this->deltaTime)
                 {                    
@@ -177,7 +183,7 @@ namespace vel
                 if (!this->config.HEADLESS)
                 {
 					// update window, which includes capturing input state
-					this->window.value()->update();
+					//this->window.value()->update();
 
 					// perform draw (render) logic
                     this->gpu->enableDepthTest();

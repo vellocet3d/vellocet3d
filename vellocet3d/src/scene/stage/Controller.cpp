@@ -18,6 +18,11 @@ namespace vel::scene::stage
 		this->deltaTime = delta;
 	}
 
+	void Controller::setAlphaTime(float alpha)
+	{
+		this->alphaTime = alpha;
+	}
+
 
 
 }

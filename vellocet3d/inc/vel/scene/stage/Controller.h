@@ -14,11 +14,13 @@ namespace vel::scene::stage
 	{
 	protected:
 		const InputState&	input;
-		float				deltaTime;
+		float				deltaTime = 0.0f;
+		float				alphaTime = 0.0f;
 
 	public:
 							Controller();
 		void				setDeltaTime(float delta);
+		void				setAlphaTime(float alpha);
 		virtual void		logic() = 0;
 	};
 }

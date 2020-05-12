@@ -102,6 +102,14 @@ namespace vel::scene
 		}
 	}
 
+	void Scene::executeOuterLoopControllers(float frameTime, float alphaTime)
+	{
+		for (auto& s : this->stages)
+		{
+			s.executeOuterLoopControllers(frameTime, alphaTime);
+		}
+	}
+
     void Scene::draw(float alpha)
     {
         GPU& gpu = App::get().getGPU().value();
