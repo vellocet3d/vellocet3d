@@ -182,8 +182,10 @@ namespace vel
                 
                 if (!this->config.HEADLESS)
                 {
-					// update window, which includes capturing input state
-					//this->window.value()->update();
+					float alphaTime = (float)(this->accumulator / this->deltaTime);
+
+					// execute outer loop controllers
+					this->scene.value()->executeOuterLoopControllers((float)this->frameTime, alphaTime);
 
 					// perform draw (render) logic
                     this->gpu->enableDepthTest();
@@ -192,7 +194,7 @@ namespace vel
 
                     if (this->scene && this->scene.value()->loaded)
                     {
-                        this->scene.value()->draw((float)(this->accumulator / this->deltaTime));
+                        this->scene.value()->draw(alphaTime);
                     }
 
                     this->window.value()->swapBuffers();
