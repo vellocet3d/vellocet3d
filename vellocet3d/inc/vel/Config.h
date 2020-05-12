@@ -19,6 +19,7 @@ namespace vel
         bool								HEADLESS = false;
         bool								LOG_ENABLED = true;
 		double								LOGIC_TICK = 30.0;
+		bool								CURSOR_HIDDEN = true;
         const std::string					LOG_PATH = "data/log.txt";
         const std::string					SHADER_FILE_PATH = "data/shaders";
         const std::string					DEFAULT_VERTEX_SHADER = "default.vert";

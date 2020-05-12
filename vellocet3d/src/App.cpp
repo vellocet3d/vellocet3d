@@ -28,7 +28,8 @@ namespace vel
         if (!this->config.HEADLESS)
         {
 			// create window
-            auto w = std::make_unique<Window>(this->config.SCREEN_WIDTH, this->config.SCREEN_HEIGHT, this->config.FULLSCREEN);
+            auto w = std::make_unique<Window>(this->config.SCREEN_WIDTH, this->config.SCREEN_HEIGHT, 
+				this->config.FULLSCREEN, this->config.CURSOR_HIDDEN);
             this->window = std::move(w);
 
 			// initialize GPU

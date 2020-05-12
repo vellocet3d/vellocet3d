@@ -73,6 +73,21 @@ namespace vel::scene::stage
         return m;
     }
 
+	glm::vec3 Transform::interpolateTranslations(const Transform& previousTransform, const Transform& currentTransform, float alpha)
+	{
+		return glm::lerp(previousTransform.getTranslation(), currentTransform.getTranslation(), alpha);
+	}
+
+	glm::quat Transform::interpolateRotations(const Transform& previousTransform, const Transform& currentTransform, float alpha)
+	{
+		return glm::slerp(previousTransform.getRotation(), currentTransform.getRotation(), alpha);
+	}
+
+	glm::vec3 Transform::interpolateScales(const Transform& previousTransform, const Transform& currentTransform, float alpha)
+	{
+		return glm::lerp(previousTransform.getScale(), currentTransform.getScale(), alpha);
+	}
+
 	glm::mat4 Transform::interpolateTransforms(const Transform& previousTransform, const Transform& currentTransform, float alpha)
 	{
 		Transform t;

@@ -27,6 +27,9 @@ namespace vel::scene::stage
 		const glm::mat4		getMatrix() const;
 		void				print();
 
+		static glm::vec3	interpolateTranslations(const Transform& previousTransform, const Transform& currentTransform, float alpha);
+		static glm::quat	interpolateRotations(const Transform& previousTransform, const Transform& currentTransform, float alpha);
+		static glm::vec3	interpolateScales(const Transform& previousTransform, const Transform& currentTransform, float alpha);
 		static glm::mat4	interpolateTransforms(const Transform& previousTransform, const Transform& currentTransform, float alpha);
 
 	};

@@ -117,6 +117,33 @@ namespace vel::scene::stage
 
 	}
 
+	glm::vec3 Actor::getInterpolatedTranslation(float alpha)
+	{
+		if (this->previousTransform) // insure we have a value for previousTransform from which to interpolate
+		{
+			return Transform::interpolateTranslations(this->previousTransform.value(), this->transform, alpha);
+		}
+		return this->transform.getTranslation();
+	}
+
+	glm::quat Actor::getInterpolatedRotation(float alpha)
+	{
+		if (this->previousTransform) // insure we have a value for previousTransform from which to interpolate
+		{
+			return Transform::interpolateRotations(this->previousTransform.value(), this->transform, alpha);
+		}
+		return this->transform.getTranslation();
+	}
+
+	glm::vec3 Actor::getInterpolatedScale(float alpha)
+	{
+		if (this->previousTransform) // insure we have a value for previousTransform from which to interpolate
+		{
+			return Transform::interpolateScales(this->previousTransform.value(), this->transform, alpha);
+		}
+		return this->transform.getTranslation();
+	}
+
 	const bool Actor::isDynamic() const
 	{
 		return this->dynamic;

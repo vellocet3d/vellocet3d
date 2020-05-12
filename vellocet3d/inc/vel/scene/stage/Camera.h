@@ -26,18 +26,14 @@ namespace vel::scene::stage
         glm::vec3			    lookAt = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3			    up = glm::vec3(0.0f, 1.0f, 0.0f);
         glm::mat4			    viewMatrix = glm::mat4(1.0f);
-		glm::mat4				viewRenderMatrix = glm::mat4(1.0f);
         glm::mat4			    projectionMatrix = glm::mat4(1.0f);
         void                    updateViewMatrix(float alpha);
         void                    updateProjectionMatrix();
-		Transform				currentTransform;
-		Transform				previousTransform;
 
     public:
 								Camera(CameraType type, bool fixed, float nearPlane, float farPlane, float fovScale);
         bool                    fixed;
         void                    update(float alpha);
-		void					updatePreviousTransform();
 		glm::mat4               getViewMatrix();
         glm::mat4               getProjectionMatrix();
         glm::vec3               getPosition();

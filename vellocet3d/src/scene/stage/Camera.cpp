@@ -20,11 +20,6 @@ namespace vel::scene::stage
         
     }
 
-	void Camera::updatePreviousTransform()
-	{
-		this->previousTransform = this->currentTransform;
-	}
-
 	void Camera::updateProjectionMatrix()
 	{
 		if (type == CameraType::ORTHOGRAPHIC)
@@ -44,24 +39,9 @@ namespace vel::scene::stage
 
     void Camera::updateViewMatrix(float alpha)
     {
-        if (!this->fixed) {
-
+        if (!this->fixed) 
+		{
             this->viewMatrix = glm::lookAt(this->position, this->lookAt, this->up);
-
-			glm::vec3 scale;
-			glm::quat rotation;
-			glm::vec3 translation;
-			glm::vec3 skew;
-			glm::vec4 perspective;
-			glm::decompose(this->viewMatrix, scale, rotation, translation, skew, perspective);
-			rotation = glm::conjugate(rotation);
-
-			this->currentTransform.setTranslation(translation);
-			this->currentTransform.setRotation(rotation);
-			this->currentTransform.setScale(scale);
-
-			this->viewRenderMatrix = Transform::interpolateTransforms(this->previousTransform, this->currentTransform, alpha);
-
         }
     }
 
@@ -73,8 +53,7 @@ namespace vel::scene::stage
 
     glm::mat4 Camera::getViewMatrix()
     {
-        //return this->viewMatrix;
-		return this->viewRenderMatrix;
+        return this->viewMatrix;
     }
 
     glm::mat4 Camera::getProjectionMatrix()

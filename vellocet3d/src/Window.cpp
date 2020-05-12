@@ -11,9 +11,10 @@
 
 namespace vel
 {
-    Window::Window(int screenWidth, int screenHeight, bool fullScreen) :
+    Window::Window(int screenWidth, int screenHeight, bool fullScreen, bool cursorHidden) :
         screenSize(glm::ivec2(screenWidth, screenHeight)),
-        fullScreen(fullScreen)        
+        fullScreen(fullScreen),
+		cursorHidden(cursorHidden)
     {
         // Initialize GLFW. This is the library that creates our cross platform (kinda since
         // apple decided to ditch opengl support for metal only) window object
@@ -64,7 +65,10 @@ namespace vel
                 this->setCallbacks();
 
                 // Set window input mode
-                glfwSetInputMode(this->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				if (this->cursorHidden)
+				{
+					glfwSetInputMode(this->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				}
 
                 // Set opengl viewport size
                 glViewport(0, 0, this->screenSize.x, this->screenSize.y);

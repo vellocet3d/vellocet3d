@@ -72,6 +72,9 @@ namespace vel::scene::stage
 		std::optional<glm::mat4>						getParentMatrix();
 		glm::mat4										getWorldMatrix();
 		glm::mat4										getWorldRenderMatrix(float alpha); // contains logic for interpolation
+		glm::vec3										getInterpolatedTranslation(float alpha);
+		glm::quat										getInterpolatedRotation(float alpha);
+		glm::vec3										getInterpolatedScale(float alpha);
 
 		const glm::vec3&								getTranslation();
 		const glm::quat&								getRotation();

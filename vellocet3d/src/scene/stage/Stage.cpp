@@ -177,10 +177,6 @@ namespace vel::scene::stage
 
 	void Stage::savePreviousTransforms()
 	{
-		if (this->camera)
-		{
-			this->camera->updatePreviousTransform();
-		}
 		for (auto& a : this->actors)
 		{
 			a.updatePreviousTransform();
