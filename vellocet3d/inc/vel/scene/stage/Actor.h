@@ -75,16 +75,10 @@ namespace vel::scene::stage
 		glm::vec3										getInterpolatedTranslation(float alpha);
 		glm::quat										getInterpolatedRotation(float alpha);
 		glm::vec3										getInterpolatedScale(float alpha);
-
 		const glm::vec3&								getTranslation();
 		const glm::quat&								getRotation();
 		const glm::vec3&								getScale();
 
-		// The below methods (upon implementing) will allow for the retrieval of this actor's translation/rotation/scale
-		// taking into account it's parent's transform, ie it's world translation/rotation/scale
-		//glm::vec3										getWorldTranslation();
-		//glm::quat										getWorldRotation();
-		//glm::vec3										getWorldScale();
 
     };
 }
