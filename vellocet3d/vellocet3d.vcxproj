@@ -179,6 +179,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\collision\EllipsoidCollider.cpp" />
     <ClCompile Include="src\GPU.cpp" />
     <ClCompile Include="src\scene\armature\Armature.cpp" />
     <ClCompile Include="src\scene\armature\Bone.cpp" />
@@ -225,6 +226,7 @@
     <ClInclude Include="inc\scene\stage\Transform.h" />
     <ClInclude Include="inc\scene\mesh\Vertex.h" />
     <ClInclude Include="inc\vel\App.h" />
+    <ClInclude Include="inc\vel\collision\EllipsoidCollider.h" />
     <ClInclude Include="inc\vel\Config.h" />
     <ClInclude Include="inc\vel\GPU.h" />
     <ClInclude Include="inc\vel\helpers.h" />

@@ -9,4 +9,8 @@ namespace vel
     std::string char_to_string(char* a);
 	bool sin_vector(std::string needle, std::vector<std::string> haystack);
 	bool string_contains(std::string needle, std::string haystack);
+	bool approximatelyEqual(float a, float b, float epsilon);
+	bool essentiallyEqual(float a, float b, float epsilon);
+	bool definitelyGreaterThan(float a, float b, float epsilon);
+	bool definitelyLessThan(float a, float b, float epsilon);
 }
