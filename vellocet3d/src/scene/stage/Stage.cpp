@@ -20,12 +20,17 @@ namespace vel::scene::stage
 		controllers(std::vector<std::unique_ptr<Controller>>()),
 		outerLoopControllers(std::vector<std::unique_ptr<Controller>>())
     {
-        // set default actors container to 1000 slots. If more space
+        // Set default actors container to 1000 slots. If more space
         // is required, call setActorContainerSize before adding
         // actors to the stage. If this is not done and actors
         // are added past the reserved limit, it will result in
         // undefined behavior (as push_back will reallocate
-        // all data to a new block every time push_back is called)
+        // all data to a new block every time it is called)
+		//
+		// Yes, this is a naive approach, but for the time being it
+		// solves the problem at hand and allows me to move forward.
+		// A more elegant solution should be put into place once
+		// time allows
         this->actors.reserve(1000);
 
         if (!this->headless)
@@ -35,6 +40,109 @@ namespace vel::scene::stage
         }
 
     }
+
+	std::vector<CollisionData*> Stage::getCollisionData()
+	{
+		std::vector<CollisionData*> returnCollisionData;
+
+		returnCollisionData.push_back(&this->staticCollisionData);
+
+		for (auto& srcd : this->staticRemovableCollisionData)
+		{
+			returnCollisionData.push_back(&srcd.first);
+		}
+
+		if (this->dynamicCollisionActors.size() > 0)
+		{
+			// pre-allocate the size of this->dynamicCollisionData to number 
+			// of dynamic actors so that when we add values, the memory addresses 
+			// do not change
+			this->dynamicCollisionData.clear();
+			this->dynamicCollisionData.reserve(this->dynamicCollisionActors.size());
+
+			for (auto& actor : this->dynamicCollisionActors)
+			{
+				if (!actor->getMeshIndex())
+				{
+					continue;
+				}
+
+				auto transformMatrix = actor->getWorldMatrix();
+				auto mesh = &App::get().getScene()->getMesh(actor->getMeshIndex().value());
+
+				CollisionData cd;
+
+				for (auto& vert : mesh->getVertices())
+				{
+					cd.vertices.push_back(glm::vec3(transformMatrix * glm::vec4(vert.position, 1.0f)));
+				}
+
+				for (auto& ind : mesh->getIndices())
+				{
+					cd.indices.push_back(ind);
+				}
+
+				this->dynamicCollisionData.push_back(cd);
+
+				returnCollisionData.push_back(&this->dynamicCollisionData.back());
+			}
+		}
+		
+		return returnCollisionData;
+	}
+
+	void Stage::addDynamicCollisionActor(Actor* actor)
+	{
+		this->dynamicCollisionActors.push_back(actor);
+	}
+
+	void Stage::addStaticRemovableCollisionActor(Actor* actor)
+	{
+		if (!actor->getMeshIndex())
+		{
+			return;
+		}
+
+		auto transformMatrix = actor->getWorldMatrix();
+		auto mesh = &App::get().getScene()->getMesh(actor->getMeshIndex().value());
+
+		CollisionData cd;
+
+		for (auto& vert : mesh->getVertices())
+		{
+			cd.vertices.push_back(glm::vec3(transformMatrix * glm::vec4(vert.position, 1.0f)));
+		}
+
+		for (auto& ind : mesh->getIndices())
+		{
+			cd.indices.push_back(ind);
+		}
+
+		this->staticRemovableCollisionData.push_back(std::pair<CollisionData, Actor*>(cd, actor));
+	}
+
+	void Stage::addStaticCollisionActor(Actor* actor)
+	{
+		if (!actor->getMeshIndex())
+		{
+			return;
+		}
+
+		auto transformMatrix = actor->getWorldMatrix();
+		auto mesh = &App::get().getScene()->getMesh(actor->getMeshIndex().value());
+
+		size_t vertexOffset = this->staticCollisionData.vertices.size();
+
+		for (auto& vert : mesh->getVertices())
+		{
+			this->staticCollisionData.vertices.push_back(glm::vec3(transformMatrix * glm::vec4(vert.position, 1.0f)));
+		}
+
+		for (auto& ind : mesh->getIndices())
+		{
+			this->staticCollisionData.indices.push_back(ind + vertexOffset);
+		}
+	}
 
 	void Stage::executeOuterLoopControllers(float frameTime, float alphaTime)
 	{

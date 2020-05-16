@@ -5,10 +5,8 @@
 
 #include "glm/glm.hpp"
 
-namespace vel::scene::stage
-{
-	class Actor;
-}
+#include "vel/scene/stage/CollisionData.h"
+
 
 namespace vel::collision
 {
@@ -25,8 +23,7 @@ namespace vel::collision
 	private:
 		glm::vec3							gravity;
 		glm::vec3							ellipsoidSpace;
-		std::vector<glm::vec3>				collisionVertices;
-		std::vector<size_t>					collisionIndices;
+		std::vector<CollisionData*>			collisionData;
 		bool								jumping;
 		bool								falling;
 		EllipsoidCollisionResponseType		activeResponseType;
@@ -49,7 +46,6 @@ namespace vel::collision
 
 	public:
 											EllipsoidCollider(glm::vec3 ellipsoidSpace, glm::vec3 gravity);
-		void								addStaticActor(vel::scene::stage::Actor& actor);
 		void								setSlidingPlaneThreshold(float threshold);
 		void								setJumping(bool jumping);
 		void								setFalling(bool falling);

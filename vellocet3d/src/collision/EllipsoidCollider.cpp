@@ -9,8 +9,6 @@ namespace vel::collision
 	EllipsoidCollider::EllipsoidCollider(glm::vec3 ellipsoidSpace, glm::vec3 gravity) :
 		gravity(gravity),
 		ellipsoidSpace(ellipsoidSpace),
-		collisionVertices(std::vector<glm::vec3>()),
-		collisionIndices(std::vector<size_t>()),
 		jumping(false),
 		falling(false),
 		activeResponseType(EllipsoidCollisionResponseType::SLIDE),
@@ -20,31 +18,6 @@ namespace vel::collision
 		nearestDistance(0.0f),
 		veryCloseDistance(0.0001f)
 	{};
-
-	
-	void EllipsoidCollider::addStaticActor(vel::scene::stage::Actor& actor)
-	{
-		if (!actor.getMeshIndex())
-		{
-			return;
-		}
-
-		auto transformMatrix = actor.getWorldMatrix();
-		auto mesh = &App::get().getScene()->getMesh(actor.getMeshIndex().value());
-
-		size_t vertexOffset = this->collisionVertices.size();
-
-		for (auto& vert : mesh->getVertices())
-		{
-			this->collisionVertices.push_back(glm::vec3(transformMatrix * glm::vec4(vert.position, 1.0f)));
-		}
-
-		for (auto& ind : mesh->getIndices())
-		{
-			this->collisionIndices.push_back(ind + vertexOffset);
-		}
-
-	}
 
 	glm::vec3 EllipsoidCollider::getCorrectedPosition(glm::vec3 position, glm::vec3 velocity)
 	{
@@ -99,22 +72,25 @@ namespace vel::collision
 		this->foundCollision = false;
 		this->nearestDistance = 0.0f;
 
-		glm::vec3 p0, p1, p2, triNormal;
-		for (int triCounter = 0; triCounter < this->collisionIndices.size() / 3; triCounter++) 
+		for (auto& cd : this->collisionData)
 		{
-			p0 = this->collisionVertices[this->collisionIndices[3 * triCounter]];
-			p1 = this->collisionVertices[this->collisionIndices[3 * triCounter + 1]];
-			p2 = this->collisionVertices[this->collisionIndices[3 * triCounter + 2]];
+			glm::vec3 p0, p1, p2, triNormal;
+			for (int triCounter = 0; triCounter < cd->indices.size() / 3; triCounter++)
+			{
+				p0 = cd->vertices[cd->indices[3 * triCounter]];
+				p1 = cd->vertices[cd->indices[3 * triCounter + 1]];
+				p2 = cd->vertices[cd->indices[3 * triCounter + 2]];
 
-			p0 = p0 / this->ellipsoidSpace;
-			p1 = p1 / this->ellipsoidSpace;
-			p2 = p2 / this->ellipsoidSpace;
+				p0 = p0 / this->ellipsoidSpace;
+				p1 = p1 / this->ellipsoidSpace;
+				p2 = p2 / this->ellipsoidSpace;
 
-			triNormal = glm::normalize(glm::cross((p1 - p0), (p2 - p0)));
+				triNormal = glm::normalize(glm::cross((p1 - p0), (p2 - p0)));
 
-			sphereCollidingWithTriangle(p0, p1, p2, triNormal);
+				sphereCollidingWithTriangle(p0, p1, p2, triNormal);
+			}
 		}
-
+		
 		if (!this->foundCollision)
 		{
 			return this->ePosition + this->eVelocity;

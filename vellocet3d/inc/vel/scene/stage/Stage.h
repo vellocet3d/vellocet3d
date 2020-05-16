@@ -11,6 +11,7 @@
 #include "vel/scene/stage/Camera.h"
 #include "vel/scene/stage/RenderCommand.h"
 #include "vel/scene/stage/Controller.h"
+#include "vel/scene/stage/CollisionData.h"
 
 
 namespace vel::scene::stage
@@ -29,6 +30,12 @@ namespace vel::scene::stage
         size_t                                      addRenderCommand(RenderCommand rc);
 		std::vector<std::unique_ptr<Controller>>	controllers;
 		std::vector<std::unique_ptr<Controller>>	outerLoopControllers;
+
+		CollisionData									staticCollisionData;
+		std::vector<std::pair<CollisionData, Actor*>>	staticRemovableCollisionData;
+		std::vector<Actor*>								dynamicCollisionActors;
+		std::vector<CollisionData>						dynamicCollisionData;
+
 
 
     public:
@@ -60,6 +67,13 @@ namespace vel::scene::stage
 		void										executeControllers(float deltaTime);
 		void										executeOuterLoopControllers(float frameTime, float alphaTime);
 		void										savePreviousTransforms();
+
+		void										addStaticCollisionActor(Actor* actor);
+		void										addStaticRemovableCollisionActor(Actor* actor);
+		void										addDynamicCollisionActor(Actor* actor);
+		std::vector<CollisionData*>					getCollisionData();
+
+
 
 
     };
