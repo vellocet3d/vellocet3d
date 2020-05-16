@@ -42,6 +42,9 @@ namespace vel::collision
 		std::optional<glm::vec3>			intersectionPoint;
 
 		glm::vec3							collideWithWorld();
+		float								calculatePlaneConstant(glm::vec3 point, glm::vec3 normal);
+		bool								checkPointInTriangle(const glm::vec3& point, const glm::vec3& triV1, const glm::vec3& triV2, const glm::vec3& triV3);
+		bool								getLowestRoot(float a, float b, float c, float maxR, float* root);
 		bool								sphereCollidingWithTriangle(glm::vec3& p0, glm::vec3& p1, glm::vec3& p2, glm::vec3& tri_normal);
 		
 
