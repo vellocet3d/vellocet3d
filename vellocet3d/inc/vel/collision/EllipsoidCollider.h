@@ -5,6 +5,7 @@
 
 #include "glm/glm.hpp"
 
+#include "vel/collision/RayCaster.h"
 #include "vel/scene/stage/CollisionData.h"
 
 
@@ -21,9 +22,10 @@ namespace vel::collision
 	{
 
 	private:
+		RayCaster							rayCaster;
 		glm::vec3							gravity;
 		glm::vec3							ellipsoidSpace;
-		std::vector<CollisionData*>			collisionData;
+		std::vector<vel::scene::stage::CollisionData*>	collisionData;
 		bool								jumping;
 		bool								falling;
 		EllipsoidCollisionResponseType		activeResponseType;

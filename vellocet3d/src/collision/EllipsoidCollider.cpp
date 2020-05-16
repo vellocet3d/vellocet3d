@@ -7,6 +7,7 @@
 namespace vel::collision
 {
 	EllipsoidCollider::EllipsoidCollider(glm::vec3 ellipsoidSpace, glm::vec3 gravity) :
+		rayCaster(RayCaster()),
 		gravity(gravity),
 		ellipsoidSpace(ellipsoidSpace),
 		jumping(false),
@@ -72,7 +73,7 @@ namespace vel::collision
 		this->foundCollision = false;
 		this->nearestDistance = 0.0f;
 
-		for (auto& cd : this->collisionData)
+		for (auto cd : this->collisionData)
 		{
 			glm::vec3 p0, p1, p2, triNormal;
 			for (int triCounter = 0; triCounter < cd->indices.size() / 3; triCounter++)
@@ -124,11 +125,44 @@ namespace vel::collision
 
 			if (slidePlaneAngle < this->slidingPlaneThreshold)
 			{
+				auto origin = newPosition * this->ellipsoidSpace;
+				origin.y = origin.y - this->ellipsoidSpace.y;
 
+				this->rayCaster.setCastOrigin(origin);
+				this->rayCaster.setCastDirection(glm::vec3(0.0f, -1.0f, 0.0f));
+				this->rayCaster.setCollisionData(this->collisionData);
+				this->rayCaster.execute();
+
+				float slideOffOffset = 0.1f;
+				bool shouldSlide = origin.y - this->rayCaster.getIntersectionPoint().y > slideOffOffset ? true : false;
+
+				if (!shouldSlide)
+				{
+					return newPosition;
+				}
 			}
-
 		}
 
+		float planeConstant = -((slidePlaneNormal.x * slidePlaneOrigin.x) + 
+			(slidePlaneNormal.y * slidePlaneOrigin.y) + 
+			(slidePlaneNormal.z * slidePlaneOrigin.z));
+
+		float distanceBetweenDestinationPointAndSlidingPlane = (glm::dot(destinationPoint, slidePlaneNormal) + planeConstant);
+
+		glm::vec3 newDestinationPoint = destinationPoint - distanceBetweenDestinationPointAndSlidingPlane * slidePlaneNormal;
+
+		glm::vec3 newVelocityVector = newDestinationPoint - this->intersectionPoint.value();
+
+		if (glm::length(newVelocityVector) < veryCloseDistance)
+		{
+			return newPosition;
+		}
+
+		this->recursionDepth++;
+		this->ePosition = newPosition;
+		this->eVelocity = newVelocityVector;
+
+		return this->collideWithWorld();
 	}
 
 	bool EllipsoidCollider::sphereCollidingWithTriangle(glm::vec3& p0, glm::vec3& p1, glm::vec3& p2, glm::vec3& tri_normal)
