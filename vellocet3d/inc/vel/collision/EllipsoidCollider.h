@@ -50,7 +50,9 @@ namespace vel::collision
 
 
 	public:
-											EllipsoidCollider(glm::vec3 ellipsoidSpace, glm::vec3 gravity);
+											EllipsoidCollider(glm::vec3 ellipsoidSpace);
+		void								setGravity(glm::vec3 gravity);
+		void								setCollisionData(std::vector<vel::scene::stage::CollisionData*> collisionData);
 		void								setSlidingPlaneThreshold(float threshold);
 		void								setJumping(bool jumping);
 		void								setFalling(bool falling);

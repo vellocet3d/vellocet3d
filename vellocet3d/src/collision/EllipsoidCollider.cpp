@@ -6,9 +6,9 @@
 
 namespace vel::collision
 {
-	EllipsoidCollider::EllipsoidCollider(glm::vec3 ellipsoidSpace, glm::vec3 gravity) :
+	EllipsoidCollider::EllipsoidCollider(glm::vec3 ellipsoidSpace) :
 		rayCaster(RayCaster()),
-		gravity(gravity),
+		gravity(glm::vec3(0.0f, -1.0f, 0.0f)),
 		ellipsoidSpace(ellipsoidSpace),
 		jumping(false),
 		falling(false),
@@ -450,6 +450,11 @@ namespace vel::collision
 		return -((normal.x * point.x) + (normal.y * point.y) + (normal.z * point.z));
 	}
 
+	void EllipsoidCollider::setCollisionData(std::vector<vel::scene::stage::CollisionData*> collisionData)
+	{
+		this->collisionData = collisionData;
+	}
+
 	void EllipsoidCollider::setSlidingPlaneThreshold(float threshold)
 	{
 		this->slidingPlaneThreshold = threshold;
@@ -463,6 +468,11 @@ namespace vel::collision
 	void EllipsoidCollider::setFalling(bool falling)
 	{
 		this->falling = falling;
+	}
+
+	void EllipsoidCollider::setGravity(glm::vec3 gravity)
+	{
+		this->gravity = gravity;
 	}
 
 	bool EllipsoidCollider::getFalling()

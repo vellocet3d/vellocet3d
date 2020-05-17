@@ -41,6 +41,11 @@ namespace vel::scene::stage
 
     }
 
+	std::vector<Actor>& Stage::getActors()
+	{
+		return this->actors;
+	}
+
 	std::vector<CollisionData*> Stage::getCollisionData()
 	{
 		std::vector<CollisionData*> returnCollisionData;

@@ -49,6 +49,7 @@ namespace vel::scene::stage
         void										removeActor(size_t index);
         Actor*										getActor(size_t index);
         Actor*										getActor(std::string name);
+		std::vector<Actor>&							getActors();
         const size_t								getActorSize() const;
         void										printRenderCommands() const;
         RenderCommand&								getRenderCommand(size_t index);
