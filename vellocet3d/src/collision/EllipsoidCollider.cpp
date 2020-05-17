@@ -47,7 +47,7 @@ namespace vel::collision
 
 			if (this->falling)
 			{
-				if (essentiallyEqual(yBeforeGravity, finalPosition.y, 0.01))
+				if (essentiallyEqual(yBeforeGravity, finalPosition.y, 0.01f))
 				{
 					this->falling = false;
 				}

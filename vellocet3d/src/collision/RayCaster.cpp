@@ -78,7 +78,7 @@ namespace vel::collision
 			return false; // This ray is parallel to this triangle
 		}
 
-		f = 1.0 / a;
+		f = 1.0f / a;
 		s = this->castOrigin - vertex0;
 		u = f * glm::dot(s, h);
 		if (u < 0.0 || u > 1.0) 
