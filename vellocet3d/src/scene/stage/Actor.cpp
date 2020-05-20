@@ -38,21 +38,6 @@ namespace vel::scene::stage
 		this->name = newName;
 	}
 
-	const glm::vec3& Actor::getTranslation()
-	{
-		return this->transform.getTranslation();
-	}
-
-	const glm::quat& Actor::getRotation()
-	{
-		return this->transform.getRotation();
-	}
-
-	const glm::vec3& Actor::getScale()
-	{
-		return this->transform.getScale();
-	}
-
 	std::optional<glm::mat4> Actor::getParentMatrix()
 	{
 		if (!this->parentActor)
@@ -155,26 +140,6 @@ namespace vel::scene::stage
 		{
 			this->previousTransform = this->getTransform();
 		}
-	}
-
-	void Actor::translate(glm::vec3 translation)
-	{
-		this->getTransform().setTranslation(translation);
-	}
-
-	void Actor::rotate(float angle, glm::vec3 axis)
-	{
-		this->getTransform().setRotation(angle, axis);
-	}
-
-	void Actor::rotate(glm::quat rotation)
-	{
-		this->getTransform().setRotation(rotation);
-	}
-
-	void Actor::scale(glm::vec3 scale)
-	{
-		this->getTransform().setScale(scale);
 	}
 
 	void Actor::setParentActor(Actor* a)

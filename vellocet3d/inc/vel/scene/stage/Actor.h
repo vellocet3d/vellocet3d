@@ -65,19 +65,13 @@ namespace vel::scene::stage
 		Transform&										getTransform();
 		std::optional<Transform>&						getPreviousTransform();
 		void											updatePreviousTransform();
-		void											translate(glm::vec3 translation);
-		void											rotate(float angle, glm::vec3 axis);
-		void											rotate(glm::quat rotation);
-		void											scale(glm::vec3 scale);
 		std::optional<glm::mat4>						getParentMatrix();
 		glm::mat4										getWorldMatrix();
 		glm::mat4										getWorldRenderMatrix(float alpha); // contains logic for interpolation
 		glm::vec3										getInterpolatedTranslation(float alpha);
 		glm::quat										getInterpolatedRotation(float alpha);
 		glm::vec3										getInterpolatedScale(float alpha);
-		const glm::vec3&								getTranslation();
-		const glm::quat&								getRotation();
-		const glm::vec3&								getScale();
+
 
 
     };
