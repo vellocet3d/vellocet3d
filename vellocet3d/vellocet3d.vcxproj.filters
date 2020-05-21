@@ -75,10 +75,10 @@
     <ClCompile Include="src\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\collision\EllipsoidCollider.cpp">
+    <ClCompile Include="src\scene\stage\CollisionWorld.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\collision\RayCaster.cpp">
+    <ClCompile Include="src\CollisionDebugDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -239,13 +239,10 @@
     <ClInclude Include="inc\vel\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\vel\collision\EllipsoidCollider.h">
+    <ClInclude Include="inc\vel\scene\stage\CollisionWorld.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\vel\scene\stage\CollisionData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\vel\collision\RayCaster.h">
+    <ClInclude Include="inc\vel\CollisionDebugDrawer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

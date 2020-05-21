@@ -3,6 +3,9 @@
 #include <vector>
 #include <string>
 
+#include "glm/glm.hpp"
+#include "bullet/LinearMath/btVector3.h"
+
 namespace vel
 {
     std::vector<std::string> explode_string(std::string const & s, char delim);
@@ -13,4 +16,5 @@ namespace vel
 	bool essentiallyEqual(float a, float b, float epsilon);
 	bool definitelyGreaterThan(float a, float b, float epsilon);
 	bool definitelyLessThan(float a, float b, float epsilon);
+	btVector3 glmToBulletVec3(glm::vec3 glmVec);
 }

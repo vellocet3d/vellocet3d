@@ -1,0 +1,63 @@
+#include <iostream>
+
+#include "glad/glad.h"
+
+#include "vel/CollisionDebugDrawer.h"
+
+
+
+namespace vel
+{
+	CollisionDebugDrawer::CollisionDebugDrawer() 
+	{
+		glGenVertexArrays(1, &VAO);
+		glGenBuffers(1, &VBO);
+	};
+
+	CollisionDebugDrawer::~CollisionDebugDrawer() 
+	{
+		std::cout << "debugDrawerDestructor\n";
+	};
+
+	void CollisionDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) 
+	{
+		this->verts.push_back(from.getX());
+		this->verts.push_back(from.getY());
+		this->verts.push_back(from.getZ());
+		this->verts.push_back(to.getX());
+		this->verts.push_back(to.getY());
+		this->verts.push_back(to.getZ());
+	}
+
+	void CollisionDebugDrawer::drawContactPoint(const btVector3&, const btVector3&, btScalar, int, const btVector3&) {}
+	void CollisionDebugDrawer::reportErrorWarning(const char*) {}
+	void CollisionDebugDrawer::draw3dText(const btVector3&, const char *) {}
+
+	void CollisionDebugDrawer::setDebugMode(int debug_mode) 
+	{
+		this->debug_mode = debug_mode;
+	}
+
+	int CollisionDebugDrawer::getDebugMode(void) const 
+	{ 
+		return this->debug_mode; 
+	}
+
+	void CollisionDebugDrawer::draw() 
+	{
+		if (this->verts.size() > 0)
+		{
+			glBindVertexArray(VAO);
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			glBufferData(GL_ARRAY_BUFFER, this->verts.size() * sizeof(float), &this->verts[0], GL_STATIC_DRAW);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+			glEnableVertexAttribArray(0);
+			glDrawArrays(GL_LINES, 0, (GLsizei)this->verts.size() / 3);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArray(0);
+			this->verts.clear();
+		}
+		
+	}
+
+}

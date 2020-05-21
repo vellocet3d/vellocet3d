@@ -11,7 +11,8 @@
 #include "vel/scene/stage/Camera.h"
 #include "vel/scene/stage/RenderCommand.h"
 #include "vel/scene/stage/Controller.h"
-#include "vel/scene/stage/CollisionData.h"
+#include "vel/scene/stage/CollisionWorld.h"
+
 
 
 namespace vel::scene::stage
@@ -30,12 +31,9 @@ namespace vel::scene::stage
         size_t                                      addRenderCommand(RenderCommand rc);
 		std::vector<std::unique_ptr<Controller>>	controllers;
 		std::vector<std::unique_ptr<Controller>>	outerLoopControllers;
-
-		CollisionData									staticCollisionData;
-		std::vector<std::pair<CollisionData, Actor*>>	staticRemovableCollisionData;
-		std::vector<Actor*>								dynamicCollisionActors;
-		std::vector<CollisionData>						dynamicCollisionData;
-
+		std::optional<std::unique_ptr<CollisionWorld>> collisionWorld;
+		bool										collisionDebuggingSwitch;
+		
 
 
     public:
@@ -69,13 +67,11 @@ namespace vel::scene::stage
 		void										executeOuterLoopControllers(float frameTime, float alphaTime);
 		void										savePreviousTransforms();
 
-		void										addStaticCollisionActor(Actor* actor);
-		void										addStaticRemovableCollisionActor(Actor* actor);
-		void										addDynamicCollisionActor(Actor* actor);
-		std::vector<CollisionData*>					getCollisionData();
-
-
-
+		void										setCollisionWorld(float gravity = -10.0f);
+		CollisionWorld*								getCollisionWorld();
+		void										stepPhysics(float delta);
+		void										useCollisionDebugDrawer();
+		bool										collisionDebugging();
 
     };
 }

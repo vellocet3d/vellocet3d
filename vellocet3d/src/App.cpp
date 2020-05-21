@@ -174,7 +174,10 @@ namespace vel
 						// update animations
 						this->scene.value()->updateAnimations(this->deltaTime);
 
-                        // call scene loop which executes all controllers of all stages
+						// step physics simulation
+						this->scene.value()->stepPhysics((float)this->deltaTime);
+
+                        // execute all controllers of all stages
                         this->scene.value()->loop((float)this->deltaTime);
                     }
                     

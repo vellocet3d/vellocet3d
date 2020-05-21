@@ -110,6 +110,14 @@ namespace vel::scene
 		}
 	}
 
+	void Scene::stepPhysics(float delta)
+	{
+		for (auto& s : this->stages)
+		{
+			s.stepPhysics(delta);
+		}
+	}
+
     void Scene::draw(float alpha)
     {
         GPU& gpu = App::get().getGPU().value();
@@ -119,6 +127,13 @@ namespace vel::scene
 			if (!s.isVisible())
 			{
 				continue;
+			}
+
+			// if debug drawer set, do debug draw
+			if (s.collisionDebugging())
+			{
+				s.getCollisionWorld()->dynamicsWorld->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
+				gpu.getCollisionDebugDrawer()->draw(); // draw all loaded vertices with a single call and clear
 			}
 
             //s.printRenderCommands();            

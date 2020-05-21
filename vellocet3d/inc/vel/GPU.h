@@ -8,6 +8,7 @@
 #include "vel/scene/Shader.h"
 #include "vel/scene/mesh/Mesh.h"
 #include "vel/scene/mesh/Texture.h"
+#include "vel/CollisionDebugDrawer.h"
 
 using namespace vel::scene;
 
@@ -24,6 +25,7 @@ namespace vel
         size_t								activeShaderIndex;
 		size_t								activeMeshRenderableIndex;
 		size_t								activeTextureIndex;
+		CollisionDebugDrawer*				collisionDebugDrawer;
 		
 
     public:
@@ -46,7 +48,10 @@ namespace vel
         void								setShaderMat4(const std::string &name, glm::mat4 value) const;
         void								useMeshRenderable(size_t meshRenderableIndex);
         void								drawMeshRenderable();
-        void								wipe();
+		CollisionDebugDrawer*				getCollisionDebugDrawer();
+		
+		void								wipe();
+		
 
     };
 }

@@ -183,8 +183,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
-    <ClCompile Include="src\collision\EllipsoidCollider.cpp" />
-    <ClCompile Include="src\collision\RayCaster.cpp" />
     <ClCompile Include="src\GPU.cpp" />
     <ClCompile Include="src\scene\armature\Armature.cpp" />
     <ClCompile Include="src\scene\armature\Bone.cpp" />
@@ -198,6 +196,8 @@
     <ClCompile Include="src\scene\mesh\Mesh.cpp" />
     <ClCompile Include="src\scene\stage\Actor.cpp" />
     <ClCompile Include="src\scene\Scene.cpp" />
+    <ClCompile Include="src\CollisionDebugDrawer.cpp" />
+    <ClCompile Include="src\scene\stage\CollisionWorld.cpp" />
     <ClCompile Include="src\scene\stage\Controller.cpp" />
     <ClCompile Include="src\scene\stage\RenderCommand.cpp" />
     <ClCompile Include="src\scene\stage\Stage.cpp" />
@@ -231,8 +231,6 @@
     <ClInclude Include="inc\scene\stage\Transform.h" />
     <ClInclude Include="inc\scene\mesh\Vertex.h" />
     <ClInclude Include="inc\vel\App.h" />
-    <ClInclude Include="inc\vel\collision\EllipsoidCollider.h" />
-    <ClInclude Include="inc\vel\collision\RayCaster.h" />
     <ClInclude Include="inc\vel\Config.h" />
     <ClInclude Include="inc\vel\GPU.h" />
     <ClInclude Include="inc\vel\helpers.h" />
@@ -253,7 +251,8 @@
     <ClInclude Include="inc\vel\scene\Shader.h" />
     <ClInclude Include="inc\vel\scene\stage\Actor.h" />
     <ClInclude Include="inc\vel\scene\stage\Camera.h" />
-    <ClInclude Include="inc\vel\scene\stage\CollisionData.h" />
+    <ClInclude Include="inc\vel\scene\stage\CollisionWorld.h" />
+    <ClInclude Include="inc\vel\CollisionDebugDrawer.h" />
     <ClInclude Include="inc\vel\scene\stage\Controller.h" />
     <ClInclude Include="inc\vel\scene\stage\RenderCommand.h" />
     <ClInclude Include="inc\vel\scene\stage\Stage.h" />

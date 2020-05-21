@@ -49,6 +49,7 @@ namespace vel::scene
 		void								executeOuterLoopControllers(float frameTime, float alphaTime);
 		void								draw(float alpha);
 		virtual void						load() = 0;
+		void								stepPhysics(float delta);
 		void								loop(float deltaTime);
 
 	};

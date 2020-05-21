@@ -18,7 +18,8 @@ namespace vel::scene::stage
         headless(headless),
         visible(true),
 		controllers(std::vector<std::unique_ptr<Controller>>()),
-		outerLoopControllers(std::vector<std::unique_ptr<Controller>>())
+		outerLoopControllers(std::vector<std::unique_ptr<Controller>>()),
+		collisionDebuggingSwitch(false)
     {
         // Set default actors container to 1000 slots. If more space
         // is required, call setActorContainerSize before adding
@@ -41,112 +42,50 @@ namespace vel::scene::stage
 
     }
 
+	bool Stage::collisionDebugging()
+	{
+		return this->collisionDebuggingSwitch;
+	}
+
+	void Stage::useCollisionDebugDrawer()
+	{
+		if (!this->collisionWorld)
+		{
+			return;
+		}
+
+		this->collisionDebuggingSwitch = true;
+
+		auto gpu = App::get().getGPU();
+
+		this->getCollisionWorld()->dynamicsWorld->setDebugDrawer(gpu->getCollisionDebugDrawer());
+	}
+
+	void Stage::stepPhysics(float delta)
+	{
+		if (this->collisionWorld)
+		{
+			this->collisionWorld.value()->dynamicsWorld->stepSimulation(delta, 0);
+		}
+	}
+
+	CollisionWorld* Stage::getCollisionWorld()
+	{
+		if (!this->collisionWorld)
+		{
+			return nullptr;
+		}
+		return this->collisionWorld.value().get();
+	}
+
+	void Stage::setCollisionWorld(float gravity)
+	{
+		this->collisionWorld = std::make_unique<CollisionWorld>(gravity);
+	}
+
 	std::vector<Actor>& Stage::getActors()
 	{
 		return this->actors;
-	}
-
-	std::vector<CollisionData*> Stage::getCollisionData()
-	{
-		std::vector<CollisionData*> returnCollisionData;
-
-		returnCollisionData.push_back(&this->staticCollisionData);
-
-		for (auto& srcd : this->staticRemovableCollisionData)
-		{
-			returnCollisionData.push_back(&srcd.first);
-		}
-
-		if (this->dynamicCollisionActors.size() > 0)
-		{
-			// pre-allocate the size of this->dynamicCollisionData to number 
-			// of dynamic actors so that when we add values, the memory addresses 
-			// do not change
-			this->dynamicCollisionData.clear();
-			this->dynamicCollisionData.reserve(this->dynamicCollisionActors.size());
-
-			for (auto& actor : this->dynamicCollisionActors)
-			{
-				if (!actor->getMeshIndex())
-				{
-					continue;
-				}
-
-				auto transformMatrix = actor->getWorldMatrix();
-				auto mesh = &App::get().getScene()->getMesh(actor->getMeshIndex().value());
-
-				CollisionData cd;
-
-				for (auto& vert : mesh->getVertices())
-				{
-					cd.vertices.push_back(glm::vec3(transformMatrix * glm::vec4(vert.position, 1.0f)));
-				}
-
-				for (auto& ind : mesh->getIndices())
-				{
-					cd.indices.push_back(ind);
-				}
-
-				this->dynamicCollisionData.push_back(cd);
-
-				returnCollisionData.push_back(&this->dynamicCollisionData.back());
-			}
-		}
-		
-		return returnCollisionData;
-	}
-
-	void Stage::addDynamicCollisionActor(Actor* actor)
-	{
-		this->dynamicCollisionActors.push_back(actor);
-	}
-
-	void Stage::addStaticRemovableCollisionActor(Actor* actor)
-	{
-		if (!actor->getMeshIndex())
-		{
-			return;
-		}
-
-		auto transformMatrix = actor->getWorldMatrix();
-		auto mesh = &App::get().getScene()->getMesh(actor->getMeshIndex().value());
-
-		CollisionData cd;
-
-		for (auto& vert : mesh->getVertices())
-		{
-			cd.vertices.push_back(glm::vec3(transformMatrix * glm::vec4(vert.position, 1.0f)));
-		}
-
-		for (auto& ind : mesh->getIndices())
-		{
-			cd.indices.push_back(ind);
-		}
-
-		this->staticRemovableCollisionData.push_back(std::pair<CollisionData, Actor*>(cd, actor));
-	}
-
-	void Stage::addStaticCollisionActor(Actor* actor)
-	{
-		if (!actor->getMeshIndex())
-		{
-			return;
-		}
-
-		auto transformMatrix = actor->getWorldMatrix();
-		auto mesh = &App::get().getScene()->getMesh(actor->getMeshIndex().value());
-
-		size_t vertexOffset = this->staticCollisionData.vertices.size();
-
-		for (auto& vert : mesh->getVertices())
-		{
-			this->staticCollisionData.vertices.push_back(glm::vec3(transformMatrix * glm::vec4(vert.position, 1.0f)));
-		}
-
-		for (auto& ind : mesh->getIndices())
-		{
-			this->staticCollisionData.indices.push_back(ind + vertexOffset);
-		}
 	}
 
 	void Stage::executeOuterLoopControllers(float frameTime, float alphaTime)

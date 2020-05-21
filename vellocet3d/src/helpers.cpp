@@ -69,4 +69,9 @@ namespace vel
 		return (b - a) > ((fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
 	}
 
+	btVector3 glmToBulletVec3(glm::vec3 glmVec)
+	{
+		return btVector3(glmVec.x, glmVec.y, glmVec.z);
+	}
+
 }
