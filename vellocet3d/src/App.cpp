@@ -1,6 +1,8 @@
 #include <iostream>
 #include <limits>
 
+#include "btBulletCollisionCommon.h"
+#include "btBulletDynamicsCommon.h"
 
 #include "vel/App.h"
 
