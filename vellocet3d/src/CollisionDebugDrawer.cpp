@@ -21,15 +21,25 @@ namespace vel
 
 	void CollisionDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) 
 	{
-		this->verts.push_back(from.getX());
-		this->verts.push_back(from.getY());
-		this->verts.push_back(from.getZ());
-		this->verts.push_back(to.getX());
-		this->verts.push_back(to.getY());
-		this->verts.push_back(to.getZ());
-		this->verts.push_back(color.getX());
-		this->verts.push_back(color.getY());
-		this->verts.push_back(color.getZ());
+		auto colorVec = glm::vec3(color.getX(), color.getY(), color.getZ());
+
+		BulletDebugDrawData data;
+		data.position = glm::vec3(from.getX(), from.getY(), from.getZ());
+		data.color = colorVec;
+		this->verts.push_back(data);
+
+		data.position = glm::vec3(to.getX(), to.getY(), to.getZ());
+		this->verts.push_back(data);
+
+		//this->verts.push_back(from.getX());
+		//this->verts.push_back(from.getY());
+		//this->verts.push_back(from.getZ());
+		//this->verts.push_back(to.getX());
+		//this->verts.push_back(to.getY());
+		//this->verts.push_back(to.getZ());
+		//this->verts.push_back(color.getX());
+		//this->verts.push_back(color.getY());
+		//this->verts.push_back(color.getZ());
 
 	}
 
@@ -54,18 +64,18 @@ namespace vel
 			glBindVertexArray(VAO);
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-			glBufferData(GL_ARRAY_BUFFER, this->verts.size() * sizeof(float), &this->verts[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, this->verts.size() * sizeof(BulletDebugDrawData), &this->verts[0], GL_STATIC_DRAW);
 
 			// Assign vertex positions to location = 0
 			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BulletDebugDrawData), (void*)0);
 
 			// Assign vertex color to location = 1
 			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(6 * sizeof(float)));
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(BulletDebugDrawData), (void*)offsetof(BulletDebugDrawData, color));
 
 			//glDrawArrays(GL_LINES, 0, (GLsizei)this->verts.size() / 3);
-			glDrawArrays(GL_LINES, 0, (GLsizei)(this->verts.size() - (this->verts.size() / 3)));
+			glDrawArrays(GL_LINES, 0, (GLsizei)this->verts.size());
 
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);

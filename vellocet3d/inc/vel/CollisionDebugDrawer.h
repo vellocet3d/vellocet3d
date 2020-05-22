@@ -3,20 +3,23 @@
 #include <vector>
 
 #include "btBulletCollisionCommon.h"
+#include "glm/glm.hpp"
 
 
 namespace vel
 {
 	struct BulletDebugDrawData
 	{
-
+		glm::vec3 position;
+		glm::vec3 color;
 	};
+
 	class CollisionDebugDrawer : public btIDebugDraw 
 	{
 
 	private:
 		int					debug_mode = 1; // default to DBG_DrawWireframe
-		std::vector<float>	verts;
+		std::vector<BulletDebugDrawData>	verts;
 		unsigned int		VAO;
 		unsigned int		VBO;
 
