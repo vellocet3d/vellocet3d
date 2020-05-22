@@ -133,6 +133,9 @@ namespace vel::scene
 			if (s.collisionDebugging())
 			{
 				s.getCollisionWorld()->dynamicsWorld->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
+
+				gpu.useShader(2);
+				gpu.setShaderMat4("vp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix());
 				gpu.getCollisionDebugDrawer()->draw(); // draw all loaded vertices with a single call and clear
 			}
 

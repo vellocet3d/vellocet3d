@@ -27,6 +27,10 @@ namespace vel
 		this->verts.push_back(to.getX());
 		this->verts.push_back(to.getY());
 		this->verts.push_back(to.getZ());
+		this->verts.push_back(color.getX());
+		this->verts.push_back(color.getY());
+		this->verts.push_back(color.getZ());
+
 	}
 
 	void CollisionDebugDrawer::drawContactPoint(const btVector3&, const btVector3&, btScalar, int, const btVector3&) {}
@@ -49,10 +53,20 @@ namespace vel
 		{
 			glBindVertexArray(VAO);
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
 			glBufferData(GL_ARRAY_BUFFER, this->verts.size() * sizeof(float), &this->verts[0], GL_STATIC_DRAW);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+			// Assign vertex positions to location = 0
 			glEnableVertexAttribArray(0);
-			glDrawArrays(GL_LINES, 0, (GLsizei)this->verts.size() / 3);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+			// Assign vertex color to location = 1
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(6 * sizeof(float)));
+
+			//glDrawArrays(GL_LINES, 0, (GLsizei)this->verts.size() / 3);
+			glDrawArrays(GL_LINES, 0, (GLsizei)(this->verts.size() - (this->verts.size() / 3)));
+
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);
 			this->verts.clear();

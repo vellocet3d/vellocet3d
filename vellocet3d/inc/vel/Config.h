@@ -26,6 +26,8 @@ namespace vel
         const std::string					DEFAULT_FRAGMENT_SHADER = "default.frag";
 		const std::string					DEFAULT_SKINNED_VERTEX_SHADER = "default_skinned.vert";
 		const std::string					DEFAULT_SKINNED_FRAGMENT_SHADER = "default_skinned.frag";
+		const std::string					DEFAULT_DEBUG_VERTEX_SHADER = "default_debug.vert";
+		const std::string					DEFAULT_DEBUG_FRAGMENT_SHADER = "default_debug.frag";
         
 
         // User defined via config.ini

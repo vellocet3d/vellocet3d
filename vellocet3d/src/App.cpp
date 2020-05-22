@@ -40,6 +40,7 @@ namespace vel
 			// create default shaders
             this->gpu->loadShader("default", this->config.DEFAULT_VERTEX_SHADER, this->config.DEFAULT_FRAGMENT_SHADER);
 			this->gpu->loadShader("default_skinned", this->config.DEFAULT_SKINNED_VERTEX_SHADER, this->config.DEFAULT_SKINNED_FRAGMENT_SHADER);
+			this->gpu->loadShader("default_debug", this->config.DEFAULT_DEBUG_VERTEX_SHADER, this->config.DEFAULT_DEBUG_FRAGMENT_SHADER);
 
 			// create default texture
 			this->gpu->loadTexture("diffuse", ("data/models/default_texture.jpg"));

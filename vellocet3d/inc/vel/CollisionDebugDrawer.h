@@ -7,6 +7,10 @@
 
 namespace vel
 {
+	struct BulletDebugDrawData
+	{
+
+	};
 	class CollisionDebugDrawer : public btIDebugDraw 
 	{
 
@@ -15,6 +19,8 @@ namespace vel
 		std::vector<float>	verts;
 		unsigned int		VAO;
 		unsigned int		VBO;
+
+		bool				buffersInitialized = false;
 
 	public:
 					CollisionDebugDrawer();
