@@ -18,12 +18,12 @@ namespace vel
         activeShaderIndex(-1),
         activeMeshRenderableIndex(-1),
         activeTextureIndex(-1),
-		collisionDebugDrawer(new CollisionDebugDrawer())
+		collisionDebugDrawer(std::move(std::make_unique<CollisionDebugDrawer>()))
     {}
 
 	CollisionDebugDrawer* GPU::getCollisionDebugDrawer()
 	{
-		return this->collisionDebugDrawer;
+		return this->collisionDebugDrawer.get();
 	}
 
     size_t GPU::loadShader(const std::string name, const std::string vertFile, const std::string fragFile)

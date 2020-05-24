@@ -56,9 +56,7 @@ namespace vel::scene::stage
 
 		this->collisionDebuggingSwitch = true;
 
-		auto gpu = App::get().getGPU();
-
-		this->getCollisionWorld()->dynamicsWorld->setDebugDrawer(gpu->getCollisionDebugDrawer());
+		this->getCollisionWorld()->dynamicsWorld->setDebugDrawer(App::get().getGPU()->getCollisionDebugDrawer());
 	}
 
 	void Stage::stepPhysics(float delta)

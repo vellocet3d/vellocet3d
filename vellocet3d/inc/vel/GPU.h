@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 #include "glm/glm.hpp"
 
@@ -25,7 +26,7 @@ namespace vel
         size_t								activeShaderIndex;
 		size_t								activeMeshRenderableIndex;
 		size_t								activeTextureIndex;
-		CollisionDebugDrawer*				collisionDebugDrawer;
+		std::unique_ptr<CollisionDebugDrawer> collisionDebugDrawer;
 		
 
     public:
