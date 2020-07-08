@@ -74,4 +74,9 @@ namespace vel
 		return btVector3(glmVec.x, glmVec.y, glmVec.z);
 	}
 
+	glm::vec3 bulletToGlmVec3(btVector3 btVec)
+	{
+		return glm::vec3(btVec.getX(), btVec.getY(), btVec.getZ());
+	}
+
 }

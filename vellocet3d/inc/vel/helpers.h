@@ -4,7 +4,7 @@
 #include <string>
 
 #include "glm/glm.hpp"
-#include "bullet/LinearMath/btVector3.h"
+#include "LinearMath/btVector3.h"
 
 namespace vel
 {
@@ -17,4 +17,5 @@ namespace vel
 	bool definitelyGreaterThan(float a, float b, float epsilon);
 	bool definitelyLessThan(float a, float b, float epsilon);
 	btVector3 glmToBulletVec3(glm::vec3 glmVec);
+	glm::vec3 bulletToGlmVec3(btVector3 btVec);
 }
