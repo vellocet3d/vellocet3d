@@ -91,7 +91,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dep\inc;$(SolutionDir)dep\inc\bullet;$(ProjectDir)inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dep\inc;$(SolutionDir)dep\inc\bullet;$(SolutionDir)dep\inc\imgui;$(ProjectDir)inc</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -113,7 +113,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dep\inc;$(SolutionDir)dep\inc\bullet;$(ProjectDir)inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dep\inc;$(SolutionDir)dep\inc\bullet;$(SolutionDir)dep\inc\imgui;$(ProjectDir)inc</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -137,7 +137,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dep\inc;$(SolutionDir)dep\inc\bullet;$(ProjectDir)inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dep\inc;$(SolutionDir)dep\inc\bullet;$(SolutionDir)dep\inc\imgui;$(ProjectDir)inc</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -163,7 +163,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dep\inc;$(SolutionDir)dep\inc\bullet;$(ProjectDir)inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dep\inc;$(SolutionDir)dep\inc\bullet;$(SolutionDir)dep\inc\imgui;$(ProjectDir)inc</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -183,6 +183,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\dep\imgui.cpp" />
+    <ClCompile Include="src\dep\imgui_draw.cpp" />
+    <ClCompile Include="src\dep\imgui_widgets.cpp" />
     <ClCompile Include="src\GPU.cpp" />
     <ClCompile Include="src\scene\armature\Armature.cpp" />
     <ClCompile Include="src\scene\armature\Bone.cpp" />
