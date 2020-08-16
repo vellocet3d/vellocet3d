@@ -4,6 +4,7 @@
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 
+
 #include "vel/App.h"
 
 
@@ -31,7 +32,7 @@ namespace vel
         {
 			// create window
             auto w = std::make_unique<Window>(this->config.SCREEN_WIDTH, this->config.SCREEN_HEIGHT, 
-				this->config.FULLSCREEN, this->config.CURSOR_HIDDEN);
+				this->config.FULLSCREEN, this->config.CURSOR_HIDDEN, this->config.USE_IMGUI);
             this->window = std::move(w);
 
 			// initialize GPU
@@ -45,6 +46,7 @@ namespace vel
 			// create default texture
 			this->gpu->loadTexture("diffuse", ("data/models/default_texture.jpg"));
         }
+
     }
 
     void App::setScene(Scene* scene)
@@ -204,6 +206,7 @@ namespace vel
                         this->scene.value()->draw(alphaTime);
                     }
 
+					this->window.value()->renderGui();
                     this->window.value()->swapBuffers();
                 }
 

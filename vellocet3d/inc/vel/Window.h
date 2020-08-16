@@ -20,6 +20,7 @@ namespace vel
         glm::ivec2			screenSize;
         bool				fullScreen;
 		bool				cursorHidden;
+		bool				useImGui;
         InputState			inputState;
         GLFWwindow*			glfwWindow;
         double				scrollX = 0.0;
@@ -32,7 +33,7 @@ namespace vel
 
     public:
 							Window(Window&&) = default;
-							Window(int screenWidth, int screenHeight, bool fullScreen, bool cursorHidden);
+							Window(int screenWidth, int screenHeight, bool fullScreen, bool cursorHidden, bool useImGui);
 							~Window();
         void				setTitle(std::string title);
         bool				shouldClose();
@@ -41,6 +42,7 @@ namespace vel
         const InputState&	getInputState() const;
         const glm::ivec2&	getScreenSize() const;
         void				swapBuffers();
+		void				renderGui();
         //void				vsync();
 
     };
