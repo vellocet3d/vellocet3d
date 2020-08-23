@@ -15,12 +15,12 @@ namespace vel::scene::stage
 	protected:
 		const InputState&	input;
 		float				deltaTime = 0.0f;
-		float				alphaTime = 0.0f;
+		float				renderLerpInterval = 0.0f;
 
 	public:
 							Controller();
 		void				setDeltaTime(float delta);
-		void				setAlphaTime(float alpha);
+		void				setRenderLerpInterval(float alpha);
 		virtual void		logic() = 0;
 	};
 }

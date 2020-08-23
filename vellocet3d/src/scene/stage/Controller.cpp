@@ -18,9 +18,9 @@ namespace vel::scene::stage
 		this->deltaTime = delta;
 	}
 
-	void Controller::setAlphaTime(float alpha)
+	void Controller::setRenderLerpInterval(float renderLerpInterval)
 	{
-		this->alphaTime = alpha;
+		this->renderLerpInterval = renderLerpInterval;
 	}
 
 

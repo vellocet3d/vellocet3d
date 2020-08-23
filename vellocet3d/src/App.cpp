@@ -127,7 +127,7 @@ namespace vel
 
     void App::execute()
     {
-        this->deltaTime = 1 / this->config.LOGIC_TICK;
+        this->fixedLogicTime = 1 / this->config.LOGIC_TICK;
         this->currentTime = this->time();
 
         while (true)
@@ -145,6 +145,7 @@ namespace vel
 
             this->newTime = this->time();
             this->frameTime = this->newTime - this->currentTime;
+
 
             if (this->frameTime >= (1 / this->config.MAX_RENDER_FPS)) // cap max fps
             {
@@ -167,7 +168,7 @@ namespace vel
 				}
 
                 // process update logic
-                while (this->accumulator >= this->deltaTime)
+                while (this->accumulator >= this->fixedLogicTime)
                 {                    
                     if (this->scene && this->scene.value()->loaded) 
                     {
@@ -175,26 +176,26 @@ namespace vel
 						this->scene.value()->savePreviousTransforms();
 
 						// update animations
-						this->scene.value()->updateAnimations(this->deltaTime);
+						this->scene.value()->updateAnimations(this->fixedLogicTime);
 
 						// step physics simulation
-						this->scene.value()->stepPhysics((float)this->deltaTime);
+						this->scene.value()->stepPhysics((float)this->fixedLogicTime);
 
                         // execute all controllers of all stages
-                        this->scene.value()->loop((float)this->deltaTime);
+                        this->scene.value()->loop((float)this->fixedLogicTime);
                     }
                     
                     // decrement accumulator
-                    this->accumulator -= this->deltaTime;
+                    this->accumulator -= this->fixedLogicTime;
                 }
 
                 
                 if (!this->config.HEADLESS)
                 {
-					float alphaTime = (float)(this->accumulator / this->deltaTime);
+					float renderLerpInterval = (float)(this->accumulator / this->fixedLogicTime);
 
 					// execute outer loop controllers
-					this->scene.value()->executeOuterLoopControllers((float)this->frameTime, alphaTime);
+					this->scene.value()->executeOuterLoopControllers((float)this->frameTime, renderLerpInterval);
 
 					// perform draw (render) logic
                     this->gpu->enableDepthTest();
@@ -203,7 +204,7 @@ namespace vel
 
                     if (this->scene && this->scene.value()->loaded)
                     {
-                        this->scene.value()->draw(alphaTime);
+                        this->scene.value()->draw(renderLerpInterval);
                     }
 
 					this->window.value()->renderGui();

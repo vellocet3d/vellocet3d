@@ -64,7 +64,7 @@ namespace vel::scene::stage
 		void										parentActorToActorBone(std::string childName, std::string parentName, std::string parentBoneName);
 		void										addController(Controller* controller, bool forOuterLoop = false);
 		void										executeControllers(float deltaTime);
-		void										executeOuterLoopControllers(float frameTime, float alphaTime);
+		void										executeOuterLoopControllers(float frameTime, float renderLerpInterval);
 		void										savePreviousTransforms();
 
 		void										setCollisionWorld(float gravity = -10.0f);

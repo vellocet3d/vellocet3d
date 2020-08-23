@@ -31,7 +31,7 @@ namespace vel
 
         std::chrono::high_resolution_clock::time_point	startTime;
         bool											shouldClose = false;
-        double											deltaTime = 0.0;
+        double											fixedLogicTime = 0.0;
         double											currentTime = 0.0;
         double											newTime = 0.0;
         double											frameTime = 0.0;

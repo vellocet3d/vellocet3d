@@ -102,11 +102,11 @@ namespace vel::scene
 		}
 	}
 
-	void Scene::executeOuterLoopControllers(float frameTime, float alphaTime)
+	void Scene::executeOuterLoopControllers(float frameTime, float renderLerpInterval)
 	{
 		for (auto& s : this->stages)
 		{
-			s.executeOuterLoopControllers(frameTime, alphaTime);
+			s.executeOuterLoopControllers(frameTime, renderLerpInterval);
 		}
 	}
 

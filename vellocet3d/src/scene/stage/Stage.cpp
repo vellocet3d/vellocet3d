@@ -86,12 +86,12 @@ namespace vel::scene::stage
 		return this->actors;
 	}
 
-	void Stage::executeOuterLoopControllers(float frameTime, float alphaTime)
+	void Stage::executeOuterLoopControllers(float frameTime, float renderLerpInterval)
 	{
 		for (auto& c : this->outerLoopControllers)
 		{
 			c->setDeltaTime(frameTime);
-			c->setAlphaTime(alphaTime);
+			c->setRenderLerpInterval(renderLerpInterval);
 			c->logic();
 		}
 	}

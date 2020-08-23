@@ -1,5 +1,7 @@
 #include <iostream>
 
+
+
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "imgui.h"
@@ -50,6 +52,7 @@ namespace vel
         {
 
             glfwMakeContextCurrent(this->glfwWindow);
+			glfwSwapInterval(0); // 0 = no vsync 1 = vsync
 
             // Initialize glad. Glad is a .c file which is included in our project.
             // GLAD manages function pointers for OpenGL so we want to initialize GLAD before we call any OpenGL function
@@ -72,6 +75,7 @@ namespace vel
 				if (this->cursorHidden)
 				{
 					glfwSetInputMode(this->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+					glfwSetInputMode(this->glfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 				}
 
                 // Set opengl viewport size
@@ -153,6 +157,7 @@ namespace vel
     void Window::update() 
     {
         glfwPollEvents();
+		//glfwWaitEventsTimeout(0.0833333);
         setKeys();
         setMouse();
         setScroll();
