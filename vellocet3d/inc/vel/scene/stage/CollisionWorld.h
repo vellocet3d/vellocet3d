@@ -24,6 +24,7 @@ namespace vel::scene::stage
 												CollisionWorld(float gravity = -10);
 												~CollisionWorld();
 		void									addStaticCollisionBody(std::vector<Actor*> actors, std::optional<std::function<void(btRigidBody* body)>> callback = std::nullopt);
+		static bool								contactAddedCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1);
 
 	};
 

@@ -1,5 +1,5 @@
 
-
+#include "BulletCollision/CollisionDispatch/btInternalEdgeUtility.h"
 #include "glm/glm.hpp"
 
 #include "vel/App.h"
@@ -63,6 +63,12 @@ namespace vel::scene::stage
 		this->collisionShapes.clear();
 	}
 
+	bool CollisionWorld::contactAddedCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1)
+	{
+		btAdjustInternalEdgeContacts(cp, colObj1Wrap, colObj0Wrap, partId1, index1);
+		return true;
+	}
+
 	/*
 		Create a single btBvhTriangleMeshShape and corresponding btRigidBody object from
 		the vector of passed Actor pointers. Call callback at the end of the method passing
@@ -108,15 +114,29 @@ namespace vel::scene::stage
 			mergedTriangleMesh->addTriangle(p0, p1, p2);
 		}
 
-		btCollisionShape* staticCollisionShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);
+		//btCollisionShape* staticCollisionShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);
+		btBvhTriangleMeshShape* bvhShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);
+		btCollisionShape* staticCollisionShape = bvhShape;
 		this->collisionShapes.push_back(staticCollisionShape);
+
+		
 
 		btScalar mass(0.0);
 		btVector3 localInertia(0, 0, 0);
 		btDefaultMotionState* defaultMotionState = new btDefaultMotionState();
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, defaultMotionState, staticCollisionShape, localInertia);
-		
 		btRigidBody* body = new btRigidBody(rbInfo);
+		
+		/////////
+
+		gContactAddedCallback = &CollisionWorld::contactAddedCallback;
+		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+		btTriangleInfoMap* triangleInfoMap = new btTriangleInfoMap();
+		btGenerateInternalEdgeInfo(bvhShape, triangleInfoMap);
+
+		/////////
+
+
 		this->dynamicsWorld->addRigidBody(body);
 
 		if (callback)
