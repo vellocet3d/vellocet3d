@@ -157,7 +157,6 @@ namespace vel
     void Window::update() 
     {
         glfwPollEvents();
-		//glfwWaitEventsTimeout(0.0833333);
         setKeys();
         setMouse();
         setScroll();

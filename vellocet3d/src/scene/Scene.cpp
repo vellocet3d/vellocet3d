@@ -94,22 +94,6 @@ namespace vel::scene
 		}
 	}
 
-	void Scene::loop(float deltaTime)
-	{
-		for (auto& s : this->stages)
-		{
-			s.executeControllers(deltaTime);
-		}
-	}
-
-	void Scene::executeOuterLoopControllers(float frameTime, float renderLerpInterval)
-	{
-		for (auto& s : this->stages)
-		{
-			s.executeOuterLoopControllers(frameTime, renderLerpInterval);
-		}
-	}
-
 	void Scene::stepPhysics(float delta)
 	{
 		for (auto& s : this->stages)

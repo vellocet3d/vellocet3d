@@ -17,8 +17,6 @@ namespace vel::scene::stage
     Stage::Stage(bool headless) :
         headless(headless),
         visible(true),
-		controllers(std::vector<std::unique_ptr<Controller>>()),
-		outerLoopControllers(std::vector<std::unique_ptr<Controller>>()),
 		collisionDebuggingSwitch(false)
     {
         // Set default actors container to 1000 slots. If more space
@@ -84,35 +82,6 @@ namespace vel::scene::stage
 	std::vector<Actor>& Stage::getActors()
 	{
 		return this->actors;
-	}
-
-	void Stage::executeOuterLoopControllers(float frameTime, float renderLerpInterval)
-	{
-		for (auto& c : this->outerLoopControllers)
-		{
-			c->setDeltaTime(frameTime);
-			c->setRenderLerpInterval(renderLerpInterval);
-			c->logic();
-		}
-	}
-
-	void Stage::executeControllers(float deltaTime)
-	{
-		for (auto& c : this->controllers)
-		{
-			c->setDeltaTime(deltaTime);
-			c->logic();
-		}
-	}
-
-	void Stage::addController(Controller* controller, bool forOuterLoop)
-	{
-		if (!forOuterLoop)
-		{
-			this->controllers.push_back(std::move(std::unique_ptr<Controller>(controller)));
-			return;
-		}
-		this->outerLoopControllers.push_back(std::move(std::unique_ptr<Controller>(controller)));
 	}
 
 	void Stage::parentActorToActorBone(std::string childName, std::string parentName, std::string parentBoneName)

@@ -46,11 +46,14 @@ namespace vel::scene
 		Animation&							getAnimation(size_t index);
 		void								updateAnimations(double runTime);
 		void								savePreviousTransforms();
-		void								executeOuterLoopControllers(float frameTime, float renderLerpInterval);
+		//void								executeOuterLoopControllers(float frameTime, float renderLerpInterval);
 		void								draw(float alpha);
-		virtual void						load() = 0;
 		void								stepPhysics(float delta);
-		void								loop(float deltaTime);
+		//void								loop(float deltaTime);
+
+		virtual void						load() = 0;
+		virtual void						innerLoop(float deltaTime) = 0;
+		virtual void						outerLoop(float frameTime, float renderLerpInterval) = 0;
 
 	};
 

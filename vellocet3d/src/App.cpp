@@ -182,7 +182,10 @@ namespace vel
 						this->scene.value()->stepPhysics((float)this->fixedLogicTime);
 
                         // execute all controllers of all stages
-                        this->scene.value()->loop((float)this->fixedLogicTime);
+                        //this->scene.value()->loop((float)this->fixedLogicTime);
+
+						// execute inner loop (fixed rate) logic
+						this->scene.value()->innerLoop((float)this->fixedLogicTime);
                     }
                     
                     // decrement accumulator
@@ -195,7 +198,10 @@ namespace vel
 					float renderLerpInterval = (float)(this->accumulator / this->fixedLogicTime);
 
 					// execute outer loop controllers
-					this->scene.value()->executeOuterLoopControllers((float)this->frameTime, renderLerpInterval);
+					//this->scene.value()->executeOuterLoopControllers((float)this->frameTime, renderLerpInterval);
+
+					// execute outer loop (immediate) logic
+					this->scene.value()->outerLoop((float)this->frameTime, renderLerpInterval);
 
 					// perform draw (render) logic
                     this->gpu->enableDepthTest();

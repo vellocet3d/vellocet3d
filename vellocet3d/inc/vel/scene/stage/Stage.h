@@ -10,7 +10,6 @@
 #include "vel/scene/stage/Actor.h"
 #include "vel/scene/stage/Camera.h"
 #include "vel/scene/stage/RenderCommand.h"
-#include "vel/scene/stage/Controller.h"
 #include "vel/scene/stage/CollisionWorld.h"
 
 
@@ -29,8 +28,8 @@ namespace vel::scene::stage
         std::optional<std::vector<size_t>>          renderCommandsOrder;
 		std::optional<size_t>                       renderCommandExists(size_t sI, size_t mI, size_t tI);
         size_t                                      addRenderCommand(RenderCommand rc);
-		std::vector<std::unique_ptr<Controller>>	controllers;
-		std::vector<std::unique_ptr<Controller>>	outerLoopControllers;
+		//std::vector<std::unique_ptr<Controller>>	controllers;
+		//std::vector<std::unique_ptr<Controller>>	outerLoopControllers;
 		std::optional<std::unique_ptr<CollisionWorld>> collisionWorld;
 		bool										collisionDebuggingSwitch;
 		
@@ -62,9 +61,9 @@ namespace vel::scene::stage
 		const bool									isVisible();
 		void										parentActorToActor(std::string childName, std::string parentName);
 		void										parentActorToActorBone(std::string childName, std::string parentName, std::string parentBoneName);
-		void										addController(Controller* controller, bool forOuterLoop = false);
-		void										executeControllers(float deltaTime);
-		void										executeOuterLoopControllers(float frameTime, float renderLerpInterval);
+		//void										addController(Controller* controller, bool forOuterLoop = false);
+		//void										executeControllers(float deltaTime);
+		//void										executeOuterLoopControllers(float frameTime, float renderLerpInterval);
 		void										savePreviousTransforms();
 
 		void										setCollisionWorld(float gravity = -10.0f);
