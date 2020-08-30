@@ -182,7 +182,7 @@ namespace vel
 						this->scene.value()->stepPhysics((float)this->fixedLogicTime);
 
 						// execute all contact triggers
-						//this->scene.value()->pullContactTriggers();
+						this->scene.value()->pullContactTriggers();
 
 						// execute inner loop (fixed rate) logic
 						this->scene.value()->innerLoop((float)this->fixedLogicTime);

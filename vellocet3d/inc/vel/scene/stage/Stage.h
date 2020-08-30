@@ -62,13 +62,14 @@ namespace vel::scene::stage
 		void										parentActorToActor(std::string childName, std::string parentName);
 		void										parentActorToActorBone(std::string childName, std::string parentName, std::string parentBoneName);
 		void										addContactTrigger(ContactTrigger* ct);
-		void										pullContactTriggers();
-		//void										executeControllers(float deltaTime);
-		//void										executeOuterLoopControllers(float frameTime, float renderLerpInterval);
 		void										savePreviousTransforms();
+
+		void										pullContactTriggers();
+
 
 		void										setCollisionWorld(float gravity = -10.0f);
 		CollisionWorld*								getCollisionWorld();
+
 		void										stepPhysics(float delta);
 		void										useCollisionDebugDrawer();
 		bool										collisionDebugging();

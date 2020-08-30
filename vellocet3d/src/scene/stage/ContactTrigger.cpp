@@ -15,8 +15,11 @@ namespace vel::scene::stage
 
 	bool ContactTrigger::matchingManifold(const btCollisionObject* ob1, const btCollisionObject* ob2)
 	{
-		return ((ob1 == this->contactPair.first && ob2 == this->contactPair.second) || 
-			(ob1 == this->contactPair.second && ob2 == this->contactPair.first));
+		// if the second value in contactPair is nullptr then we match the first value with ALL other btCollisionObjects
+		return (ob1 == this->contactPair.first && this->contactPair.second == nullptr) ||
+			(ob2 == this->contactPair.first && this->contactPair.second == nullptr) ||
+			(ob1 == this->contactPair.first && ob2 == this->contactPair.second) ||
+			(ob1 == this->contactPair.second && ob2 == this->contactPair.first);
 	}
 
 }

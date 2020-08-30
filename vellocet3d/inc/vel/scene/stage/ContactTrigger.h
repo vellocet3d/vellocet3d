@@ -9,7 +9,7 @@ namespace vel::scene::stage
 	class ContactTrigger
 	{
 	public:
-		ContactTrigger(btCollisionObject* ob1, btCollisionObject* ob2);
+		ContactTrigger(btCollisionObject* ob1, btCollisionObject* ob2 = nullptr);
 		
 		std::pair<btCollisionObject*, btCollisionObject*> contactPair;
 

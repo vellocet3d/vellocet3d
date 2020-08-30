@@ -75,7 +75,7 @@ namespace vel::scene::stage
 		the newly generated btRigidBody object allowing users to modify it as necessary (applying
 		friction and whatnot)
 	*/
-	void CollisionWorld::addStaticCollisionBody(std::vector<Actor*> actors, std::optional<std::function<void(btRigidBody* body)>> callback)
+	btRigidBody* CollisionWorld::addStaticCollisionBody(std::vector<Actor*> actors, std::optional<std::function<void(btRigidBody* body)>> callback)
 	{
 		std::vector<glm::vec3> tmpVerts;
 		std::vector<size_t> tmpInds;
@@ -84,7 +84,8 @@ namespace vel::scene::stage
 		{
 			if (!actor->getMeshIndex())
 			{
-				return;
+				//return; //not sure why i was returning here...probably should have been continue
+				continue;
 			}
 
 			auto transformMatrix = actor->getWorldMatrix();
@@ -144,6 +145,8 @@ namespace vel::scene::stage
 		{
 			callback.value()(body);
 		}
+
+		return body;
 	}
 
 }
