@@ -127,7 +127,8 @@ namespace vel::scene::stage
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, defaultMotionState, staticCollisionShape, localInertia);
 		btRigidBody* body = new btRigidBody(rbInfo);
 		
-		/////////
+		///////// added below to handle jitter when objects sliding across faces
+		// https://stackoverflow.com/questions/25605659/avoid-ground-collision-with-bullet/25725502#25725502
 
 		gContactAddedCallback = &CollisionWorld::contactAddedCallback;
 		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);

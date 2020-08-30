@@ -203,6 +203,7 @@
     <ClCompile Include="src\scene\Scene.cpp" />
     <ClCompile Include="src\CollisionDebugDrawer.cpp" />
     <ClCompile Include="src\scene\stage\CollisionWorld.cpp" />
+    <ClCompile Include="src\scene\stage\ContactTrigger.cpp" />
     <ClCompile Include="src\scene\stage\RenderCommand.cpp" />
     <ClCompile Include="src\scene\stage\Stage.cpp" />
     <ClCompile Include="src\scene\stage\Transform.cpp" />
@@ -255,6 +256,7 @@
     <ClInclude Include="inc\vel\scene\Shader.h" />
     <ClInclude Include="inc\vel\scene\stage\Actor.h" />
     <ClInclude Include="inc\vel\scene\stage\Camera.h" />
+    <ClInclude Include="inc\vel\scene\stage\ContactTrigger.h" />
     <ClInclude Include="inc\vel\scene\stage\CollisionWorld.h" />
     <ClInclude Include="inc\vel\CollisionDebugDrawer.h" />
     <ClInclude Include="inc\vel\scene\stage\RenderCommand.h" />

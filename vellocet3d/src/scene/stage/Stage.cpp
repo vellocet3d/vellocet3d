@@ -30,6 +30,13 @@ namespace vel::scene::stage
 		// solves the problem at hand and allows me to move forward.
 		// A more elegant solution should be put into place once
 		// time allows
+		//
+		// 6ish months later this really isn't that bad of a way to handle
+		// this...it's straight forward, works, and is sufficiently performant.
+		//
+		// TODO: simply add some logic to check if we are close to filling
+		// up the reserve, and if so, allocate an additional 1000 blocks and
+		// go about our day
         this->actors.reserve(1000);
 
         if (!this->headless)
@@ -39,6 +46,38 @@ namespace vel::scene::stage
         }
 
     }
+
+	void Stage::addContactTrigger(ContactTrigger* ct)
+	{
+		this->contactTriggers.push_back(std::move(std::unique_ptr<ContactTrigger>(ct)));
+	}
+
+	void Stage::pullContactTriggers()
+	{
+		if (this->collisionWorld)
+		{
+			for (int i = 0; i < this->collisionWorld.value()->dispatcher->getNumManifolds(); i++)
+			{
+				btPersistentManifold* contactManifold = this->collisionWorld.value()->dispatcher->getManifoldByIndexInternal(i);
+				if (contactManifold->getNumContacts() > 0)
+				{
+					for (auto& ct : this->contactTriggers)
+					{
+						if (!ct->matchingManifold(contactManifold->getBody0(), contactManifold->getBody1()))
+							continue;
+
+						ct->onContactDiscovered(contactManifold);
+
+						for (int j = 0; j < contactManifold->getNumContacts(); j++)
+						{
+							ct->forEachContactPoint(contactManifold->getContactPoint(j), j);
+						}
+					}
+				}
+			}
+		}
+		
+	}
 
 	bool Stage::collisionDebugging()
 	{

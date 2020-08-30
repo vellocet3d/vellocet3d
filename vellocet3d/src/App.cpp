@@ -181,8 +181,8 @@ namespace vel
 						// step physics simulation
 						this->scene.value()->stepPhysics((float)this->fixedLogicTime);
 
-                        // execute all controllers of all stages
-                        //this->scene.value()->loop((float)this->fixedLogicTime);
+						// execute all contact triggers
+						//this->scene.value()->pullContactTriggers();
 
 						// execute inner loop (fixed rate) logic
 						this->scene.value()->innerLoop((float)this->fixedLogicTime);

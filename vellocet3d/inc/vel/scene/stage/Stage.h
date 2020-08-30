@@ -11,6 +11,7 @@
 #include "vel/scene/stage/Camera.h"
 #include "vel/scene/stage/RenderCommand.h"
 #include "vel/scene/stage/CollisionWorld.h"
+#include "vel/scene/stage/ContactTrigger.h"
 
 
 
@@ -19,19 +20,18 @@ namespace vel::scene::stage
     class Stage
     {
     private:
-        const bool                                  headless;
-        bool                                        visible;
-        std::optional<Camera>                       camera;
-        std::vector<Actor>                          actors;
-        std::vector<size_t>                         actorFreeSlots;
-        std::optional<std::vector<RenderCommand>>   renderCommands;
-        std::optional<std::vector<size_t>>          renderCommandsOrder;
-		std::optional<size_t>                       renderCommandExists(size_t sI, size_t mI, size_t tI);
-        size_t                                      addRenderCommand(RenderCommand rc);
-		//std::vector<std::unique_ptr<Controller>>	controllers;
-		//std::vector<std::unique_ptr<Controller>>	outerLoopControllers;
-		std::optional<std::unique_ptr<CollisionWorld>> collisionWorld;
-		bool										collisionDebuggingSwitch;
+        const bool										headless;
+        bool											visible;
+        std::optional<Camera>							camera;
+        std::vector<Actor>								actors;
+        std::vector<size_t>								actorFreeSlots;
+        std::optional<std::vector<RenderCommand>>		renderCommands;
+        std::optional<std::vector<size_t>>				renderCommandsOrder;
+		std::optional<size_t>							renderCommandExists(size_t sI, size_t mI, size_t tI);
+        size_t											addRenderCommand(RenderCommand rc);
+		std::vector<std::unique_ptr<ContactTrigger>>	contactTriggers;
+		std::optional<std::unique_ptr<CollisionWorld>>	collisionWorld;
+		bool											collisionDebuggingSwitch;
 		
 
 
@@ -61,7 +61,8 @@ namespace vel::scene::stage
 		const bool									isVisible();
 		void										parentActorToActor(std::string childName, std::string parentName);
 		void										parentActorToActorBone(std::string childName, std::string parentName, std::string parentBoneName);
-		//void										addController(Controller* controller, bool forOuterLoop = false);
+		void										addContactTrigger(ContactTrigger* ct);
+		void										pullContactTriggers();
 		//void										executeControllers(float deltaTime);
 		//void										executeOuterLoopControllers(float frameTime, float renderLerpInterval);
 		void										savePreviousTransforms();

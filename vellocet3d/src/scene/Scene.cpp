@@ -25,6 +25,14 @@ namespace vel::scene
 		App::get().getGPU()->wipe();
 	}
 
+	void Scene::pullContactTriggers()
+	{
+		for (auto& s : this->stages)
+		{
+			s.pullContactTriggers();
+		}
+	}
+
 	size_t Scene::addAnimation(Animation a)
 	{
 		this->animations.push_back(a);

@@ -46,10 +46,9 @@ namespace vel::scene
 		Animation&							getAnimation(size_t index);
 		void								updateAnimations(double runTime);
 		void								savePreviousTransforms();
-		//void								executeOuterLoopControllers(float frameTime, float renderLerpInterval);
 		void								draw(float alpha);
 		void								stepPhysics(float delta);
-		//void								loop(float deltaTime);
+		void								pullContactTriggers();
 
 		virtual void						load() = 0;
 		virtual void						innerLoop(float deltaTime) = 0;
