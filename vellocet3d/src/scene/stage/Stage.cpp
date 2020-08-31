@@ -68,6 +68,12 @@ namespace vel::scene::stage
 
 						ct->onContactDiscovered(contactManifold);
 
+						if (ct->shouldSkip)
+						{
+							ct->shouldSkip = false;
+							continue;
+						}
+
 						for (int j = 0; j < contactManifold->getNumContacts(); j++)
 						{
 							ct->forEachContactPoint(contactManifold->getContactPoint(j), j);

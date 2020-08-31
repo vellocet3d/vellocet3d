@@ -8,6 +8,7 @@ namespace vel::scene::stage
 {
 
 	ContactTrigger::ContactTrigger(btCollisionObject* ob1, btCollisionObject* ob2) :
+		shouldSkip(false),
 		contactPair(std::pair<btCollisionObject*, btCollisionObject*>(ob1, ob2))
 	{
 
