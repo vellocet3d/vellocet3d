@@ -181,6 +181,8 @@ namespace vel
 						// step physics simulation
 						this->scene.value()->stepPhysics((float)this->fixedLogicTime);
 
+						// applyTransforms() ? incorporating current savePreviousTransforms() logic
+
 						// execute all contact triggers
 						this->scene.value()->pullContactTriggers();
 
