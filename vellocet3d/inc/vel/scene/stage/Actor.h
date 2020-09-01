@@ -4,6 +4,8 @@
 #include <string>
 
 #include "glm/glm.hpp"
+#include "btBulletCollisionCommon.h"
+#include "btBulletDynamicsCommon.h"
 
 #include "vel/scene/armature/Armature.h"
 #include "vel/scene/mesh/Mesh.h"
@@ -31,6 +33,7 @@ namespace vel::scene::stage
         std::optional<size_t>							shaderIndex;
         std::optional<size_t>							meshIndex;
         std::optional<size_t>							textureIndex;							
+		
 		
 
     public:
@@ -71,6 +74,10 @@ namespace vel::scene::stage
 		glm::vec3										getInterpolatedTranslation(float alpha);
 		glm::quat										getInterpolatedRotation(float alpha);
 		glm::vec3										getInterpolatedScale(float alpha);
+
+		btRigidBody*									rigidBody;
+		bool											manualTransformation;
+		void											applyTransformation();
 
 
 

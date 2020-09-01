@@ -239,11 +239,11 @@ namespace vel::scene::stage
 		}
 	}
 
-	void Stage::savePreviousTransforms()
+	void Stage::applyTransformations()
 	{
 		for (auto& a : this->actors)
 		{
-			a.updatePreviousTransform();
+			a.applyTransformation();
 		}
 	}
 

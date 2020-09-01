@@ -6,6 +6,15 @@
 
 namespace vel
 {
+	glm::quat bulletToGlmQuat(btQuaternion btQuat)
+	{
+		return glm::quat(btQuat.getW(),
+			btQuat.getX(),
+			btQuat.getY(),
+			btQuat.getZ()
+		);
+	}
+
     std::vector<std::string> explode_string(std::string const & s, char delim)
     {
         std::vector<std::string> result;

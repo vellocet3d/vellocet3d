@@ -62,8 +62,8 @@ namespace vel::scene::stage
 		void										parentActorToActor(std::string childName, std::string parentName);
 		void										parentActorToActorBone(std::string childName, std::string parentName, std::string parentBoneName);
 		void										addContactTrigger(ContactTrigger* ct);
-		void										savePreviousTransforms();
 
+		void										applyTransformations();
 		void										pullContactTriggers();
 
 

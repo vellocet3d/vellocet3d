@@ -173,7 +173,7 @@ namespace vel
                     if (this->scene && this->scene.value()->loaded) 
                     {
 						// save previous transforms for interpolation
-						this->scene.value()->savePreviousTransforms();
+						//this->scene.value()->savePreviousTransforms();
 
 						// update animations
 						this->scene.value()->updateAnimations(this->fixedLogicTime);
@@ -182,6 +182,7 @@ namespace vel
 						this->scene.value()->stepPhysics((float)this->fixedLogicTime);
 
 						// applyTransforms() ? incorporating current savePreviousTransforms() logic
+						this->scene.value()->applyTransformations();
 
 						// execute all contact triggers
 						this->scene.value()->pullContactTriggers();

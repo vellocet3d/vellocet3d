@@ -1,6 +1,6 @@
 
 
-
+#include "vel/helpers.h"
 #include "vel/App.h"
 #include "vel/scene/stage/Actor.h"
 
@@ -12,8 +12,20 @@ namespace vel::scene::stage
         deleted(false),
 		visible(true),
 		dynamic(false),
-        transform(t) 
+        transform(t) ,
+		manualTransformation(true)
     {}
+
+	void Actor::applyTransformation()
+	{
+		this->updatePreviousTransform();
+		
+		if (!this->manualTransformation && this->rigidBody != nullptr)
+		{
+			this->transform.setTranslation(bulletToGlmVec3(this->rigidBody->getWorldTransform().getOrigin()));
+			this->transform.setRotation(bulletToGlmQuat(this->rigidBody->getWorldTransform().getRotation()));
+		}
+	}
 
 	void Actor::setDynamic(bool dynamic)
 	{

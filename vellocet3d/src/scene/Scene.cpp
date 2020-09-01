@@ -25,6 +25,14 @@ namespace vel::scene
 		App::get().getGPU()->wipe();
 	}
 
+	void Scene::applyTransformations()
+	{
+		for (auto& s : this->stages)
+		{
+			s.applyTransformations();
+		}
+	}
+
 	void Scene::pullContactTriggers()
 	{
 		for (auto& s : this->stages)
@@ -91,14 +99,6 @@ namespace vel::scene
 		for (auto& s : this->stages)
 		{
 			s.updateActorAnimations(this->animationTime);
-		}
-	}
-
-	void Scene::savePreviousTransforms()
-	{
-		for (auto& s : this->stages)
-		{
-			s.savePreviousTransforms();
 		}
 	}
 

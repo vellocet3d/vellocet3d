@@ -45,9 +45,9 @@ namespace vel::scene
 		const std::vector<Animation>&		getAnimations() const;
 		Animation&							getAnimation(size_t index);
 		void								updateAnimations(double runTime);
-		void								savePreviousTransforms();
 		void								draw(float alpha);
 		void								stepPhysics(float delta);
+		void								applyTransformations();
 		void								pullContactTriggers();
 
 		virtual void						load() = 0;
