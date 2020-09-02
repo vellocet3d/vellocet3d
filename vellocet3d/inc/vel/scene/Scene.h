@@ -48,7 +48,7 @@ namespace vel::scene
 		void								draw(float alpha);
 		void								stepPhysics(float delta);
 		void								applyTransformations();
-		void								pullContactTriggers();
+		void								processSensors();
 
 		virtual void						load() = 0;
 		virtual void						innerLoop(float deltaTime) = 0;

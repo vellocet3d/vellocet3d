@@ -1,20 +1,20 @@
 
 
 
-#include "vel/scene/stage/ContactTrigger.h"
+#include "vel/scene/stage/Sensor.h"
 
 
 namespace vel::scene::stage
 {
 
-	ContactTrigger::ContactTrigger(btCollisionObject* ob1, btCollisionObject* ob2) :
+	Sensor::Sensor(btCollisionObject* ob1, btCollisionObject* ob2) :
 		shouldSkip(false),
 		contactPair(std::pair<btCollisionObject*, btCollisionObject*>(ob1, ob2))
 	{
 
 	}
 
-	bool ContactTrigger::matchingManifold(const btCollisionObject* ob1, const btCollisionObject* ob2)
+	bool Sensor::matchingManifold(const btCollisionObject* ob1, const btCollisionObject* ob2)
 	{
 		// if the second value in contactPair is nullptr then we match the first value with ALL other btCollisionObjects
 		return (ob1 == this->contactPair.first && this->contactPair.second == nullptr) ||

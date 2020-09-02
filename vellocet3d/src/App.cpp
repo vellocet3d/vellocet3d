@@ -185,7 +185,7 @@ namespace vel
 						this->scene.value()->applyTransformations();
 
 						// execute all contact triggers
-						this->scene.value()->pullContactTriggers();
+						this->scene.value()->processSensors();
 
 						// execute inner loop (fixed rate) logic
 						this->scene.value()->innerLoop((float)this->fixedLogicTime);

@@ -33,11 +33,11 @@ namespace vel::scene
 		}
 	}
 
-	void Scene::pullContactTriggers()
+	void Scene::processSensors()
 	{
 		for (auto& s : this->stages)
 		{
-			s.pullContactTriggers();
+			s.processSensors();
 		}
 	}
 

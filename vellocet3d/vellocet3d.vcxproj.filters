@@ -93,7 +93,7 @@
     <ClCompile Include="src\dep\imgui\imgui_impl_opengl3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\stage\ContactTrigger.cpp">
+    <ClCompile Include="src\scene\stage\Sensor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -257,7 +257,7 @@
     <ClInclude Include="inc\vel\CollisionDebugDrawer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\vel\scene\stage\ContactTrigger.h">
+    <ClInclude Include="inc\vel\scene\stage\Sensor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

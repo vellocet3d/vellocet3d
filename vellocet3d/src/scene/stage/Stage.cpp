@@ -36,7 +36,9 @@ namespace vel::scene::stage
 		//
 		// TODO: simply add some logic to check if we are close to filling
 		// up the reserve, and if so, allocate an additional 1000 blocks and
-		// go about our day
+		// go about our day....yeah, that'd be a great way to invalidate all
+		// of our pointers...wow...so yeah, you will need to implement multiple
+		// 1000 block vectors
         this->actors.reserve(1000);
 
         if (!this->headless)
@@ -47,12 +49,12 @@ namespace vel::scene::stage
 
     }
 
-	void Stage::addContactTrigger(ContactTrigger* ct)
+	void Stage::addSensor(Sensor* ct)
 	{
-		this->contactTriggers.push_back(std::move(std::unique_ptr<ContactTrigger>(ct)));
+		this->sensors.push_back(std::move(std::unique_ptr<Sensor>(ct)));
 	}
 
-	void Stage::pullContactTriggers()
+	void Stage::processSensors()
 	{
 		if (this->collisionWorld)
 		{
@@ -61,7 +63,7 @@ namespace vel::scene::stage
 				btPersistentManifold* contactManifold = this->collisionWorld.value()->dispatcher->getManifoldByIndexInternal(i);
 				if (contactManifold->getNumContacts() > 0)
 				{
-					for (auto& ct : this->contactTriggers)
+					for (auto& ct : this->sensors)
 					{
 						if (!ct->matchingManifold(contactManifold->getBody0(), contactManifold->getBody1()))
 							continue;
