@@ -33,6 +33,16 @@ namespace vel::scene::stage
 		this->dynamic = dynamic;
 	}
 
+	void Actor::setGhostObject(btPairCachingGhostObject* go)
+	{
+		this->ghostObject = go;
+	}
+
+	btPairCachingGhostObject* Actor::getGhostObject()
+	{
+		return this->ghostObject;
+	}
+
 	Actor Actor::cleanCopy(std::string newName)
 	{
 		auto newActor = *this;
@@ -43,12 +53,13 @@ namespace vel::scene::stage
 		newActor.parentActorBone = std::nullopt;
 		newActor.childActors.clear();
 
-		// Clear rigidbody pointer and transform flag
+		// Clear rigidbody pointer, ghost pointer, and transform flag
 		newActor.setRigidBody(nullptr);
+		newActor.setGhostObject(nullptr);
 		newActor.setManualTransform(true);
 
 		// TODO: In the future we may need to implement methods for:
-		// > duplicating an entire actor hierarchy including all of it's children
+		// > automatically duplicating an entire actor hierarchy including all of it's children
 		// > automatically copying the rigidbody component and adding to collision world
 
 		return newActor;

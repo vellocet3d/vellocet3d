@@ -6,6 +6,7 @@
 #include "glm/glm.hpp"
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
+#include "BulletCollision/CollisionDispatch/btGhostObject.h"
 
 #include "vel/scene/armature/Armature.h"
 #include "vel/scene/mesh/Mesh.h"
@@ -35,6 +36,7 @@ namespace vel::scene::stage
         std::optional<size_t>							textureIndex;							
 		
 		btRigidBody*									rigidBody;
+		btPairCachingGhostObject*						ghostObject;
 		bool											manualTransform;
 		
 
@@ -79,6 +81,8 @@ namespace vel::scene::stage
 
 		void											setRigidBody(btRigidBody* rb);
 		btRigidBody*									getRigidBody();
+		void											setGhostObject(btPairCachingGhostObject* go);
+		btPairCachingGhostObject*						getGhostObject();
 		void											setManualTransform(bool mt);
 		bool											getManualTransform();
 
