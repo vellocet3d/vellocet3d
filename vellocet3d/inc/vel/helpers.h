@@ -21,4 +21,5 @@ namespace vel
 	btVector3 glmToBulletVec3(glm::vec3 glmVec);
 	glm::vec3 bulletToGlmVec3(btVector3 btVec);
 	glm::quat bulletToGlmQuat(btQuaternion btQuat);
+	btQuaternion glmToBulletQuat(glm::quat glmQuat);
 }

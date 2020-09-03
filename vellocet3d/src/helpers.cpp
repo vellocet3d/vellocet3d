@@ -6,6 +6,11 @@
 
 namespace vel
 {
+	btQuaternion glmToBulletQuat(glm::quat glmQuat)
+	{
+		return btQuaternion(glmQuat.x, glmQuat.y, glmQuat.z, glmQuat.w);
+	}
+
 	glm::quat bulletToGlmQuat(btQuaternion btQuat)
 	{
 		return glm::quat(btQuat.getW(),
@@ -87,5 +92,7 @@ namespace vel
 	{
 		return glm::vec3(btVec.getX(), btVec.getY(), btVec.getZ());
 	}
+
+	
 
 }

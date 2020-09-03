@@ -34,6 +34,8 @@ namespace vel::scene::stage
         std::optional<size_t>							meshIndex;
         std::optional<size_t>							textureIndex;							
 		
+		btRigidBody*									rigidBody;
+		bool											manualTransform;
 		
 
     public:
@@ -75,9 +77,13 @@ namespace vel::scene::stage
 		glm::quat										getInterpolatedRotation(float alpha);
 		glm::vec3										getInterpolatedScale(float alpha);
 
-		btRigidBody*									rigidBody;
-		bool											manualTransformation;
-		void											applyTransformation();
+		void											setRigidBody(btRigidBody* rb);
+		btRigidBody*									getRigidBody();
+		void											setManualTransform(bool mt);
+		bool											getManualTransform();
+
+		
+		void											processTransform();
 
 
 

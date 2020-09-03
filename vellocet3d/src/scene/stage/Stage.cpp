@@ -245,7 +245,7 @@ namespace vel::scene::stage
 	{
 		for (auto& a : this->actors)
 		{
-			a.applyTransformation();
+			a.processTransform();
 		}
 	}
 
@@ -344,6 +344,22 @@ namespace vel::scene::stage
         {
             this->renderCommands.value().at(a.getRenderCommand().first).freeActorIndex(a.getRenderCommand().second);
         }
+
+		// if this actor has a rigid body, remove it from the collision world and clear the pointer
+		auto arb = a.getRigidBody();
+		if (arb != nullptr)
+		{
+			if (arb->getMotionState())
+			{
+				delete arb->getMotionState();
+			}
+			
+			this->collisionWorld.value()->dynamicsWorld->removeCollisionObject(arb);
+
+			delete arb;
+
+			a.setRigidBody(nullptr);
+		}
 
         a.setDeleted(true);
         this->actorFreeSlots.push_back(index);

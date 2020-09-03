@@ -1,7 +1,13 @@
 #include <iostream>
 
+#include "glm/gtx/compatibility.hpp"
 #include "glm/gtx/string_cast.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "glm/gtc/quaternion.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/transform.hpp"
+#include "glm/gtx/rotate_vector.hpp"
+
 
 #include "vel/App.h"
 #include "vel/scene/AssetLoader.h"
@@ -16,7 +22,9 @@ namespace vel::scene
         currentStage(stage),
         currentAssetFile(assetFile),
         currentAssetDirectory(assetFile.substr(0, assetFile.find_last_of('/'))),
-		currentIsDynamic(dynamic)
+		currentIsDynamic(dynamic),
+		blenderRotationCorrectionMatrix(glm::rotate(90.0f, glm::vec3(1.0f, 0.0f, 0.0f))),
+		blenderRotationCorrectionPerVertexMatrix(glm::mat4(1.0f) * glm::rotate(90.0f, glm::vec3(-1.0f, 0.0f, 0.0f)))
     {
         this->aiScene = this->aiImporter.ReadFile(this->currentAssetFile, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
 
@@ -27,6 +35,9 @@ namespace vel::scene
             std::cin.get();
             exit(EXIT_FAILURE);
         }
+
+		//this->aiScene->mRootNode->mTransformation = this->glmToAssImpMat4(this->blenderRotationCorrectionMatrix) * this->aiScene->mRootNode->mTransformation;
+
     }
 
     void AssetLoader::loadActors()
@@ -287,6 +298,9 @@ namespace vel::scene
         aiVector3D aiScale;
         aiVector3D aiPosition;
 		aiQuaternion aiRotation;
+
+		//node->mTransformation = this->glmToAssImpMat4(this->blenderRotationCorrectionMatrix) * node->mTransformation;
+
         node->mTransformation.Decompose(aiScale, aiRotation, aiPosition);
 
         glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
@@ -309,16 +323,39 @@ namespace vel::scene
             glm::vec3 vector;
 
             // position
-            vector.x = aiMesh->mVertices[i].x;
-            vector.y = aiMesh->mVertices[i].y;
-            vector.z = aiMesh->mVertices[i].z;
-            vertex.position = vector;
+            //vector.x = aiMesh->mVertices[i].x;
+            //vector.y = aiMesh->mVertices[i].y;
+            //vector.z = aiMesh->mVertices[i].z;
+            //vertex.position = vector;
+
+			//////////////////////////////// Trying something
+
+			vector.x = aiMesh->mVertices[i].x;
+			vector.y = aiMesh->mVertices[i].y;
+			vector.z = aiMesh->mVertices[i].z;
+			vertex.position = vector;
+			//vertex.position = this->blenderRotationCorrectionPerVertexMatrix * glm::vec4(vector, 1.0f);
+			//vertex.position = this->aiMatrix4x4ToGlm(node->mTransformation) * glm::vec4(vector, 1.0f);
+			//vertex.position = glm::rotateX(vector, -90.0f);
+
+			//glm::mat4 m = glm::mat4(1.0f);
+			//m = glm::translate(m, glm::vec3(1.0f));
+			//m = glm::rotate(m, 90.0f, glm::vec3(-1.0f, 0.0f, 0.0f));
+			//m = glm::scale(m, glm::vec3(1.0f));
+			//vertex.position = m * glm::vec4(vector, 1.0f);
+
+			////////////////////////////////
+
 
             // normal
             vector.x = aiMesh->mNormals[i].x;
             vector.y = aiMesh->mNormals[i].y;
             vector.z = aiMesh->mNormals[i].z;
             vertex.normal = vector;
+			//vertex.normal = this->blenderRotationCorrectionPerVertexMatrix * glm::vec4(vector, 1.0f);
+			//vertex.normal = this->aiMatrix4x4ToGlm(node->mTransformation) * glm::vec4(vector, 1.0f);
+			//vertex.normal = glm::rotateX(vector, -90.0f);
+			//vertex.normal = m * glm::vec4(vector, 1.0f);
 
             // texture coordinates
             if (aiMesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
@@ -472,4 +509,15 @@ namespace vel::scene
 		return to;
 	}
 
+	aiMatrix4x4 AssetLoader::glmToAssImpMat4(glm::mat4 mat)
+	{
+		const float* glmMat = (const float*)glm::value_ptr(mat);
+
+		return aiMatrix4x4(
+			glmMat[0], glmMat[1], glmMat[2], glmMat[3],
+			glmMat[4], glmMat[5], glmMat[6], glmMat[7],
+			glmMat[8], glmMat[9], glmMat[10], glmMat[11],
+			glmMat[12], glmMat[13], glmMat[14], glmMat[15]
+		);
+	}
 }

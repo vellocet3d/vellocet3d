@@ -13,14 +13,15 @@ namespace vel::scene::stage
 		visible(true),
 		dynamic(false),
         transform(t) ,
-		manualTransformation(true)
+		rigidBody(nullptr),
+		manualTransform(true)
     {}
 
-	void Actor::applyTransformation()
+	void Actor::processTransform()
 	{
 		this->updatePreviousTransform();
 		
-		if (!this->manualTransformation && this->rigidBody != nullptr)
+		if (!this->manualTransform && this->rigidBody != nullptr)
 		{
 			this->transform.setTranslation(bulletToGlmVec3(this->rigidBody->getWorldTransform().getOrigin()));
 			this->transform.setRotation(bulletToGlmQuat(this->rigidBody->getWorldTransform().getRotation()));
@@ -73,7 +74,7 @@ namespace vel::scene::stage
 			return this->transform.getMatrix();
 		}
 
-		// if this actor is parented to another actor (an not a bone of that actor)
+		// if this actor is parented to another actor (and not a bone of that actor)
 		if (!this->parentActorBone)
 		{
 			return this->parentActor.value()->getTransform().getMatrix() * this->transform.getMatrix();
@@ -102,7 +103,7 @@ namespace vel::scene::stage
 
 		auto parentActorMatrix = Transform::interpolateTransforms(this->parentActor.value()->getPreviousTransform().value(), this->parentActor.value()->getTransform(), alpha);
 
-		// if this actor is parented to another actor (an not a bone of that actor)
+		// if this actor is parented to another actor (and not a bone of that actor)
 		if (!this->parentActorBone)
 		{
 			return parentActorMatrix * actorMatrix;
@@ -213,6 +214,26 @@ namespace vel::scene::stage
     {
         this->deleted = d;
     }
+
+	void Actor::setRigidBody(btRigidBody* rb)
+	{
+		this->rigidBody = rb;
+	}
+
+	void Actor::setManualTransform(bool mt)
+	{
+		this->manualTransform = mt;
+	}
+
+	btRigidBody* Actor::getRigidBody()
+	{
+		return this->rigidBody;
+	}
+
+	bool Actor::getManualTransform()
+	{
+		return this->manualTransform;
+	}
 
 	const bool Actor::isVisible() const
 	{

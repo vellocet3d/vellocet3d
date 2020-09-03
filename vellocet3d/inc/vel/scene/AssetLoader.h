@@ -39,6 +39,8 @@ namespace vel::scene
 		std::vector<std::string>			processedNodes;
 		std::vector<mesh::VertexBoneData>	currentMeshBones;
 		glm::mat4							currentGlobalInverseMatrix;
+		glm::mat4							blenderRotationCorrectionMatrix;
+		glm::mat4							blenderRotationCorrectionPerVertexMatrix;
 		void								processAnimations();
 		void								processArmatureNode(aiNode* node);
 		void								processActorNode(aiNode* node);
@@ -48,6 +50,8 @@ namespace vel::scene
 		std::string							generateUniqueActorName(std::string name);
 		glm::mat4							aiMatrix4x4ToGlm(const aiMatrix4x4 &from);
 		std::optional<size_t>				getExistingAnimationIndex(std::string animationName);
+
+		aiMatrix4x4							glmToAssImpMat4(glm::mat4 mat);
 
 	public:
 																	AssetLoader(Stage* stage, std::string assetFile, bool dynamic);
