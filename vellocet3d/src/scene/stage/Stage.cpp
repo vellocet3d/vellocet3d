@@ -192,22 +192,22 @@ namespace vel::scene::stage
         );
     }
 
-    void Stage::loadActors(std::string filename, bool dynamic)
+	std::vector<size_t> Stage::loadActors(std::string filename, bool dynamic)
     {
         auto loader = AssetLoader(this, filename, dynamic);
-        loader.loadActors();
+        return loader.loadActors();
     }
 
-    void Stage::loadActors(std::string filename, bool dynamic, int shaderIndex)
+	std::vector<size_t> Stage::loadActors(std::string filename, bool dynamic, int shaderIndex)
     {
         auto loader = AssetLoader(this, filename, dynamic);
         loader.findShaderId = [&](std::string actorName) {
             return shaderIndex;
         };
-        loader.loadActors();
+        return loader.loadActors();
     }
 
-    void Stage::loadActors(std::string filename, bool dynamic,
+	std::vector<size_t> Stage::loadActors(std::string filename, bool dynamic,
         std::vector<std::pair<int, std::vector<std::string>>> actorShaderAssocs)
     {
         auto loader = AssetLoader(this, filename, dynamic);
@@ -227,7 +227,7 @@ namespace vel::scene::stage
             return 0; // if no shader assoc found, use default shader
 
         };
-        loader.loadActors();
+        return loader.loadActors();
     }
 
 	void Stage::updateActorAnimations(double runTime)
@@ -254,7 +254,7 @@ namespace vel::scene::stage
         return this->actors.size();
     }
 
-    void Stage::addActor(Actor a)
+    size_t Stage::addActor(Actor a)
     {
         size_t slotIndex;
 
@@ -300,6 +300,8 @@ namespace vel::scene::stage
             actor->addRenderCommand(std::pair<size_t, size_t>(renderCommandIndex.value(), indexOfActorInRenderCommand));
 
         }
+
+		return slotIndex;
     }
 
     Actor* Stage::getActor(std::string name)
@@ -344,6 +346,9 @@ namespace vel::scene::stage
         {
             this->renderCommands.value().at(a.getRenderCommand().first).freeActorIndex(a.getRenderCommand().second);
         }
+
+		// TODO: need to add logic for removing ghostObjects as well, AND remove all sensors which use either the
+		// rigidBody or ghostObject of this actor
 
 		// if this actor has a rigid body, remove it from the collision world and clear the pointer
 		auto arb = a.getRigidBody();

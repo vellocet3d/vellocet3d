@@ -40,9 +40,10 @@ namespace vel::scene
 
     }
 
-    void AssetLoader::loadActors()
+	std::vector<size_t> AssetLoader::loadActors()
     {
         this->processActorNode(this->aiScene->mRootNode);
+		return this->addedActorIndexes;
     }
 
 	std::optional<size_t> AssetLoader::getExistingAnimationIndex(std::string animationName)
@@ -280,7 +281,7 @@ namespace vel::scene
 					}
 				}
 
-				this->currentStage->addActor(actor);
+				this->addedActorIndexes.push_back(this->currentStage->addActor(actor));
 			}
 
 			

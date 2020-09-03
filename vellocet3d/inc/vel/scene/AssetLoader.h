@@ -53,10 +53,12 @@ namespace vel::scene
 
 		aiMatrix4x4							glmToAssImpMat4(glm::mat4 mat);
 
+		std::vector<size_t>					addedActorIndexes;
+
 	public:
 																	AssetLoader(Stage* stage, std::string assetFile, bool dynamic);
 		std::optional<std::function<int(std::string actorName)>>	findShaderId;
-		void														loadActors();
+		std::vector<size_t>											loadActors();
 
 	};
 	

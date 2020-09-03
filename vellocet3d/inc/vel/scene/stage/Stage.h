@@ -37,11 +37,11 @@ namespace vel::scene::stage
 
     public:
 													Stage(bool headless);
-        void										loadActors(std::string filename, bool dynamic = false);
-        void										loadActors(std::string filename, bool dynamic, int shaderIndex);
-        void										loadActors(std::string filename, bool dynamic, std::vector<std::pair<int, std::vector<std::string>>> actorShaderAssocs);
+		std::vector<size_t>							loadActors(std::string filename, bool dynamic = false);
+		std::vector<size_t>							loadActors(std::string filename, bool dynamic, int shaderIndex);
+		std::vector<size_t>							loadActors(std::string filename, bool dynamic, std::vector<std::pair<int, std::vector<std::string>>> actorShaderAssocs);
 		void										updateActorAnimations(double runTime);
-        void										addActor(Actor a);
+        size_t										addActor(Actor a);
         void										removeActor(std::string name);
         void										removeActor(size_t index);
         Actor*										getActor(size_t index);
