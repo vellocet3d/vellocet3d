@@ -43,6 +43,14 @@ namespace vel::scene::stage
 		newActor.parentActorBone = std::nullopt;
 		newActor.childActors.clear();
 
+		// Clear rigidbody pointer and transform flag
+		newActor.setRigidBody(nullptr);
+		newActor.setManualTransform(true);
+
+		// TODO: In the future we may need to implement methods for:
+		// > duplicating an entire actor hierarchy including all of it's children
+		// > automatically copying the rigidbody component and adding to collision world
+
 		return newActor;
 	}
 
