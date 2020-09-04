@@ -16,7 +16,7 @@ namespace vel::scene::stage
 		overlappingPairCache(new btDbvtBroadphase()),
 		solver(new btSequentialImpulseConstraintSolver),
 		dynamicsWorld(new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration)),
-		collisionShapes(btAlignedObjectArray<btCollisionShape*>())
+		sensors(std::vector<std::unique_ptr<Sensor>>())
 	{
 		btVector3 gravityVec(0.0f, gravity, 0.0f);
 		this->dynamicsWorld->setGravity(gravityVec);
@@ -38,12 +38,18 @@ namespace vel::scene::stage
 		}
 
 		//delete collision shapes
-		for (int j = 0; j < this->collisionShapes.size(); j++)
+		for (auto& cs : this->collisionShapes)
 		{
-			btCollisionShape* shape = this->collisionShapes[j];
-			this->collisionShapes[j] = 0;
+			btCollisionShape* shape = cs.second;
+			cs.second = 0;
 			delete shape;
 		}
+		//for (int j = 0; j < this->collisionShapes.size(); j++)
+		//{
+		//	btCollisionShape* shape = this->collisionShapes[j];
+		//	this->collisionShapes[j] = 0;
+		//	delete shape;
+		//}
 
 		//delete dynamics world
 		delete this->dynamicsWorld;
@@ -63,10 +69,62 @@ namespace vel::scene::stage
 		this->collisionShapes.clear();
 	}
 
+	void CollisionWorld::processSensors()
+	{
+		for (int i = 0; i < this->dispatcher->getNumManifolds(); i++)
+		{
+			btPersistentManifold* contactManifold = this->dispatcher->getManifoldByIndexInternal(i);
+			if (contactManifold->getNumContacts() > 0)
+			{
+				for (auto& sen : this->sensors)
+				{
+					if (!sen->matchingManifold(contactManifold->getBody0(), contactManifold->getBody1()))
+						continue;
+
+					sen->onContactDiscovered(contactManifold, sen->contactPair);
+				}
+			}
+		}
+		
+	}
+
+	void CollisionWorld::addSensor(Sensor* ct)
+	{
+		this->sensors.push_back(std::move(std::unique_ptr<Sensor>(ct)));
+	}
+
+	void CollisionWorld::removeGhostObject(btPairCachingGhostObject* go)
+	{
+		this->dynamicsWorld->removeCollisionObject(go);
+		delete go;
+	}
+
+	void CollisionWorld::removeRigidBody(btRigidBody* rb)
+	{
+		if (rb->getMotionState())
+		{
+			delete rb->getMotionState();
+		}
+
+		this->dynamicsWorld->removeCollisionObject(rb);
+
+		delete rb;
+	}
+
 	bool CollisionWorld::contactAddedCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1)
 	{
 		btAdjustInternalEdgeContacts(cp, colObj1Wrap, colObj0Wrap, partId1, index1);
 		return true;
+	}
+
+	void CollisionWorld::addCollisionShape(std::string name, btCollisionShape* shape)
+	{
+		this->collisionShapes[name] = shape;
+	}
+
+	btDiscreteDynamicsWorld* const	CollisionWorld::getDynamicsWorld()
+	{
+		return this->dynamicsWorld;
 	}
 
 	/*
@@ -75,7 +133,7 @@ namespace vel::scene::stage
 		the newly generated btRigidBody object allowing users to modify it as necessary (applying
 		friction and whatnot)
 	*/
-	btRigidBody* CollisionWorld::addStaticCollisionBody(std::vector<Actor*> actors, std::optional<std::function<void(btRigidBody* body)>> callback)
+	btRigidBody* CollisionWorld::addStaticCollisionBody(std::string collisionObjectName, std::vector<Actor*> actors, std::optional<std::function<void(btRigidBody* body)>> callback)
 	{
 		std::vector<glm::vec3> tmpVerts;
 		std::vector<size_t> tmpInds;
@@ -118,7 +176,7 @@ namespace vel::scene::stage
 		//btCollisionShape* staticCollisionShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);
 		btBvhTriangleMeshShape* bvhShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);
 		btCollisionShape* staticCollisionShape = bvhShape;
-		this->collisionShapes.push_back(staticCollisionShape);
+		this->collisionShapes[collisionObjectName] = staticCollisionShape;
 
 		
 

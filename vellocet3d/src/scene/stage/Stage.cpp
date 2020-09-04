@@ -49,44 +49,6 @@ namespace vel::scene::stage
 
     }
 
-	void Stage::addSensor(Sensor* ct)
-	{
-		this->sensors.push_back(std::move(std::unique_ptr<Sensor>(ct)));
-	}
-
-	void Stage::processSensors()
-	{
-		if (this->collisionWorld)
-		{
-			for (int i = 0; i < this->collisionWorld.value()->dispatcher->getNumManifolds(); i++)
-			{
-				btPersistentManifold* contactManifold = this->collisionWorld.value()->dispatcher->getManifoldByIndexInternal(i);
-				if (contactManifold->getNumContacts() > 0)
-				{
-					for (auto& ct : this->sensors)
-					{
-						if (!ct->matchingManifold(contactManifold->getBody0(), contactManifold->getBody1()))
-							continue;
-
-						ct->onContactDiscovered(contactManifold);
-
-						if (ct->shouldSkip)
-						{
-							ct->shouldSkip = false;
-							continue;
-						}
-
-						for (int j = 0; j < contactManifold->getNumContacts(); j++)
-						{
-							ct->forEachContactPoint(contactManifold->getContactPoint(j), j);
-						}
-					}
-				}
-			}
-		}
-		
-	}
-
 	bool Stage::collisionDebugging()
 	{
 		return this->collisionDebuggingSwitch;
@@ -101,14 +63,14 @@ namespace vel::scene::stage
 
 		this->collisionDebuggingSwitch = true;
 
-		this->getCollisionWorld()->dynamicsWorld->setDebugDrawer(App::get().getGPU()->getCollisionDebugDrawer());
+		this->getCollisionWorld()->getDynamicsWorld()->setDebugDrawer(App::get().getGPU()->getCollisionDebugDrawer());
 	}
 
 	void Stage::stepPhysics(float delta)
 	{
 		if (this->collisionWorld)
 		{
-			this->collisionWorld.value()->dynamicsWorld->stepSimulation(delta, 0);
+			this->collisionWorld.value()->getDynamicsWorld()->stepSimulation(delta, 0);
 		}
 	}
 
@@ -354,16 +316,15 @@ namespace vel::scene::stage
 		auto arb = a.getRigidBody();
 		if (arb != nullptr)
 		{
-			if (arb->getMotionState())
-			{
-				delete arb->getMotionState();
-			}
-			
-			this->collisionWorld.value()->dynamicsWorld->removeCollisionObject(arb);
-
-			delete arb;
-
+			this->collisionWorld.value()->removeRigidBody(arb);
 			a.setRigidBody(nullptr);
+		}
+
+		auto ago = a.getGhostObject();
+		if (ago != nullptr)
+		{
+			this->collisionWorld.value()->removeGhostObject(ago);
+			a.setGhostObject(nullptr);
 		}
 
         a.setDeleted(true);

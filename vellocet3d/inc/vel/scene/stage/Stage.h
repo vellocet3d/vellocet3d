@@ -29,7 +29,6 @@ namespace vel::scene::stage
         std::optional<std::vector<size_t>>				renderCommandsOrder;
 		std::optional<size_t>							renderCommandExists(size_t sI, size_t mI, size_t tI);
         size_t											addRenderCommand(RenderCommand rc);
-		std::vector<std::unique_ptr<Sensor>>			sensors;
 		std::optional<std::unique_ptr<CollisionWorld>>	collisionWorld;
 		bool											collisionDebuggingSwitch;
 		
@@ -61,10 +60,10 @@ namespace vel::scene::stage
 		const bool									isVisible();
 		void										parentActorToActor(std::string childName, std::string parentName);
 		void										parentActorToActorBone(std::string childName, std::string parentName, std::string parentBoneName);
-		void										addSensor(Sensor* ct);
+		
 
 		void										applyTransformations();
-		void										processSensors();
+		
 
 
 		void										setCollisionWorld(float gravity = -10.0f);

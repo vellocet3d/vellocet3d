@@ -7,8 +7,9 @@
 namespace vel::scene::stage
 {
 
-	Sensor::Sensor(btCollisionObject* ob1, btCollisionObject* ob2) :
-		shouldSkip(false),
+	Sensor::Sensor(std::function<void(btPersistentManifold* contactManifold, std::pair<btCollisionObject*, btCollisionObject*>	contactPair)> onContactDiscovered, 
+		btCollisionObject* ob1, btCollisionObject* ob2) :
+		onContactDiscovered(onContactDiscovered),
 		contactPair(std::pair<btCollisionObject*, btCollisionObject*>(ob1, ob2))
 	{
 

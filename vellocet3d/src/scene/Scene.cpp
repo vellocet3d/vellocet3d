@@ -37,9 +37,12 @@ namespace vel::scene
 	{
 		for (auto& s : this->stages)
 		{
-			s.processSensors();
+			if (s.getCollisionWorld())
+			{
+				s.getCollisionWorld()->processSensors();
+			}
 		}
-	}
+	}	
 
 	size_t Scene::addAnimation(Animation a)
 	{
@@ -124,7 +127,7 @@ namespace vel::scene
 			// if debug drawer set, do debug draw
 			if (s.collisionDebugging())
 			{
-				s.getCollisionWorld()->dynamicsWorld->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
+				s.getCollisionWorld()->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
 
 				gpu.useShader(2);
 				gpu.setShaderMat4("vp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix());

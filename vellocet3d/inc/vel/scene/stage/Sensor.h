@@ -1,22 +1,23 @@
 #pragma once
 
 #include <utility>
+#include <functional>
 
 #include "btBulletCollisionCommon.h"
 
 namespace vel::scene::stage
 {
-	class Sensor
+	struct Sensor
 	{
-	protected:
-		std::pair<btCollisionObject*, btCollisionObject*>	contactPair;
+		Sensor(std::function<void(btPersistentManifold* contactManifold, std::pair<btCollisionObject*, btCollisionObject*>	contactPair)> onContactDiscovered, 
+			btCollisionObject* ob1, btCollisionObject* ob2 = nullptr);
 
-	public:
-						Sensor(btCollisionObject* ob1, btCollisionObject* ob2 = nullptr);
-		bool			shouldSkip;
-		bool			matchingManifold(const btCollisionObject* ob1, const btCollisionObject* ob2);
-		virtual void	onContactDiscovered(btPersistentManifold* contactManifold) = 0;
-		virtual void	forEachContactPoint(btManifoldPoint& contactPoint, int index) = 0;
+		std::pair<btCollisionObject*, btCollisionObject*>			contactPair;
+		bool														matchingManifold(const btCollisionObject* ob1, const btCollisionObject* ob2);
+		std::function<void(btPersistentManifold* contactManifold, 
+			std::pair<btCollisionObject*, btCollisionObject*>	contactPair)>	onContactDiscovered;
+
+		
 
 	};
 }
