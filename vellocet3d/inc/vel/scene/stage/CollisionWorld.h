@@ -24,6 +24,8 @@ namespace vel::scene::stage
 		btDiscreteDynamicsWorld*				dynamicsWorld;
 		std::map<std::string, btCollisionShape*> collisionShapes;
 		std::vector<std::unique_ptr<Sensor>>	sensors;
+
+		void									removeSensorsUsingCollisionObject(btCollisionObject* co);
 	
 	public:
 		static bool								contactAddedCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1);

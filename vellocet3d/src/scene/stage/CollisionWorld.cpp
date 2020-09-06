@@ -93,14 +93,31 @@ namespace vel::scene::stage
 		this->sensors.push_back(std::move(std::unique_ptr<Sensor>(ct)));
 	}
 
+	void CollisionWorld::removeSensorsUsingCollisionObject(btCollisionObject* co)
+	{
+		size_t index = 0;
+		for (auto& s : this->sensors)
+		{
+			if (s->contactPair.first == co || s->contactPair.second == co)
+			{
+				this->sensors.erase(this->sensors.begin() + index);
+			}
+
+			index++;
+		}
+	}
+
 	void CollisionWorld::removeGhostObject(btPairCachingGhostObject* go)
 	{
+		this->removeSensorsUsingCollisionObject(go);
 		this->dynamicsWorld->removeCollisionObject(go);
 		delete go;
 	}
 
 	void CollisionWorld::removeRigidBody(btRigidBody* rb)
 	{
+		this->removeSensorsUsingCollisionObject(rb);
+
 		if (rb->getMotionState())
 		{
 			delete rb->getMotionState();
