@@ -87,7 +87,7 @@ namespace vel::scene::armature
 			double timeInTicks = runTime * this->currentAnimation->tps;
 			double animationTime = fmod(timeInTicks, this->currentAnimation->duration);
 
-			//std::cout << animationTime << "\n"; // when animation time is 30, system freaks. THINK this has been rectified, but leaving comment as clue in case
+			std::cout << this->getCurrentAnimationName() << ":" << animationTime << "\n";
 
 			if (this->lastAnimationTime == -1.0)
 			{
@@ -102,7 +102,6 @@ namespace vel::scene::armature
 
 			if ((!this->repeatCurrentAnimation && this->currentAnimationCycle == 0) || this->repeatCurrentAnimation)
 			{
-				//std::cout << "here\n";
 				for (size_t i = 0; i < this->bones.size(); i++)
 				{
 					if (i == 0)
@@ -113,6 +112,18 @@ namespace vel::scene::armature
 					{
 						this->updateBone(i, (float)animationTime, this->bones[this->bones[i].parent].matrix);
 					}
+				}
+			}
+
+			// set last transform properties of each bone to current if this is a non-repeatable animation and we have completed the first cycle
+			if (!this->repeatCurrentAnimation && this->currentAnimationCycle == 1)
+			{
+				for (size_t i = 0; i < this->bones.size(); i++)
+				{
+					auto& bone = this->bones[i];
+					bone.previousTranslation = bone.translation;
+					bone.previousRotation = bone.rotation;
+					bone.previousScale = bone.scale;
 				}
 			}
 		}
