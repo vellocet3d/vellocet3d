@@ -50,6 +50,7 @@ namespace vel
         void								useMeshRenderable(size_t meshRenderableIndex);
         void								drawMeshRenderable();
 		CollisionDebugDrawer*				getCollisionDebugDrawer();
+		void								clearDepthBuffer();
 		
 		void								wipe();
 		

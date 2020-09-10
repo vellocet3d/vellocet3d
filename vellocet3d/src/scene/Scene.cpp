@@ -124,6 +124,12 @@ namespace vel::scene
 				continue;
 			}
 
+			// clear depth buffer if flag set in stage
+			if (s.getClearDepthBuffer())
+			{
+				gpu.clearDepthBuffer();
+			}
+
 			// if debug drawer set, do debug draw
 			if (s.collisionDebugging())
 			{

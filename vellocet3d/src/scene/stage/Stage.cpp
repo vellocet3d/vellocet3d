@@ -17,7 +17,8 @@ namespace vel::scene::stage
     Stage::Stage(bool headless) :
         headless(headless),
         visible(true),
-		collisionDebuggingSwitch(false)
+		collisionDebuggingSwitch(false),
+		clearDepthBuffer(false)
     {
         // Set default actors container to 1000 slots. If more space
         // is required, call setActorContainerSize before adding
@@ -48,6 +49,16 @@ namespace vel::scene::stage
         }
 
     }
+
+	bool Stage::getClearDepthBuffer()
+	{
+		return this->clearDepthBuffer;
+	}
+
+	void Stage::setClearDepthBuffer(bool b)
+	{
+		this->clearDepthBuffer = b;
+	}
 
 	bool Stage::collisionDebugging()
 	{

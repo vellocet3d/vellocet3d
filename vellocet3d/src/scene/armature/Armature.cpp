@@ -13,8 +13,16 @@
 namespace vel::scene::armature
 {
 	Armature::Armature(std::string name) :
-		name(name)
+		name(name),
+		repeatCurrentAnimation(true),
+		lastAnimationTime(-1.0),
+		currentAnimationCycle(0)
 	{}
+
+	std::string Armature::getCurrentAnimationName()
+	{
+		return this->currentAnimation->name;
+	}
 
 	glm::vec3 Armature::calcTranslation(const float& time, size_t currentKeyIndex, const vel::scene::animation::Channel& channel)
 	{
@@ -74,28 +82,54 @@ namespace vel::scene::armature
 
 	void Armature::updateCurrentAnimation(double runTime, std::optional<glm::mat4> parentMatrix)
 	{
-		double timeInTicks = runTime * this->currentAnimation->tps;
-		double animationTime = fmod(timeInTicks, this->currentAnimation->duration);
-
-		//std::cout << animationTime << "\n"; // when animation time is 30, system freaks
-
-		for (size_t i = 0; i < this->bones.size(); i++)
+		if ((!this->repeatCurrentAnimation && this->currentAnimationCycle == 0) || this->repeatCurrentAnimation)
 		{
-			if (i == 0)
+			double timeInTicks = runTime * this->currentAnimation->tps;
+			double animationTime = fmod(timeInTicks, this->currentAnimation->duration);
+
+			//std::cout << animationTime << "\n"; // when animation time is 30, system freaks. THINK this has been rectified, but leaving comment as clue in case
+
+			if (this->lastAnimationTime == -1.0)
 			{
-				this->updateBone(0, (float)animationTime, glm::mat4(1.0f));
+				this->lastAnimationTime = animationTime;
 			}
-			else
+
+			// if animationTime is less than the last animation time, we know that a new cycle has begun
+			if (animationTime < this->lastAnimationTime)
 			{
-				this->updateBone(i, (float)animationTime, this->bones[this->bones[i].parent].matrix);
+				this->currentAnimationCycle++;
+			}
+
+			if ((!this->repeatCurrentAnimation && this->currentAnimationCycle == 0) || this->repeatCurrentAnimation)
+			{
+				//std::cout << "here\n";
+				for (size_t i = 0; i < this->bones.size(); i++)
+				{
+					if (i == 0)
+					{
+						this->updateBone(0, (float)animationTime, glm::mat4(1.0f));
+					}
+					else
+					{
+						this->updateBone(i, (float)animationTime, this->bones[this->bones[i].parent].matrix);
+					}
+				}
 			}
 		}
+		
 	}
 
-	void Armature::setCurrentAnimation(std::string animationName)
+	void Armature::setCurrentAnimation(std::string animationName, bool repeat)
 	{
-		this->currentAnimationName = animationName;
-		this->currentAnimation = &App::get().getScene()->getAnimation(this->getAnimationIndex(this->currentAnimationName));
+		this->currentAnimation = &App::get().getScene()->getAnimation(this->getAnimationIndex(animationName));
+		this->repeatCurrentAnimation = repeat;
+		this->lastAnimationTime = -1.0;
+		this->currentAnimationCycle = 0;
+	}
+
+	unsigned int Armature::getCurrentAnimationCycle()
+	{
+		return this->currentAnimationCycle;
 	}
 
 	const std::vector<std::pair<std::string, size_t>>& Armature::getAnimations() const

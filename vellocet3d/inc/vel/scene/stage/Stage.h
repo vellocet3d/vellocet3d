@@ -31,6 +31,7 @@ namespace vel::scene::stage
         size_t											addRenderCommand(RenderCommand rc);
 		std::optional<std::unique_ptr<CollisionWorld>>	collisionWorld;
 		bool											collisionDebuggingSwitch;
+		bool											clearDepthBuffer;
 		
 
 
@@ -60,6 +61,8 @@ namespace vel::scene::stage
 		const bool									isVisible();
 		void										parentActorToActor(std::string childName, std::string parentName);
 		void										parentActorToActorBone(std::string childName, std::string parentName, std::string parentBoneName);
+		void										setClearDepthBuffer(bool b);
+		bool										getClearDepthBuffer();
 		
 
 		void										applyTransformations();

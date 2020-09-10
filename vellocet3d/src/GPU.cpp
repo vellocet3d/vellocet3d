@@ -317,6 +317,11 @@ namespace vel
         glEnable(GL_DEPTH_TEST);
     }
 
+	void GPU::clearDepthBuffer()
+	{
+		glClear(GL_DEPTH_BUFFER_BIT);
+	}
+
     void GPU::clearBuffers(float r, float g, float b, float a)
     {
         glClearColor(r, g, b, a);
