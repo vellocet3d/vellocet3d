@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #define GLM_FORCE_ALIGNED_GENTYPES
+#include "glm/gtx/compatibility.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/matrix_decompose.hpp"
 #include "glm/gtx/string_cast.hpp"
@@ -16,13 +17,19 @@ namespace vel::scene::armature
 		name(name),
 		repeatCurrentAnimation(true),
 		lastAnimationTime(-1.0),
-		currentAnimationCycle(0)
+		currentAnimationCycle(0),
+		transitionAnimation(nullptr),
+		blendTime(0),
+		runTime(0.0),
+		previousRunTime(0.0),
+		stepTime(0.0),
+		currentAnimationTime(0.0f),
+		transitionAnimationTime(0.0f),
+		blendPercentage(0.0f),
+		rollingBlendTime(0.0),
+		currentAnimationName(""),
+		transitionAnimationName("")
 	{}
-
-	std::string Armature::getCurrentAnimationName()
-	{
-		return this->currentAnimation->name;
-	}
 
 	glm::vec3 Armature::calcTranslation(const float& time, size_t currentKeyIndex, const vel::scene::animation::Channel& channel)
 	{
@@ -54,50 +61,107 @@ namespace vel::scene::armature
 		return channel.scalingKeyValues[currentKeyIndex] + factor * (channel.scalingKeyValues[nextKeyIndex] - channel.scalingKeyValues[currentKeyIndex]);
 	}
 
-	void Armature::updateBone(size_t index, float time, glm::mat4 parentMatrix)
+	void Armature::updateBone(size_t index, glm::mat4 parentMatrix)
 	{
 		// we assume there are always at least 2 keys of animation data
 
+		// get current bone and update it's previous SRT values with current
 		auto& bone = this->bones[index];
-		auto& channel = this->currentAnimation->channels[bone.name];
-
-		auto it = std::upper_bound(channel.positionKeyTimes.begin(), channel.positionKeyTimes.end(), time);
-		auto tmpKey = (size_t)(it - channel.positionKeyTimes.begin());
-		size_t currentKeyIndex = !(tmpKey == channel.positionKeyTimes.size()) ? (tmpKey - 1) : (tmpKey - 2);
-
 		bone.previousTranslation = bone.translation;
 		bone.previousRotation = bone.rotation;
 		bone.previousScale = bone.scale;
 
-		bone.matrix = glm::mat4(1.0f);
-		bone.matrix = glm::translate(bone.matrix, this->calcTranslation(time, currentKeyIndex, channel));
-		bone.matrix = bone.matrix * glm::toMat4(this->calcRotation(time, currentKeyIndex, channel));
-		bone.matrix = glm::scale(bone.matrix, this->calcScale(time, currentKeyIndex, channel));
-		bone.matrix = parentMatrix * bone.matrix;
+		// get key index for current animation
+		auto& channel = this->currentAnimation->channels[bone.name];
+		auto it = std::upper_bound(channel.positionKeyTimes.begin(), channel.positionKeyTimes.end(), this->currentAnimationTime);
+		auto tmpKey = (size_t)(it - channel.positionKeyTimes.begin());
+		size_t currentKeyIndex = !(tmpKey == channel.positionKeyTimes.size()) ? (tmpKey - 1) : (tmpKey - 2);
 
-		glm::decompose(bone.matrix, bone.scale, bone.rotation, bone.translation, bone.skew, bone.perspective);
-		bone.rotation = glm::conjugate(bone.rotation);
+		if (this->transitionAnimation == nullptr)
+		{
+			
+			// generate a new matrix and SRT values for this bone based solely on the current animation time (single animation no blending)
+			bone.matrix = glm::mat4(1.0f);
+			bone.matrix = glm::translate(bone.matrix, this->calcTranslation(this->currentAnimationTime, currentKeyIndex, channel));
+			bone.matrix = bone.matrix * glm::toMat4(this->calcRotation(this->currentAnimationTime, currentKeyIndex, channel));
+			bone.matrix = glm::scale(bone.matrix, this->calcScale(this->currentAnimationTime, currentKeyIndex, channel));
+			bone.matrix = parentMatrix * bone.matrix;
+
+			glm::decompose(bone.matrix, bone.scale, bone.rotation, bone.translation, bone.skew, bone.perspective);
+			bone.rotation = glm::conjugate(bone.rotation);
+		}
+		else
+		{
+			
+			// generate a new matrix and SRT values for this bone by lerping between the animation data of the last key of the currentAnimation 
+			// (currentAnimation stops moving forward at time when transitionAnimation is added ("Frozen Transition")) and the current key of the
+			// transitionAnimation, using this->blendPercentage as interpolation alpha
+			auto& transitionChannel = this->transitionAnimation->channels[bone.name];
+			auto it2 = std::upper_bound(transitionChannel.positionKeyTimes.begin(), transitionChannel.positionKeyTimes.end(), this->transitionAnimationTime);
+			auto tmpKey2 = (size_t)(it2 - transitionChannel.positionKeyTimes.begin());
+			size_t transitionKeyIndex = !(tmpKey2 == transitionChannel.positionKeyTimes.size()) ? (tmpKey2 - 1) : (tmpKey2 - 2);
+
+			bone.matrix = glm::mat4(1.0f);
+			bone.matrix = glm::translate(bone.matrix, glm::lerp(this->calcTranslation(this->currentAnimationTime, currentKeyIndex, channel), this->calcTranslation(this->transitionAnimationTime, transitionKeyIndex, transitionChannel), this->blendPercentage));
+			bone.matrix = bone.matrix * glm::toMat4(glm::slerp(this->calcRotation(this->currentAnimationTime, currentKeyIndex, channel), this->calcRotation(this->transitionAnimationTime, transitionKeyIndex, transitionChannel), this->blendPercentage));
+			bone.matrix = glm::scale(bone.matrix, glm::lerp(this->calcScale(this->currentAnimationTime, currentKeyIndex, channel), this->calcScale(this->transitionAnimationTime, transitionKeyIndex, transitionChannel), this->blendPercentage));
+			bone.matrix = parentMatrix * bone.matrix;
+
+			glm::decompose(bone.matrix, bone.scale, bone.rotation, bone.translation, bone.skew, bone.perspective);
+			bone.rotation = glm::conjugate(bone.rotation);
+		}
+		
 
 	}
 
 	void Armature::updateCurrentAnimation(double runTime, std::optional<glm::mat4> parentMatrix)
 	{
+		this->previousRunTime = this->runTime;
+		this->runTime = runTime;
+		this->stepTime = this->runTime - this->previousRunTime;
+
 		if ((!this->repeatCurrentAnimation && this->currentAnimationCycle == 0) || this->repeatCurrentAnimation)
 		{
-			double timeInTicks = runTime * this->currentAnimation->tps;
-			double animationTime = fmod(timeInTicks, this->currentAnimation->duration);
-
-			std::cout << this->getCurrentAnimationName() << ":" << animationTime << "\n";
-
-			if (this->lastAnimationTime == -1.0)
+			if (this->transitionAnimation != nullptr)
 			{
-				this->lastAnimationTime = animationTime;
+				this->rollingBlendTime += this->stepTime;
+				this->blendPercentage = (float)(this->rollingBlendTime / (this->blendTime / 1000.0));
+
+				double transitionAnimationTimeInTicks = this->runTime * this->transitionAnimation->tps;
+				this->transitionAnimationTime = (float)fmod(transitionAnimationTimeInTicks, this->transitionAnimation->duration);
+
+				if (this->blendPercentage >= 1.0f)
+				{
+					this->currentAnimation = this->transitionAnimation;
+					this->currentAnimationName = this->transitionAnimationName;
+
+					this->transitionAnimationName = "";
+					this->transitionAnimation = nullptr;
+
+					this->lastAnimationTime = -1.0;
+					this->currentAnimationCycle = 0;
+					this->blendPercentage = 0.0f;
+					this->rollingBlendTime = 0.0;
+				}
 			}
 
-			// if animationTime is less than the last animation time, we know that a new cycle has begun
-			if (animationTime < this->lastAnimationTime)
+			// set current animation time, unless we have a transitionAnimation, in which case currentAnimationTime needs
+			// to stay what it was
+			if (this->transitionAnimation == nullptr)
 			{
-				this->currentAnimationCycle++;
+				double currentAnimationTimeInTicks = this->runTime * this->currentAnimation->tps;
+				this->currentAnimationTime = (float)fmod(currentAnimationTimeInTicks, this->currentAnimation->duration);
+
+				if (this->lastAnimationTime == -1.0)
+				{
+					this->lastAnimationTime = this->currentAnimationTime;
+				}
+
+				// if animationTime is less than the last animation time, we know that a new cycle has begun
+				if (this->currentAnimationTime < this->lastAnimationTime)
+				{
+					this->currentAnimationCycle++;
+				}
 			}
 
 			if ((!this->repeatCurrentAnimation && this->currentAnimationCycle == 0) || this->repeatCurrentAnimation)
@@ -106,11 +170,11 @@ namespace vel::scene::armature
 				{
 					if (i == 0)
 					{
-						this->updateBone(0, (float)animationTime, glm::mat4(1.0f));
+						this->updateBone(0, glm::mat4(1.0f));
 					}
 					else
 					{
-						this->updateBone(i, (float)animationTime, this->bones[this->bones[i].parent].matrix);
+						this->updateBone(i, this->bones[this->bones[i].parent].matrix);
 					}
 				}
 			}
@@ -130,12 +194,31 @@ namespace vel::scene::armature
 		
 	}
 
+	void Armature::setTransitionAnimation(std::string animationName, int blendTime)
+	{
+		this->transitionAnimation = &App::get().getScene()->getAnimation(this->getAnimationIndex(animationName));
+		this->transitionAnimationName = animationName;
+		this->blendTime = blendTime;
+	}
+
 	void Armature::setCurrentAnimation(std::string animationName, bool repeat)
 	{
 		this->currentAnimation = &App::get().getScene()->getAnimation(this->getAnimationIndex(animationName));
+		this->currentAnimationName = animationName;
 		this->repeatCurrentAnimation = repeat;
 		this->lastAnimationTime = -1.0;
 		this->currentAnimationCycle = 0;
+		this->transitionAnimation = nullptr;
+	}
+
+	std::string	Armature::getTransitionAnimationName()
+	{
+		return this->transitionAnimationName;
+	}
+
+	std::string Armature::getCurrentAnimationName()
+	{
+		return this->currentAnimationName;
 	}
 
 	unsigned int Armature::getCurrentAnimationCycle()
@@ -192,6 +275,8 @@ namespace vel::scene::armature
 	{
 		return this->bones.at(index);
 	}
+
+	
 
 	size_t Armature::getAnimationIndex(std::string animationName)
 	{

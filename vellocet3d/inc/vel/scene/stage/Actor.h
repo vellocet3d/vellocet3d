@@ -63,7 +63,6 @@ namespace vel::scene::stage
 		void											setArmature(vel::scene::armature::Armature& arm);
 		vel::scene::armature::Armature&					getArmature();
 		vel::scene::mesh::Mesh&							getMesh();
-		void											animate(std::string animationName, bool repeat = true);
 		const std::optional<std::vector<std::pair<size_t, std::string>>>& getActiveBones() const;
 		void											setActiveBones(std::vector<std::pair<size_t, std::string>> activeBones);
 		void											setParentActor(Actor* a);

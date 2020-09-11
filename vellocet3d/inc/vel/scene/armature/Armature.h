@@ -22,7 +22,18 @@ namespace vel::scene::armature
 		std::vector<Bone>									bones;
 		std::vector<std::pair<std::string, size_t>>			animations;
 		vel::scene::animation::Animation*					currentAnimation;
-		void												updateBone(size_t index, float time, glm::mat4 parentMatrix);
+		std::string											currentAnimationName;
+		vel::scene::animation::Animation*					transitionAnimation;
+		std::string											transitionAnimationName;
+		double												runTime;
+		double												previousRunTime;
+		double												stepTime;
+		float												currentAnimationTime;
+		float												transitionAnimationTime;
+		double												rollingBlendTime;
+		double												blendTime; // in ms
+		float												blendPercentage;
+		void												updateBone(size_t index, glm::mat4 parentMatrix);
 		glm::vec3											calcTranslation(const float& time, size_t currentKeyIndex, const vel::scene::animation::Channel& channel);
 		glm::quat											calcRotation(const float& time, size_t currentKeyIndex, const vel::scene::animation::Channel& channel);
 		glm::vec3											calcScale(const float& time, size_t currentKeyIndex, const vel::scene::animation::Channel& channel);
@@ -48,6 +59,9 @@ namespace vel::scene::armature
 		void												updateCurrentAnimation(double runTime, std::optional<glm::mat4> parentMatrix);
 		size_t												getAnimationIndex(std::string animationName);
 		unsigned int										getCurrentAnimationCycle();
+
+		void												setTransitionAnimation(std::string animationName, int blendTime);
+		std::string											getTransitionAnimationName();
 
 	};
 }

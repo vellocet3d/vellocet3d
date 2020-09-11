@@ -318,12 +318,4 @@ namespace vel::scene::stage
 		return App::get().getScene()->getMesh(this->meshIndex.value());
 	}
 
-	void Actor::animate(std::string animationName, bool repeat)
-	{
-		if (this->armature)
-		{
-			this->getArmature().setCurrentAnimation(animationName, repeat);
-		}
-	}
-
 }
