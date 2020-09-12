@@ -209,6 +209,7 @@ namespace vel::scene::armature
 		this->lastAnimationTime = -1.0;
 		this->currentAnimationCycle = 0;
 		this->transitionAnimation = nullptr;
+		this->transitionAnimationName = "";
 	}
 
 	std::string	Armature::getTransitionAnimationName()
