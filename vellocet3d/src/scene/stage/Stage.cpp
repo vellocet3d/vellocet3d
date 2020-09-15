@@ -209,7 +209,7 @@ namespace vel::scene::stage
 		{
 			if (!a.isDeleted() && a.isAnimated())
 			{
-				a.getArmature().updateCurrentAnimation(runTime, a.getParentMatrix());
+				a.getArmature().updateAnimation(runTime, a.getParentMatrix());
 			}
 		}
 	}

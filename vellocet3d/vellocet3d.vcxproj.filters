@@ -260,5 +260,8 @@
     <ClInclude Include="inc\vel\scene\stage\Sensor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\vel\scene\armature\ActiveAnimation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

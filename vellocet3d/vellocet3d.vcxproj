@@ -243,6 +243,7 @@
     <ClInclude Include="inc\vel\Logger.h" />
     <ClInclude Include="inc\vel\scene\animation\Animation.h" />
     <ClInclude Include="inc\vel\scene\animation\Channel.h" />
+    <ClInclude Include="inc\vel\scene\armature\ActiveAnimation.h" />
     <ClInclude Include="inc\vel\scene\armature\Armature.h" />
     <ClInclude Include="inc\vel\scene\armature\Bone.h" />
     <ClInclude Include="inc\vel\scene\AssetLoader.h" />

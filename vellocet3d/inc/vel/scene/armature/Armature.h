@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <deque>
 #include <optional>
 
 #include "glm/glm.hpp"
@@ -11,6 +12,7 @@
 #include "vel/scene/mesh/Mesh.h"
 #include "vel/scene/armature/Bone.h"
 #include "vel/scene/stage/Transform.h"
+#include "vel/scene/armature/ActiveAnimation.h"
 
 
 namespace vel::scene::armature
@@ -21,25 +23,14 @@ namespace vel::scene::armature
 		std::string											name;
 		std::vector<Bone>									bones;
 		std::vector<std::pair<std::string, size_t>>			animations;
-		vel::scene::animation::Animation*					currentAnimation;
-		std::string											currentAnimationName;
-		vel::scene::animation::Animation*					transitionAnimation;
-		std::string											transitionAnimationName;
+		std::deque<ActiveAnimation>							activeAnimations;
 		double												runTime;
 		double												previousRunTime;
-		double												stepTime;
-		float												currentAnimationTime;
-		float												transitionAnimationTime;
-		double												rollingBlendTime;
-		double												blendTime; // in ms
-		float												blendPercentage;
+		double												stepTime;		
 		void												updateBone(size_t index, glm::mat4 parentMatrix);
 		glm::vec3											calcTranslation(const float& time, size_t currentKeyIndex, const vel::scene::animation::Channel& channel);
 		glm::quat											calcRotation(const float& time, size_t currentKeyIndex, const vel::scene::animation::Channel& channel);
 		glm::vec3											calcScale(const float& time, size_t currentKeyIndex, const vel::scene::animation::Channel& channel);
-		bool												repeatCurrentAnimation;
-		double												lastAnimationTime;
-		unsigned int										currentAnimationCycle; 
 
 
 	public:
@@ -56,12 +47,14 @@ namespace vel::scene::armature
 		size_t												getBoneIndex(std::string boneName);
 		void												setCurrentAnimation(std::string animationName, bool repeat = true);
 		std::string											getCurrentAnimationName();
-		void												updateCurrentAnimation(double runTime, std::optional<glm::mat4> parentMatrix);
+		void												updateAnimation(double runTime, std::optional<glm::mat4> parentMatrix);
 		size_t												getAnimationIndex(std::string animationName);
 		unsigned int										getCurrentAnimationCycle();
 
 		void												setTransitionAnimation(std::string animationName, int blendTime);
 		std::string											getTransitionAnimationName();
+
+		void												playAnimation(std::string animationName, int blendTime = 0)
 
 	};
 }
