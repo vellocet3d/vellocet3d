@@ -263,6 +263,7 @@
     <ClInclude Include="inc\vel\scene\stage\RenderCommand.h" />
     <ClInclude Include="inc\vel\scene\stage\Stage.h" />
     <ClInclude Include="inc\vel\scene\stage\Transform.h" />
+    <ClInclude Include="inc\vel\scene\stage\TRS.h" />
     <ClInclude Include="inc\vel\Window.h" />
     <ClInclude Include="inc\Window.h" />
     <ClInclude Include="inc\scene\stage\Stage.h" />

@@ -9,6 +9,7 @@
 
 #include "vel/App.h"
 #include "vel/scene/armature/Armature.h"
+#include "vel/scene/stage/TRS.h"
 
 
 namespace vel::scene::armature
@@ -54,7 +55,7 @@ namespace vel::scene::armature
 	{
 		// we assume there are always at least 2 keys of animation data
 
-		// get current bone and update it's previous SRT values with current
+		// get current bone and update it's previous TRS values with current
 		auto& bone = this->bones[index];
 		bone.previousTranslation = bone.translation;
 		bone.previousRotation = bone.rotation;
@@ -62,7 +63,7 @@ namespace vel::scene::armature
 
 
 		// get vector of key indexes where vector index is the index of the activeAnimation and value is the keyIndex
-		std::vector<std::pair<size_t, vel::scene::animation::Channel*>> keyIndexAndChannels;
+		std::vector<TRS> activeAnimationsTRS;
 		for (auto& aa : this->activeAnimations)
 		{
 			auto channel = &aa.animation->channels[bone.name];
@@ -70,27 +71,58 @@ namespace vel::scene::armature
 			auto tmpKey = (size_t)(it - channel->positionKeyTimes.begin());
 			size_t currentKeyIndex = !(tmpKey == channel->positionKeyTimes.size()) ? (tmpKey - 1) : (tmpKey - 2);
 
-			keyIndexAndChannels.push_back(std::pair<size_t, vel::scene::animation::Channel*>(currentKeyIndex, channel));
+			TRS trs;
+			trs.translation = this->calcTranslation(aa.animationKeyTime, currentKeyIndex, channel);
+			trs.rotation = this->calcRotation(aa.animationKeyTime, currentKeyIndex, channel);
+			trs.scale = this->calcScale(aa.animationKeyTime, currentKeyIndex, channel);
+
+			activeAnimationsTRS.push_back(trs);
 		}
 
-		// if activeAnimations has a size of 1, then do no interpolation
-		if (this->activeAnimations.size() > 1)
+		// if activeAnimations has a size greater than 1, then do interpolation
+		if (activeAnimationsTRS.size() > 1)
 		{
-
-
+			TRS lerpTRS;
+			for (size_t i = 0; i < activeAnimationsTRS.size() - 1; i++)
+			{
+				// no need to lerp last element
+				if (i + 1 < activeAnimationsTRS.size())
+				{
+					// if this is the first element, prime lerpTRS using by lerping with first element
+					if (i == 0)
+					{
+						lerpTRS.translation = glm::lerp(activeAnimationsTRS[i].translation, activeAnimationsTRS[i + 1].translation, this->activeAnimations[i + 1].blendPercentage);
+						lerpTRS.rotation = glm::slerp(activeAnimationsTRS[i].rotation, activeAnimationsTRS[i + 1].rotation, this->activeAnimations[i + 1].blendPercentage);
+						lerpTRS.scale = glm::lerp(activeAnimationsTRS[i].scale, activeAnimationsTRS[i + 1].scale, this->activeAnimations[i + 1].blendPercentage);
+					}
+					// otherwise lerp using lerpTRS
+					else
+					{
+						lerpTRS.translation = glm::lerp(lerpTRS.translation, activeAnimationsTRS[i + 1].translation, this->activeAnimations[i + 1].blendPercentage);
+						lerpTRS.rotation = glm::slerp(lerpTRS.rotation, activeAnimationsTRS[i + 1].rotation, this->activeAnimations[i + 1].blendPercentage);
+						lerpTRS.scale = glm::lerp(lerpTRS.scale, activeAnimationsTRS[i + 1].scale, this->activeAnimations[i + 1].blendPercentage);
+					}
+				}
+			}
+			
+			bone.matrix = glm::mat4(1.0f);
+			bone.matrix = glm::translate(bone.matrix, lerpTRS.translation);
+			bone.matrix = bone.matrix * glm::toMat4(lerpTRS.rotation);
+			bone.matrix = glm::scale(bone.matrix, lerpTRS.scale);
 
 		}
+		// otherwise, generate the bone matrix using the single animation
 		else
 		{
 			bone.matrix = glm::mat4(1.0f);
-			bone.matrix = glm::translate(bone.matrix, this->calcTranslation(this->activeAnimations[0].animationKeyTime, keyIndexAndChannels[0].first, keyIndexAndChannels[0].second));
-			bone.matrix = bone.matrix * glm::toMat4(this->calcRotation(this->activeAnimations[0].animationKeyTime, keyIndexAndChannels[0].first, keyIndexAndChannels[0].second));
-			bone.matrix = glm::scale(bone.matrix, this->calcScale(this->activeAnimations[0].animationKeyTime, keyIndexAndChannels[0].first, keyIndexAndChannels[0].second));
-			bone.matrix = parentMatrix * bone.matrix;
-
-			glm::decompose(bone.matrix, bone.scale, bone.rotation, bone.translation, bone.skew, bone.perspective);
-			bone.rotation = glm::conjugate(bone.rotation);
+			bone.matrix = glm::translate(bone.matrix, activeAnimationsTRS[0].translation);
+			bone.matrix = bone.matrix * glm::toMat4(activeAnimationsTRS[0].rotation);
+			bone.matrix = glm::scale(bone.matrix, activeAnimationsTRS[0].scale);
 		}
+
+		bone.matrix = parentMatrix * bone.matrix;
+		glm::decompose(bone.matrix, bone.scale, bone.rotation, bone.translation, bone.skew, bone.perspective);
+		bone.rotation = glm::conjugate(bone.rotation);
 
 		
 
@@ -100,7 +132,7 @@ namespace vel::scene::armature
 
 		/////////////////////////////////////////////////////////////////////
 
-
+		/*
 		// get key index for current animation
 		auto& channel = this->currentAnimation->channels[bone.name];
 		auto it = std::upper_bound(channel.positionKeyTimes.begin(), channel.positionKeyTimes.end(), this->currentAnimationTime);
@@ -110,7 +142,7 @@ namespace vel::scene::armature
 		if (this->transitionAnimation == nullptr)
 		{
 			
-			// generate a new matrix and SRT values for this bone based solely on the current animation time (single animation no blending)
+			// generate a new matrix and TRS values for this bone based solely on the current animation time (single animation no blending)
 			bone.matrix = glm::mat4(1.0f);
 			bone.matrix = glm::translate(bone.matrix, this->calcTranslation(this->currentAnimationTime, currentKeyIndex, channel));
 			bone.matrix = bone.matrix * glm::toMat4(this->calcRotation(this->currentAnimationTime, currentKeyIndex, channel));
@@ -123,7 +155,7 @@ namespace vel::scene::armature
 		else
 		{
 			
-			// generate a new matrix and SRT values for this bone by lerping between the animation data of the last key of the currentAnimation 
+			// generate a new matrix and TRS values for this bone by lerping between the animation data of the last key of the currentAnimation 
 			// (currentAnimation stops moving forward at time when transitionAnimation is added ("Frozen Transition")) and the current key of the
 			// transitionAnimation, using this->blendPercentage as interpolation alpha
 			auto& transitionChannel = this->transitionAnimation->channels[bone.name];
@@ -140,6 +172,7 @@ namespace vel::scene::armature
 			glm::decompose(bone.matrix, bone.scale, bone.rotation, bone.translation, bone.skew, bone.perspective);
 			bone.rotation = glm::conjugate(bone.rotation);
 		}
+		*/
 		
 
 	}
@@ -152,7 +185,7 @@ namespace vel::scene::armature
 
 
 		// get most most recent active animation
-		auto activeAnimation = this->activeAnimations.back();
+		auto& activeAnimation = this->activeAnimations.back();
 
 		if (activeAnimation.blendTime > 0.0)
 		{
@@ -177,7 +210,7 @@ namespace vel::scene::armature
 		}
 
 		activeAnimation.lastAnimationKeyTime = activeAnimation.animationKeyTime;
-		activeAnimation.animationKeyTime = (float)fmod(activeAnimation.animationTime, activeAnimation.animation->duration);
+		activeAnimation.animationKeyTime = (float)fmod(activeAnimation.animationTime * activeAnimation.animation->tps, activeAnimation.animation->duration);
 
 		if (activeAnimation.animationKeyTime < activeAnimation.lastAnimationKeyTime)
 		{
@@ -285,10 +318,34 @@ namespace vel::scene::armature
 		a.blendTime = (double)blendTime;
 		a.animationTime = 0.0;
 		a.lastAnimationKeyTime = 0.0f;
-		a.currentAnimationCycle = 0.0f;
+		a.currentAnimationCycle = 0;
 		a.blendPercentage = 0.0f;
 
 		this->activeAnimations.push_back(a);
+	}
+
+	unsigned int Armature::getCurrentAnimationCycle()
+	{
+		if (this->activeAnimations.size() > 0)
+		{
+			return this->activeAnimations.back().currentAnimationCycle;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	std::string Armature::getCurrentAnimationName()
+	{
+		if (this->activeAnimations.size() > 0)
+		{
+			return this->activeAnimations.back().animationName;
+		}
+		else
+		{
+			return "";
+		}
 	}
 
 	const std::vector<std::pair<std::string, size_t>>& Armature::getAnimations() const

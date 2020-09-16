@@ -28,9 +28,9 @@ namespace vel::scene::armature
 		double												previousRunTime;
 		double												stepTime;		
 		void												updateBone(size_t index, glm::mat4 parentMatrix);
-		glm::vec3											calcTranslation(const float& time, size_t currentKeyIndex, const vel::scene::animation::Channel& channel);
-		glm::quat											calcRotation(const float& time, size_t currentKeyIndex, const vel::scene::animation::Channel& channel);
-		glm::vec3											calcScale(const float& time, size_t currentKeyIndex, const vel::scene::animation::Channel& channel);
+		glm::vec3											calcTranslation(const float& time, size_t currentKeyIndex, vel::scene::animation::Channel* channel);
+		glm::quat											calcRotation(const float& time, size_t currentKeyIndex, vel::scene::animation::Channel* channel);
+		glm::vec3											calcScale(const float& time, size_t currentKeyIndex, vel::scene::animation::Channel* channel);
 
 
 	public:
@@ -45,16 +45,13 @@ namespace vel::scene::armature
 		const std::string&									getName() const;
 		const std::vector<std::pair<std::string, size_t>>&	getAnimations() const;
 		size_t												getBoneIndex(std::string boneName);
-		void												setCurrentAnimation(std::string animationName, bool repeat = true);
-		std::string											getCurrentAnimationName();
 		void												updateAnimation(double runTime, std::optional<glm::mat4> parentMatrix);
 		size_t												getAnimationIndex(std::string animationName);
+
+		std::string											getCurrentAnimationName();
 		unsigned int										getCurrentAnimationCycle();
 
-		void												setTransitionAnimation(std::string animationName, int blendTime);
-		std::string											getTransitionAnimationName();
-
-		void												playAnimation(std::string animationName, int blendTime = 0)
+		void												playAnimation(std::string animationName, int blendTime = 0);
 
 	};
 }
