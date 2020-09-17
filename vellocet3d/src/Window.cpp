@@ -186,6 +186,8 @@ namespace vel
 
     void Window::setKeys() 
     {
+		this->inputState.mouseLeftButton = glfwGetMouseButton(this->glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+		this->inputState.mouseRightButton = glfwGetMouseButton(this->glfwWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
 		this->inputState.keySpace = glfwGetKey(this->glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS;
 		this->inputState.keyApostrophe = glfwGetKey(this->glfwWindow, GLFW_KEY_APOSTROPHE) == GLFW_PRESS;
 		this->inputState.keyComma = glfwGetKey(this->glfwWindow, GLFW_KEY_COMMA) == GLFW_PRESS;
@@ -292,6 +294,8 @@ namespace vel
 		this->inputState.keyRightSuper = glfwGetKey(this->glfwWindow, GLFW_KEY_RIGHT_SUPER) == GLFW_PRESS;
 		this->inputState.keyMenu = glfwGetKey(this->glfwWindow, GLFW_KEY_MENU) == GLFW_PRESS;
 		///////////////////////////////////////////
+		this->inputState.mouseLeftButton_Released = glfwGetMouseButton(this->glfwWindow, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE;
+		this->inputState.mouseRightButton_Released = glfwGetMouseButton(this->glfwWindow, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE;
 		this->inputState.keySpace_Released = glfwGetKey(this->glfwWindow, GLFW_KEY_SPACE) == GLFW_RELEASE;
 		this->inputState.keyApostrophe_Released = glfwGetKey(this->glfwWindow, GLFW_KEY_APOSTROPHE) == GLFW_RELEASE;
 		this->inputState.keyComma_Released = glfwGetKey(this->glfwWindow, GLFW_KEY_COMMA) == GLFW_RELEASE;

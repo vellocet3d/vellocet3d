@@ -4,6 +4,8 @@ namespace vel
 {
     struct InputState
     {
+		bool	mouseLeftButton = false;
+		bool	mouseRightButton = false;
         float	mouseXPos = 0.0f;
         float	mouseYPos = 0.0f;
         float	scrollX = 0.0f;
@@ -114,6 +116,8 @@ namespace vel
 		bool	keyRightSuper = false;
 		bool	keyMenu = false;
 		//////////////////////////////////////////////////
+		bool	mouseLeftButton_Released = true;
+		bool	mouseRightButton_Released = true;
 		bool	keySpace_Released = true;
 		bool	keyApostrophe_Released = true;
 		bool	keyComma_Released = true;

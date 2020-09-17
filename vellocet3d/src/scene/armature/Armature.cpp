@@ -183,6 +183,7 @@ namespace vel::scene::armature
 		this->runTime = runTime;
 		this->stepTime = this->runTime - this->previousRunTime;
 
+		//std::cout << this->activeAnimations.size() << "\n";
 
 		// get most most recent active animation
 		auto& activeAnimation = this->activeAnimations.back();
