@@ -50,8 +50,9 @@ namespace vel::scene::armature
 
 		std::string											getCurrentAnimationName();
 		unsigned int										getCurrentAnimationCycle();
+		float												getCurrentAnimationKeyTime();
 
-		void												playAnimation(std::string animationName, int blendTime = 0);
+		void												playAnimation(std::string animationName, bool repeat = true, int blendTime = 0);
 
 	};
 }

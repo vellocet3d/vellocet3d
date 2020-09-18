@@ -10,6 +10,7 @@ namespace vel::scene::armature
 		vel::scene::animation::Animation*	animation; // pointer to animation held by current scene
 		std::string							animationName; // name relative to armature, no armature prefix
 		double								blendTime; // in ms
+		bool								repeat; // whether or not this animation should loop
 
 		double								animationTime; // total time animation has been running
 		float								animationKeyTime; // what time value we need to use to find key index
