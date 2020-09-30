@@ -22,6 +22,7 @@ namespace vel::scene
         currentStage(stage),
         currentAssetFile(assetFile),
         currentAssetDirectory(assetFile.substr(0, assetFile.find_last_of('/'))),
+		currentArmature(nullptr),
 		currentIsDynamic(dynamic),
 		blenderRotationCorrectionMatrix(glm::rotate(90.0f, glm::vec3(1.0f, 0.0f, 0.0f))),
 		blenderRotationCorrectionPerVertexMatrix(glm::mat4(1.0f) * glm::rotate(90.0f, glm::vec3(-1.0f, 0.0f, 0.0f)))
@@ -146,7 +147,7 @@ namespace vel::scene
 
 			if (nodeParentName == "RootNode")
 			{
-				this->currentArmature = vel::scene::armature::Armature(boneName);
+				this->currentArmature = this->currentStage->addArmature(vel::scene::armature::Armature(boneName));
 			}
 
 			vel::scene::armature::Bone bone;
@@ -205,6 +206,7 @@ namespace vel::scene
 			this->currentGlobalInverseMatrix = glm::inverse(this->aiMatrix4x4ToGlm(node->mTransformation));
 		}
 
+		// If this is not the RootNode and this node has not already been processed
         if (nodeName != "RootNode" && !sin_vector(nodeName, this->processedNodes))
         {
 			
@@ -221,7 +223,6 @@ namespace vel::scene
 					// get index of parent
 					b.parent = this->currentArmature->getBoneIndex(b.parentName);
 				}
-
 			}
 			else
 			{
@@ -242,14 +243,14 @@ namespace vel::scene
 					actor.setMeshIndex(this->currentMeshIndex.value());
 					if (this->currentArmature)
 					{
-						actor.setArmature(this->currentArmature.value());
+						actor.setArmature(this->currentArmature);
 
 						// set activeBones mapping
 						std::vector<std::pair<size_t, std::string>> activeBones;
 						size_t index = 0;
 						for (auto& meshBone : App::get().getScene()->getMesh(this->currentMeshIndex.value()).getBones())
 						{
-							activeBones.push_back(std::pair<size_t, std::string>(actor.getArmature().getBoneIndex(meshBone.name), "bones[" + std::to_string(index) + "]"));
+							activeBones.push_back(std::pair<size_t, std::string>(actor.getArmature()->getBoneIndex(meshBone.name), "bones[" + std::to_string(index) + "]"));
 							index++;
 						}
 
@@ -324,39 +325,16 @@ namespace vel::scene
             glm::vec3 vector;
 
             // position
-            //vector.x = aiMesh->mVertices[i].x;
-            //vector.y = aiMesh->mVertices[i].y;
-            //vector.z = aiMesh->mVertices[i].z;
-            //vertex.position = vector;
-
-			//////////////////////////////// Trying something
-
 			vector.x = aiMesh->mVertices[i].x;
 			vector.y = aiMesh->mVertices[i].y;
 			vector.z = aiMesh->mVertices[i].z;
 			vertex.position = vector;
-			//vertex.position = this->blenderRotationCorrectionPerVertexMatrix * glm::vec4(vector, 1.0f);
-			//vertex.position = this->aiMatrix4x4ToGlm(node->mTransformation) * glm::vec4(vector, 1.0f);
-			//vertex.position = glm::rotateX(vector, -90.0f);
-
-			//glm::mat4 m = glm::mat4(1.0f);
-			//m = glm::translate(m, glm::vec3(1.0f));
-			//m = glm::rotate(m, 90.0f, glm::vec3(-1.0f, 0.0f, 0.0f));
-			//m = glm::scale(m, glm::vec3(1.0f));
-			//vertex.position = m * glm::vec4(vector, 1.0f);
-
-			////////////////////////////////
-
 
             // normal
             vector.x = aiMesh->mNormals[i].x;
             vector.y = aiMesh->mNormals[i].y;
             vector.z = aiMesh->mNormals[i].z;
             vertex.normal = vector;
-			//vertex.normal = this->blenderRotationCorrectionPerVertexMatrix * glm::vec4(vector, 1.0f);
-			//vertex.normal = this->aiMatrix4x4ToGlm(node->mTransformation) * glm::vec4(vector, 1.0f);
-			//vertex.normal = glm::rotateX(vector, -90.0f);
-			//vertex.normal = m * glm::vec4(vector, 1.0f);
 
             // texture coordinates
             if (aiMesh->mTextureCoords[0]) // does the mesh contain texture coordinates?

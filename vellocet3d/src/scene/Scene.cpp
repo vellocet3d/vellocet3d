@@ -178,12 +178,12 @@ namespace vel::scene
 						if (a->isAnimated())
 						{
 							auto& mesh = a->getMesh();
-							auto& armature = a->getArmature();
+							auto armature = a->getArmature();
 							
 							size_t boneIndex = 0;
 							for (auto& activeBone : a->getActiveBones().value())
 							{
-								glm::mat4 meshBoneTransform = mesh.getGlobalInverseMatrix() * armature.getBone(activeBone.first).getRenderMatrix(alpha) * mesh.getBone(boneIndex).offsetMatrix;
+								glm::mat4 meshBoneTransform = mesh.getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrix(alpha) * mesh.getBone(boneIndex).offsetMatrix;
 
 								gpu.setShaderMat4(activeBone.second, meshBoneTransform);
 

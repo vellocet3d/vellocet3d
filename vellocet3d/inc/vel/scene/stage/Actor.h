@@ -27,7 +27,7 @@ namespace vel::scene::stage
 		std::optional<Actor*>							parentActor;
 		std::optional<vel::scene::armature::Bone*>		parentActorBone;
 		std::vector<Actor*>								childActors;
-		std::optional<vel::scene::armature::Armature>	armature;
+		vel::scene::armature::Armature*					armature;
 		std::optional<std::vector<std::pair<size_t, std::string>>> activeBones; // the bones from the armature that are actually used by the mesh, 
 																				// the glue between an armature and a mesh (index is mesh bone index, value is armature bone index)
 		std::optional<std::pair<size_t, size_t>>		renderCommand;
@@ -60,8 +60,8 @@ namespace vel::scene::stage
 		const bool										isVisible() const;
 		const bool										isAnimated() const;
 		const bool										isDynamic() const;
-		void											setArmature(vel::scene::armature::Armature& arm);
-		vel::scene::armature::Armature&					getArmature();
+		void											setArmature(vel::scene::armature::Armature* arm);
+		vel::scene::armature::Armature*					getArmature();
 		vel::scene::mesh::Mesh&							getMesh();
 		const std::optional<std::vector<std::pair<size_t, std::string>>>& getActiveBones() const;
 		void											setActiveBones(std::vector<std::pair<size_t, std::string>> activeBones);

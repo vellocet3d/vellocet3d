@@ -34,7 +34,7 @@ namespace vel::scene
 		Transform							currentTransform;
 		std::optional<size_t>				currentMeshIndex;
 		std::optional<size_t>				currentMeshTextureIndex;
-		std::optional<armature::Armature>	currentArmature;
+		armature::Armature*					currentArmature;
 		bool								currentIsDynamic;
 		std::vector<std::string>			processedNodes;
 		std::vector<mesh::VertexBoneData>	currentMeshBones;

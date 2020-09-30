@@ -14,6 +14,7 @@ namespace vel::scene::stage
 		dynamic(false),
         transform(t) ,
 		rigidBody(nullptr),
+		armature(nullptr),
 		manualTransform(true)
     {}
 
@@ -303,14 +304,14 @@ namespace vel::scene::stage
 		return false;
 	}
 
-	void Actor::setArmature(vel::scene::armature::Armature& arm)
+	void Actor::setArmature(vel::scene::armature::Armature* arm)
 	{
 		this->armature = arm;
 	}
 
-	vel::scene::armature::Armature& Actor::getArmature()
+	vel::scene::armature::Armature* Actor::getArmature()
 	{
-		return this->armature.value();
+		return this->armature;
 	}
 
 	vel::scene::mesh::Mesh& Actor::getMesh()

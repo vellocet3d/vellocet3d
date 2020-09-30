@@ -39,8 +39,11 @@ namespace vel::scene::stage
 		// up the reserve, and if so, allocate an additional 1000 blocks and
 		// go about our day....yeah, that'd be a great way to invalidate all
 		// of our pointers...wow...so yeah, you will need to implement multiple
-		// 1000 block vectors
+		// 1000 block vectors, OR just make this value user defined and allow
+		// user to provide value which application will not exceed?
         this->actors.reserve(1000);
+
+		this->armatures.reserve(100);
 
         if (!this->headless)
         {
@@ -49,6 +52,13 @@ namespace vel::scene::stage
         }
 
     }
+
+	vel::scene::armature::Armature* Stage::addArmature(vel::scene::armature::Armature a)
+	{
+		this->armatures.push_back(a);
+		
+		return &this->armatures.back();
+	}
 
 	bool Stage::getClearDepthBuffer()
 	{
@@ -110,7 +120,7 @@ namespace vel::scene::stage
 		auto parentActor = this->getActor(parentName);
 
 		childActor->setParentActor(parentActor);
-		childActor->setParentActorBone(parentActor->getArmature().getBone(parentBoneName));
+		childActor->setParentActorBone(parentActor->getArmature()->getBone(parentBoneName));
 		parentActor->addChildActor(childActor);
 	}
 
@@ -209,7 +219,7 @@ namespace vel::scene::stage
 		{
 			if (!a.isDeleted() && a.isAnimated())
 			{
-				a.getArmature().updateAnimation(runTime, a.getParentMatrix());
+				a.getArmature()->updateAnimation(runTime, a.getParentMatrix());
 			}
 		}
 	}

@@ -25,6 +25,7 @@ namespace vel::scene::stage
         std::optional<Camera>							camera;
         std::vector<Actor>								actors;
         std::vector<size_t>								actorFreeSlots;
+		std::vector<vel::scene::armature::Armature>		armatures;
         std::optional<std::vector<RenderCommand>>		renderCommands;
         std::optional<std::vector<size_t>>				renderCommandsOrder;
 		std::optional<size_t>							renderCommandExists(size_t sI, size_t mI, size_t tI);
@@ -75,6 +76,8 @@ namespace vel::scene::stage
 		void										stepPhysics(float delta);
 		void										useCollisionDebugDrawer();
 		bool										collisionDebugging();
+
+		vel::scene::armature::Armature*				addArmature(vel::scene::armature::Armature a);
 
     };
 }
