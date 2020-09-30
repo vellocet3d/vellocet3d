@@ -83,6 +83,11 @@ namespace vel
 		return (b - a) > ((fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
 	}
 
+	bool sortOfEquals(const float a, const float b, const float tolerance)
+	{
+		return (a + tolerance >= b) && (a - tolerance <= b);
+	}
+
 	btVector3 glmToBulletVec3(glm::vec3 glmVec)
 	{
 		return btVector3(glmVec.x, glmVec.y, glmVec.z);

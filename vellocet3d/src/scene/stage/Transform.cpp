@@ -3,6 +3,7 @@
 #include "glm/gtx/compatibility.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+
 #include "vel/scene/stage/Transform.h"
 
 
@@ -28,6 +29,12 @@ namespace vel::scene::stage
         std::cout << "S:(" << this->scale.x << "," << this->scale.y << "," << this->scale.z << ")\n";
         std::cout << "---------------------------------\n";
     }
+
+	glm::vec3 Transform::getRotationEulers()
+	{
+		auto tmp = glm::eulerAngles(this->rotation);
+		return glm::vec3((tmp.x * 180.0f / 3.141592653589793f), (tmp.y * 180.0f / 3.141592653589793f), (tmp.z * 180.0f / 3.141592653589793f));
+	}
 
     void Transform::setTranslation(glm::vec3 translation) 
     {

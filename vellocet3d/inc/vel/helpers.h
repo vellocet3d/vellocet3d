@@ -18,6 +18,7 @@ namespace vel
 	bool essentiallyEqual(float a, float b, float epsilon);
 	bool definitelyGreaterThan(float a, float b, float epsilon);
 	bool definitelyLessThan(float a, float b, float epsilon);
+	bool sortOfEquals(const float a, const float b, const float tolerance = 0.000001f);
 	btVector3 glmToBulletVec3(glm::vec3 glmVec);
 	glm::vec3 bulletToGlmVec3(btVector3 btVec);
 	glm::quat bulletToGlmQuat(btQuaternion btQuat);
