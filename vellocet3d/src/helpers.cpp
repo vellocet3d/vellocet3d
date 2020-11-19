@@ -98,6 +98,9 @@ namespace vel
 		return glm::vec3(btVec.getX(), btVec.getY(), btVec.getZ());
 	}
 
-	
+	glm::vec2 invertVec2(glm::vec2 in)
+	{
+		return glm::vec2(-in.x, -in.y);
+	}
 
 }

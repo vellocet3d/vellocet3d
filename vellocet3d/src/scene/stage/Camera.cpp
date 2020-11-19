@@ -31,8 +31,11 @@ namespace vel::scene::stage
 		}
 		else
 		{
-			this->projectionMatrix = glm::perspective(glm::radians(this->fovScale),
-				(float)this->screenSize->x / (float)this->screenSize->y, this->nearPlane, this->farPlane);
+			if (this->screenSize->x > 0 && this->screenSize->y > 0) // crashes when windowing out of fullscreen if this condition is not checked
+			{
+				this->projectionMatrix = glm::perspective(glm::radians(this->fovScale),
+					(float)this->screenSize->x / (float)this->screenSize->y, this->nearPlane, this->farPlane);
+			}
 		}
 
 	}
