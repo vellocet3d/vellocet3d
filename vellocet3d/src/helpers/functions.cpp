@@ -2,9 +2,9 @@
 #include <sstream>
 #include <algorithm>
 
-#include "vel/helpers.h"
+#include "vel/helpers/functions.h"
 
-namespace vel
+namespace vel::helpers::functions
 {
 	btQuaternion glmToBulletQuat(glm::quat glmQuat)
 	{

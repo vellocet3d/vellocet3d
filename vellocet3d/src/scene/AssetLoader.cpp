@@ -12,8 +12,10 @@
 #include "vel/App.h"
 #include "vel/scene/AssetLoader.h"
 #include "vel/scene/mesh/Vertex.h"
-#include "vel/helpers.h"
+#include "vel/helpers/functions.h"
 
+
+using namespace vel::helpers::functions;
 
 namespace vel::scene
 {

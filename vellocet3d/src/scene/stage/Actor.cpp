@@ -1,6 +1,6 @@
 
 
-#include "vel/helpers.h"
+#include "vel/helpers/functions.h"
 #include "vel/App.h"
 #include "vel/scene/stage/Actor.h"
 
@@ -24,8 +24,8 @@ namespace vel::scene::stage
 		
 		if (!this->manualTransform && this->rigidBody != nullptr)
 		{
-			this->transform.setTranslation(bulletToGlmVec3(this->rigidBody->getWorldTransform().getOrigin()));
-			this->transform.setRotation(bulletToGlmQuat(this->rigidBody->getWorldTransform().getRotation()));
+			this->transform.setTranslation(vel::helpers::functions::bulletToGlmVec3(this->rigidBody->getWorldTransform().getOrigin()));
+			this->transform.setRotation(vel::helpers::functions::bulletToGlmQuat(this->rigidBody->getWorldTransform().getRotation()));
 		}
 	}
 
