@@ -1,6 +1,9 @@
 //#include <iostream>
 
+//#include "glm/gtx/string_cast.hpp"
+
 #include "vel/helpers/Tweener.h"
+
 
 // need to convert this to use vector math and not just break down each component
 
@@ -23,14 +26,17 @@ namespace vel::helpers
 		//std::cout << "F:(" << this->forwardXDirection << "," << this->forwardYDirection << "," << this->forwardZDirection << ")\n";
 		//std::cout << "B:(" << this->backwardXDirection << "," << this->backwardYDirection << "," << this->backwardZDirection << ")\n";
 
+		this->setSpeeds();
+		//std::cout << glm::to_string(this->speeds) << "\n";
+
 	};
 
 	glm::vec3 Tweener::updateForward(float dt)
 	{
 		// update this->currentVec
-		this->currentVec.x += this->forwardXDirection * (this->speed * dt);
-		this->currentVec.y += this->forwardYDirection * (this->speed * dt);
-		this->currentVec.z += this->forwardZDirection * (this->speed * dt);
+		this->currentVec.x += this->forwardXDirection * (this->speeds.x * dt);
+		this->currentVec.y += this->forwardYDirection * (this->speeds.y * dt);
+		this->currentVec.z += this->forwardZDirection * (this->speeds.z * dt);
 
 		// correct x positions
 		if (this->forwardXDirection == 1)
@@ -49,7 +55,6 @@ namespace vel::helpers
 		}
 		else // 0
 		{
-			//this->currentVec.x = 0.0f;
 			this->currentVec.x = this->fromVec.x;
 		}
 		
@@ -70,7 +75,6 @@ namespace vel::helpers
 		}
 		else // 0
 		{
-			//this->currentVec.y = 0.0f;
 			this->currentVec.y = this->fromVec.y;
 		}
 
@@ -91,7 +95,6 @@ namespace vel::helpers
 		}
 		else // 0
 		{
-			//this->currentVec.z = 0.0f;
 			this->currentVec.z = this->fromVec.z;
 		}
 
@@ -101,9 +104,9 @@ namespace vel::helpers
 	glm::vec3 Tweener::updateBackward(float dt)
 	{
 		// update this->currentVec
-		this->currentVec.x += this->backwardXDirection * (this->speed * dt);
-		this->currentVec.y += this->backwardYDirection * (this->speed * dt);
-		this->currentVec.z += this->backwardZDirection * (this->speed * dt);
+		this->currentVec.x += this->backwardXDirection * (this->speeds.x * dt);
+		this->currentVec.y += this->backwardYDirection * (this->speeds.y * dt);
+		this->currentVec.z += this->backwardZDirection * (this->speeds.z * dt);
 
 		// correct x positions
 		if (this->backwardXDirection == 1)
@@ -224,6 +227,36 @@ namespace vel::helpers
 		else if ((this->fromVec.z - this->toVec.z) < 0.0f)
 		{
 			this->backwardZDirection = -1;
+		}
+	}
+
+	void Tweener::setSpeeds()
+	{
+		// find the component which has the greatest distance, this component will use the actual speed, while
+		// the others will use the product of the percentage of their distance and the greatest distance and the actual speed
+		float xDis = fabs(this->toVec.x - this->fromVec.x);
+		float yDis = fabs(this->toVec.y - this->fromVec.y);
+		float zDis = fabs(this->toVec.z - this->fromVec.z);
+
+		//std::cout << xDis << "," << yDis << "," << zDis << "\n";
+
+		if (xDis >= yDis && xDis >= zDis)
+		{
+			this->speeds.x = this->speed;
+			this->speeds.y = yDis > 0.0f ? ((yDis / xDis) * this->speed) : 0.0f;
+			this->speeds.z = zDis > 0.0f ? ((zDis / xDis) * this->speed) : 0.0f;
+		}
+		else if (yDis >= xDis && yDis >= zDis)
+		{
+			this->speeds.x = xDis > 0.0f ? ((xDis / yDis) * this->speed) : 0.0f;
+			this->speeds.y = this->speed;
+			this->speeds.z = zDis > 0.0f ? ((zDis / yDis) * this->speed) : 0.0f;
+		}
+		else if (zDis >= xDis && zDis >= yDis)
+		{
+			this->speeds.x = xDis > 0.0f ? ((xDis / zDis) * this->speed) : 0.0f;
+			this->speeds.y = yDis > 0.0f ? ((yDis / zDis) * this->speed) : 0.0f;
+			this->speeds.z = this->speed;
 		}
 	}
 

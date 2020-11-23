@@ -13,6 +13,7 @@ namespace vel::helpers
 		glm::vec3	toVec;
 		glm::vec3	currentVec;
 		float		speed;
+		glm::vec3	speeds;
 
 		int			forwardXDirection; // -1, 1, 0
 		int			backwardXDirection; // -1, 1, 0
@@ -22,6 +23,7 @@ namespace vel::helpers
 		int			backwardZDirection; // -1, 1, 0
 		
 		void		setDirections();
+		void		setSpeeds();
 
 	public:
 		Tweener(glm::vec3 from, glm::vec3 to, float speed);
