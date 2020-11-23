@@ -189,6 +189,7 @@
     <ClCompile Include="src\dep\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\dep\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\GPU.cpp" />
+    <ClCompile Include="src\helpers\Tweener.cpp" />
     <ClCompile Include="src\scene\armature\Armature.cpp" />
     <ClCompile Include="src\scene\armature\Bone.cpp" />
     <ClCompile Include="src\scene\AssetLoader.cpp" />
@@ -239,6 +240,7 @@
     <ClInclude Include="inc\vel\Config.h" />
     <ClInclude Include="inc\vel\GPU.h" />
     <ClInclude Include="inc\vel\helpers\functions.h" />
+    <ClInclude Include="inc\vel\helpers\Tweener.h" />
     <ClInclude Include="inc\vel\InputState.h" />
     <ClInclude Include="inc\vel\Logger.h" />
     <ClInclude Include="inc\vel\scene\animation\Animation.h" />
