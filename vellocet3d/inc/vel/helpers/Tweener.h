@@ -25,10 +25,18 @@ namespace vel::helpers
 		void		setDirections();
 		void		setSpeeds();
 
+		bool		forwardUpdateComplete;
+		bool		backwardUpdateComplete;
+		void		updateCompletionStatus();
+
 	public:
 		Tweener(glm::vec3 from, glm::vec3 to, float speed);
 		
 		glm::vec3	updateForward(float dt);
 		glm::vec3	updateBackward(float dt);
+
+		bool		isForwardComplete();
+		bool		isBackwardComplete();
+		void		reset();
 	};
 }

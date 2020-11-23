@@ -99,6 +99,9 @@
     <ClCompile Include="src\helpers\Tweener.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\helpers\MultiTweener.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\App.h">
@@ -270,6 +273,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\vel\helpers\Tweener.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\vel\helpers\MultiTweener.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
