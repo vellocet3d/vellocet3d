@@ -14,7 +14,10 @@ namespace vel::helpers
 		vecs(vecs),
 		speed(speed),
 		speedPerVec(speed * (float)vecs.size()),
-		repeat(repeat)
+		repeat(repeat),
+		shouldPause(false),
+		cycleComplete(false),
+		foundPause(false)
 	{
 
 		size_t i = 0;
@@ -29,19 +32,65 @@ namespace vel::helpers
 
 	};
 
+	void MultiTweener::setPausePoints(std::vector<size_t> in)
+	{
+		this->pausePoints = in;
+	}
+
+	void MultiTweener::pause()
+	{
+		this->shouldPause = true;
+	}
+
+	void MultiTweener::unpause()
+	{
+		this->shouldPause = false;
+		this->foundPause = false;
+		
+	}
 
 	glm::vec3 MultiTweener::update(float dt)
 	{
-		for (auto& t : this->tweens)
+		if (this->shouldPause && this->foundPause)
 		{
-			if (t.isForwardComplete())
-				continue;
-
-			return t.updateForward(dt);
+			return this->currentVec;
 		}
 
+		for (int i = 0; i < this->tweens.size(); i++)
+		{
+			if (this->tweens[i].isForwardComplete())
+			{
+				continue;
+			}
+
+			if (this->shouldPause && i == 0 && this->pausePointExists(0) && this->cycleComplete)
+			{
+				this->foundPause = true;
+				this->currentVec = this->vecs[0];
+				return this->currentVec;
+			}
+
+			this->cycleComplete = false;
+
+			this->currentVec = this->tweens[i].updateForward(dt);
+
+			if (this->tweens[i].isForwardComplete())
+			{
+				if (this->shouldPause && this->pausePointExists(i + 1))
+				{
+					this->foundPause = true;
+					return this->currentVec;
+				}
+
+			}
+
+			return this->currentVec;
+		}
+
+		this->cycleComplete = true;
+
 		if (!this->repeat)
-			return this->tweens[this->tweens.size() - 1].updateForward(dt);
+			return this->currentVec;
 
 		for (auto& t : this->tweens)
 		{
@@ -49,6 +98,17 @@ namespace vel::helpers
 		}
 
 		return this->update(dt);
+	}
+
+	bool MultiTweener::pausePointExists(size_t in)
+	{
+		for (auto& pp : this->pausePoints)
+		{
+			if (pp == in)
+				return true;
+		}
+
+		return false;
 	}
 
 }
