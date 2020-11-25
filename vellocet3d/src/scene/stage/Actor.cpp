@@ -107,8 +107,8 @@ namespace vel::scene::stage
 	glm::mat4 Actor::getWorldRenderMatrix(float alpha)
 	{
 		// actor is not dynamic (does not move) so interpolation is not required, simply return it's world matrix
-		//if (!this->isDynamic() || !this->previousTransform)
-		if (!this->isDynamic() || !this->previousTransform || (App::get().getFrameTime() >= App::get().getLogicTime()))
+		if (!this->isDynamic() || !this->previousTransform)
+		//if (!this->isDynamic() || !this->previousTransform || (App::get().getFrameTime() >= App::get().getLogicTime()))
 		{
 			return this->getWorldMatrix();
 		}
