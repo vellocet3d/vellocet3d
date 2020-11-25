@@ -94,6 +94,16 @@ namespace vel
         return this->gpu;
     }
 
+	float App::getFrameTime()
+	{
+		return (float)this->frameTime;
+	}
+
+	float App::getLogicTime()
+	{
+		return (float)this->fixedLogicTime;
+	}
+
     void App::displayAverageFrameTime()
     {
         if (this->time() - this->lastDisplayTime >= 1.0) 

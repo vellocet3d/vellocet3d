@@ -56,5 +56,8 @@ namespace vel
         void											execute();
         void											close();
 
+		float											getFrameTime();
+		float											getLogicTime();
+
     };
 };
