@@ -17,7 +17,8 @@ namespace vel::helpers
 		repeat(repeat),
 		shouldPause(false),
 		cycleComplete(false),
-		foundPause(false)
+		foundPause(false),
+		firstCycleStarted(false)
 	{
 
 		size_t i = 0;
@@ -29,6 +30,8 @@ namespace vel::helpers
 				this->tweens.push_back(Tweener(v, this->vecs[i], this->speedPerVec));
 			}
 		}
+
+		this->currentVec = this->vecs[0];
 
 	};
 
@@ -46,18 +49,19 @@ namespace vel::helpers
 	{
 		this->shouldPause = false;
 		this->foundPause = false;
-		
 	}
 
 	glm::vec3 MultiTweener::update(float dt)
 	{
-		if (this->shouldPause && this->foundPause)
+		if ((this->shouldPause && this->foundPause) || (this->shouldPause && !this->firstCycleStarted))
 		{
 			return this->currentVec;
 		}
 
 		for (int i = 0; i < this->tweens.size(); i++)
 		{
+			this->firstCycleStarted = true;
+
 			if (this->tweens[i].isForwardComplete())
 			{
 				continue;
