@@ -37,8 +37,13 @@ namespace vel
         double											frameTime = 0.0;
         double											accumulator = 0.0;        
         std::vector<double>								averageFrameTimeArray;
-        double											lastDisplayTime = 0.0;
+        double											lastFrameTimeCalculation = 0.0;
         void											displayAverageFrameTime();
+		void											calculateAverageFrameTime();
+
+		double											averageFrameTime = 0.0;
+		double											averageFrameRate = 0.0;
+		bool											canDisplayAverageFrameTime = false;
     
 
     public:

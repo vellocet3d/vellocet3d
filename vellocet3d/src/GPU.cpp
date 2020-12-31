@@ -250,6 +250,17 @@ namespace vel
         return this->textures;
     }
 
+	std::vector<std::string> GPU::getActiveShaderNames()
+	{
+		std::vector<std::string> names;
+		for (auto& s : this->shaders)
+		{
+			names.push_back(s.name);
+		}
+
+		return names;
+	}
+
     void GPU::useShader(size_t shaderIndex)
     {
         this->activeShaderIndex = shaderIndex;
@@ -344,20 +355,23 @@ namespace vel
 
         for (auto& t : this->textures)
         {
-            glDeleteTextures(1, &t.id);
+			if (t.path.find("default_texture.jpg") == std::string::npos)
+			{
+				glDeleteTextures(1, &t.id);
+			}
         }
 
         for (auto& s : this->shaders)
         {
-            if (s.name != "default")
+            if (s.name != "default" && s.name != "default_skinned" && s.name != "default_debug")
             {
                 glDeleteProgram(s.id);
             }
         }
 
-        this->shaders.resize(2); // wipe all shaders except default and skinned default
+        this->shaders.resize(3); // wipe all shaders except default, default_skinned, and default_debug
         this->meshRenderables.clear();
-        this->textures.clear();
+        this->textures.resize(1); // wipe all textures except for default_texture.jpg
 
         this->activeShaderIndex = -1;
         this->activeMeshRenderableIndex = -1;

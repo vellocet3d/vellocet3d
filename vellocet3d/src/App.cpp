@@ -104,21 +104,38 @@ namespace vel
 		return (float)this->fixedLogicTime;
 	}
 
+	void App::calculateAverageFrameTime()
+	{
+		this->canDisplayAverageFrameTime = false;
+
+		if (this->time() - this->lastFrameTimeCalculation >= 1.0)
+		{
+			this->lastFrameTimeCalculation = this->time();
+
+			double average = 0.0;
+			for (auto& v : this->averageFrameTimeArray)
+			{
+				average += v;
+			}
+
+			average = average / this->averageFrameTimeArray.size();
+
+			this->averageFrameTime = average;
+			this->averageFrameRate = 1000 / (average * 1000);
+
+			this->averageFrameTimeArray.clear();
+
+			this->canDisplayAverageFrameTime = true;
+		}
+
+		this->averageFrameTimeArray.push_back(this->frameTime);
+	}
+
     void App::displayAverageFrameTime()
     {
-        if (this->time() - this->lastDisplayTime >= 1.0) 
+        if (this->canDisplayAverageFrameTime)
         {    
-            this->lastDisplayTime = this->time();
-
-            double average = 0.0;
-            for (auto& v : this->averageFrameTimeArray)
-            {
-                average += v;
-            }
-
-            average = average / this->averageFrameTimeArray.size();
-            
-			std::string message = "FrameTime: " + std::to_string(average) + " | FPS: " + std::to_string(1000 / (average * 1000));
+			std::string message = "FrameTime: " + std::to_string(this->averageFrameRate) + " | FPS: " + std::to_string(this->averageFrameRate);
 
 			if (!this->config.HEADLESS)
 			{
@@ -128,11 +145,7 @@ namespace vel
 			{
 				std::cout << message << "\n";
 			}
-
-			this->averageFrameTimeArray.clear();
         }
-
-        this->averageFrameTimeArray.push_back(this->frameTime);
     }
 
     void App::execute()
@@ -159,6 +172,7 @@ namespace vel
 
             if (this->frameTime >= (1 / this->config.MAX_RENDER_FPS)) // cap max fps
             {
+				this->calculateAverageFrameTime();
 				this->displayAverageFrameTime();
 
                 this->currentTime = this->newTime;				
@@ -182,14 +196,11 @@ namespace vel
                 {                    
                     if (this->scene && this->scene.value()->loaded) 
                     {
-						// save previous transforms for interpolation
-						//this->scene.value()->savePreviousTransforms();
-
 						// update animations
 						this->scene.value()->updateAnimations(this->fixedLogicTime);
 
-						// step physics simulation
-						this->scene.value()->stepPhysics((float)this->fixedLogicTime);
+						//// step physics simulation
+						//this->scene.value()->stepPhysics((float)this->fixedLogicTime);
 
 						// applyTransforms() ? incorporating current savePreviousTransforms() logic
 						this->scene.value()->applyTransformations();
@@ -199,6 +210,15 @@ namespace vel
 
 						// execute inner loop (fixed rate) logic
 						this->scene.value()->innerLoop((float)this->fixedLogicTime);
+
+						// step physics simulation
+						this->scene.value()->stepPhysics((float)this->fixedLogicTime);
+
+						// call postPhysics method to allow correction of any issues caused by collision solver
+						this->scene.value()->postPhysics((float)this->fixedLogicTime);
+
+						//// execute all contact triggers
+						//this->scene.value()->processSensors();
                     }
                     
                     // decrement accumulator

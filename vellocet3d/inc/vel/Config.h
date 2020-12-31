@@ -36,6 +36,7 @@ namespace vel
         const int							SCREEN_HEIGHT;
         const bool							FULLSCREEN;
         const double						MAX_RENDER_FPS;
+		const float							MOUSE_SENSITIVITY;
 
     };
 }

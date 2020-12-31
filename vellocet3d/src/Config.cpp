@@ -14,7 +14,9 @@ namespace vel
         SCREEN_WIDTH(userConfigParams.count("screenWidth") != 0 ? std::stoi(this->userConfigParams["screenWidth"]) : 1280),
         SCREEN_HEIGHT(userConfigParams.count("screenHeight") != 0 ? std::stoi(this->userConfigParams["screenHeight"]) : 720),
         FULLSCREEN(userConfigParams.count("fullScreen") != 0 ? (this->userConfigParams["fullScreen"] == "0" ? false : true) : false),
-        MAX_RENDER_FPS(userConfigParams.count("maxFps") != 0 ? std::stod(this->userConfigParams["maxFps"]) : 240) {};
+        MAX_RENDER_FPS(userConfigParams.count("maxFps") != 0 ? std::stod(this->userConfigParams["maxFps"]) : 240),
+		MOUSE_SENSITIVITY(userConfigParams.count("mouseSensitivity") != 0 ? std::stof(this->userConfigParams["mouseSensitivity"]) : 0.08f)
+	{};
 
     std::map<std::string, std::string> Config::loadFromFile(std::string path)
     {

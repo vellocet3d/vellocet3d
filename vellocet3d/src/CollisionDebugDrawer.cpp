@@ -16,7 +16,7 @@ namespace vel
 
 	CollisionDebugDrawer::~CollisionDebugDrawer() 
 	{
-		std::cout << "debugDrawerDestructor\n";
+		//std::cout << "debugDrawerDestructor\n";
 	};
 
 	void CollisionDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) 
@@ -30,16 +30,6 @@ namespace vel
 
 		data.position = glm::vec3(to.getX(), to.getY(), to.getZ());
 		this->verts.push_back(data);
-
-		//this->verts.push_back(from.getX());
-		//this->verts.push_back(from.getY());
-		//this->verts.push_back(from.getZ());
-		//this->verts.push_back(to.getX());
-		//this->verts.push_back(to.getY());
-		//this->verts.push_back(to.getZ());
-		//this->verts.push_back(color.getX());
-		//this->verts.push_back(color.getY());
-		//this->verts.push_back(color.getZ());
 
 	}
 

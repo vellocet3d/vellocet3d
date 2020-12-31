@@ -1,4 +1,4 @@
-
+#include <iostream>
 
 #define GLM_FORCE_ALIGNED_GENTYPES
 #include <glm/gtx/string_cast.hpp>
@@ -17,6 +17,8 @@ namespace vel::scene
 		animationTime(0.0)
 	{
 		this->stages.reserve(10); // can't see ever needing more than 10 stages (naive, but good enough until it's not)
+
+		//std::cout << "Scene Constructor Ran\n";
 	}
 
 	Scene::~Scene()
@@ -113,6 +115,8 @@ namespace vel::scene
 		}
 	}
 
+	void Scene::postPhysics(float delta){}
+
     void Scene::draw(float alpha)
     {
         GPU& gpu = App::get().getGPU().value();
@@ -145,6 +149,7 @@ namespace vel::scene
             // should always have a camera if we've made it this far
             s.getCamera()->update(alpha);
 
+			//std::cout << "----------------------------------\n";
 
             for (auto& rco : s.getRenderCommandsOrder().value())
             {
@@ -169,6 +174,8 @@ namespace vel::scene
                 for (auto& ai : rc.getActorIndexes())
                 {
                     Actor* a = s.getActor(ai);
+
+					//std::cout << a->getName() << ":" << rc.getShaderIndex() << "-" << rc.getMeshIndex() << "-" << rc.getTextureIndex() << "\n";
 
                     if (!a->isDeleted() && a->isVisible())
                     {

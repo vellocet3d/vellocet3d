@@ -51,6 +51,7 @@ namespace vel
         void								drawMeshRenderable();
 		CollisionDebugDrawer*				getCollisionDebugDrawer();
 		void								clearDepthBuffer();
+		std::vector<std::string>			getActiveShaderNames(); // added this to assist debugging
 		
 		void								wipe();
 		

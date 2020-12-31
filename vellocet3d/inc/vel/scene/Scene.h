@@ -53,6 +53,7 @@ namespace vel::scene
 		virtual void						load() = 0;
 		virtual void						innerLoop(float deltaTime) = 0;
 		virtual void						outerLoop(float frameTime, float renderLerpInterval) = 0;
+		virtual void						postPhysics(float deltaTime);
 
 	};
 
