@@ -160,6 +160,9 @@ namespace vel
                 break;
             }
 
+			// Used for when we load our initial scene from Main. When switching from one scene to another
+			// the new scene will be loaded asynchronously so that the current scene will continue to be
+			// responsive to the user
             if (this->scene && !this->scene.value()->loaded)
             {
                 this->scene.value()->load();
