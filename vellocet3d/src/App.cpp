@@ -34,27 +34,16 @@ namespace vel
             auto w = std::make_unique<Window>(this->config.SCREEN_WIDTH, this->config.SCREEN_HEIGHT, 
 				this->config.FULLSCREEN, this->config.CURSOR_HIDDEN, this->config.USE_IMGUI);
             this->window = std::move(w);
-
-			// initialize GPU
-			this->gpu = GPU(this->config.SHADER_FILE_PATH);
-
-			// create default shaders
-            this->gpu->loadShader("default", this->config.DEFAULT_VERTEX_SHADER, this->config.DEFAULT_FRAGMENT_SHADER);
-			this->gpu->loadShader("default_skinned", this->config.DEFAULT_SKINNED_VERTEX_SHADER, this->config.DEFAULT_SKINNED_FRAGMENT_SHADER);
-			this->gpu->loadShader("default_debug", this->config.DEFAULT_DEBUG_VERTEX_SHADER, this->config.DEFAULT_DEBUG_FRAGMENT_SHADER);
-
-			// create default texture
-			this->gpu->loadTexture("diffuse", ("data/models/default_texture.jpg"));
         }
 
     }
 
-    void App::setScene(Scene* scene)
+    void App::setScene(scene::Scene* scene)
     {
-        this->scene = std::move(std::move(std::unique_ptr<Scene>(scene)));
+        this->scene = std::move(std::move(std::unique_ptr<scene::Scene>(scene)));
     }
 
-    Scene* App::getScene()
+	scene::Scene* App::getScene()
     {
         return this->scene.value().get();
     }
@@ -87,11 +76,6 @@ namespace vel
     void App::clearScene()
     {
         this->scene.reset();
-    }
-
-    std::optional<GPU>& App::getGPU()
-    {
-        return this->gpu;
     }
 
 	float App::getFrameTime()
@@ -219,9 +203,6 @@ namespace vel
 
 						// call postPhysics method to allow correction of any issues caused by collision solver
 						this->scene.value()->postPhysics((float)this->fixedLogicTime);
-
-						//// execute all contact triggers
-						//this->scene.value()->processSensors();
                     }
                     
                     // decrement accumulator
@@ -233,16 +214,13 @@ namespace vel
                 {
 					float renderLerpInterval = (float)(this->accumulator / this->fixedLogicTime);
 
-					// execute outer loop controllers
-					//this->scene.value()->executeOuterLoopControllers((float)this->frameTime, renderLerpInterval);
-
 					// execute outer loop (immediate) logic
 					this->scene.value()->outerLoop((float)this->frameTime, renderLerpInterval);
 
 					// perform draw (render) logic
-                    this->gpu->enableDepthTest();
+                    this->scene.value()->getGPU()->enableDepthTest();
                     //this->gpu->drawLinesOnly();
-                    this->gpu->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);
+                    this->scene.value()->getGPU()->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);
 
                     if (this->scene && this->scene.value()->loaded)
                     {

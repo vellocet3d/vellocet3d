@@ -6,7 +6,7 @@
 #include "glm/glm.hpp"
 
 
-namespace vel
+namespace vel::scene
 {
 	struct BulletDebugDrawData
 	{

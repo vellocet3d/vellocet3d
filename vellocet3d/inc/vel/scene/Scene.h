@@ -3,11 +3,13 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <optional>
 
 #include "vel/scene/mesh/Mesh.h"
 #include "vel/scene/stage/Stage.h"
 #include "vel/scene/armature/Armature.h"
 #include "vel/scene/animation/Animation.h"
+#include "vel/scene/GPU.h"
 
 
 using namespace vel::scene::stage;
@@ -26,7 +28,7 @@ namespace vel::scene
 		std::vector<Mesh>					meshes;
 		std::vector<Animation>				animations;
 		double								animationTime;
-
+		std::optional<GPU>					gpu;
 
 	protected:
 		size_t								addShader(std::string name, std::string vertName, std::string fragName);
@@ -49,6 +51,7 @@ namespace vel::scene
 		void								stepPhysics(float delta);
 		void								applyTransformations();
 		void								processSensors();
+		std::optional<GPU>&					getGPU();
 
 		virtual void						load() = 0;
 		virtual void						innerLoop(float deltaTime) = 0;

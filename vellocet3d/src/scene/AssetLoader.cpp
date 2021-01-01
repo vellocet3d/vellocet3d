@@ -437,7 +437,7 @@ namespace vel::scene
 
             // determine if the texture already exists, if it does use it's index...
             int meshTextureIndex = 0;
-            for (auto& t : App::get().getGPU()->getTextures()) // ignore intellisense error for getTextures()
+            for (auto& t : this->currentStage->getSceneGPU()->getTextures())
             {
                 if (t.path == (this->currentAssetDirectory + "/" + str.C_Str()))
                 {
@@ -449,7 +449,7 @@ namespace vel::scene
             // ...otherwise create a new texture
             if (!this->currentMeshTextureIndex)
             {
-                this->currentMeshTextureIndex = App::get().getGPU()->loadTexture("diffuse", (this->currentAssetDirectory + "/" + str.C_Str()));
+                this->currentMeshTextureIndex = this->currentStage->getSceneGPU()->loadTexture("diffuse", (this->currentAssetDirectory + "/" + str.C_Str()));
             }
         }
     }

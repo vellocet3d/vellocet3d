@@ -11,7 +11,9 @@
 #include "vel/scene/stage/Camera.h"
 #include "vel/scene/stage/RenderCommand.h"
 #include "vel/scene/stage/CollisionWorld.h"
+#include "vel/scene/CollisionDebugDrawer.h"
 #include "vel/scene/stage/Sensor.h"
+#include "vel/scene/GPU.h"
 
 
 
@@ -33,11 +35,12 @@ namespace vel::scene::stage
 		std::optional<std::unique_ptr<CollisionWorld>>	collisionWorld;
 		bool											collisionDebuggingSwitch;
 		bool											clearDepthBuffer;
+		GPU*											sceneGPU;
 		
 
 
     public:
-													Stage(bool headless);
+													Stage(GPU* sceneGPU);
 		std::vector<size_t>							loadActors(std::string filename, bool dynamic = false);
 		std::vector<size_t>							loadActors(std::string filename, bool dynamic, int shaderIndex);
 		std::vector<size_t>							loadActors(std::string filename, bool dynamic, std::vector<std::pair<int, std::vector<std::string>>> actorShaderAssocs);
@@ -74,8 +77,10 @@ namespace vel::scene::stage
 		CollisionWorld*								getCollisionWorld();
 
 		void										stepPhysics(float delta);
-		void										useCollisionDebugDrawer();
+		void										useCollisionDebugDrawer(CollisionDebugDrawer* cdd);
 		bool										collisionDebugging();
+
+		GPU*										getSceneGPU();
 
 		vel::scene::armature::Armature*				addArmature(vel::scene::armature::Armature a);
 

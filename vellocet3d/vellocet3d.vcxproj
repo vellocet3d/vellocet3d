@@ -95,6 +95,7 @@
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib</AdditionalLibraryDirectories>
@@ -117,6 +118,7 @@
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)dep\lib</AdditionalLibraryDirectories>
@@ -188,7 +190,7 @@
     <ClCompile Include="src\dep\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="src\dep\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\dep\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\GPU.cpp" />
+    <ClCompile Include="src\scene\GPU.cpp" />
     <ClCompile Include="src\helpers\MultiTweener.cpp" />
     <ClCompile Include="src\helpers\Tweener.cpp" />
     <ClCompile Include="src\scene\armature\Armature.cpp" />
@@ -203,7 +205,7 @@
     <ClCompile Include="src\scene\mesh\Mesh.cpp" />
     <ClCompile Include="src\scene\stage\Actor.cpp" />
     <ClCompile Include="src\scene\Scene.cpp" />
-    <ClCompile Include="src\CollisionDebugDrawer.cpp" />
+    <ClCompile Include="src\scene\CollisionDebugDrawer.cpp" />
     <ClCompile Include="src\scene\stage\CollisionWorld.cpp" />
     <ClCompile Include="src\scene\stage\Sensor.cpp" />
     <ClCompile Include="src\scene\stage\RenderCommand.cpp" />
@@ -239,7 +241,7 @@
     <ClInclude Include="inc\scene\mesh\Vertex.h" />
     <ClInclude Include="inc\vel\App.h" />
     <ClInclude Include="inc\vel\Config.h" />
-    <ClInclude Include="inc\vel\GPU.h" />
+    <ClInclude Include="inc\vel\scene\GPU.h" />
     <ClInclude Include="inc\vel\helpers\functions.h" />
     <ClInclude Include="inc\vel\helpers\MultiTweener.h" />
     <ClInclude Include="inc\vel\helpers\Tweener.h" />
@@ -263,7 +265,7 @@
     <ClInclude Include="inc\vel\scene\stage\Camera.h" />
     <ClInclude Include="inc\vel\scene\stage\Sensor.h" />
     <ClInclude Include="inc\vel\scene\stage\CollisionWorld.h" />
-    <ClInclude Include="inc\vel\CollisionDebugDrawer.h" />
+    <ClInclude Include="inc\vel\scene\CollisionDebugDrawer.h" />
     <ClInclude Include="inc\vel\scene\stage\RenderCommand.h" />
     <ClInclude Include="inc\vel\scene\stage\Stage.h" />
     <ClInclude Include="inc\vel\scene\stage\Transform.h" />

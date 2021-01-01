@@ -9,12 +9,10 @@
 #include "vel/scene/Shader.h"
 #include "vel/scene/mesh/Mesh.h"
 #include "vel/scene/mesh/Texture.h"
-#include "vel/CollisionDebugDrawer.h"
-
-using namespace vel::scene;
+#include "vel/scene/CollisionDebugDrawer.h"
 
 
-namespace vel
+namespace vel::scene
 {
     class GPU
     {
@@ -30,7 +28,9 @@ namespace vel
 		
 
     public:
-											GPU(std::string shaderDirectory);
+											GPU();
+											~GPU();
+											GPU(GPU&&) = default;
         void								enableDepthTest();
         void								clearBuffers(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 0.0f);
         void								drawLinesOnly();

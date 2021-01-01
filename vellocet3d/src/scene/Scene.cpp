@@ -14,9 +14,15 @@ namespace vel::scene
 	Scene::Scene() :
 		headless(App::get().config.HEADLESS),
 		loaded(false),
-		animationTime(0.0)
+		animationTime(0.0),
+		gpu(!this->headless ? std::make_optional<GPU>(GPU()) : std::nullopt)
 	{
 		this->stages.reserve(10); // can't see ever needing more than 10 stages (naive, but good enough until it's not)
+
+		//if (!this->headless)
+		//{
+		//	this->gpu = GPU();
+		//}
 
 		//std::cout << "Scene Constructor Ran\n";
 	}
@@ -24,7 +30,7 @@ namespace vel::scene
 	Scene::~Scene()
 	{
 		//std::cout << "Scene Destructor Ran\n";
-		App::get().getGPU()->wipe();
+		//this->gpu->wipe();
 	}
 
 	void Scene::applyTransformations()
@@ -54,12 +60,16 @@ namespace vel::scene
 
 	size_t Scene::addShader(std::string name, std::string vertName, std::string fragName)
 	{
-		return App::get().getGPU()->loadShader(name, vertName, fragName);
+		return this->gpu->loadShader(name, vertName, fragName);
 	}
 
 	Stage& Scene::addStage()
 	{
-		this->stages.push_back(Stage(this->headless));
+		if(this->headless)
+			this->stages.push_back(Stage(nullptr));
+		else
+			this->stages.push_back(Stage(&this->gpu.value()));
+
 		return this->getStage(this->stages.size() - 1);
 	}
 
@@ -78,11 +88,16 @@ namespace vel::scene
 		return this->animations;
 	}
 
+	std::optional<GPU>& Scene::getGPU()
+	{
+		return this->gpu;
+	}
+
 	size_t Scene::addMesh(Mesh m)
 	{
 		if (!this->headless)
 		{
-			m.setMeshRenderableIndex(App::get().getGPU()->loadMesh(m));
+			m.setMeshRenderableIndex(this->gpu->loadMesh(m));
 		}
 		this->meshes.push_back(m);
 		return this->meshes.size() - 1;
@@ -119,7 +134,7 @@ namespace vel::scene
 
     void Scene::draw(float alpha)
     {
-        GPU& gpu = App::get().getGPU().value();
+        GPU& gpu = this->gpu.value(); // for convenience
 
         for (auto& s : this->stages)
         {

@@ -9,7 +9,9 @@
 #include "vel/Logger.h"
 #include "vel/Window.h"
 #include "vel/scene/Scene.h"
-#include "vel/GPU.h"
+
+
+
 
 
 namespace vel 
@@ -26,8 +28,8 @@ namespace vel
 														App(Config conf);
 		static App*										instance;
         std::optional<std::unique_ptr<Window>>			window;
-        std::optional<std::unique_ptr<Scene>>			scene;
-        std::optional<GPU>								gpu;
+        std::optional<std::unique_ptr<scene::Scene>>	scene;
+        
 
         std::chrono::high_resolution_clock::time_point	startTime;
         bool											shouldClose = false;
@@ -51,9 +53,8 @@ namespace vel
         static void										init(Config conf);
 														App(App const&) = delete;
         void											operator=(App const&) = delete;
-        void											setScene(Scene* scene);
-        Scene*											getScene();
-        std::optional<GPU>&								getGPU();
+        void											setScene(scene::Scene* scene);
+		scene::Scene*									getScene();
         void											clearScene();
         const double									time() const;
         const InputState&								getInputState() const;

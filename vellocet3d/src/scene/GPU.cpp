@@ -8,18 +8,36 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "STB_IMAGE/stb_image.h"
 
-#include "vel/GPU.h"
+#include "vel/App.h"
+#include "vel/scene/GPU.h"
 #include "vel/scene/mesh/Vertex.h"
 
-namespace vel
+namespace vel::scene
 {
-    GPU::GPU(std::string shaderDirectory) :
-        shaderDirectory(shaderDirectory),
+    GPU::GPU() :
+        shaderDirectory(App::get().config.SHADER_FILE_PATH),
         activeShaderIndex(-1),
         activeMeshRenderableIndex(-1),
         activeTextureIndex(-1),
 		collisionDebugDrawer(std::move(std::make_unique<CollisionDebugDrawer>()))
-    {}
+    {
+	
+		//std::cout << "loading new GPU\n";
+
+		// create default shaders
+		this->loadShader("default", App::get().config.DEFAULT_VERTEX_SHADER, App::get().config.DEFAULT_FRAGMENT_SHADER);
+		this->loadShader("default_skinned", App::get().config.DEFAULT_SKINNED_VERTEX_SHADER, App::get().config.DEFAULT_SKINNED_FRAGMENT_SHADER);
+		this->loadShader("default_debug", App::get().config.DEFAULT_DEBUG_VERTEX_SHADER, App::get().config.DEFAULT_DEBUG_FRAGMENT_SHADER);
+
+		// create default texture
+		this->loadTexture("diffuse", ("data/models/default_texture.jpg"));
+	
+	}
+
+	GPU::~GPU()
+	{
+		this->wipe();
+	}
 
 	CollisionDebugDrawer* GPU::getCollisionDebugDrawer()
 	{
@@ -346,6 +364,8 @@ namespace vel
 
     void GPU::wipe()
     {
+		//std::cout << "wiping gpu data for previous GPU instance\n";
+
         for (auto& mr : this->meshRenderables)
         {
             glDeleteVertexArrays(1, &mr.VAO);
@@ -355,27 +375,13 @@ namespace vel
 
         for (auto& t : this->textures)
         {
-			if (t.path.find("default_texture.jpg") == std::string::npos)
-			{
-				glDeleteTextures(1, &t.id);
-			}
+			glDeleteTextures(1, &t.id);
         }
 
         for (auto& s : this->shaders)
         {
-            if (s.name != "default" && s.name != "default_skinned" && s.name != "default_debug")
-            {
-                glDeleteProgram(s.id);
-            }
+			glDeleteProgram(s.id);
         }
-
-        this->shaders.resize(3); // wipe all shaders except default, default_skinned, and default_debug
-        this->meshRenderables.clear();
-        this->textures.resize(1); // wipe all textures except for default_texture.jpg
-
-        this->activeShaderIndex = -1;
-        this->activeMeshRenderableIndex = -1;
-        this->activeTextureIndex = -1;
     }
 		
 	

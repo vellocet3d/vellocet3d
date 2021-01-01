@@ -11,11 +11,13 @@
 
 
 
+
 namespace vel::scene::stage
 {
 
-    Stage::Stage(bool headless) :
-        headless(headless),
+    Stage::Stage(GPU* sceneGPU) :
+		sceneGPU(sceneGPU),
+        headless(sceneGPU == nullptr ? true : false),
         visible(true),
 		collisionDebuggingSwitch(false),
 		clearDepthBuffer(false)
@@ -75,7 +77,7 @@ namespace vel::scene::stage
 		return this->collisionDebuggingSwitch;
 	}
 
-	void Stage::useCollisionDebugDrawer()
+	void Stage::useCollisionDebugDrawer(CollisionDebugDrawer* cdd)
 	{
 		if (!this->collisionWorld)
 		{
@@ -84,7 +86,7 @@ namespace vel::scene::stage
 
 		this->collisionDebuggingSwitch = true;
 
-		this->getCollisionWorld()->getDynamicsWorld()->setDebugDrawer(App::get().getGPU()->getCollisionDebugDrawer());
+		this->getCollisionWorld()->getDynamicsWorld()->setDebugDrawer(cdd);
 	}
 
 	void Stage::stepPhysics(float delta)
@@ -450,5 +452,10 @@ namespace vel::scene::stage
     {
         return this->camera;
     }
+
+	GPU* Stage::getSceneGPU()
+	{
+		return this->sceneGPU;
+	}
 
 }
