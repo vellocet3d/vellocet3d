@@ -437,7 +437,7 @@ namespace vel::scene
 
             // determine if the texture already exists, if it does use it's index...
             int meshTextureIndex = 0;
-            for (auto& t : this->currentStage->getSceneGPU()->getTextures())
+            for (auto& t : this->currentStage->getSceneGPU()->getTextures()) // ignore intellisense error on getTextures()
             {
                 if (t.path == (this->currentAssetDirectory + "/" + str.C_Str()))
                 {

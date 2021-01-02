@@ -29,6 +29,7 @@ namespace vel
 		static App*										instance;
         std::optional<std::unique_ptr<Window>>			window;
         std::optional<std::unique_ptr<scene::Scene>>	scene;
+		scene::Scene*									nextScene = nullptr;
         
 
         std::chrono::high_resolution_clock::time_point	startTime;
@@ -55,6 +56,9 @@ namespace vel
         void											operator=(App const&) = delete;
         void											setScene(scene::Scene* scene);
 		scene::Scene*									getScene();
+		void											loadNextScene(scene::Scene* scene);
+		scene::Scene*									getNextScene();
+		void											clearNextScene();
         void											clearScene();
         const double									time() const;
         const InputState&								getInputState() const;

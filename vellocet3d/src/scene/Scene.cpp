@@ -24,12 +24,12 @@ namespace vel::scene
 		//	this->gpu = GPU();
 		//}
 
-		//std::cout << "Scene Constructor Ran\n";
+		std::cout << "Scene Constructor Ran\n";
 	}
 
 	Scene::~Scene()
 	{
-		//std::cout << "Scene Destructor Ran\n";
+		std::cout << "Scene Destructor Ran\n";
 		//this->gpu->wipe();
 	}
 

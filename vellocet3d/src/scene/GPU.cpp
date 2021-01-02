@@ -199,6 +199,8 @@ namespace vel::scene
 
         this->meshRenderables.push_back(mr);
 
+		std::cout << "got here just fine\n";
+
         return this->meshRenderables.size() - 1;
     }
 
@@ -209,6 +211,8 @@ namespace vel::scene
         texture.path = path;
 
         glGenTextures(1, &texture.id);
+
+		std::cout << "texture.id:" << texture.id << "\n";
 
         int width, height, nrComponents;
         //stbi_set_flip_vertically_on_load(true);

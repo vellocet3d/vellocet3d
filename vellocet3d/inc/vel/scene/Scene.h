@@ -29,6 +29,7 @@ namespace vel::scene
 		std::vector<Animation>				animations;
 		double								animationTime;
 		std::optional<GPU>					gpu;
+		
 
 	protected:
 		size_t								addShader(std::string name, std::string vertName, std::string fragName);

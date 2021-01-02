@@ -1,5 +1,7 @@
 #include <iostream>
 #include <limits>
+#include <thread> 
+
 
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
@@ -48,6 +50,27 @@ namespace vel
         return this->scene.value().get();
     }
 
+	void App::loadNextScene(scene::Scene* scene)
+	{
+		this->nextScene = scene;
+
+		std::thread t([this]{
+
+			this->getNextScene()->load();
+			this->getNextScene()->loaded = true;
+			this->setScene(this->getNextScene());
+			this->clearNextScene();
+
+		});
+
+		t.detach();
+	}
+
+	scene::Scene* App::getNextScene()
+	{
+		return this->nextScene;
+	}
+
     void App::close()
     {
         this->shouldClose = true;
@@ -77,6 +100,11 @@ namespace vel
     {
         this->scene.reset();
     }
+
+	void App::clearNextScene()
+	{
+		this->nextScene = nullptr;
+	}
 
 	float App::getFrameTime()
 	{
