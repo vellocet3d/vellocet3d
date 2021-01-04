@@ -15,14 +15,17 @@
 #include "vel/scene/stage/Sensor.h"
 #include "vel/scene/GPU.h"
 
-
+namespace vel::scene
+{
+	class Scene;
+}
 
 namespace vel::scene::stage
 {
     class Stage
     {
     private:
-        const bool										headless;
+        
         bool											visible;
         std::optional<Camera>							camera;
         std::vector<Actor>								actors;
@@ -35,12 +38,16 @@ namespace vel::scene::stage
 		std::optional<std::unique_ptr<CollisionWorld>>	collisionWorld;
 		bool											collisionDebuggingSwitch;
 		bool											clearDepthBuffer;
+
+		vel::scene::Scene*								parentScene;
 		GPU*											sceneGPU;
+		
+		const bool										headless;
 		
 
 
     public:
-													Stage(GPU* sceneGPU);
+													Stage(vel::scene::Scene* parentScene);
 		std::vector<size_t>							loadActors(std::string filename, bool dynamic = false);
 		std::vector<size_t>							loadActors(std::string filename, bool dynamic, int shaderIndex);
 		std::vector<size_t>							loadActors(std::string filename, bool dynamic, std::vector<std::pair<int, std::vector<std::string>>> actorShaderAssocs);
@@ -81,6 +88,7 @@ namespace vel::scene::stage
 		bool										collisionDebugging();
 
 		GPU*										getSceneGPU();
+		vel::scene::Scene*							getParentScene();
 
 		vel::scene::armature::Armature*				addArmature(vel::scene::armature::Armature a);
 

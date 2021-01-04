@@ -65,10 +65,7 @@ namespace vel::scene
 
 	Stage& Scene::addStage()
 	{
-		if(this->headless)
-			this->stages.push_back(Stage(nullptr));
-		else
-			this->stages.push_back(Stage(&this->gpu.value()));
+		this->stages.push_back(Stage(this));
 
 		return this->getStage(this->stages.size() - 1);
 	}

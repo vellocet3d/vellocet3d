@@ -28,6 +28,7 @@ namespace vel::scene
 		Assimp::Importer					aiImporter;
 		const aiScene*						aiScene;
 		bool								headless;
+		Scene*								stageParentScene;
 		Stage*								currentStage;
 		std::string							currentAssetFile;
 		std::string							currentAssetDirectory;
@@ -56,7 +57,7 @@ namespace vel::scene
 		std::vector<size_t>					addedActorIndexes;
 
 	public:
-																	AssetLoader(Stage* stage, std::string assetFile, bool dynamic);
+																	AssetLoader(Scene* stageParentScene, Stage* stage, std::string assetFile, bool dynamic);
 		std::optional<std::function<int(std::string actorName)>>	findShaderId;
 		std::vector<size_t>											loadActors();
 

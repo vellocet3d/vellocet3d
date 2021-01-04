@@ -12,11 +12,16 @@
 #include "vel/scene/stage/Actor.h"
 #include "vel/scene/stage/Sensor.h"
 
+
+
 namespace vel::scene::stage
 {
+	class Stage;
+
 	class CollisionWorld
 	{
 	private:
+		Stage*									stage;
 		btDefaultCollisionConfiguration*		collisionConfiguration;
 		btCollisionDispatcher*					dispatcher;
 		btBroadphaseInterface*					overlappingPairCache;
@@ -30,7 +35,7 @@ namespace vel::scene::stage
 	public:
 		static bool								contactAddedCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1);
 												
-												CollisionWorld(float gravity = -10);
+												CollisionWorld(Stage* stage, float gravity = -10);
 												~CollisionWorld();
 		btDiscreteDynamicsWorld* const			getDynamicsWorld();
 		void									addCollisionShape(std::string name, btCollisionShape* shape);

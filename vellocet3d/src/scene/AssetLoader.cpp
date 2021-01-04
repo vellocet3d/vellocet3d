@@ -19,8 +19,9 @@ using namespace vel::helpers::functions;
 
 namespace vel::scene
 {
-	AssetLoader::AssetLoader(Stage* stage, std::string assetFile, bool dynamic) :
+	AssetLoader::AssetLoader(Scene* stageParentScene, Stage* stage, std::string assetFile, bool dynamic) :
         headless(App::get().config.HEADLESS),
+		stageParentScene(stageParentScene),
         currentStage(stage),
         currentAssetFile(assetFile),
         currentAssetDirectory(assetFile.substr(0, assetFile.find_last_of('/'))),
@@ -52,7 +53,7 @@ namespace vel::scene
 	std::optional<size_t> AssetLoader::getExistingAnimationIndex(std::string animationName)
 	{
 		size_t i = 0;
-		for (auto& a : App::get().getScene()->getAnimations())
+		for (auto& a : this->stageParentScene->getAnimations())
 		{
 			if (a.name == animationName)
 			{
@@ -127,7 +128,7 @@ namespace vel::scene
 				}
 
 				// add animation to scene's animations container, retrieving index
-				auto ai = App::get().getScene()->addAnimation(a);
+				auto ai = this->stageParentScene->addAnimation(a);
 
 				// obtain this animation name relative to the armature
 				auto name = explode_string(a.name, '|')[1];
@@ -149,7 +150,7 @@ namespace vel::scene
 
 			if (nodeParentName == "RootNode")
 			{
-				this->currentArmature = this->currentStage->addArmature(vel::scene::armature::Armature(boneName));
+				this->currentArmature = this->currentStage->addArmature(vel::scene::armature::Armature(boneName, this->currentStage));
 			}
 
 			vel::scene::armature::Bone bone;
@@ -235,7 +236,7 @@ namespace vel::scene
 				this->currentMeshIndex.reset();
 				this->currentMeshTextureIndex.reset();
 
-				auto actor = Actor(actorName, this->currentTransform);
+				auto actor = Actor(actorName, this->currentTransform, this->currentStage);
 				actor.setDynamic(this->currentIsDynamic);
 
 				if (node->mNumMeshes == 1)
@@ -250,7 +251,7 @@ namespace vel::scene
 						// set activeBones mapping
 						std::vector<std::pair<size_t, std::string>> activeBones;
 						size_t index = 0;
-						for (auto& meshBone : App::get().getScene()->getMesh(this->currentMeshIndex.value()).getBones())
+						for (auto& meshBone : this->stageParentScene->getMesh(this->currentMeshIndex.value()).getBones())
 						{
 							activeBones.push_back(std::pair<size_t, std::string>(actor.getArmature()->getBoneIndex(meshBone.name), "bones[" + std::to_string(index) + "]"));
 							index++;
@@ -402,7 +403,7 @@ namespace vel::scene
         // Loop through each existing mesh and determine if the verticies are the same.
         // (Probably a better way to do this...hashes maybe?)
         int meshIndex = 0;
-        for (auto& m : App::get().getScene()->getMeshes())
+        for (auto& m : this->stageParentScene->getMeshes())
         {
             // If mesh exists, use the index of the existing mesh...
             if (vertices == m.getVertices())
@@ -417,7 +418,7 @@ namespace vel::scene
         {
 			mesh.setGlobalInverseMatrix(this->currentGlobalInverseMatrix);
 
-            this->currentMeshIndex = App::get().getScene()->addMesh(mesh);
+            this->currentMeshIndex = this->stageParentScene->addMesh(mesh);
         }
 
 
@@ -437,7 +438,7 @@ namespace vel::scene
 
             // determine if the texture already exists, if it does use it's index...
             int meshTextureIndex = 0;
-            for (auto& t : this->currentStage->getSceneGPU()->getTextures()) // ignore intellisense error on getTextures()
+            for (auto& t : this->stageParentScene->getGPU().value().getTextures()) // ignore intellisense error on getTextures()
             {
                 if (t.path == (this->currentAssetDirectory + "/" + str.C_Str()))
                 {
@@ -449,7 +450,7 @@ namespace vel::scene
             // ...otherwise create a new texture
             if (!this->currentMeshTextureIndex)
             {
-                this->currentMeshTextureIndex = this->currentStage->getSceneGPU()->loadTexture("diffuse", (this->currentAssetDirectory + "/" + str.C_Str()));
+                this->currentMeshTextureIndex = this->stageParentScene->getGPU().value().loadTexture("diffuse", (this->currentAssetDirectory + "/" + str.C_Str()));
             }
         }
     }

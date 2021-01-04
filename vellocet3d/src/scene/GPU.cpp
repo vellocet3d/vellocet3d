@@ -24,7 +24,7 @@ namespace vel::scene
 		openGLContext(App::get().getNextFreeOpenGLContext())
     {
 	
-		std::cout << "loading new GPU\n";
+		//std::cout << "loading new GPU\n";
 
 		//// set openGLContext as current context for executing thread
 		//glfwMakeUserContextCurrent(this->openGLContext);
@@ -223,7 +223,7 @@ namespace vel::scene
 
         this->meshRenderables.push_back(mr);
 
-		std::cout << "got here just fine\n";
+		//std::cout << "got here just fine\n";
 
         return this->meshRenderables.size() - 1;
     }
@@ -236,7 +236,7 @@ namespace vel::scene
 
         glGenTextures(1, &texture.id);
 
-		std::cout << "texture.id:" << texture.id << "\n";
+		//std::cout << "texture.id:" << texture.id << "\n";
 
         int width, height, nrComponents;
         //stbi_set_flip_vertically_on_load(true);

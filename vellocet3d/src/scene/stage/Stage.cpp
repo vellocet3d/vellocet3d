@@ -15,9 +15,10 @@
 namespace vel::scene::stage
 {
 
-    Stage::Stage(GPU* sceneGPU) :
-		sceneGPU(sceneGPU),
-        headless(sceneGPU == nullptr ? true : false),
+    Stage::Stage(vel::scene::Scene* parentScene) :
+		parentScene(parentScene),
+		sceneGPU(this->parentScene->getGPU().has_value() ? &this->parentScene->getGPU().value() : nullptr),
+        headless(this->sceneGPU == nullptr ? true : false),
         visible(true),
 		collisionDebuggingSwitch(false),
 		clearDepthBuffer(false)
@@ -108,7 +109,12 @@ namespace vel::scene::stage
 
 	void Stage::setCollisionWorld(float gravity)
 	{
-		this->collisionWorld = std::make_unique<CollisionWorld>(gravity);
+		this->collisionWorld = std::make_unique<CollisionWorld>(this, gravity);
+	}
+
+	vel::scene::Scene* Stage::getParentScene()
+	{
+		return this->parentScene;
 	}
 
 	std::vector<Actor>& Stage::getActors()
@@ -179,13 +185,13 @@ namespace vel::scene::stage
 
 	std::vector<size_t> Stage::loadActors(std::string filename, bool dynamic)
     {
-        auto loader = AssetLoader(this, filename, dynamic);
+        auto loader = AssetLoader(this->parentScene, this, filename, dynamic);
         return loader.loadActors();
     }
 
 	std::vector<size_t> Stage::loadActors(std::string filename, bool dynamic, int shaderIndex)
     {
-        auto loader = AssetLoader(this, filename, dynamic);
+        auto loader = AssetLoader(this->parentScene, this, filename, dynamic);
         loader.findShaderId = [&](std::string actorName) {
             return shaderIndex;
         };
@@ -195,7 +201,7 @@ namespace vel::scene::stage
 	std::vector<size_t> Stage::loadActors(std::string filename, bool dynamic,
         std::vector<std::pair<int, std::vector<std::string>>> actorShaderAssocs)
     {
-        auto loader = AssetLoader(this, filename, dynamic);
+        auto loader = AssetLoader(this->parentScene, this, filename, dynamic);
         loader.findShaderId = [&](std::string actorName) {
             
             for (auto& a : actorShaderAssocs)
@@ -263,7 +269,7 @@ namespace vel::scene::stage
 			actor->getTextureIndex().has_value()) // If we are not in headless mode, AND this actor has a shader, mesh, and texture
         {
             size_t shaderIndex = actor->getShaderIndex().value();
-			size_t meshRenderableIndex = App::get().getScene()->getMesh(actor->getMeshIndex().value()).getMeshRenderableIndex().value();
+			size_t meshRenderableIndex = this->parentScene->getMesh(actor->getMeshIndex().value()).getMeshRenderableIndex().value();
 			size_t textureIndex = actor->getTextureIndex().value();
 
             // Search the existing render commands to see if one exists for the given criteria

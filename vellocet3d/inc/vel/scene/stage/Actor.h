@@ -15,6 +15,8 @@
 
 namespace vel::scene::stage
 {
+	class Stage;
+
     class Actor
     {
     private:
@@ -38,10 +40,11 @@ namespace vel::scene::stage
 		btRigidBody*									rigidBody;
 		btPairCachingGhostObject*						ghostObject;
 		bool											manualTransform;
+		Stage*											parentStage;
 		
 
     public:
-														Actor(std::string name, Transform t);
+														Actor(std::string name, Transform t, Stage* parentStage);
 		Actor											cleanCopy(std::string newName);
 		void											setDynamic(bool dynamic);
         void											setMeshIndex(size_t i);

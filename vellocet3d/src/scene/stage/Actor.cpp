@@ -7,7 +7,7 @@
 
 namespace vel::scene::stage
 {
-    Actor::Actor(std::string name, Transform t) :
+    Actor::Actor(std::string name, Transform t, Stage* parentStage) :
         name(name),
         deleted(false),
 		visible(true),
@@ -15,7 +15,8 @@ namespace vel::scene::stage
         transform(t) ,
 		rigidBody(nullptr),
 		armature(nullptr),
-		manualTransform(true)
+		manualTransform(true),
+		parentStage(parentStage)
     {}
 
 	void Actor::processTransform()
@@ -317,7 +318,7 @@ namespace vel::scene::stage
 
 	vel::scene::mesh::Mesh& Actor::getMesh()
 	{
-		return App::get().getScene()->getMesh(this->meshIndex.value());
+		return this->parentStage->getParentScene()->getMesh(this->meshIndex.value());
 	}
 
 }

@@ -15,12 +15,18 @@
 #include "vel/scene/armature/ActiveAnimation.h"
 
 
+namespace vel::scene::stage
+{
+	class Stage;
+}
+
 namespace vel::scene::armature
 {
 	class Armature
 	{
 	private:
 		std::string											name;
+		vel::scene::stage::Stage*							parentStage;
 		std::vector<Bone>									bones;
 		std::vector<std::pair<std::string, size_t>>			animations;
 		std::deque<ActiveAnimation>							activeAnimations;
@@ -34,7 +40,7 @@ namespace vel::scene::armature
 
 
 	public:
-															Armature(std::string name);
+															Armature(std::string name, vel::scene::stage::Stage* parentStage);
 		void												addBone(Bone b);
 		void												addAnimation(std::string name, size_t index);
 		Bone&												getRootBone();

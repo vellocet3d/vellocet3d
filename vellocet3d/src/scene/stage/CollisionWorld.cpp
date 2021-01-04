@@ -10,7 +10,8 @@
 
 namespace vel::scene::stage
 {
-	CollisionWorld::CollisionWorld(float gravity) :
+	CollisionWorld::CollisionWorld(Stage* stage, float gravity) :
+		stage(stage),
 		collisionConfiguration(new btDefaultCollisionConfiguration()),
 		dispatcher(new btCollisionDispatcher(collisionConfiguration)),
 		overlappingPairCache(new btDbvtBroadphase()),
@@ -164,7 +165,7 @@ namespace vel::scene::stage
 			}
 
 			auto transformMatrix = actor->getWorldMatrix();
-			auto mesh = &App::get().getScene()->getMesh(actor->getMeshIndex().value());
+			auto mesh = &this->stage->getParentScene()->getMesh(actor->getMeshIndex().value());
 
 			size_t vertexOffset = tmpVerts.size();
 
