@@ -9,6 +9,7 @@
 
 
 struct GLFWwindow;
+struct GLFWusercontext;
 
 namespace vel
 {
@@ -30,6 +31,10 @@ namespace vel
         void				setScroll();
         void				setCallbacks();
 
+		GLFWusercontext*	openGLContext1;
+		GLFWusercontext*	openGLContext2;
+
+		size_t				nextFreeContext;
 
     public:
 							Window(Window&&) = default;
@@ -44,6 +49,8 @@ namespace vel
         void				swapBuffers();
 		void				renderGui();
         //void				vsync();
+		GLFWusercontext*	getNextFreeOpenGLContext();
+		void				setOpenGLContext(GLFWusercontext* c);
 
     };
     

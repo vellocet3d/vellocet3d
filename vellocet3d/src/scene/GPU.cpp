@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "glad/glad.h"
+#include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -19,10 +20,34 @@ namespace vel::scene
         activeShaderIndex(-1),
         activeMeshRenderableIndex(-1),
         activeTextureIndex(-1),
-		collisionDebugDrawer(std::move(std::make_unique<CollisionDebugDrawer>()))
+		collisionDebugDrawer(std::move(std::make_unique<CollisionDebugDrawer>())),
+		openGLContext(App::get().getNextFreeOpenGLContext())
     {
 	
-		//std::cout << "loading new GPU\n";
+		std::cout << "loading new GPU\n";
+
+		//// set openGLContext as current context for executing thread
+		//glfwMakeUserContextCurrent(this->openGLContext);
+
+		//// create default shaders
+		//this->loadShader("default", App::get().config.DEFAULT_VERTEX_SHADER, App::get().config.DEFAULT_FRAGMENT_SHADER);
+		//this->loadShader("default_skinned", App::get().config.DEFAULT_SKINNED_VERTEX_SHADER, App::get().config.DEFAULT_SKINNED_FRAGMENT_SHADER);
+		//this->loadShader("default_debug", App::get().config.DEFAULT_DEBUG_VERTEX_SHADER, App::get().config.DEFAULT_DEBUG_FRAGMENT_SHADER);
+
+		//// create default texture
+		//this->loadTexture("diffuse", ("data/models/default_texture.jpg"));
+	
+	}
+
+	GPU::~GPU()
+	{
+		this->wipe();
+	}
+
+	void GPU::primeGPU()
+	{
+		// set openGLContext as current context for executing thread
+		glfwMakeUserContextCurrent(this->openGLContext);
 
 		// create default shaders
 		this->loadShader("default", App::get().config.DEFAULT_VERTEX_SHADER, App::get().config.DEFAULT_FRAGMENT_SHADER);
@@ -31,12 +56,11 @@ namespace vel::scene
 
 		// create default texture
 		this->loadTexture("diffuse", ("data/models/default_texture.jpg"));
-	
 	}
 
-	GPU::~GPU()
+	GLFWusercontext* GPU::getOpenGLContext()
 	{
-		this->wipe();
+		return this->openGLContext;
 	}
 
 	CollisionDebugDrawer* GPU::getCollisionDebugDrawer()

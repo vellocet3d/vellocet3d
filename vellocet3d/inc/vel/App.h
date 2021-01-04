@@ -12,7 +12,7 @@
 
 
 
-
+struct GLFWusercontext;
 
 namespace vel 
 {
@@ -68,6 +68,8 @@ namespace vel
 
 		float											getFrameTime();
 		float											getLogicTime();
+
+		GLFWusercontext*								getNextFreeOpenGLContext();
 
     };
 };

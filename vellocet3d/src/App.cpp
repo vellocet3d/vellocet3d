@@ -40,9 +40,15 @@ namespace vel
 
     }
 
+	GLFWusercontext* App::getNextFreeOpenGLContext()
+	{
+		return this->window.value()->getNextFreeOpenGLContext();
+	}
+
     void App::setScene(scene::Scene* scene)
     {
         this->scene = std::move(std::move(std::unique_ptr<scene::Scene>(scene)));
+		this->scene.value()->getGPU().value().primeGPU();
     }
 
 	scene::Scene* App::getScene()
@@ -56,10 +62,9 @@ namespace vel
 
 		std::thread t([this]{
 
+			this->getNextScene()->getGPU().value().primeGPU();
 			this->getNextScene()->load();
 			this->getNextScene()->loaded = true;
-			this->setScene(this->getNextScene());
-			this->clearNextScene();
 
 		});
 
@@ -179,7 +184,20 @@ namespace vel
             {
                 this->scene.value()->load();
                 this->scene.value()->loaded = true;
+
+				this->window.value()->setOpenGLContext(this->scene.value()->getGPU().value().getOpenGLContext());
             }
+
+			//
+			if (this->nextScene && this->nextScene->loaded)
+			{
+				this->setScene(this->getNextScene());
+				this->clearNextScene();
+
+				// swap contexts
+				this->window.value()->setOpenGLContext(this->scene.value()->getGPU().value().getOpenGLContext());
+
+			}
 
             this->newTime = this->time();
             this->frameTime = this->newTime - this->currentTime;

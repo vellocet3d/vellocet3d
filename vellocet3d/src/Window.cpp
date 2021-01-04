@@ -20,7 +20,8 @@ namespace vel
         screenSize(glm::ivec2(screenWidth, screenHeight)),
         fullScreen(fullScreen),
 		cursorHidden(cursorHidden),
-		useImGui(useImGui)
+		useImGui(useImGui),
+		nextFreeContext(0) // 0-2
     {
         // Initialize GLFW. This is the library that creates our cross platform (kinda since
         // apple decided to ditch opengl support for metal only) window object
@@ -50,6 +51,18 @@ namespace vel
         }
         else 
         {
+			// create our usercontexts that will be switched between when loading scenes
+			this->openGLContext1 = glfwCreateUserContext(this->glfwWindow);
+			this->openGLContext2 = glfwCreateUserContext(this->glfwWindow);
+
+			if (!this->openGLContext1 || !this->openGLContext2)
+			{
+				glfwTerminate();
+				std::cout << "Failed to create openGLContext members\n";
+				std::cin.get();
+				exit(EXIT_FAILURE);
+			}
+
 
             glfwMakeContextCurrent(this->glfwWindow);
 			glfwSwapInterval(0); // 0 = no vsync 1 = vsync
@@ -112,6 +125,25 @@ namespace vel
         // Terminate GLFW application process
         glfwTerminate();
     }
+
+	void Window::setOpenGLContext(GLFWusercontext* c)
+	{
+		glfwMakeUserContextCurrent(c);
+	}
+
+	GLFWusercontext* Window::getNextFreeOpenGLContext()
+	{
+		if (this->nextFreeContext == 0 || this->nextFreeContext == 1)
+		{
+			this->nextFreeContext = 2;
+			return this->openGLContext1;
+		}
+		else if (this->nextFreeContext == 2)
+		{
+			this->nextFreeContext = 1;
+			return this->openGLContext2;
+		}
+	}
 
     void Window::setTitle(std::string title)
     {

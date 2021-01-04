@@ -6,11 +6,13 @@
 
 #include "glm/glm.hpp"
 
+
 #include "vel/scene/Shader.h"
 #include "vel/scene/mesh/Mesh.h"
 #include "vel/scene/mesh/Texture.h"
 #include "vel/scene/CollisionDebugDrawer.h"
 
+struct GLFWusercontext;
 
 namespace vel::scene
 {
@@ -25,6 +27,8 @@ namespace vel::scene
 		size_t								activeMeshRenderableIndex;
 		size_t								activeTextureIndex;
 		std::unique_ptr<CollisionDebugDrawer> collisionDebugDrawer;
+
+		GLFWusercontext*					openGLContext;
 		
 
     public:
@@ -53,6 +57,9 @@ namespace vel::scene
 		void								clearDepthBuffer();
 		std::vector<std::string>			getActiveShaderNames(); // added this to assist debugging
 		
+		GLFWusercontext*					getOpenGLContext();
+		void								primeGPU();
+
 		void								wipe();
 		
 
