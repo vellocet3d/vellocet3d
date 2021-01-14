@@ -188,7 +188,7 @@ namespace vel
 				this->window.value()->setOpenGLContext(this->scene.value()->getGPU().value().getOpenGLContext());
             }
 
-			//
+			
 			if (this->nextScene && this->nextScene->loaded)
 			{
 				this->setScene(this->getNextScene());
@@ -270,6 +270,7 @@ namespace vel
 
                     if (this->scene && this->scene.value()->loaded)
                     {
+						//std::cout << "call draw:" << this->currentTime << "\n";
                         this->scene.value()->draw(renderLerpInterval);
                     }
 

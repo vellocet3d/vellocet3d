@@ -234,12 +234,16 @@ namespace vel::scene
         texture.type = "diffuse";
         texture.path = path;
 
+		//std::cout << texture.path << "\n";
+
         glGenTextures(1, &texture.id);
 
 		//std::cout << "texture.id:" << texture.id << "\n";
 
         int width, height, nrComponents;
         //stbi_set_flip_vertically_on_load(true);
+
+		//std::cout << "stbi_load\n";
         unsigned char*	data = stbi_load(texture.path.c_str(), &width, &height, &nrComponents, 0);
         if (data) 
         {
@@ -252,6 +256,7 @@ namespace vel::scene
                 format = GL_RGBA;
 
             glBindTexture(GL_TEXTURE_2D, texture.id);
+			//std::cout << "loading texture, generating mipmap\n";
             glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
 

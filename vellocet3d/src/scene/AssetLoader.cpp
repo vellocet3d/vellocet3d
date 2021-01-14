@@ -310,7 +310,7 @@ namespace vel::scene
 
         glm::vec3 scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
         glm::vec3 translation = glm::vec3(aiPosition.x, aiPosition.y, aiPosition.z);
-		glm::quat rotation = glm::quat(aiRotation.w, aiRotation.x, aiRotation.y, aiRotation.z);		
+		glm::quat rotation = glm::quat(aiRotation.w, aiRotation.x, aiRotation.y, aiRotation.z);
 
         this->currentTransform = Transform(translation, rotation, scale);
     }
@@ -452,6 +452,7 @@ namespace vel::scene
             {
                 this->currentMeshTextureIndex = this->stageParentScene->getGPU().value().loadTexture("diffuse", (this->currentAssetDirectory + "/" + str.C_Str()));
             }
+
         }
     }
 
