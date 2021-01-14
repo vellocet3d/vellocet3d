@@ -43,7 +43,7 @@ namespace vel::scene
         const size_t						getActiveTextureIndex() const;
 		size_t								loadShader(const std::string name, const std::string vertFile, const std::string fragFile);
 		size_t								loadMesh(mesh::Mesh& m);
-		size_t								loadTexture(std::string type, std::string path);
+		size_t								loadTexture(std::string type, std::string dir, std::string filename);
         void								useTexture(size_t textureIndex);
         const std::vector<mesh::Texture>&	getTextures() const;
         void								useShader(size_t shaderIndex);

@@ -440,7 +440,7 @@ namespace vel::scene
             int meshTextureIndex = 0;
             for (auto& t : this->stageParentScene->getGPU().value().getTextures()) // ignore intellisense error on getTextures()
             {
-                if (t.path == (this->currentAssetDirectory + "/" + str.C_Str()))
+                if (t.fullPath == (this->currentAssetDirectory + "/" + str.C_Str()))
                 {
                     this->currentMeshTextureIndex = meshTextureIndex;
                     break;
@@ -450,7 +450,7 @@ namespace vel::scene
             // ...otherwise create a new texture
             if (!this->currentMeshTextureIndex)
             {
-                this->currentMeshTextureIndex = this->stageParentScene->getGPU().value().loadTexture("diffuse", (this->currentAssetDirectory + "/" + str.C_Str()));
+                this->currentMeshTextureIndex = this->stageParentScene->getGPU().value().loadTexture("diffuse", this->currentAssetDirectory, str.C_Str());
             }
 
         }

@@ -9,6 +9,9 @@ namespace vel::scene::mesh
 	{
 		unsigned int id;
 		std::string type;
+		std::string fullPath;
 		std::string path;
+		std::string filename;
+		std::string fileExt;
 	};
 }

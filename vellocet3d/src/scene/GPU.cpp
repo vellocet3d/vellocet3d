@@ -12,6 +12,7 @@
 #include "vel/App.h"
 #include "vel/scene/GPU.h"
 #include "vel/scene/mesh/Vertex.h"
+#include "vel/helpers/functions.h"
 
 namespace vel::scene
 {
@@ -55,7 +56,7 @@ namespace vel::scene
 		this->loadShader("default_debug", App::get().config.DEFAULT_DEBUG_VERTEX_SHADER, App::get().config.DEFAULT_DEBUG_FRAGMENT_SHADER);
 
 		// create default texture
-		this->loadTexture("diffuse", ("data/models/default_texture.jpg"));
+		this->loadTexture("diffuse", "data/models", "default_texture.jpg");
 	}
 
 	GLFWusercontext* GPU::getOpenGLContext()
@@ -228,23 +229,26 @@ namespace vel::scene
         return this->meshRenderables.size() - 1;
     }
 
-	size_t GPU::loadTexture(std::string type, std::string path)
+	size_t GPU::loadTexture(std::string type, std::string dir, std::string filename)
     {
+		auto fileExploded = vel::helpers::functions::explode_string(filename, '.');
+
 		mesh::Texture texture;
         texture.type = "diffuse";
-        texture.path = path;
+        texture.path = dir;
+		texture.fullPath = dir + "/" + filename;
+		texture.filename = fileExploded[0];
+		texture.fileExt = fileExploded[1];
+		
 
-		//std::cout << texture.path << "\n";
+
+
 
         glGenTextures(1, &texture.id);
 
-		//std::cout << "texture.id:" << texture.id << "\n";
-
         int width, height, nrComponents;
         //stbi_set_flip_vertically_on_load(true);
-
-		//std::cout << "stbi_load\n";
-        unsigned char*	data = stbi_load(texture.path.c_str(), &width, &height, &nrComponents, 0);
+        unsigned char*	data = stbi_load(texture.fullPath.c_str(), &width, &height, &nrComponents, 0);
         if (data) 
         {
             GLenum format;
@@ -275,7 +279,7 @@ namespace vel::scene
         else
         {
             stbi_image_free(data);
-            std::cout << "Texture failed to load at path: " << texture.path << "\n";
+            std::cout << "Texture failed to load at path: " << texture.fullPath << "\n";
             std::cin.get();
             exit(EXIT_FAILURE);
         }
