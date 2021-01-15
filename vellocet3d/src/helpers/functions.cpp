@@ -2,10 +2,12 @@
 #include <sstream>
 #include <algorithm>
 
+
 #include "vel/helpers/functions.h"
 
 namespace vel::helpers::functions
 {
+
 	btQuaternion glmToBulletQuat(glm::quat glmQuat)
 	{
 		return btQuaternion(glmQuat.x, glmQuat.y, glmQuat.z, glmQuat.w);

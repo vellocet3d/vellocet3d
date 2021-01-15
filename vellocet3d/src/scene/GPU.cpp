@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <filesystem>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -238,16 +239,18 @@ namespace vel::scene
         texture.path = dir;
 		texture.fullPath = dir + "/" + filename;
 		texture.filename = fileExploded[0];
-		texture.fileExt = fileExploded[1];
-		
+		texture.fileExt = "." + fileExploded[1];
 
-
-
+		//std::cout << texture.path << "\n";
+		//std::cout << texture.fullPath << "\n";
+		//std::cout << texture.filename << "\n";
+		//std::cout << texture.fileExt << "\n";
+		//std::cout << "--------------\n";
 
         glGenTextures(1, &texture.id);
 
+
         int width, height, nrComponents;
-        //stbi_set_flip_vertically_on_load(true);
         unsigned char*	data = stbi_load(texture.fullPath.c_str(), &width, &height, &nrComponents, 0);
         if (data) 
         {
@@ -260,15 +263,77 @@ namespace vel::scene
                 format = GL_RGBA;
 
             glBindTexture(GL_TEXTURE_2D, texture.id);
-			//std::cout << "loading texture, generating mipmap\n";
-            glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
 
+			// load the base level texture
+            glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
+			// set texture parameters
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			auto mip_dir_path = texture.path + "/" + texture.filename + "_mipmaps";
+			bool has_mip_dir = std::filesystem::is_directory(mip_dir_path);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+			if (!has_mip_dir)
+			{
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			}
+			else
+			{
+				auto dirIter = std::filesystem::directory_iterator(mip_dir_path);
+
+				int mipcount = 0;
+
+				for (auto& entry : dirIter)
+				{
+					if (entry.is_regular_file())
+					{
+						mipcount++;
+					}
+				}
+
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipcount);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+				while (mipcount > 0)
+				{
+					auto full_mip_file_path = mip_dir_path + "/" + std::to_string(mipcount) + texture.fileExt;
+
+					int mip_width, mip_height, mip_nrComponents;
+					unsigned char*	mip_data = stbi_load(full_mip_file_path.c_str(), &mip_width, &mip_height, &mip_nrComponents, 0);
+
+					if (mip_data)
+					{
+						GLenum mip_format;
+						if (mip_nrComponents == 1)
+							mip_format = GL_RED;
+						else if (mip_nrComponents == 3)
+							mip_format = GL_RGB;
+						else if (mip_nrComponents == 4)
+							mip_format = GL_RGBA;
+
+						std::cout << full_mip_file_path << ":" << mip_nrComponents << "\n";
+
+						glTexImage2D(GL_TEXTURE_2D, mipcount, mip_format, mip_width, mip_height, 0, mip_format, GL_UNSIGNED_BYTE, mip_data);
+
+						stbi_image_free(mip_data);
+
+						mipcount--;
+					}
+					else
+					{
+						stbi_image_free(mip_data);
+						std::cout << "Texture failed to load at path: " << full_mip_file_path << "\n";
+						std::cin.get();
+						exit(EXIT_FAILURE);
+					}
+
+				}
+
+			}     
 
             stbi_image_free(data);
 

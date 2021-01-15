@@ -450,7 +450,11 @@ namespace vel::scene
             // ...otherwise create a new texture
             if (!this->currentMeshTextureIndex)
             {
-                this->currentMeshTextureIndex = this->stageParentScene->getGPU().value().loadTexture("diffuse", this->currentAssetDirectory, str.C_Str());
+				//TODO: hack that will only work for .fbx files with textures in separate .fbm directory separated by windows directory separator, fix correctly later
+				auto textureDirAndName = vel::helpers::functions::explode_string(str.C_Str(), '\\');
+
+                this->currentMeshTextureIndex = this->stageParentScene->getGPU().value().loadTexture("diffuse", 
+					this->currentAssetDirectory + '/' + textureDirAndName[0], textureDirAndName[1]);
             }
 
         }
