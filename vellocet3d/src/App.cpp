@@ -64,6 +64,7 @@ namespace vel
 
 			this->getNextScene()->getGPU().value().primeGPU();
 			this->getNextScene()->load();
+			//this->getNextScene()->getGPU().value().finish();
 			this->getNextScene()->loaded = true;
 
 		});

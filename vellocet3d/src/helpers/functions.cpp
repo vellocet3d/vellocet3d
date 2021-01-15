@@ -8,6 +8,20 @@
 namespace vel::helpers::functions
 {
 
+	std::string str_replace(const std::string& from, const std::string& to, std::string str)
+	{
+		if (from.empty())
+			return str;
+
+		size_t start_pos = 0;
+		while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+			str.replace(start_pos, from.length(), to);
+			start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+		}
+
+		return str;
+	}
+
 	btQuaternion glmToBulletQuat(glm::quat glmQuat)
 	{
 		return btQuaternion(glmQuat.x, glmQuat.y, glmQuat.z, glmQuat.w);

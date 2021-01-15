@@ -440,8 +440,11 @@ namespace vel::scene
             int meshTextureIndex = 0;
             for (auto& t : this->stageParentScene->getGPU().value().getTextures()) // ignore intellisense error on getTextures()
             {
-                if (t.fullPath == (this->currentAssetDirectory + "/" + str.C_Str()))
+				std::string current_asset_full_path = this->currentAssetDirectory + "/" + str.C_Str();
+
+				if(str_replace("/", "", str_replace("\\", "", t.fullPath)) == str_replace("/", "", str_replace("\\", "", current_asset_full_path)))
                 {
+					//std::cout << "EXISTING: " << str.C_Str() << "\n";
                     this->currentMeshTextureIndex = meshTextureIndex;
                     break;
                 }
@@ -450,6 +453,8 @@ namespace vel::scene
             // ...otherwise create a new texture
             if (!this->currentMeshTextureIndex)
             {
+				//std::cout << "NEW: " << str.C_Str() << "\n";
+
 				//TODO: hack that will only work for .fbx files with textures in separate .fbm directory separated by windows directory separator, fix correctly later
 				auto textureDirAndName = vel::helpers::functions::explode_string(str.C_Str(), '\\');
 

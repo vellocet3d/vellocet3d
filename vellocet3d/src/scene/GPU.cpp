@@ -262,6 +262,8 @@ namespace vel::scene
             else if (nrComponents == 4)
                 format = GL_RGBA;
 
+			//std::cout << texture.filename << ":" << nrComponents << "\n";
+
             glBindTexture(GL_TEXTURE_2D, texture.id);
 
 			// load the base level texture
@@ -486,6 +488,10 @@ namespace vel::scene
         }
     }
 		
+	void GPU::finish()
+	{
+		glFinish();
+	}
 	
 
 }

@@ -25,4 +25,5 @@ namespace vel::helpers::functions
 	glm::quat bulletToGlmQuat(btQuaternion btQuat);
 	btQuaternion glmToBulletQuat(glm::quat glmQuat);
 	glm::vec2 invertVec2(glm::vec2 in);
+	std::string str_replace(const std::string& from, const std::string& to, std::string str);
 }

@@ -61,6 +61,7 @@ namespace vel::scene
 		void								primeGPU();
 
 		void								wipe();
+		void								finish();
 		
 
     };
