@@ -19,18 +19,11 @@ namespace vel::scene
 	{
 		this->stages.reserve(10); // can't see ever needing more than 10 stages (naive, but good enough until it's not)
 
-		//if (!this->headless)
-		//{
-		//	this->gpu = GPU();
-		//}
-
-		std::cout << "Scene Constructor Ran\n";
 	}
 
 	Scene::~Scene()
 	{
-		std::cout << "Scene Destructor Ran\n";
-		//this->gpu->wipe();
+		
 	}
 
 	void Scene::applyTransformations()

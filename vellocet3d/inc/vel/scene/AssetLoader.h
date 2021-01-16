@@ -52,6 +52,8 @@ namespace vel::scene
 		glm::mat4							aiMatrix4x4ToGlm(const aiMatrix4x4 &from);
 		std::optional<size_t>				getExistingAnimationIndex(std::string animationName);
 
+		std::pair<std::string, std::string> get_texture_path_and_file(std::string in);
+
 		aiMatrix4x4							glmToAssImpMat4(glm::mat4 mat);
 
 		std::vector<size_t>					addedActorIndexes;

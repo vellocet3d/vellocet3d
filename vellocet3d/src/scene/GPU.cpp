@@ -317,7 +317,7 @@ namespace vel::scene
 						else if (mip_nrComponents == 4)
 							mip_format = GL_RGBA;
 
-						std::cout << full_mip_file_path << ":" << mip_nrComponents << "\n";
+						//std::cout << full_mip_file_path << ":" << mip_nrComponents << "\n";
 
 						glTexImage2D(GL_TEXTURE_2D, mipcount, mip_format, mip_width, mip_height, 0, mip_format, GL_UNSIGNED_BYTE, mip_data);
 

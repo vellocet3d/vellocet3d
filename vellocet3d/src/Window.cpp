@@ -138,7 +138,7 @@ namespace vel
 			this->nextFreeContext = 2;
 			return this->openGLContext1;
 		}
-		else if (this->nextFreeContext == 2)
+		else
 		{
 			this->nextFreeContext = 1;
 			return this->openGLContext2;

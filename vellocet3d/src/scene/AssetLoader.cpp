@@ -453,13 +453,10 @@ namespace vel::scene
             // ...otherwise create a new texture
             if (!this->currentMeshTextureIndex)
             {
-				//std::cout << "NEW: " << str.C_Str() << "\n";
-
-				//TODO: hack that will only work for .fbx files with textures in separate .fbm directory separated by windows directory separator, fix correctly later
-				auto textureDirAndName = vel::helpers::functions::explode_string(str.C_Str(), '\\');
+				auto texturePathAndFile = this->get_texture_path_and_file(str.C_Str());
 
                 this->currentMeshTextureIndex = this->stageParentScene->getGPU().value().loadTexture("diffuse", 
-					this->currentAssetDirectory + '/' + textureDirAndName[0], textureDirAndName[1]);
+					this->currentAssetDirectory + '/' + texturePathAndFile.first, texturePathAndFile.second);
             }
 
         }
@@ -512,4 +509,34 @@ namespace vel::scene
 			glmMat[12], glmMat[13], glmMat[14], glmMat[15]
 		);
 	}
+
+	std::pair<std::string, std::string> AssetLoader::get_texture_path_and_file(std::string in)
+	{
+		std::pair<std::string, std::string> out;
+
+		if (!string_contains("\\", in) && !string_contains("/", in))
+		{
+			out.first = "";
+			out.second = in;
+
+			return out;
+		}
+
+		if (string_contains("\\", in))
+		{
+			in = str_replace("\\", "/", in);
+		}
+
+		auto exp_val = explode_string(in, '/');
+
+		for (size_t i = 0; i <= exp_val.size() - 2; i++)
+		{
+			out.first += "/" + exp_val[i];
+		}
+
+		out.second = exp_val[exp_val.size() - 1];
+
+		return out;
+	}
+
 }
