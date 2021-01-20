@@ -16,11 +16,11 @@
 
 namespace vel
 {
-    Window::Window(int screenWidth, int screenHeight, bool fullScreen, bool cursorHidden, bool useImGui) :
-        screenSize(glm::ivec2(screenWidth, screenHeight)),
-        fullScreen(fullScreen),
-		cursorHidden(cursorHidden),
-		useImGui(useImGui),
+    Window::Window(Config c) :
+        screenSize(glm::ivec2(c.SCREEN_WIDTH, c.SCREEN_HEIGHT)),
+        fullScreen(c.FULLSCREEN),
+		cursorHidden(c.CURSOR_HIDDEN),
+		useImGui(c.USE_IMGUI),
 		nextFreeContext(0) // 0-2
     {
         // Initialize GLFW. This is the library that creates our cross platform (kinda since
@@ -103,6 +103,13 @@ namespace vel
 					//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 					//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
+					// get pointer to default font
+					this->imguiFonts["default"] = io.Fonts->AddFontDefault();
+
+					// create fonts
+					for (auto& f : c.imguiFonts)
+						this->imguiFonts[f.key] = io.Fonts->AddFontFromFileTTF(f.path.c_str(), f.pixels);
+
 					// Setup Dear ImGui style
 					ImGui::StyleColorsDark();
 					//ImGui::StyleColorsClassic();
@@ -125,6 +132,11 @@ namespace vel
         // Terminate GLFW application process
         glfwTerminate();
     }
+
+	ImFont* Window::getImguiFont(std::string key)
+	{
+		return this->imguiFonts[key];
+	}
 
 	void Window::setOpenGLContext(GLFWusercontext* c)
 	{

@@ -2,14 +2,18 @@
 
 #include <string>
 #include <chrono>
+#include <map>
 
 #include "glm/glm.hpp"
 
+
 #include "vel/InputState.h"
+#include "vel/Config.h"
 
 
 struct GLFWwindow;
 struct GLFWusercontext;
+struct ImFont;
 
 namespace vel
 {
@@ -36,9 +40,11 @@ namespace vel
 
 		size_t				nextFreeContext;
 
+		std::map<std::string, ImFont*> imguiFonts;
+
     public:
 							Window(Window&&) = default;
-							Window(int screenWidth, int screenHeight, bool fullScreen, bool cursorHidden, bool useImGui);
+							Window(Config c);
 							~Window();
         void				setTitle(std::string title);
         bool				shouldClose();
@@ -51,6 +57,7 @@ namespace vel
         //void				vsync();
 		GLFWusercontext*	getNextFreeOpenGLContext();
 		void				setOpenGLContext(GLFWusercontext* c);
+		ImFont*				getImguiFont(std::string key);
 
     };
     

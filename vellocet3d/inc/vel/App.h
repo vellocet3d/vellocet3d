@@ -70,6 +70,7 @@ namespace vel
 		float											getLogicTime();
 
 		GLFWusercontext*								getNextFreeOpenGLContext();
+		ImFont*											getImguiFont(std::string key);
 
     };
 };

@@ -33,12 +33,19 @@ namespace vel
         if (!this->config.HEADLESS)
         {
 			// create window
-            auto w = std::make_unique<Window>(this->config.SCREEN_WIDTH, this->config.SCREEN_HEIGHT, 
-				this->config.FULLSCREEN, this->config.CURSOR_HIDDEN, this->config.USE_IMGUI);
+            auto w = std::make_unique<Window>(this->config);
             this->window = std::move(w);
         }
 
     }
+
+	ImFont* App::getImguiFont(std::string key)
+	{
+		if (!this->config.HEADLESS)
+			return this->window.value()->getImguiFont(key);
+		else
+			return nullptr;
+	}
 
 	GLFWusercontext* App::getNextFreeOpenGLContext()
 	{
@@ -64,7 +71,7 @@ namespace vel
 
 			this->getNextScene()->getGPU().value().primeGPU();
 			this->getNextScene()->load();
-			//this->getNextScene()->getGPU().value().finish();
+			this->getNextScene()->getGPU().value().finish();
 			this->getNextScene()->loaded = true;
 
 		});
@@ -273,9 +280,11 @@ namespace vel
                     {
 						//std::cout << "call draw:" << this->currentTime << "\n";
                         this->scene.value()->draw(renderLerpInterval);
+
+						this->window.value()->renderGui();
                     }
 
-					this->window.value()->renderGui();
+					
                     this->window.value()->swapBuffers();
                 }
 
