@@ -39,6 +39,21 @@ namespace vel
 
     }
 
+	void App::forceImguiRender()
+	{
+		this->window.value()->renderGui();
+	}
+
+	void App::showMouseCursor()
+	{
+		this->window.value()->showMouseCursor();
+	}
+
+	void App::hideMouseCursor()
+	{
+		this->window.value()->hideMouseCursor();
+	}
+
 	ImFont* App::getImguiFont(std::string key)
 	{
 		if (!this->config.HEADLESS)

@@ -84,15 +84,19 @@ namespace vel
                 // to use a callback)
                 this->setCallbacks();
 
+				glfwSetInputMode(this->glfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
                 // Set window input mode
 				if (this->cursorHidden)
 				{
 					glfwSetInputMode(this->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-					glfwSetInputMode(this->glfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+					//glfwSetInputMode(this->glfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 				}
 
                 // Set opengl viewport size
                 glViewport(0, 0, this->screenSize.x, this->screenSize.y);
+
+				//glfwFocusWindow(this->glfwWindow);
 
 				if (this->useImGui)
 				{
@@ -132,6 +136,18 @@ namespace vel
         // Terminate GLFW application process
         glfwTerminate();
     }
+
+	void Window::showMouseCursor()
+	{
+		glfwSetInputMode(this->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
+	void Window::hideMouseCursor()
+	{
+		glfwSetInputMode(this->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		//glfwFocusWindow(this->glfwWindow);
+		//glfwSetInputMode(this->glfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+	}
 
 	ImFont* Window::getImguiFont(std::string key)
 	{
@@ -187,6 +203,20 @@ namespace vel
             glViewport(0, 0, width, height);
 
         });
+
+		glfwSetWindowFocusCallback(this->glfwWindow, [](GLFWwindow* window, int focused) {
+		
+			if (focused)
+			{
+				std::cout << "window focused\n";
+			}
+			else
+			{
+				std::cout << "window NOT focused\n";
+			}
+		
+		});
+
     }
 
 	void Window::renderGui()
@@ -453,6 +483,8 @@ namespace vel
 		double mYPos;
 
         glfwGetCursorPos(this->glfwWindow, &mXPos, &mYPos);
+
+		//std::cout << mXPos << "\n";
 
 		this->inputState.mouseXPos = (float)mXPos;
 		this->inputState.mouseYPos = (float)mYPos;

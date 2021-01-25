@@ -42,11 +42,13 @@ namespace vel
         
 
         // User defined via config.ini
-        const int							SCREEN_WIDTH;
-        const int							SCREEN_HEIGHT;
-        const bool							FULLSCREEN;
-        const double						MAX_RENDER_FPS;
-		const float							MOUSE_SENSITIVITY;
+        int									SCREEN_WIDTH;
+        int									SCREEN_HEIGHT;
+        bool								FULLSCREEN;
+        double								MAX_RENDER_FPS;
+		float								MOUSE_SENSITIVITY;
+
+		void								updateConfigFile();
 
     };
 }

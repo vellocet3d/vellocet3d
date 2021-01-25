@@ -58,6 +58,8 @@ namespace vel
 		GLFWusercontext*	getNextFreeOpenGLContext();
 		void				setOpenGLContext(GLFWusercontext* c);
 		ImFont*				getImguiFont(std::string key);
+		void				hideMouseCursor();
+		void				showMouseCursor();
 
     };
     

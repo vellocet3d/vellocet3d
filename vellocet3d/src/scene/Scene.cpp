@@ -19,11 +19,13 @@ namespace vel::scene
 	{
 		this->stages.reserve(10); // can't see ever needing more than 10 stages (naive, but good enough until it's not)
 
+		std::cout << "scene constructing - Context:" << this->getGPU().value().getOpenGLContext() << "\n";
+
 	}
 
 	Scene::~Scene()
 	{
-		
+		std::cout << "scene destructing - Context:" << this->getGPU().value().getOpenGLContext() << "\n";
 	}
 
 	void Scene::applyTransformations()

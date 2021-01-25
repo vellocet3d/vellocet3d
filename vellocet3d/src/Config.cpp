@@ -18,6 +18,20 @@ namespace vel
 		MOUSE_SENSITIVITY(userConfigParams.count("mouseSensitivity") != 0 ? std::stof(this->userConfigParams["mouseSensitivity"]) : 0.08f)
 	{};
 
+	void Config::updateConfigFile()
+	{
+		std::ofstream outStream("data/config.ini", std::ofstream::trunc);
+
+		outStream << "screenWidth=" << this->SCREEN_WIDTH << std::endl;
+		outStream << "screenHeight=" << this->SCREEN_HEIGHT << std::endl;
+		outStream << "fullScreen=" << (this->FULLSCREEN ? "1" : "0") << std::endl;
+		outStream << "maxFps=" << this->MAX_RENDER_FPS << std::endl;
+		outStream << "mouseSensitivity=" << this->MOUSE_SENSITIVITY << std::endl;
+
+		outStream.close();
+
+	}
+
     std::map<std::string, std::string> Config::loadFromFile(std::string path)
     {
         std::ifstream conf;

@@ -20,7 +20,7 @@ namespace vel
     class App
     {
     public:
-        const Config									config;
+        Config											config;
         Logger											logger;
 
 
@@ -71,6 +71,10 @@ namespace vel
 
 		GLFWusercontext*								getNextFreeOpenGLContext();
 		ImFont*											getImguiFont(std::string key);
+		void											hideMouseCursor();
+		void											showMouseCursor();
+
+		void											forceImguiRender();
 
     };
 };
