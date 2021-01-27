@@ -54,9 +54,9 @@ namespace vel
         static void										init(Config conf);
 														App(App const&) = delete;
         void											operator=(App const&) = delete;
-        void											setScene(scene::Scene* scene);
+        void											blockingSceneLoad(scene::Scene* scene);
 		scene::Scene*									getScene();
-		void											loadNextScene(scene::Scene* scene);
+		void											nonBlockingSceneLoad(scene::Scene* scene, double minTime = 0.0);
 		scene::Scene*									getNextScene();
 		void											clearNextScene();
         void											clearScene();

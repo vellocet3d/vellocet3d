@@ -21,6 +21,7 @@ namespace vel
         fullScreen(c.FULLSCREEN),
 		cursorHidden(c.CURSOR_HIDDEN),
 		useImGui(c.USE_IMGUI),
+		imguiFrameOpen(false),
 		nextFreeContext(0) // 0-2
     {
         // Initialize GLFW. This is the library that creates our cross platform (kinda since
@@ -219,12 +220,18 @@ namespace vel
 
     }
 
+	bool Window::getImguiFrameOpen()
+	{
+		return this->imguiFrameOpen;
+	}
+
 	void Window::renderGui()
 	{
 		if (this->useImGui)
 		{
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			this->imguiFrameOpen = false;
 		}
 	}
 
@@ -241,6 +248,7 @@ namespace vel
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
+			this->imguiFrameOpen = true;
 		}
 
     }

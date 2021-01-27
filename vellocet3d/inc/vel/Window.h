@@ -41,6 +41,7 @@ namespace vel
 		size_t				nextFreeContext;
 
 		std::map<std::string, ImFont*> imguiFonts;
+		bool				imguiFrameOpen;
 
     public:
 							Window(Window&&) = default;
@@ -60,6 +61,7 @@ namespace vel
 		ImFont*				getImguiFont(std::string key);
 		void				hideMouseCursor();
 		void				showMouseCursor();
+		bool				getImguiFrameOpen();
 
     };
     

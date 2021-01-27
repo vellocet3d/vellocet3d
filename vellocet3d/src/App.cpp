@@ -1,6 +1,7 @@
 #include <iostream>
 #include <limits>
 #include <thread> 
+#include <chrono>
 
 
 #include "btBulletCollisionCommon.h"
@@ -9,6 +10,7 @@
 
 #include "vel/App.h"
 
+using namespace std::chrono_literals;
 
 namespace vel
 {
@@ -67,26 +69,35 @@ namespace vel
 		return this->window.value()->getNextFreeOpenGLContext();
 	}
 
-    void App::setScene(scene::Scene* scene)
+	scene::Scene* App::getScene()
+	{
+		return this->scene.value().get();
+	}
+
+    void App::blockingSceneLoad(scene::Scene* scene)
     {
+		if(this->window && this->window.value()->getImguiFrameOpen())
+			this->forceImguiRender();
+
         this->scene = std::move(std::move(std::unique_ptr<scene::Scene>(scene)));
 		this->scene.value()->getGPU().value().primeGPU();
     }
 
-	scene::Scene* App::getScene()
-    {
-        return this->scene.value().get();
-    }
-
-	void App::loadNextScene(scene::Scene* scene)
+	void App::nonBlockingSceneLoad(scene::Scene* scene, double minTime)
 	{
 		this->nextScene = scene;
 
-		std::thread t([this]{
+		std::thread t([this, minTime]{
+
+			double startTime = this->time();
 
 			this->getNextScene()->getGPU().value().primeGPU();
 			this->getNextScene()->load();
 			this->getNextScene()->getGPU().value().finish();
+
+			while (this->time() - startTime < minTime)
+				std::this_thread::sleep_for(250ms);
+
 			this->getNextScene()->loaded = true;
 
 		});
@@ -214,7 +225,7 @@ namespace vel
 			
 			if (this->nextScene && this->nextScene->loaded)
 			{
-				this->setScene(this->getNextScene());
+				this->blockingSceneLoad(this->getNextScene());
 				this->clearNextScene();
 
 				// swap contexts
