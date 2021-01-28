@@ -180,6 +180,7 @@ namespace vel::scene::stage
 	void Actor::setParentActor(Actor* a)
 	{
 		this->parentActor = a;
+		a->addChildActor(this);
 	}
 
 	void Actor::setParentActorBone(vel::scene::armature::Bone* b)
@@ -265,6 +266,10 @@ namespace vel::scene::stage
 	void Actor::setVisible(bool v)
 	{
 		this->visible = v;
+		
+		for (auto& ca : this->childActors)
+			ca->setVisible(v);
+
 	}
 
     const std::pair<size_t, size_t>& Actor::getRenderCommand() const

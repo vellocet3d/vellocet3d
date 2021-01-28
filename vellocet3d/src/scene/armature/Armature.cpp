@@ -67,6 +67,8 @@ namespace vel::scene::armature
 		std::vector<TRS> activeAnimationsTRS;
 		for (auto& aa : this->activeAnimations)
 		{
+			//std::cout << aa.animation->name << "\n";
+			//std::cout << bone.name << "\n";
 			auto channel = &aa.animation->channels[bone.name];
 			auto it = std::upper_bound(channel->positionKeyTimes.begin(), channel->positionKeyTimes.end(), aa.animationKeyTime);
 			auto tmpKey = (size_t)(it - channel->positionKeyTimes.begin());
@@ -217,6 +219,8 @@ namespace vel::scene::armature
 		a.currentAnimationCycle = 0;
 		a.blendPercentage = 0.0f;
 		a.repeat = repeat;
+
+		//std::cout << "aan:" << a.animation->name << "\n";
 
 		this->activeAnimations.push_back(a);
 	}
