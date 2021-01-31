@@ -263,8 +263,8 @@ namespace vel
                 {                    
                     if (this->scene && this->scene.value()->loaded) 
                     {
-						// update animations
-						this->scene.value()->updateAnimations(this->fixedLogicTime);
+						//// update animations
+						//this->scene.value()->updateAnimations(this->fixedLogicTime);
 
 						//// step physics simulation
 						//this->scene.value()->stepPhysics((float)this->fixedLogicTime);
@@ -277,6 +277,9 @@ namespace vel
 
 						// execute inner loop (fixed rate) logic
 						this->scene.value()->innerLoop((float)this->fixedLogicTime);
+
+						// update animations
+						this->scene.value()->updateAnimations(this->fixedLogicTime);
 
 						// step physics simulation
 						this->scene.value()->stepPhysics((float)this->fixedLogicTime);

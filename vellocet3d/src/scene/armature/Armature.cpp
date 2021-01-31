@@ -18,8 +18,7 @@ namespace vel::scene::armature
 		parentStage(parentStage),
 		name(name),
 		runTime(0.0),
-		previousRunTime(0.0),
-		stepTime(0.0)
+		previousRunTime(0.0)
 	{}
 
 	glm::vec3 Armature::calcTranslation(const float& time, size_t currentKeyIndex, vel::scene::animation::Channel* channel)
@@ -132,8 +131,10 @@ namespace vel::scene::armature
 	{
 		this->previousRunTime = this->runTime;
 		this->runTime = runTime;
-		this->stepTime = this->runTime - this->previousRunTime;
+		auto stepTime = this->runTime - this->previousRunTime;
 
+		//if (this->activeAnimations.size() == 0)
+		//	return;
 
 		// get most recent active animation
 		auto& activeAnimation = this->activeAnimations.back();
@@ -153,7 +154,7 @@ namespace vel::scene::armature
 
 			// if blendPercentage is greater than or equal to 1.0f, then we have completed the blending phase and this animation
 			// can continue to play without interpolating between previous animations, therefore we clear all previous animations
-			// from this->activeAnimations and reset activeAnimation value (since removal will shift memory)
+			// from this->activeAnimations
 			if (activeAnimation.blendPercentage >= 1.0f)
 			{
 				for (size_t i = 0; i < this->activeAnimations.size() - 1; i++)
@@ -168,6 +169,8 @@ namespace vel::scene::armature
 
 			activeAnimation.lastAnimationKeyTime = activeAnimation.animationKeyTime;
 			activeAnimation.animationKeyTime = (float)fmod(activeAnimation.animationTime * activeAnimation.animation->tps, activeAnimation.animation->duration);
+
+			//std::cout << activeAnimation.animationKeyTime << "\n";
 
 			if (activeAnimation.animationKeyTime < activeAnimation.lastAnimationKeyTime)
 			{
@@ -200,7 +203,7 @@ namespace vel::scene::armature
 					}
 				}
 
-				activeAnimation.animationTime += this->stepTime;
+				activeAnimation.animationTime += stepTime;
 			}
 		}
 	}

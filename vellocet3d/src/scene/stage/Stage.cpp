@@ -225,7 +225,8 @@ namespace vel::scene::stage
 	{
 		for (auto& a : this->actors)
 		{
-			if (!a.isDeleted() && a.isAnimated() && a.isVisible())
+			//if (!a.isDeleted() && a.isAnimated() && a.isVisible())
+			if (!a.isDeleted() && a.isAnimated())
 			{
 				a.getArmature()->updateAnimation(runTime, a.getParentMatrix());
 			}

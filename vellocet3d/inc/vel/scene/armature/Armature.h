@@ -31,8 +31,7 @@ namespace vel::scene::armature
 		std::vector<std::pair<std::string, size_t>>			animations;
 		std::deque<ActiveAnimation>							activeAnimations;
 		double												runTime;
-		double												previousRunTime;
-		double												stepTime;		
+		double												previousRunTime;		
 		void												updateBone(size_t index, glm::mat4 parentMatrix);
 		glm::vec3											calcTranslation(const float& time, size_t currentKeyIndex, vel::scene::animation::Channel* channel);
 		glm::quat											calcRotation(const float& time, size_t currentKeyIndex, vel::scene::animation::Channel* channel);
@@ -59,6 +58,7 @@ namespace vel::scene::armature
 		float												getCurrentAnimationKeyTime();
 
 		void												playAnimation(std::string animationName, bool repeat = true, int blendTime = 0);
+
 
 	};
 }
