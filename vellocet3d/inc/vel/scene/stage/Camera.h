@@ -37,6 +37,7 @@ namespace vel::scene::stage
 		glm::mat4               getViewMatrix();
         glm::mat4               getProjectionMatrix();
         glm::vec3               getPosition();
+		glm::ivec2				getScreenSize();
         void                    setPosition(float x, float y, float z);
 		void                    setPosition(glm::vec3 position);
         void                    setLookAt(float x, float y, float z);

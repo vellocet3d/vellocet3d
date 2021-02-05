@@ -20,6 +20,11 @@ namespace vel::scene::stage
         
     }
 
+	glm::ivec2 Camera::getScreenSize()
+	{
+		return glm::ivec2(this->screenSize->x, this->screenSize->y);
+	}
+
 	void Camera::updateProjectionMatrix()
 	{
 		if (type == CameraType::ORTHOGRAPHIC)
