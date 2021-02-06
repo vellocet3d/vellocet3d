@@ -10,8 +10,8 @@ namespace vel::scene
 {
 	CollisionDebugDrawer::CollisionDebugDrawer() 
 	{
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
+		glGenVertexArrays(1, &this->VAO);
+		glGenBuffers(1, &this->VBO);
 	};
 
 	CollisionDebugDrawer::~CollisionDebugDrawer() 
@@ -51,8 +51,8 @@ namespace vel::scene
 	{
 		if (this->verts.size() > 0)
 		{
-			glBindVertexArray(VAO);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			glBindVertexArray(this->VAO);
+			glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
 
 			glBufferData(GL_ARRAY_BUFFER, this->verts.size() * sizeof(BulletDebugDrawData), &this->verts[0], GL_STATIC_DRAW);
 

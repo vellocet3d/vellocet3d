@@ -128,6 +128,8 @@ namespace vel::scene
 
     void Scene::draw(float alpha)
     {
+		//std::cout << "new draw iteration---------------------------------------\n";
+
         GPU& gpu = this->gpu.value(); // for convenience
 
         for (auto& s : this->stages)
@@ -143,6 +145,9 @@ namespace vel::scene
 				gpu.clearDepthBuffer();
 			}
 
+			// should always have a camera if we've made it this far
+			s.getCamera()->update(alpha);
+
 			// if debug drawer set, do debug draw
 			if (s.collisionDebugging())
 			{
@@ -151,18 +156,24 @@ namespace vel::scene
 				gpu.useShader(2);
 				gpu.setShaderMat4("vp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix());
 				gpu.getCollisionDebugDrawer()->draw(); // draw all loaded vertices with a single call and clear
+
+				//std::cout << "debug draw\n";
 			}
 
             //s.printRenderCommands();            
 
             // should always have a camera if we've made it this far
-            s.getCamera()->update(alpha);
+            //s.getCamera()->update(alpha);
 
 			//std::cout << "----------------------------------\n";
+
+			//std::cout << "gpu active before rco loop:" << gpu.getActiveShaderIndex() << "," << gpu.getActiveMeshRenderableIndex() << "," << gpu.getActiveTextureIndex() << "\n";
 
             for (auto& rco : s.getRenderCommandsOrder().value())
             {
                 RenderCommand& rc = s.getRenderCommand(rco);
+
+				//std::cout << "rc:" << rc.getShaderIndex() << "," << rc.getMeshIndex() << "," << rc.getTextureIndex() << "\n";
 
                 if (rc.getShaderIndex() != gpu.getActiveShaderIndex())
                 {
@@ -185,6 +196,7 @@ namespace vel::scene
                     Actor* a = s.getActor(ai);
 
 					//std::cout << a->getName() << ":" << rc.getShaderIndex() << "-" << rc.getMeshIndex() << "-" << rc.getTextureIndex() << "\n";
+					//std::cout << a->getName() << ":" << gpu.getActiveShaderIndex() << "-" << gpu.getActiveMeshRenderableIndex() << "-" << gpu.getActiveTextureIndex() << "\n";
 
                     if (!a->isDeleted() && a->isVisible())
                     {

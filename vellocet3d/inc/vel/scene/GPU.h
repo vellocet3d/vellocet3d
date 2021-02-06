@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <optional>
 
 #include "glm/glm.hpp"
 
@@ -26,7 +27,8 @@ namespace vel::scene
         size_t								activeShaderIndex;
 		size_t								activeMeshRenderableIndex;
 		size_t								activeTextureIndex;
-		std::unique_ptr<CollisionDebugDrawer> collisionDebugDrawer;
+		//std::unique_ptr<CollisionDebugDrawer> collisionDebugDrawer;
+		std::optional<CollisionDebugDrawer> collisionDebugDrawer;
 
 		GLFWusercontext*					openGLContext;
 		

@@ -22,7 +22,7 @@ namespace vel::scene
         activeShaderIndex(-1),
         activeMeshRenderableIndex(-1),
         activeTextureIndex(-1),
-		collisionDebugDrawer(std::move(std::make_unique<CollisionDebugDrawer>())),
+		//collisionDebugDrawer(std::move(std::make_unique<CollisionDebugDrawer>())),
 		openGLContext(App::get().getNextFreeOpenGLContext())
     {
 	
@@ -51,6 +51,11 @@ namespace vel::scene
 		// set openGLContext as current context for executing thread
 		glfwMakeUserContextCurrent(this->openGLContext);
 
+		// create collision debug drawer
+		//this->collisionDebugDrawer = std::make_unique<CollisionDebugDrawer>();
+
+		this->collisionDebugDrawer = CollisionDebugDrawer();
+
 		// create default shaders
 		this->loadShader("default", App::get().config.DEFAULT_VERTEX_SHADER, App::get().config.DEFAULT_FRAGMENT_SHADER);
 		this->loadShader("default_skinned", App::get().config.DEFAULT_SKINNED_VERTEX_SHADER, App::get().config.DEFAULT_SKINNED_FRAGMENT_SHADER);
@@ -67,7 +72,11 @@ namespace vel::scene
 
 	CollisionDebugDrawer* GPU::getCollisionDebugDrawer()
 	{
-		return this->collisionDebugDrawer.get();
+		//return this->collisionDebugDrawer.get();
+		if (this->collisionDebugDrawer)
+			return &this->collisionDebugDrawer.value();
+		else
+			return nullptr;
 	}
 
     size_t GPU::loadShader(const std::string name, const std::string vertFile, const std::string fragFile)
