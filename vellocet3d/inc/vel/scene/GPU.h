@@ -64,7 +64,7 @@ namespace vel::scene
 
 		void								wipe();
 		void								finish();
-		
+		void								enableBlend();
 
     };
 }

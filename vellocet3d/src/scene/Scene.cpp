@@ -132,6 +132,8 @@ namespace vel::scene
 
         GPU& gpu = this->gpu.value(); // for convenience
 
+		gpu.enableBlend();
+
         for (auto& s : this->stages)
         {
 			if (!s.isVisible())
