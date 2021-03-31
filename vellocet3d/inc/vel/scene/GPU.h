@@ -61,6 +61,7 @@ namespace vel::scene
 		
 		GLFWusercontext*					getOpenGLContext();
 		void								primeGPU();
+		void								detachOpenGLContext(); // detach context from current thread
 
 		void								wipe();
 		void								finish();

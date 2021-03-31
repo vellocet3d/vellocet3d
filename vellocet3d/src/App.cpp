@@ -95,6 +95,8 @@ namespace vel
 			this->getNextScene()->load();
 			this->getNextScene()->getGPU().value().finish();
 
+			this->getNextScene()->getGPU().value().detachOpenGLContext();
+
 			while (this->time() - startTime < minTime)
 				std::this_thread::sleep_for(250ms);
 

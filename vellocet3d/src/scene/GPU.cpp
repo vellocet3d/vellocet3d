@@ -65,6 +65,11 @@ namespace vel::scene
 		this->loadTexture("diffuse", "data/models", "default_texture.jpg");
 	}
 
+	void GPU::detachOpenGLContext()
+	{
+		glfwMakeUserContextCurrent(NULL);
+	}
+
 	GLFWusercontext* GPU::getOpenGLContext()
 	{
 		return this->openGLContext;
