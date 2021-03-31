@@ -11,15 +11,16 @@
 
 #include "vel/scene/mesh/Mesh.h"
 #include "vel/scene/stage/Stage.h"
-#include "vel/scene/Shader.h"
+#include "vel/Shader.h"
 #include "vel/scene/stage/Transform.h"
 #include "vel/scene/armature/Armature.h"
 #include "vel/scene/mesh/VertexBoneData.h"
+#include "vel/scene/Scene.h"
 
 using namespace vel::scene::stage;
 
 
-namespace vel::scene
+namespace vel
 {
 
 	class AssetLoader
@@ -28,17 +29,17 @@ namespace vel::scene
 		Assimp::Importer					aiImporter;
 		const aiScene*						aiScene;
 		bool								headless;
-		Scene*								stageParentScene;
+		vel::scene::Scene*					stageParentScene;
 		Stage*								currentStage;
 		std::string							currentAssetFile;
 		std::string							currentAssetDirectory;
 		Transform							currentTransform;
 		std::optional<size_t>				currentMeshIndex;
 		std::optional<size_t>				currentMeshTextureIndex;
-		armature::Armature*					currentArmature;
+		scene::armature::Armature*					currentArmature;
 		bool								currentIsDynamic;
 		std::vector<std::string>			processedNodes;
-		std::vector<mesh::VertexBoneData>	currentMeshBones;
+		std::vector<scene::mesh::VertexBoneData>	currentMeshBones;
 		glm::mat4							currentGlobalInverseMatrix;
 		glm::mat4							blenderRotationCorrectionMatrix;
 		glm::mat4							blenderRotationCorrectionPerVertexMatrix;
@@ -59,7 +60,7 @@ namespace vel::scene
 		std::vector<size_t>					addedActorIndexes;
 
 	public:
-																	AssetLoader(Scene* stageParentScene, Stage* stage, std::string assetFile, bool dynamic);
+																	AssetLoader(vel::scene::Scene* stageParentScene, Stage* stage, std::string assetFile, bool dynamic);
 		std::optional<std::function<int(std::string actorName)>>	findShaderId;
 		std::vector<size_t>											loadActors();
 

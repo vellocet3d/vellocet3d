@@ -8,33 +8,32 @@
 #include "glm/glm.hpp"
 
 
-#include "vel/scene/Shader.h"
+#include "vel/Shader.h"
 #include "vel/scene/mesh/Mesh.h"
 #include "vel/scene/mesh/Texture.h"
-#include "vel/scene/CollisionDebugDrawer.h"
+#include "vel/CollisionDebugDrawer.h"
 
 struct GLFWusercontext;
 
-namespace vel::scene
+namespace vel
 {
     class GPU
     {
     private:
         std::string							shaderDirectory;
         std::vector<Shader>					shaders;
-        std::vector<mesh::Texture>			textures;
-		std::vector<mesh::Renderable>		meshRenderables;
+        std::vector<scene::mesh::Texture>			textures;
+		std::vector<scene::mesh::Renderable>		meshRenderables;
         size_t								activeShaderIndex;
 		size_t								activeMeshRenderableIndex;
 		size_t								activeTextureIndex;
 		//std::unique_ptr<CollisionDebugDrawer> collisionDebugDrawer;
 		std::optional<CollisionDebugDrawer> collisionDebugDrawer;
-
-		GLFWusercontext*					openGLContext;
 		
 
     public:
-											GPU();
+											GPU(std::string shaderDirectory, std::string dvs, std::string dfs, std::string dsvs, std::string dsfs,
+												std::string ddvs, std::string ddfs);
 											~GPU();
 											GPU(GPU&&) = default;
         void								enableDepthTest();
@@ -44,10 +43,10 @@ namespace vel::scene
         const size_t						getActiveMeshRenderableIndex() const;
         const size_t						getActiveTextureIndex() const;
 		size_t								loadShader(const std::string name, const std::string vertFile, const std::string fragFile);
-		size_t								loadMesh(mesh::Mesh& m);
+		size_t								loadMesh(scene::mesh::Mesh& m);
 		size_t								loadTexture(std::string type, std::string dir, std::string filename);
         void								useTexture(size_t textureIndex);
-        const std::vector<mesh::Texture>&	getTextures() const;
+        const std::vector<scene::mesh::Texture>&	getTextures() const;
         void								useShader(size_t shaderIndex);
         void								setShaderBool(const std::string &name, bool value) const;
         void								setShaderInt(const std::string &name, int value) const;
@@ -59,9 +58,9 @@ namespace vel::scene
 		void								clearDepthBuffer();
 		std::vector<std::string>			getActiveShaderNames(); // added this to assist debugging
 		
-		GLFWusercontext*					getOpenGLContext();
+
 		void								primeGPU();
-		void								detachOpenGLContext(); // detach context from current thread
+
 
 		void								wipe();
 		void								finish();

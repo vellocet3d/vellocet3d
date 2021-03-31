@@ -35,11 +35,6 @@ namespace vel
         void				setScroll();
         void				setCallbacks();
 
-		GLFWusercontext*	openGLContext1;
-		GLFWusercontext*	openGLContext2;
-
-		size_t				nextFreeContext;
-
 		std::map<std::string, ImFont*> imguiFonts;
 		bool				imguiFrameOpen;
 
@@ -56,8 +51,8 @@ namespace vel
         void				swapBuffers();
 		void				renderGui();
         //void				vsync();
-		GLFWusercontext*	getNextFreeOpenGLContext();
-		void				setOpenGLContext(GLFWusercontext* c);
+
+
 		ImFont*				getImguiFont(std::string key);
 		void				hideMouseCursor();
 		void				showMouseCursor();

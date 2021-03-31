@@ -14,8 +14,7 @@ namespace vel::scene
 	Scene::Scene() :
 		headless(App::get().config.HEADLESS),
 		loaded(false),
-		animationTime(0.0),
-		gpu(!this->headless ? std::make_optional<GPU>(GPU()) : std::nullopt)
+		animationTime(0.0)
 	{
 		this->stages.reserve(10); // can't see ever needing more than 10 stages (naive, but good enough until it's not)
 
@@ -57,7 +56,7 @@ namespace vel::scene
 
 	size_t Scene::addShader(std::string name, std::string vertName, std::string fragName)
 	{
-		return this->gpu->loadShader(name, vertName, fragName);
+		return App::get().getGPU()->loadShader(name, vertName, fragName);
 	}
 
 	Stage& Scene::addStage()
@@ -82,16 +81,11 @@ namespace vel::scene
 		return this->animations;
 	}
 
-	std::optional<GPU>& Scene::getGPU()
-	{
-		return this->gpu;
-	}
-
 	size_t Scene::addMesh(Mesh m)
 	{
 		if (!this->headless)
 		{
-			m.setMeshRenderableIndex(this->gpu->loadMesh(m));
+			m.setMeshRenderableIndex(App::get().getGPU()->loadMesh(m));
 		}
 		this->meshes.push_back(m);
 		return this->meshes.size() - 1;
@@ -130,9 +124,9 @@ namespace vel::scene
     {
 		//std::cout << "new draw iteration---------------------------------------\n";
 
-        GPU& gpu = this->gpu.value(); // for convenience
+        GPU* gpu = App::get().getGPU(); // for convenience
 
-		gpu.enableBlend();
+		gpu->enableBlend();
 
         for (auto& s : this->stages)
         {
@@ -144,7 +138,7 @@ namespace vel::scene
 			// clear depth buffer if flag set in stage
 			if (s.getClearDepthBuffer())
 			{
-				gpu.clearDepthBuffer();
+				gpu->clearDepthBuffer();
 			}
 
 			// should always have a camera if we've made it this far
@@ -155,9 +149,9 @@ namespace vel::scene
 			{
 				s.getCollisionWorld()->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
 
-				gpu.useShader(2);
-				gpu.setShaderMat4("vp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix());
-				gpu.getCollisionDebugDrawer()->draw(); // draw all loaded vertices with a single call and clear
+				gpu->useShader(2);
+				gpu->setShaderMat4("vp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix());
+				gpu->getCollisionDebugDrawer()->draw(); // draw all loaded vertices with a single call and clear
 
 				//std::cout << "debug draw\n";
 			}
@@ -177,19 +171,19 @@ namespace vel::scene
 
 				//std::cout << "rc:" << rc.getShaderIndex() << "," << rc.getMeshIndex() << "," << rc.getTextureIndex() << "\n";
 
-                if (rc.getShaderIndex() != gpu.getActiveShaderIndex())
+                if (rc.getShaderIndex() != gpu->getActiveShaderIndex())
                 {
-                    gpu.useShader(rc.getShaderIndex());
+                    gpu->useShader(rc.getShaderIndex());
                 }
 
-                if (rc.getMeshIndex() != gpu.getActiveMeshRenderableIndex())
+                if (rc.getMeshIndex() != gpu->getActiveMeshRenderableIndex())
                 {
-                    gpu.useMeshRenderable(rc.getMeshIndex());
+                    gpu->useMeshRenderable(rc.getMeshIndex());
                 }
 
-                if (rc.getTextureIndex() != gpu.getActiveTextureIndex())
+                if (rc.getTextureIndex() != gpu->getActiveTextureIndex())
                 {
-                    gpu.useTexture(rc.getTextureIndex());
+                    gpu->useTexture(rc.getTextureIndex());
                 }
 
                 // gpu state has been set, now draw all actors which use this gpu state
@@ -202,7 +196,7 @@ namespace vel::scene
 
                     if (!a->isDeleted() && a->isVisible())
                     {
-						gpu.setShaderMat4("mvp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix() * a->getWorldRenderMatrix(alpha));
+						gpu->setShaderMat4("mvp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix() * a->getWorldRenderMatrix(alpha));
 
 						// If this actor is animated, send the bone transforms of it's armature to the shader
 						if (a->isAnimated())
@@ -215,13 +209,13 @@ namespace vel::scene
 							{
 								glm::mat4 meshBoneTransform = mesh.getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrix(alpha) * mesh.getBone(boneIndex).offsetMatrix;
 
-								gpu.setShaderMat4(activeBone.second, meshBoneTransform);
+								gpu->setShaderMat4(activeBone.second, meshBoneTransform);
 
 								boneIndex++;
 							}
 						}
 
-                        gpu.drawMeshRenderable();
+                        gpu->drawMeshRenderable();
                     }
                 }
 

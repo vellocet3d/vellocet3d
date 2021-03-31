@@ -10,16 +10,16 @@
 
 
 #include "vel/App.h"
-#include "vel/scene/AssetLoader.h"
+#include "vel/AssetLoader.h"
 #include "vel/scene/mesh/Vertex.h"
 #include "vel/helpers/functions.h"
 
 
 using namespace vel::helpers::functions;
 
-namespace vel::scene
+namespace vel
 {
-	AssetLoader::AssetLoader(Scene* stageParentScene, Stage* stage, std::string assetFile, bool dynamic) :
+	AssetLoader::AssetLoader(vel::scene::Scene* stageParentScene, Stage* stage, std::string assetFile, bool dynamic) :
         headless(App::get().config.HEADLESS),
 		stageParentScene(stageParentScene),
         currentStage(stage),
@@ -377,13 +377,13 @@ namespace vel::scene
 
 
 		// if mesh has bones, process bones
-		std::vector<mesh::Bone> bones;
+		std::vector<scene::mesh::Bone> bones;
 
 		if (aiMesh->HasBones())
 		{
 			for (unsigned int i = 0; i < aiMesh->mNumBones; i++)
 			{
-				auto b = mesh::Bone();
+				auto b = scene::mesh::Bone();
 				b.name = aiMesh->mBones[i]->mName.C_Str();
 				b.offsetMatrix = this->aiMatrix4x4ToGlm(aiMesh->mBones[i]->mOffsetMatrix);
 				bones.push_back(b);
@@ -438,7 +438,7 @@ namespace vel::scene
 
             // determine if the texture already exists, if it does use it's index...
             int meshTextureIndex = 0;
-            for (auto& t : this->stageParentScene->getGPU().value().getTextures()) // ignore intellisense error on getTextures()
+            for (auto& t : App::get().getGPU()->getTextures()) // ignore intellisense error on getTextures()
             {
 				std::string current_asset_full_path = this->currentAssetDirectory + "/" + str.C_Str();
 
@@ -455,7 +455,7 @@ namespace vel::scene
             {
 				auto texturePathAndFile = this->get_texture_path_and_file(str.C_Str());
 
-                this->currentMeshTextureIndex = this->stageParentScene->getGPU().value().loadTexture("diffuse", 
+                this->currentMeshTextureIndex = App::get().getGPU()->loadTexture("diffuse",
 					this->currentAssetDirectory + '/' + texturePathAndFile.first, texturePathAndFile.second);
             }
 

@@ -2,11 +2,11 @@
 
 #include "glad/glad.h"
 
-#include "vel/scene/CollisionDebugDrawer.h"
+#include "vel/CollisionDebugDrawer.h"
 
 
 
-namespace vel::scene
+namespace vel
 {
 	CollisionDebugDrawer::CollisionDebugDrawer() 
 	{

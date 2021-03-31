@@ -35,8 +35,15 @@ namespace vel
         if (!this->config.HEADLESS)
         {
 			// create window
-            auto w = std::make_unique<Window>(this->config);
+            auto w = std::move(std::make_unique<Window>(this->config));
             this->window = std::move(w);
+
+			auto g = std::move(std::make_unique<GPU>(
+				this->config.SHADER_FILE_PATH, 
+				this->config.DEFAULT_VERTEX_SHADER, this->config.DEFAULT_FRAGMENT_SHADER,
+				this->config.DEFAULT_SKINNED_VERTEX_SHADER, this->config.DEFAULT_SKINNED_FRAGMENT_SHADER,
+				this->config.DEFAULT_DEBUG_VERTEX_SHADER, this->config.DEFAULT_DEBUG_FRAGMENT_SHADER));
+			this->gpu = std::move(g);
         }
 
     }
@@ -64,53 +71,18 @@ namespace vel
 			return nullptr;
 	}
 
-	GLFWusercontext* App::getNextFreeOpenGLContext()
-	{
-		return this->window.value()->getNextFreeOpenGLContext();
-	}
-
 	scene::Scene* App::getScene()
 	{
 		return this->scene.value().get();
 	}
 
-    void App::blockingSceneLoad(scene::Scene* scene)
+    void App::setScene(scene::Scene* scene)
     {
 		if(this->window && this->window.value()->getImguiFrameOpen())
 			this->forceImguiRender();
 
         this->scene = std::move(std::move(std::unique_ptr<scene::Scene>(scene)));
-		this->scene.value()->getGPU().value().primeGPU();
     }
-
-	void App::nonBlockingSceneLoad(scene::Scene* scene, double minTime)
-	{
-		this->nextScene = scene;
-
-		std::thread t([this, minTime]{
-
-			double startTime = this->time();
-
-			this->getNextScene()->getGPU().value().primeGPU();
-			this->getNextScene()->load();
-			this->getNextScene()->getGPU().value().finish();
-
-			this->getNextScene()->getGPU().value().detachOpenGLContext();
-
-			while (this->time() - startTime < minTime)
-				std::this_thread::sleep_for(250ms);
-
-			this->getNextScene()->loaded = true;
-
-		});
-
-		t.detach();
-	}
-
-	scene::Scene* App::getNextScene()
-	{
-		return this->nextScene;
-	}
 
     void App::close()
     {
@@ -142,9 +114,12 @@ namespace vel
         this->scene.reset();
     }
 
-	void App::clearNextScene()
+	GPU* App::getGPU()
 	{
-		this->nextScene = nullptr;
+		if (this->gpu.has_value())
+			return this->gpu->get();
+		else
+			return nullptr;
 	}
 
 	float App::getFrameTime()
@@ -213,27 +188,12 @@ namespace vel
                 break;
             }
 
-			// Used for when we load our initial scene from Main. When switching from one scene to another
-			// the new scene will be loaded asynchronously so that the current scene will continue to be
-			// responsive to the user
+
             if (this->scene && !this->scene.value()->loaded)
             {
                 this->scene.value()->load();
                 this->scene.value()->loaded = true;
-
-				this->window.value()->setOpenGLContext(this->scene.value()->getGPU().value().getOpenGLContext());
             }
-
-			
-			if (this->nextScene && this->nextScene->loaded)
-			{
-				this->blockingSceneLoad(this->getNextScene());
-				this->clearNextScene();
-
-				// swap contexts
-				this->window.value()->setOpenGLContext(this->scene.value()->getGPU().value().getOpenGLContext());
-
-			}
 
             this->newTime = this->time();
             this->frameTime = this->newTime - this->currentTime;
@@ -303,9 +263,9 @@ namespace vel
 					this->scene.value()->outerLoop((float)this->frameTime, renderLerpInterval);
 
 					// perform draw (render) logic
-                    this->scene.value()->getGPU()->enableDepthTest();
+                    this->gpu.value()->enableDepthTest();
                     //this->gpu->drawLinesOnly();
-                    this->scene.value()->getGPU()->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);
+                    this->gpu.value()->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);
 
                     if (this->scene && this->scene.value()->loaded)
                     {

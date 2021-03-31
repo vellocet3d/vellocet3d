@@ -8,6 +8,7 @@
 #include "vel/Config.h"
 #include "vel/Logger.h"
 #include "vel/Window.h"
+#include "vel/GPU.h"
 #include "vel/scene/Scene.h"
 
 
@@ -29,7 +30,7 @@ namespace vel
 		static App*										instance;
         std::optional<std::unique_ptr<Window>>			window;
         std::optional<std::unique_ptr<scene::Scene>>	scene;
-		scene::Scene*									nextScene = nullptr;
+		std::optional<std::unique_ptr<GPU>>				gpu;
         
 
         std::chrono::high_resolution_clock::time_point	startTime;
@@ -54,11 +55,8 @@ namespace vel
         static void										init(Config conf);
 														App(App const&) = delete;
         void											operator=(App const&) = delete;
-        void											blockingSceneLoad(scene::Scene* scene);
+        void											setScene(scene::Scene* scene);
 		scene::Scene*									getScene();
-		void											nonBlockingSceneLoad(scene::Scene* scene, double minTime = 0.0);
-		scene::Scene*									getNextScene();
-		void											clearNextScene();
         void											clearScene();
         const double									time() const;
         const InputState&								getInputState() const;
@@ -69,12 +67,14 @@ namespace vel
 		float											getFrameTime();
 		float											getLogicTime();
 
-		GLFWusercontext*								getNextFreeOpenGLContext();
+
 		ImFont*											getImguiFont(std::string key);
 		void											hideMouseCursor();
 		void											showMouseCursor();
 
 		void											forceImguiRender();
+
+		GPU*											getGPU();
 
     };
 };

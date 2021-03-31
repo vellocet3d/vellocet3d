@@ -6,7 +6,7 @@
 
 #include "vel/App.h"
 #include "vel/scene/stage/Stage.h"
-#include "vel/scene/AssetLoader.h"
+#include "vel/AssetLoader.h"
 
 
 
@@ -17,8 +17,7 @@ namespace vel::scene::stage
 
     Stage::Stage(vel::scene::Scene* parentScene) :
 		parentScene(parentScene),
-		sceneGPU(this->parentScene->getGPU().has_value() ? &this->parentScene->getGPU().value() : nullptr),
-        headless(this->sceneGPU == nullptr ? true : false),
+        headless(App::get().config.HEADLESS),
         visible(true),
 		collisionDebuggingSwitch(false),
 		clearDepthBuffer(false)
@@ -78,7 +77,7 @@ namespace vel::scene::stage
 		return this->collisionDebuggingSwitch;
 	}
 
-	void Stage::useCollisionDebugDrawer(CollisionDebugDrawer* cdd)
+	void Stage::useCollisionDebugDrawer()
 	{
 		if (!this->collisionWorld)
 		{
@@ -87,7 +86,7 @@ namespace vel::scene::stage
 
 		this->collisionDebuggingSwitch = true;
 
-		this->getCollisionWorld()->getDynamicsWorld()->setDebugDrawer(cdd);
+		this->getCollisionWorld()->getDynamicsWorld()->setDebugDrawer(App::get().getGPU()->getCollisionDebugDrawer());
 	}
 
 	void Stage::stepPhysics(float delta)

@@ -11,9 +11,9 @@
 #include "vel/scene/stage/Camera.h"
 #include "vel/scene/stage/RenderCommand.h"
 #include "vel/scene/stage/CollisionWorld.h"
-#include "vel/scene/CollisionDebugDrawer.h"
+#include "vel/CollisionDebugDrawer.h"
 #include "vel/scene/stage/Sensor.h"
-#include "vel/scene/GPU.h"
+#include "vel/GPU.h"
 
 namespace vel::scene
 {
@@ -84,7 +84,7 @@ namespace vel::scene::stage
 		CollisionWorld*								getCollisionWorld();
 
 		void										stepPhysics(float delta);
-		void										useCollisionDebugDrawer(CollisionDebugDrawer* cdd);
+		void										useCollisionDebugDrawer();
 		bool										collisionDebugging();
 
 		GPU*										getSceneGPU();

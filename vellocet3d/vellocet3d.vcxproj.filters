@@ -24,9 +24,6 @@
     <ClCompile Include="src\scene\armature\Bone.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\AssetLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\scene\stage\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -96,10 +93,13 @@
     <ClCompile Include="src\helpers\MultiTweener.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\CollisionDebugDrawer.cpp">
+    <ClCompile Include="src\GPU.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\GPU.cpp">
+    <ClCompile Include="src\CollisionDebugDrawer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AssetLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -227,13 +227,7 @@
     <ClInclude Include="inc\vel\scene\stage\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\vel\scene\AssetLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\vel\scene\Scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\vel\scene\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\vel\App.h">
@@ -272,10 +266,16 @@
     <ClInclude Include="inc\vel\helpers\MultiTweener.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\vel\scene\CollisionDebugDrawer.h">
+    <ClInclude Include="inc\vel\GPU.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\vel\scene\GPU.h">
+    <ClInclude Include="inc\vel\CollisionDebugDrawer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\vel\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\vel\AssetLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

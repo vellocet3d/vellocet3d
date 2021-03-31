@@ -10,34 +10,29 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "STB_IMAGE/stb_image.h"
 
-#include "vel/App.h"
-#include "vel/scene/GPU.h"
+#include "vel/GPU.h"
 #include "vel/scene/mesh/Vertex.h"
 #include "vel/helpers/functions.h"
 
-namespace vel::scene
+namespace vel
 {
-    GPU::GPU() :
-        shaderDirectory(App::get().config.SHADER_FILE_PATH),
+    GPU::GPU(std::string shaderDirectory, std::string dvs, std::string dfs, std::string dsvs, std::string dsfs,
+		std::string ddvs, std::string ddfs) :
+        shaderDirectory(shaderDirectory),
         activeShaderIndex(-1),
         activeMeshRenderableIndex(-1),
-        activeTextureIndex(-1),
-		//collisionDebugDrawer(std::move(std::make_unique<CollisionDebugDrawer>())),
-		openGLContext(App::get().getNextFreeOpenGLContext())
+        activeTextureIndex(-1)
     {
-	
-		//std::cout << "loading new GPU\n";
+		// create collision debug drawer
+		this->collisionDebugDrawer = CollisionDebugDrawer();
 
-		//// set openGLContext as current context for executing thread
-		//glfwMakeUserContextCurrent(this->openGLContext);
+		// create default shaders
+		this->loadShader("default", dvs, dfs);
+		this->loadShader("default_skinned", dsvs, dsfs);
+		this->loadShader("default_debug", ddvs, ddfs);
 
-		//// create default shaders
-		//this->loadShader("default", App::get().config.DEFAULT_VERTEX_SHADER, App::get().config.DEFAULT_FRAGMENT_SHADER);
-		//this->loadShader("default_skinned", App::get().config.DEFAULT_SKINNED_VERTEX_SHADER, App::get().config.DEFAULT_SKINNED_FRAGMENT_SHADER);
-		//this->loadShader("default_debug", App::get().config.DEFAULT_DEBUG_VERTEX_SHADER, App::get().config.DEFAULT_DEBUG_FRAGMENT_SHADER);
-
-		//// create default texture
-		//this->loadTexture("diffuse", ("data/models/default_texture.jpg"));
+		// create default texture
+		this->loadTexture("diffuse", "data/models", "default_texture.jpg");
 	
 	}
 
@@ -48,31 +43,7 @@ namespace vel::scene
 
 	void GPU::primeGPU()
 	{
-		// set openGLContext as current context for executing thread
-		glfwMakeUserContextCurrent(this->openGLContext);
-
-		// create collision debug drawer
-		//this->collisionDebugDrawer = std::make_unique<CollisionDebugDrawer>();
-
-		this->collisionDebugDrawer = CollisionDebugDrawer();
-
-		// create default shaders
-		this->loadShader("default", App::get().config.DEFAULT_VERTEX_SHADER, App::get().config.DEFAULT_FRAGMENT_SHADER);
-		this->loadShader("default_skinned", App::get().config.DEFAULT_SKINNED_VERTEX_SHADER, App::get().config.DEFAULT_SKINNED_FRAGMENT_SHADER);
-		this->loadShader("default_debug", App::get().config.DEFAULT_DEBUG_VERTEX_SHADER, App::get().config.DEFAULT_DEBUG_FRAGMENT_SHADER);
-
-		// create default texture
-		this->loadTexture("diffuse", "data/models", "default_texture.jpg");
-	}
-
-	void GPU::detachOpenGLContext()
-	{
-		glfwMakeUserContextCurrent(NULL);
-	}
-
-	GLFWusercontext* GPU::getOpenGLContext()
-	{
-		return this->openGLContext;
+		
 	}
 
 	CollisionDebugDrawer* GPU::getCollisionDebugDrawer()
@@ -195,9 +166,9 @@ namespace vel::scene
         return this->shaders.size() - 1;
     }
 
-	size_t GPU::loadMesh(mesh::Mesh& m)
+	size_t GPU::loadMesh(scene::mesh::Mesh& m)
     {
-        mesh::Renderable mr = mesh::Renderable();
+        scene::mesh::Renderable mr = scene::mesh::Renderable();
         mr.indiceCount = (GLsizei)m.getIndices().size();
 
         // Generate and bind vertex attribute array
@@ -207,7 +178,7 @@ namespace vel::scene
         // Generate and bind vertex buffer object
         glGenBuffers(1, &mr.VBO);
         glBindBuffer(GL_ARRAY_BUFFER, mr.VBO);
-        glBufferData(GL_ARRAY_BUFFER, m.getVertices().size() * sizeof(mesh::Vertex), &m.getVertices()[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, m.getVertices().size() * sizeof(scene::mesh::Vertex), &m.getVertices()[0], GL_STATIC_DRAW);
 
         // Generate and bind element buffer object
         glGenBuffers(1, &mr.EBO);
@@ -216,23 +187,23 @@ namespace vel::scene
 
         // Assign vertex positions to location = 0
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(mesh::Vertex), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(scene::mesh::Vertex), (void*)0);
 
         // Assign vertex normals to location = 1
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(mesh::Vertex), (void*)offsetof(mesh::Vertex, normal));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(scene::mesh::Vertex), (void*)offsetof(scene::mesh::Vertex, normal));
 
         // Assign vertex texture coordinates to location = 2
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(mesh::Vertex), (void*)offsetof(mesh::Vertex, textureCoordinates));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(scene::mesh::Vertex), (void*)offsetof(scene::mesh::Vertex, textureCoordinates));
 
 		// Assign vertex bone ids to location = 3
 		glEnableVertexAttribArray(3);
-		glVertexAttribIPointer(3, 4, GL_INT, sizeof(mesh::Vertex), (void*)offsetof(mesh::Vertex, weights.ids));
+		glVertexAttribIPointer(3, 4, GL_INT, sizeof(scene::mesh::Vertex), (void*)offsetof(scene::mesh::Vertex, weights.ids));
 
 		// Assign vertex weights to location = 4
 		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mesh::Vertex), (void*)offsetof(mesh::Vertex, weights.weights));
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(scene::mesh::Vertex), (void*)offsetof(scene::mesh::Vertex, weights.weights));
 
         // Unbind the vertex array to prevent accidental operations
         glBindVertexArray(0);
@@ -248,7 +219,7 @@ namespace vel::scene
     {
 		auto fileExploded = vel::helpers::functions::explode_string(filename, '.');
 
-		mesh::Texture texture;
+		scene::mesh::Texture texture;
         texture.type = "diffuse";
         texture.path = dir;
 		texture.fullPath = dir + "/" + filename;
@@ -381,7 +352,7 @@ namespace vel::scene
         return this->activeTextureIndex;
     }
 
-    const std::vector<mesh::Texture>& GPU::getTextures() const
+    const std::vector<scene::mesh::Texture>& GPU::getTextures() const
     {
         return this->textures;
     }

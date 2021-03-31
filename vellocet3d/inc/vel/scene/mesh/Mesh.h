@@ -7,7 +7,7 @@
 
 #include "glm/glm.hpp"
 
-#include "vel/scene/Shader.h"
+#include "vel/Shader.h"
 #include "vel/scene/stage/Camera.h"
 #include "vel/scene/mesh/Vertex.h"
 #include "vel/scene/mesh/Texture.h"
