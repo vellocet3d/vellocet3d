@@ -17,7 +17,6 @@ namespace vel::scene::stage
 
     Stage::Stage(vel::scene::Scene* parentScene) :
 		parentScene(parentScene),
-        headless(App::get().config.HEADLESS),
         visible(true),
 		collisionDebuggingSwitch(false),
 		clearDepthBuffer(false)
@@ -47,11 +46,8 @@ namespace vel::scene::stage
 
 		this->armatures.reserve(100);
 
-        if (!this->headless)
-        {
-            this->renderCommands = std::vector<RenderCommand>();
-            this->renderCommandsOrder = std::vector<size_t>();
-        }
+        this->renderCommands = std::vector<RenderCommand>();
+        this->renderCommandsOrder = std::vector<size_t>();
 
     }
 
@@ -263,8 +259,7 @@ namespace vel::scene::stage
 
         auto actor = &this->actors.at(slotIndex);
 
-        if (!this->headless && 
-            actor->getShaderIndex().has_value() && 
+        if (actor->getShaderIndex().has_value() && 
             actor->getMeshIndex().has_value() &&
 			actor->getTextureIndex().has_value()) // If we are not in headless mode, AND this actor has a shader, mesh, and texture
         {

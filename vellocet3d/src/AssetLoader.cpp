@@ -20,7 +20,6 @@ using namespace vel::helpers::functions;
 namespace vel
 {
 	AssetLoader::AssetLoader(vel::scene::Scene* stageParentScene, Stage* stage, std::string assetFile, bool dynamic) :
-        headless(App::get().config.HEADLESS),
 		stageParentScene(stageParentScene),
         currentStage(stage),
         currentAssetFile(assetFile),
@@ -261,28 +260,27 @@ namespace vel
 
 					}
 
-					if (!this->headless)
-					{
-						actor.setTextureIndex(this->currentMeshTextureIndex.value());
+					
+					actor.setTextureIndex(this->currentMeshTextureIndex.value());
 
-						// if findShaderId lambda is not defined, then use one of the default shaders
-						// as this means the user did not explicitly pass a shader index to be used
-						if (!findShaderId)
+					// if findShaderId lambda is not defined, then use one of the default shaders
+					// as this means the user did not explicitly pass a shader index to be used
+					if (!findShaderId)
+					{
+						if (!this->currentArmature)
 						{
-							if (!this->currentArmature)
-							{
-								actor.setShaderIndex(0); // actor does not have an armature so use default (non-skinned) shader
-							}
-							else
-							{
-								actor.setShaderIndex(1); // actor has an armature so it's a skinned mesh, use default skinned shader
-							}
+							actor.setShaderIndex(0); // actor does not have an armature so use default (non-skinned) shader
 						}
 						else
 						{
-							actor.setShaderIndex(this->findShaderId.value()(actorName));
-						}						
+							actor.setShaderIndex(1); // actor has an armature so it's a skinned mesh, use default skinned shader
+						}
 					}
+					else
+					{
+						actor.setShaderIndex(this->findShaderId.value()(actorName));
+					}						
+					
 				}
 
 				this->addedActorIndexes.push_back(this->currentStage->addActor(actor));
@@ -421,44 +419,39 @@ namespace vel
             this->currentMeshIndex = this->stageParentScene->addMesh(mesh);
         }
 
+        // process materials
+        aiMaterial* material = this->aiScene->mMaterials[aiMesh->mMaterialIndex];
+        aiString str;
+        material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
 
-        if (!this->headless)
+        // if mesh does not contain a texture, use default texture
+        if (str.length == 0)
         {
-            // process materials
-            aiMaterial* material = this->aiScene->mMaterials[aiMesh->mMaterialIndex];
-            aiString str;
-            material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
+			this->currentMeshTextureIndex = 0;
+            return;
+        }
 
-            // if mesh does not contain a texture, use default texture
-            if (str.length == 0)
+        // determine if the texture already exists, if it does use it's index...
+        int meshTextureIndex = 0;
+        for (auto& t : App::get().getGPU()->getTextures()) // ignore intellisense error on getTextures()
+        {
+			std::string current_asset_full_path = this->currentAssetDirectory + "/" + str.C_Str();
+
+			if(str_replace("/", "", str_replace("\\", "", t.fullPath)) == str_replace("/", "", str_replace("\\", "", current_asset_full_path)))
             {
-				this->currentMeshTextureIndex = 0;
-                return;
+				//std::cout << "EXISTING: " << str.C_Str() << "\n";
+                this->currentMeshTextureIndex = meshTextureIndex;
+                break;
             }
+            meshTextureIndex++;
+        }
+        // ...otherwise create a new texture
+        if (!this->currentMeshTextureIndex)
+        {
+			auto texturePathAndFile = this->get_texture_path_and_file(str.C_Str());
 
-            // determine if the texture already exists, if it does use it's index...
-            int meshTextureIndex = 0;
-            for (auto& t : App::get().getGPU()->getTextures()) // ignore intellisense error on getTextures()
-            {
-				std::string current_asset_full_path = this->currentAssetDirectory + "/" + str.C_Str();
-
-				if(str_replace("/", "", str_replace("\\", "", t.fullPath)) == str_replace("/", "", str_replace("\\", "", current_asset_full_path)))
-                {
-					//std::cout << "EXISTING: " << str.C_Str() << "\n";
-                    this->currentMeshTextureIndex = meshTextureIndex;
-                    break;
-                }
-                meshTextureIndex++;
-            }
-            // ...otherwise create a new texture
-            if (!this->currentMeshTextureIndex)
-            {
-				auto texturePathAndFile = this->get_texture_path_and_file(str.C_Str());
-
-                this->currentMeshTextureIndex = App::get().getGPU()->loadTexture("diffuse",
-					this->currentAssetDirectory + '/' + texturePathAndFile.first, texturePathAndFile.second);
-            }
-
+            this->currentMeshTextureIndex = App::get().getGPU()->loadTexture("diffuse",
+				this->currentAssetDirectory + '/' + texturePathAndFile.first, texturePathAndFile.second);
         }
     }
 

@@ -12,7 +12,6 @@
 namespace vel::scene
 {
 	Scene::Scene() :
-		headless(App::get().config.HEADLESS),
 		loaded(false),
 		animationTime(0.0)
 	{
@@ -83,10 +82,7 @@ namespace vel::scene
 
 	size_t Scene::addMesh(Mesh m)
 	{
-		if (!this->headless)
-		{
-			m.setMeshRenderableIndex(App::get().getGPU()->loadMesh(m));
-		}
+		m.setMeshRenderableIndex(App::get().getGPU()->loadMesh(m));
 		this->meshes.push_back(m);
 		return this->meshes.size() - 1;
 	}

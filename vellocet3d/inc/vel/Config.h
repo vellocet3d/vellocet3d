@@ -24,7 +24,6 @@ namespace vel
     public:
 											Config();
         // Application defined
-        bool								HEADLESS = false;
         bool								LOG_ENABLED = true;
 		double								LOGIC_TICK = 60.0;
 		bool								CURSOR_HIDDEN = true;

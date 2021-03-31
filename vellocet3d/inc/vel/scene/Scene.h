@@ -22,7 +22,6 @@ namespace vel::scene
 	class Scene
 	{
 	private:
-		const bool							headless;
 		std::vector<Stage>					stages;
 		std::vector<Mesh>					meshes;
 		std::vector<Animation>				animations;

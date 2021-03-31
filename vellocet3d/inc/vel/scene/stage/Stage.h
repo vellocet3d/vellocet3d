@@ -42,8 +42,6 @@ namespace vel::scene::stage
 		vel::scene::Scene*								parentScene;
 		GPU*											sceneGPU;
 		
-		const bool										headless;
-		
 
 
     public:

@@ -30,55 +30,47 @@ namespace vel
     App::App(Config conf) :
         config(conf),
         logger(this->config.LOG_ENABLED, this->config.LOG_PATH),
+		window(std::make_unique<Window>(this->config)),
+		gpu(std::make_unique<GPU>(
+			this->config.SHADER_FILE_PATH,
+			this->config.DEFAULT_VERTEX_SHADER, this->config.DEFAULT_FRAGMENT_SHADER,
+			this->config.DEFAULT_SKINNED_VERTEX_SHADER, this->config.DEFAULT_SKINNED_FRAGMENT_SHADER,
+			this->config.DEFAULT_DEBUG_VERTEX_SHADER, this->config.DEFAULT_DEBUG_FRAGMENT_SHADER)),
+		scene(nullptr),
         startTime(std::chrono::high_resolution_clock::now())
     {
-        if (!this->config.HEADLESS)
-        {
-			// create window
-            auto w = std::move(std::make_unique<Window>(this->config));
-            this->window = std::move(w);
 
-			auto g = std::move(std::make_unique<GPU>(
-				this->config.SHADER_FILE_PATH, 
-				this->config.DEFAULT_VERTEX_SHADER, this->config.DEFAULT_FRAGMENT_SHADER,
-				this->config.DEFAULT_SKINNED_VERTEX_SHADER, this->config.DEFAULT_SKINNED_FRAGMENT_SHADER,
-				this->config.DEFAULT_DEBUG_VERTEX_SHADER, this->config.DEFAULT_DEBUG_FRAGMENT_SHADER));
-			this->gpu = std::move(g);
-        }
 
     }
 
 	void App::forceImguiRender()
 	{
-		this->window.value()->renderGui();
+		this->window->renderGui();
 	}
 
 	void App::showMouseCursor()
 	{
-		this->window.value()->showMouseCursor();
+		this->window->showMouseCursor();
 	}
 
 	void App::hideMouseCursor()
 	{
-		this->window.value()->hideMouseCursor();
+		this->window->hideMouseCursor();
 	}
 
 	ImFont* App::getImguiFont(std::string key)
 	{
-		if (!this->config.HEADLESS)
-			return this->window.value()->getImguiFont(key);
-		else
-			return nullptr;
+		return this->window->getImguiFont(key);
 	}
 
 	scene::Scene* App::getScene()
 	{
-		return this->scene.value().get();
+		return this->scene.get();
 	}
 
     void App::setScene(scene::Scene* scene)
     {
-		if(this->window && this->window.value()->getImguiFrameOpen())
+		if(this->window->getImguiFrameOpen())
 			this->forceImguiRender();
 
         this->scene = std::move(std::move(std::unique_ptr<scene::Scene>(scene)));
@@ -87,10 +79,7 @@ namespace vel
     void App::close()
     {
         this->shouldClose = true;
-        if (!this->config.HEADLESS) 
-        {
-            this->window.value()->setToClose();
-        }
+        this->window->setToClose();        
     }
 
     const double App::time() const
@@ -101,12 +90,12 @@ namespace vel
 
     const glm::ivec2& App::getScreenSize() const
     {
-        return this->window.value()->getScreenSize();
+        return this->window->getScreenSize();
     }
 
     const InputState& App::getInputState() const
     {
-        return this->window.value()->getInputState();
+        return this->window->getInputState();
     }
 
     void App::clearScene()
@@ -116,10 +105,7 @@ namespace vel
 
 	GPU* App::getGPU()
 	{
-		if (this->gpu.has_value())
-			return this->gpu->get();
-		else
-			return nullptr;
+		return this->gpu.get();
 	}
 
 	float App::getFrameTime()
@@ -165,14 +151,7 @@ namespace vel
         {    
 			std::string message = "FrameTime: " + std::to_string(this->averageFrameRate) + " | FPS: " + std::to_string(this->averageFrameRate);
 
-			if (!this->config.HEADLESS)
-			{
-				this->window.value()->setTitle(message);
-			}
-			else
-			{
-				std::cout << message << "\n";
-			}
+			this->window->setTitle(message);
         }
     }
 
@@ -183,16 +162,15 @@ namespace vel
 
         while (true)
         {
-            if (this->shouldClose || (!this->config.HEADLESS && this->window.value()->shouldClose())) 
+            if (this->shouldClose || this->window->shouldClose()) 
             {
                 break;
             }
 
-
-            if (this->scene && !this->scene.value()->loaded)
+            if (this->scene != nullptr && !this->scene->loaded)
             {
-                this->scene.value()->load();
-                this->scene.value()->loaded = true;
+                this->scene->load();
+                this->scene->loaded = true;
             }
 
             this->newTime = this->time();
@@ -214,16 +192,15 @@ namespace vel
 
                 this->accumulator += this->frameTime;
 
-				if (!this->config.HEADLESS)
-				{
-					// update window, which includes capturing input state
-					this->window.value()->update();
-				}
+
+				// update window, which includes capturing input state
+				this->window->update();
+				
 
                 // process update logic
                 while (this->accumulator >= this->fixedLogicTime)
                 {                    
-                    if (this->scene && this->scene.value()->loaded) 
+                    if (this->scene != nullptr && this->scene->loaded) 
                     {
 						//// update animations
 						//this->scene.value()->updateAnimations(this->fixedLogicTime);
@@ -232,22 +209,22 @@ namespace vel
 						//this->scene.value()->stepPhysics((float)this->fixedLogicTime);
 
 						// applyTransforms() ? incorporating current savePreviousTransforms() logic
-						this->scene.value()->applyTransformations();
+						this->scene->applyTransformations();
 
 						// execute all contact triggers
-						this->scene.value()->processSensors();
+						this->scene->processSensors();
 
 						// execute inner loop (fixed rate) logic
-						this->scene.value()->innerLoop((float)this->fixedLogicTime);
+						this->scene->innerLoop((float)this->fixedLogicTime);
 
 						// update animations
-						this->scene.value()->updateAnimations(this->fixedLogicTime);
+						this->scene->updateAnimations(this->fixedLogicTime);
 
 						// step physics simulation
-						this->scene.value()->stepPhysics((float)this->fixedLogicTime);
+						this->scene->stepPhysics((float)this->fixedLogicTime);
 
 						// call postPhysics method to allow correction of any issues caused by collision solver
-						this->scene.value()->postPhysics((float)this->fixedLogicTime);
+						this->scene->postPhysics((float)this->fixedLogicTime);
                     }
                     
                     // decrement accumulator
@@ -255,30 +232,27 @@ namespace vel
                 }
 
                 
-                if (!this->config.HEADLESS)
+
+				float renderLerpInterval = (float)(this->accumulator / this->fixedLogicTime);
+
+				// execute outer loop (immediate) logic
+				this->scene->outerLoop((float)this->frameTime, renderLerpInterval);
+
+				// perform draw (render) logic
+                this->gpu->enableDepthTest();
+                //this->gpu->drawLinesOnly();
+                this->gpu->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);
+
+                if (this->scene != nullptr && this->scene->loaded)
                 {
-					float renderLerpInterval = (float)(this->accumulator / this->fixedLogicTime);
+					//std::cout << "call draw:" << this->currentTime << "\n";
+                    this->scene->draw(renderLerpInterval);
 
-					// execute outer loop (immediate) logic
-					this->scene.value()->outerLoop((float)this->frameTime, renderLerpInterval);
-
-					// perform draw (render) logic
-                    this->gpu.value()->enableDepthTest();
-                    //this->gpu->drawLinesOnly();
-                    this->gpu.value()->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);
-
-                    if (this->scene && this->scene.value()->loaded)
-                    {
-						//std::cout << "call draw:" << this->currentTime << "\n";
-                        this->scene.value()->draw(renderLerpInterval);
-
-						this->window.value()->renderGui();
-                    }
-
-					
-                    this->window.value()->swapBuffers();
+					this->window->renderGui();
                 }
-
+					
+                this->window->swapBuffers();
+                
             }
 
         }

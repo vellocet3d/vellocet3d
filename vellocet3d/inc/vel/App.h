@@ -28,9 +28,9 @@ namespace vel
     private:
 														App(Config conf);
 		static App*										instance;
-        std::optional<std::unique_ptr<Window>>			window;
-        std::optional<std::unique_ptr<scene::Scene>>	scene;
-		std::optional<std::unique_ptr<GPU>>				gpu;
+        std::unique_ptr<Window>							window;
+        std::unique_ptr<scene::Scene>					scene;
+		std::unique_ptr<GPU>							gpu;
         
 
         std::chrono::high_resolution_clock::time_point	startTime;

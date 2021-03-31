@@ -28,7 +28,6 @@ namespace vel
 	private:
 		Assimp::Importer					aiImporter;
 		const aiScene*						aiScene;
-		bool								headless;
 		vel::scene::Scene*					stageParentScene;
 		Stage*								currentStage;
 		std::string							currentAssetFile;
