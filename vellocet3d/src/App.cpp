@@ -155,6 +155,16 @@ namespace vel
         }
     }
 
+	bool App::getPauseBufferClearAndSwap()
+	{
+		return this->pauseBufferClearAndSwap;
+	}
+
+	void App::setPauseBufferClearAndSwap(bool in)
+	{
+		this->pauseBufferClearAndSwap = in;
+	}
+
     void App::execute()
     {
         this->fixedLogicTime = 1 / this->config.LOGIC_TICK;
@@ -241,7 +251,8 @@ namespace vel
 				// perform draw (render) logic
                 this->gpu->enableDepthTest();
                 //this->gpu->drawLinesOnly();
-                this->gpu->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);
+				if(!this->pauseBufferClearAndSwap)
+					this->gpu->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);
 
                 if (this->scene != nullptr && this->scene->loaded)
                 {
@@ -250,8 +261,8 @@ namespace vel
 
 					this->window->renderGui();
                 }
-					
-                this->window->swapBuffers();
+				if (!this->pauseBufferClearAndSwap)
+					this->window->swapBuffers();
                 
             }
 

@@ -48,6 +48,7 @@ namespace vel
 		double											averageFrameTime = 0.0;
 		double											averageFrameRate = 0.0;
 		bool											canDisplayAverageFrameTime = false;
+		bool											pauseBufferClearAndSwap = false;
     
 
     public:
@@ -75,6 +76,9 @@ namespace vel
 		void											forceImguiRender();
 
 		GPU*											getGPU();
+		bool											getPauseBufferClearAndSwap();
+		void											setPauseBufferClearAndSwap(bool in);
+		
 
     };
 };
