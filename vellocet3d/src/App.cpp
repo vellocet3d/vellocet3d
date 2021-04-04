@@ -181,6 +181,7 @@ namespace vel
             {
                 this->scene->load();
                 this->scene->loaded = true;
+				this->setPauseBufferClearAndSwap(false);
             }
 
             this->newTime = this->time();
@@ -213,10 +214,10 @@ namespace vel
                     if (this->scene != nullptr && this->scene->loaded) 
                     {
 						//// update animations
-						//this->scene.value()->updateAnimations(this->fixedLogicTime);
+						//this->scene->updateAnimations(this->fixedLogicTime);
 
 						//// step physics simulation
-						//this->scene.value()->stepPhysics((float)this->fixedLogicTime);
+						//this->scene->stepPhysics((float)this->fixedLogicTime);
 
 						// applyTransforms() ? incorporating current savePreviousTransforms() logic
 						this->scene->applyTransformations();
@@ -246,7 +247,17 @@ namespace vel
 				float renderLerpInterval = (float)(this->accumulator / this->fixedLogicTime);
 
 				// execute outer loop (immediate) logic
-				this->scene->outerLoop((float)this->frameTime, renderLerpInterval);
+				if (this->scene->swapping)
+				{
+					this->setPauseBufferClearAndSwap(true);
+					std::this_thread::sleep_for(2000ms); // for testing, can be removed
+					this->setScene(this->scene->sceneToSwap);
+				}
+				else
+				{
+					this->scene->outerLoop((float)this->frameTime, renderLerpInterval);
+				}
+				
 
 				// perform draw (render) logic
                 this->gpu->enableDepthTest();

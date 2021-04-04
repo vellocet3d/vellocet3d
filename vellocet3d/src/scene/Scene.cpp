@@ -2,6 +2,8 @@
 
 #define GLM_FORCE_ALIGNED_GENTYPES
 #include <glm/gtx/string_cast.hpp>
+#include "imgui/imgui.h"
+
 
 #include "vel/App.h"
 #include "vel/scene/Scene.h"
@@ -116,6 +118,42 @@ namespace vel::scene
 
 	void Scene::postPhysics(float delta){}
 
+	void Scene::swap(scene::Scene* sceneIn)
+	{
+		this->swapping = true;
+		this->sceneToSwap = sceneIn;
+		this->showLoadingIcon();
+	}
+
+	void Scene::showLoadingIcon()
+	{
+		auto screenX = (float)vel::App::get().getScreenSize().x;
+		auto screenY = (float)vel::App::get().getScreenSize().y;
+
+		// Set window size
+		ImGui::SetNextWindowSize(ImVec2(140.0f, 51.0f));
+
+		// Center window
+		ImGui::SetNextWindowPos(
+			ImVec2((screenX * 0.5f) - 70.0f, (screenY * 0.5f) - 26.0f),
+			ImGuiCond_Always
+		);
+
+		// Create "loading" window
+		ImGui::Begin("Loading", NULL, ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoTitleBar
+			| ImGuiWindowFlags_NoResize
+		);
+
+		ImGui::PushFont(vel::App::get().getImguiFont("Teko-35"));
+
+		ImGui::Text("We Be Load'n...");
+
+		ImGui::PopFont();
+
+		ImGui::End();
+	}
+
     void Scene::draw(float alpha)
     {
 		//std::cout << "new draw iteration---------------------------------------\n";
@@ -138,7 +176,7 @@ namespace vel::scene
 			}
 
 			// should always have a camera if we've made it this far
-			s.getCamera()->update(alpha);
+			s.getCamera()->update();
 
 			// if debug drawer set, do debug draw
 			if (s.collisionDebugging())

@@ -30,6 +30,8 @@ namespace vel::scene::stage
 		}
 	}
 
+
+
 	void Actor::setDynamic(bool dynamic)
 	{
 		this->dynamic = dynamic;
@@ -152,7 +154,8 @@ namespace vel::scene::stage
 		{
 			return Transform::interpolateRotations(this->previousTransform.value(), this->transform, alpha);
 		}
-		return this->transform.getTranslation();
+		//return this->transform.getTranslation();
+		return this->transform.getRotation();
 	}
 
 	glm::vec3 Actor::getInterpolatedScale(float alpha)
@@ -161,7 +164,8 @@ namespace vel::scene::stage
 		{
 			return Transform::interpolateScales(this->previousTransform.value(), this->transform, alpha);
 		}
-		return this->transform.getTranslation();
+		//return this->transform.getTranslation();
+		return this->transform.getScale();
 	}
 
 	const bool Actor::isDynamic() const

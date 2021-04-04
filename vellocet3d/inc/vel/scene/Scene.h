@@ -55,6 +55,11 @@ namespace vel::scene
 		virtual void						outerLoop(float frameTime, float renderLerpInterval) = 0;
 		virtual void						postPhysics(float deltaTime);
 
+		bool								swapping = false;
+		void								swap(scene::Scene* scene);
+		scene::Scene*						sceneToSwap = nullptr;
+		virtual void						showLoadingIcon();
+
 	};
 
 }

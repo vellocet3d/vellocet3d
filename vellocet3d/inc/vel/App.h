@@ -78,6 +78,8 @@ namespace vel
 		GPU*											getGPU();
 		bool											getPauseBufferClearAndSwap();
 		void											setPauseBufferClearAndSwap(bool in);
+
+
 		
 
     };

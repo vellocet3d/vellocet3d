@@ -45,7 +45,7 @@ namespace vel::scene::stage
 
 	}
 
-    void Camera::updateViewMatrix(float alpha)
+    void Camera::updateViewMatrix()
     {
         if (!this->fixed) 
 		{
@@ -53,9 +53,9 @@ namespace vel::scene::stage
         }
     }
 
-    void Camera::update(float alpha)
+    void Camera::update()
     {
-        this->updateViewMatrix(alpha);
+        this->updateViewMatrix();
         this->updateProjectionMatrix();
     }
 
