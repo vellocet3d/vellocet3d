@@ -278,12 +278,16 @@ namespace vel::scene::stage
             }
 
             // Add this actor's slot index to the actorIndexes container of it's RenderCommand
-			size_t indexOfActorInRenderCommand = this->renderCommands->at(renderCommandIndex.value()).addActorIndex(slotIndex);
+			// REVISED
+			//size_t indexOfActorInRenderCommand = this->renderCommands->at(renderCommandIndex.value()).addActorIndex(slotIndex);
+			this->renderCommands->at(renderCommandIndex.value()).addActorIndex(slotIndex);
 
             // Now add the renderCommandIndex AND indexOfActorInRenderCommandActorIndexes to the actor's 
             // std::optional<std::pair<int, int>> renderCommand member, which is used to quickly remove the 
             // actor from the render command if it is ever removed from the stage
-            actor->addRenderCommand(std::pair<size_t, size_t>(renderCommandIndex.value(), indexOfActorInRenderCommand));
+			// REVISED: removed slot system from render command as it was not implemented correctly, and im not sure there was really
+			// a reason for it in the first place, so the second value in the below pair, is now the value of the actor's index in the actors slot container
+            actor->addRenderCommand(std::pair<size_t, size_t>(renderCommandIndex.value(), slotIndex));
 
         }
 
@@ -330,6 +334,8 @@ namespace vel::scene::stage
         // free actor slot in render command
         if (this->renderCommands)
         {
+			//std::cout << a.getRenderCommand().first << ":" << a.getRenderCommand().second << "\n";
+
             this->renderCommands.value().at(a.getRenderCommand().first).freeActorIndex(a.getRenderCommand().second);
         }
 

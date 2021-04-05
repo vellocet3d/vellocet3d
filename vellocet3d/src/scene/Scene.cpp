@@ -190,7 +190,7 @@ namespace vel::scene
 				//std::cout << "debug draw\n";
 			}
 
-            //s.printRenderCommands();            
+            s.printRenderCommands();            
 
             // should always have a camera if we've made it this far
             //s.getCamera()->update(alpha);
