@@ -41,9 +41,9 @@ namespace vel
 		this->wipe();
 	}
 
-	void GPU::primeGPU()
+	const scene::mesh::Texture&	GPU::getTexture(size_t i) const
 	{
-		
+		return this->textures.at(i);
 	}
 
 	CollisionDebugDrawer* GPU::getCollisionDebugDrawer()
@@ -240,14 +240,24 @@ namespace vel
         if (data) 
         {
             GLenum format;
-            if (nrComponents == 1)
-                format = GL_RED;
-            else if (nrComponents == 3)
-                format = GL_RGB;
-            else if (nrComponents == 4)
-                format = GL_RGBA;
+			if (nrComponents == 1)
+			{
+				texture.alphaChannel = false;
+				format = GL_RED;
+			} 
+			else if (nrComponents == 3)
+			{
+				texture.alphaChannel = false;
+				format = GL_RGB;
+			}
+			else if (nrComponents == 4)
+			{
+				texture.alphaChannel = true;
+				format = GL_RGBA;
+			}
+                
 
-			//std::cout << texture.filename << ":" << nrComponents << "\n";
+			//std::cout << texture.filename << ":" << texture.alphaChannel << "\n";
 
             glBindTexture(GL_TEXTURE_2D, texture.id);
 

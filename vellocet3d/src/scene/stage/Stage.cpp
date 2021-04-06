@@ -266,6 +266,9 @@ namespace vel::scene::stage
             size_t shaderIndex = actor->getShaderIndex().value();
 			size_t meshRenderableIndex = this->parentScene->getMesh(actor->getMeshIndex().value()).getMeshRenderableIndex().value();
 			size_t textureIndex = actor->getTextureIndex().value();
+			size_t textureHasAlpha = actor->getTextureHasAlphaChannel() ? 1 : 0;
+
+			//std::cout << actor->getName() << " " << textureHasAlpha << "\n";
 
             // Search the existing render commands to see if one exists for the given criteria
             std::optional<size_t> renderCommandIndex = this->renderCommandExists(shaderIndex, meshRenderableIndex, textureIndex);
@@ -273,7 +276,7 @@ namespace vel::scene::stage
             // If a render command does not exist for the given criteria, create one and get it's index
             if (!renderCommandIndex)
             {
-                auto rc = RenderCommand(shaderIndex, meshRenderableIndex, textureIndex);
+                auto rc = RenderCommand(shaderIndex, meshRenderableIndex, textureIndex, textureHasAlpha);
                 renderCommandIndex = this->addRenderCommand(rc);
             }
 
@@ -369,20 +372,34 @@ namespace vel::scene::stage
         // loop through render commands and sort order saving indexes
         // within this->renderCommandsOrder
 
-        std::vector<std::pair<size_t, size_t>> toSort;
+        std::vector<std::pair<size_t, RenderCommand>> toSort;
 
         for (size_t i = 0; i < this->renderCommands->size(); i++) 
         {
-            std::string cmdString = std::to_string(this->renderCommands->at(i).getShaderIndex()) +
-                std::to_string(this->renderCommands->at(i).getMeshIndex()) +
-                std::to_string(this->renderCommands->at(i).getTextureIndex());
-
-            toSort.push_back(std::pair<size_t, size_t>(i, std::stoi(cmdString)));
+            toSort.push_back(std::pair<size_t, RenderCommand>(i, this->renderCommands->at(i)));
         }
 
+		// sort sharder
         std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
-            return left.second < right.second;
+            return left.second.getShaderIndex() < right.second.getShaderIndex();
         });
+
+		// sort mesh
+		std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
+			return left.second.getMeshIndex() < right.second.getMeshIndex();
+		});
+
+		// sort texture
+		std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
+			return left.second.getTextureIndex() < right.second.getTextureIndex();
+		});
+
+		// sort texture alpha
+		std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
+			return left.second.getTextureHasAlpha() < right.second.getTextureHasAlpha();
+		});
+
+
 
         this->renderCommandsOrder->clear();
 
@@ -390,6 +407,16 @@ namespace vel::scene::stage
         {
             this->renderCommandsOrder->push_back(p.first);
         }
+
+		//for debugging
+		//std::cout << "-----------------------\n";
+		//for (auto& rco : this->renderCommandsOrder.value())
+		//{
+		//	auto rc = this->renderCommands.value().at(rco);
+
+		//	std::cout << "s:" << rc.getShaderIndex() << " m:" << rc.getMeshIndex() << " t:" << rc.getTextureIndex() << " a:" << rc.getTextureHasAlpha() << "\n";
+
+		//}
 
         return renderCommandIndex;
 
@@ -459,10 +486,5 @@ namespace vel::scene::stage
     {
         return this->camera;
     }
-
-	GPU* Stage::getSceneGPU()
-	{
-		return this->sceneGPU;
-	}
 
 }

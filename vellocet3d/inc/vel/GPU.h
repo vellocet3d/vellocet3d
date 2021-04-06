@@ -57,10 +57,8 @@ namespace vel
 		CollisionDebugDrawer*				getCollisionDebugDrawer();
 		void								clearDepthBuffer();
 		std::vector<std::string>			getActiveShaderNames(); // added this to assist debugging
-		
-
-		void								primeGPU();
-
+	
+		const scene::mesh::Texture&			getTexture(size_t i) const;
 
 		void								wipe();
 		void								finish();

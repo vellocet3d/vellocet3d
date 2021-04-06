@@ -7,10 +7,11 @@
 namespace vel::scene::stage
 {
 
-    RenderCommand::RenderCommand(size_t sI, size_t mI, size_t tI) :
+    RenderCommand::RenderCommand(size_t sI, size_t mI, size_t tI, size_t ta) :
         shaderIndex(sI),
         meshIndex(mI),
-        textureIndex(tI) {}
+        textureIndex(tI),
+		textureHasAlpha(ta){}
 
   //  size_t RenderCommand::addActorIndex(size_t actorIndex)
   //  {
@@ -65,6 +66,11 @@ namespace vel::scene::stage
         return this->textureIndex;
     }
     
+	const size_t& RenderCommand::getTextureHasAlpha() const
+	{
+		return this->textureHasAlpha;
+	}
+
     const std::vector<size_t>& RenderCommand::getActorIndexes() const
     {
         return this->actorIndexes;

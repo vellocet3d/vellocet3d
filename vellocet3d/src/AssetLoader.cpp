@@ -262,6 +262,9 @@ namespace vel
 
 					
 					actor.setTextureIndex(this->currentMeshTextureIndex.value());
+					actor.setTextureHasAlphaChannel(App::get().getGPU()->getTexture(this->currentMeshTextureIndex.value()).alphaChannel);
+
+					//std::cout << actor.getName() << " " << actor.getTextureHasAlphaChannel() << "\n";
 
 					// if findShaderId lambda is not defined, then use one of the default shaders
 					// as this means the user did not explicitly pass a shader index to be used

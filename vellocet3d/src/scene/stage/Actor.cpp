@@ -16,7 +16,8 @@ namespace vel::scene::stage
 		rigidBody(nullptr),
 		armature(nullptr),
 		manualTransform(true),
-		parentStage(parentStage)
+		parentStage(parentStage),
+		textureHasAlphaChannel(false)
     {}
 
 	void Actor::processTransform()
@@ -305,6 +306,16 @@ namespace vel::scene::stage
     {
         this->renderCommand = cmd;
     }
+
+	void Actor::setTextureHasAlphaChannel(bool in)
+	{
+		this->textureHasAlphaChannel = in;
+	}
+
+	bool Actor::getTextureHasAlphaChannel()
+	{
+		return this->textureHasAlphaChannel;
+	}
 
 	const bool Actor::isAnimated() const
 	{

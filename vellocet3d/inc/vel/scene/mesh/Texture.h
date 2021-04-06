@@ -13,5 +13,6 @@ namespace vel::scene::mesh
 		std::string path;
 		std::string filename;
 		std::string fileExt;
+		bool		alphaChannel;
 	};
 }

@@ -40,7 +40,6 @@ namespace vel::scene::stage
 		bool											clearDepthBuffer;
 
 		vel::scene::Scene*								parentScene;
-		GPU*											sceneGPU;
 		
 
 
