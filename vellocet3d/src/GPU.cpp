@@ -17,11 +17,12 @@
 namespace vel
 {
     GPU::GPU(std::string shaderDirectory, std::string dvs, std::string dfs, std::string dsvs, std::string dsfs,
-		std::string ddvs, std::string ddfs) :
+		std::string ddvs, std::string ddfs, bool autoGenerateMipmaps) :
         shaderDirectory(shaderDirectory),
         activeShaderIndex(-1),
         activeMeshRenderableIndex(-1),
-        activeTextureIndex(-1)
+        activeTextureIndex(-1),
+		autoGenerateMipmaps(autoGenerateMipmaps)
     {
 		// create collision debug drawer
 		this->collisionDebugDrawer = CollisionDebugDrawer();
@@ -264,73 +265,84 @@ namespace vel
 			// load the base level texture
             glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
+			if (this->autoGenerateMipmaps)
+				glGenerateMipmap(GL_TEXTURE_2D);
+
 			// set texture parameters
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			auto mip_dir_path = texture.path + "/" + texture.filename + "_mipmaps";
-			bool has_mip_dir = std::filesystem::is_directory(mip_dir_path);
-
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-			if (!has_mip_dir)
+			if (this->autoGenerateMipmaps)
 			{
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			}
 			else
 			{
-				auto dirIter = std::filesystem::directory_iterator(mip_dir_path);
+				auto mip_dir_path = texture.path + "/" + texture.filename + "_mipmaps";
+				bool has_mip_dir = std::filesystem::is_directory(mip_dir_path);
 
-				int mipcount = 0;
+				//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-				for (auto& entry : dirIter)
+				if (!has_mip_dir)
 				{
-					if (entry.is_regular_file())
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				}
+				else
+				{
+					auto dirIter = std::filesystem::directory_iterator(mip_dir_path);
+
+					int mipcount = 0;
+
+					for (auto& entry : dirIter)
 					{
-						mipcount++;
+						if (entry.is_regular_file())
+						{
+							mipcount++;
+						}
+					}
+
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipcount);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+					while (mipcount > 0)
+					{
+						auto full_mip_file_path = mip_dir_path + "/" + std::to_string(mipcount) + texture.fileExt;
+
+						int mip_width, mip_height, mip_nrComponents;
+						unsigned char*	mip_data = stbi_load(full_mip_file_path.c_str(), &mip_width, &mip_height, &mip_nrComponents, 0);
+
+						if (mip_data)
+						{
+							GLenum mip_format;
+							if (mip_nrComponents == 1)
+								mip_format = GL_RED;
+							else if (mip_nrComponents == 3)
+								mip_format = GL_RGB;
+							else if (mip_nrComponents == 4)
+								mip_format = GL_RGBA;
+
+							//std::cout << full_mip_file_path << ":" << mip_nrComponents << "\n";
+
+							glTexImage2D(GL_TEXTURE_2D, mipcount, mip_format, mip_width, mip_height, 0, mip_format, GL_UNSIGNED_BYTE, mip_data);
+
+							stbi_image_free(mip_data);
+
+							mipcount--;
+						}
+						else
+						{
+							stbi_image_free(mip_data);
+							std::cout << "Texture failed to load at path: " << full_mip_file_path << "\n";
+							std::cin.get();
+							exit(EXIT_FAILURE);
+						}
 					}
 				}
+			}
+				
 
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipcount);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-				while (mipcount > 0)
-				{
-					auto full_mip_file_path = mip_dir_path + "/" + std::to_string(mipcount) + texture.fileExt;
-
-					int mip_width, mip_height, mip_nrComponents;
-					unsigned char*	mip_data = stbi_load(full_mip_file_path.c_str(), &mip_width, &mip_height, &mip_nrComponents, 0);
-
-					if (mip_data)
-					{
-						GLenum mip_format;
-						if (mip_nrComponents == 1)
-							mip_format = GL_RED;
-						else if (mip_nrComponents == 3)
-							mip_format = GL_RGB;
-						else if (mip_nrComponents == 4)
-							mip_format = GL_RGBA;
-
-						//std::cout << full_mip_file_path << ":" << mip_nrComponents << "\n";
-
-						glTexImage2D(GL_TEXTURE_2D, mipcount, mip_format, mip_width, mip_height, 0, mip_format, GL_UNSIGNED_BYTE, mip_data);
-
-						stbi_image_free(mip_data);
-
-						mipcount--;
-					}
-					else
-					{
-						stbi_image_free(mip_data);
-						std::cout << "Texture failed to load at path: " << full_mip_file_path << "\n";
-						std::cin.get();
-						exit(EXIT_FAILURE);
-					}
-
-				}
-
-			}     
+   
 
             stbi_image_free(data);
 

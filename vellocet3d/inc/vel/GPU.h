@@ -29,11 +29,12 @@ namespace vel
 		size_t								activeTextureIndex;
 		//std::unique_ptr<CollisionDebugDrawer> collisionDebugDrawer;
 		std::optional<CollisionDebugDrawer> collisionDebugDrawer;
+		bool								autoGenerateMipmaps;
 		
 
     public:
 											GPU(std::string shaderDirectory, std::string dvs, std::string dfs, std::string dsvs, std::string dsfs,
-												std::string ddvs, std::string ddfs);
+												std::string ddvs, std::string ddfs, bool autoGenerateMipmaps);
 											~GPU();
 											GPU(GPU&&) = default;
         void								enableDepthTest();

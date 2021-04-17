@@ -35,7 +35,7 @@ namespace vel
 			this->config.SHADER_FILE_PATH,
 			this->config.DEFAULT_VERTEX_SHADER, this->config.DEFAULT_FRAGMENT_SHADER,
 			this->config.DEFAULT_SKINNED_VERTEX_SHADER, this->config.DEFAULT_SKINNED_FRAGMENT_SHADER,
-			this->config.DEFAULT_DEBUG_VERTEX_SHADER, this->config.DEFAULT_DEBUG_FRAGMENT_SHADER)),
+			this->config.DEFAULT_DEBUG_VERTEX_SHADER, this->config.DEFAULT_DEBUG_FRAGMENT_SHADER, this->config.AUTO_GENERATE_MIPMAPS)),
 		scene(nullptr),
         startTime(std::chrono::high_resolution_clock::now())
     {
