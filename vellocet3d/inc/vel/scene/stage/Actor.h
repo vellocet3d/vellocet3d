@@ -75,6 +75,7 @@ namespace vel::scene::stage
 		Transform&										getTransform();
 		std::optional<Transform>&						getPreviousTransform();
 		void											updatePreviousTransform();
+		void											clearPreviousTransform();
 		std::optional<glm::mat4>						getParentMatrix();
 		glm::mat4										getWorldMatrix();
 		glm::mat4										getWorldRenderMatrix(float alpha); // contains logic for interpolation
@@ -93,6 +94,9 @@ namespace vel::scene::stage
 		void											processTransform();
 		void											setTextureHasAlphaChannel(bool in);
 		bool											getTextureHasAlphaChannel();
+
+		void											removeParentActor(bool calledFromRemoveChildActor = false);
+		void											removeChildActor(Actor* a, bool calledFromRemoveParentActor = false);
 
 
 

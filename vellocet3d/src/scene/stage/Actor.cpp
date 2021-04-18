@@ -15,7 +15,7 @@ namespace vel::scene::stage
         transform(t) ,
 		rigidBody(nullptr),
 		armature(nullptr),
-		manualTransform(true),
+		manualTransform(true), //TODO: tf is the point of this?
 		parentStage(parentStage),
 		textureHasAlphaChannel(false)
     {}
@@ -31,7 +31,38 @@ namespace vel::scene::stage
 		}
 	}
 
+	void Actor::clearPreviousTransform()
+	{
+		this->previousTransform.reset();
+	}
 
+	void Actor::removeChildActor(Actor* aIn, bool calledFromRemoveParentActor)
+	{
+		for (size_t i = 0; i < this->childActors.size(); i++)
+		{
+			if (this->childActors.at(i) == aIn)
+			{
+				if (!calledFromRemoveParentActor)
+					aIn->removeParentActor(true);
+
+				this->childActors.erase(this->childActors.begin() + i); //TODO this will shift memory, possibly revise in future
+			}
+		}	
+	}
+
+	void Actor::removeParentActor(bool calledFromRemoveChildActor)
+	{
+		if (this->parentActor.has_value())
+		{
+			if (!calledFromRemoveChildActor)
+			{
+				// remove this actor's pointer from it's parent's childActors container
+				this->parentActor.value()->removeChildActor(this, true);
+			}
+
+			this->parentActor.reset();
+		}
+	}
 
 	void Actor::setDynamic(bool dynamic)
 	{
