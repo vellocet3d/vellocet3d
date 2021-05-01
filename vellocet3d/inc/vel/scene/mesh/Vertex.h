@@ -14,6 +14,8 @@ namespace vel::scene::mesh
 		glm::vec2		textureCoordinates;
 		VertexBoneData	weights;
 
+		int				attemptedVertexWeightAdditions = 0; // for debugging
+
 		bool operator==(const Vertex &) const;
 	};      
 }

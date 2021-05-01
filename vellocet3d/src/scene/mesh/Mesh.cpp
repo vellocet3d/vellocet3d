@@ -55,6 +55,7 @@ namespace vel::scene::mesh
 
 	void Mesh::addVertexWeight(unsigned int vertexIndex, unsigned int boneIndex, float weight)
 	{
+		this->vertices[vertexIndex].attemptedVertexWeightAdditions++;
 		for (unsigned int i = 0; i < (sizeof(this->vertices[vertexIndex].weights.ids) / sizeof(this->vertices[vertexIndex].weights.ids[0])); i++)
 		{
 			if (this->vertices[vertexIndex].weights.weights[i] == 0.0f)

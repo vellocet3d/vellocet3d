@@ -59,6 +59,8 @@ namespace vel::scene
 		void								swap(scene::Scene* scene);
 		scene::Scene*						sceneToSwap = nullptr;
 		virtual void						showLoadingIcon();
+		
+		void debugVertexBones();
 
 	};
 

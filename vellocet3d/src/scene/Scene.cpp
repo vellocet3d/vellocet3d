@@ -154,6 +154,26 @@ namespace vel::scene
 		ImGui::End();
 	}
 
+	// Use this when running into vertex bone buffer size issues
+	void Scene::debugVertexBones()
+	{
+		int maxAttemptedVertexBoneAllocations = 0;
+		for (auto& m : this->meshes)
+		{
+			for (auto& v : m.getVertices())
+			{
+				if (v.attemptedVertexWeightAdditions > maxAttemptedVertexBoneAllocations)
+				{
+					maxAttemptedVertexBoneAllocations = v.attemptedVertexWeightAdditions;
+				}
+			}
+		}
+		
+		std::cout << maxAttemptedVertexBoneAllocations << "\n";
+
+		
+	}
+
     void Scene::draw(float alpha)
     {
 		//std::cout << "new draw iteration---------------------------------------\n";

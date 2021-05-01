@@ -159,7 +159,7 @@ namespace vel
 			this->currentArmature->addBone(bone);
 		}
 
-		this->processedNodes.push_back(nodeName);
+		this->processedNodes.push_back(node);
 
 		// Do the same for each of its children
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -209,7 +209,7 @@ namespace vel
 		}
 
 		// If this is not the RootNode and this node has not already been processed
-        if (nodeName != "RootNode" && !sin_vector(nodeName, this->processedNodes))
+        if (nodeName != "RootNode" && !this->nodeHasBeenProcessed(node))
         {
 			
 			if (this->isRootArmatureNode(node))
@@ -533,6 +533,15 @@ namespace vel
 		out.second = exp_val[exp_val.size() - 1];
 
 		return out;
+	}
+
+	bool AssetLoader::nodeHasBeenProcessed(aiNode* in)
+	{
+		for (auto& pn : this->processedNodes)
+			if (pn == in)
+				return true;
+
+		return false;
 	}
 
 }

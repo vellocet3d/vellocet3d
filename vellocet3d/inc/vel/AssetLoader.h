@@ -37,7 +37,7 @@ namespace vel
 		std::optional<size_t>				currentMeshTextureIndex;
 		scene::armature::Armature*					currentArmature;
 		bool								currentIsDynamic;
-		std::vector<std::string>			processedNodes;
+		std::vector<aiNode*>				processedNodes;
 		std::vector<scene::mesh::VertexBoneData>	currentMeshBones;
 		glm::mat4							currentGlobalInverseMatrix;
 		glm::mat4							blenderRotationCorrectionMatrix;
@@ -57,6 +57,8 @@ namespace vel
 		aiMatrix4x4							glmToAssImpMat4(glm::mat4 mat);
 
 		std::vector<size_t>					addedActorIndexes;
+
+		bool								nodeHasBeenProcessed(aiNode* in);
 
 	public:
 																	AssetLoader(vel::scene::Scene* stageParentScene, Stage* stage, std::string assetFile, bool dynamic);
