@@ -89,5 +89,8 @@ namespace vel::scene::stage
 
 		vel::scene::armature::Armature*				addArmature(vel::scene::armature::Armature a);
 
+		void debugListNumberOfBonesPerArmature();
+		void debugActiveNumberOfBonesPerActor();
+
     };
 }

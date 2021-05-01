@@ -61,6 +61,8 @@ namespace vel::scene
 		virtual void						showLoadingIcon();
 		
 		void debugVertexBones();
+		void debugListNumberOfBonesPerArmature();
+		void debugActiveNumberOfBonesPerActor();
 
 	};
 

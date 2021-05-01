@@ -168,10 +168,19 @@ namespace vel::scene
 				}
 			}
 		}
-		
 		std::cout << maxAttemptedVertexBoneAllocations << "\n";
+	}
 
-		
+	void Scene::debugListNumberOfBonesPerArmature()
+	{
+		for (auto& s : this->stages)
+			s.debugListNumberOfBonesPerArmature();
+	}
+
+	void Scene::debugActiveNumberOfBonesPerActor()
+	{
+		for (auto& s : this->stages)
+			s.debugActiveNumberOfBonesPerActor();
 	}
 
     void Scene::draw(float alpha)

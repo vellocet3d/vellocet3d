@@ -487,4 +487,16 @@ namespace vel::scene::stage
         return this->camera;
     }
 
+	void Stage::debugListNumberOfBonesPerArmature()
+	{
+		for (auto& a : this->armatures)
+			std::cout << a.getName() << ":" << a.getBones().size() << "\n";
+	}
+
+	void Stage::debugActiveNumberOfBonesPerActor()
+	{
+		for (auto& a : this->actors)
+			std::cout << a.getName() << ":" << a.getActiveBones().value().size() << "\n";
+	}
+
 }
