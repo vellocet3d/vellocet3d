@@ -198,20 +198,22 @@ namespace vel
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(scene::mesh::Vertex), (void*)offsetof(scene::mesh::Vertex, textureCoordinates));
 
-		// Assign vertex bone ids to location = 3
+		// Assign vertex bone ids to location = 3 (and 4 for second array element)
 		glEnableVertexAttribArray(3);
 		glVertexAttribIPointer(3, 4, GL_INT, sizeof(scene::mesh::Vertex), (void*)offsetof(scene::mesh::Vertex, weights.ids));
-
-		// Assign vertex weights to location = 4
 		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(scene::mesh::Vertex), (void*)offsetof(scene::mesh::Vertex, weights.weights));
+		glVertexAttribIPointer(4, 4, GL_INT, sizeof(scene::mesh::Vertex), (void*)(offsetof(scene::mesh::Vertex, weights.ids) + 16));
+
+		// Assign vertex weights to location = 5 (and 6 for second array element)
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(scene::mesh::Vertex), (void*)offsetof(scene::mesh::Vertex, weights.weights));
+		glEnableVertexAttribArray(6);
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(scene::mesh::Vertex), (void*)(offsetof(scene::mesh::Vertex, weights.weights) + 16));
 
         // Unbind the vertex array to prevent accidental operations
         glBindVertexArray(0);
 
         this->meshRenderables.push_back(mr);
-
-		//std::cout << "got here just fine\n";
 
         return this->meshRenderables.size() - 1;
     }
