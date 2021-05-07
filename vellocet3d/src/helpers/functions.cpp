@@ -2,6 +2,7 @@
 #include <sstream>
 #include <algorithm>
 
+#include "glm/gtc/type_ptr.hpp"
 
 #include "vel/helpers/functions.h"
 
@@ -118,5 +119,14 @@ namespace vel::helpers::functions
 	{
 		return glm::vec2(-in.x, -in.y);
 	}
+
+	glm::mat4 bulletTransformToGlmMat4(btTransform t)
+	{
+		glm::mat4 out;
+		t.getOpenGLMatrix(glm::value_ptr(out));
+		return out;
+	}
+
+	
 
 }

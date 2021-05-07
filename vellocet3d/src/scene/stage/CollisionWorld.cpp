@@ -5,6 +5,8 @@
 #include "vel/App.h"
 #include "vel/scene/stage/CollisionWorld.h"
 #include "vel/helpers/functions.h"
+#include "vel/scene/stage/BroadphaseCallback.h"
+#include "vel/scene/stage/RaycastCallback.h"
 
 
 
@@ -223,6 +225,59 @@ namespace vel::scene::stage
 		}
 
 		return body;
+	}
+
+	std::optional<ConvexResult>	CollisionWorld::gjkIntersection(const btConvexShape *shape1, const btTransform &transform1,
+		const btConvexShape *shape2, const btTransform &transform2)
+	{
+		btGjkPairDetector gjk(shape1, shape2, &this->voronoiSolver, &this->epaSolver);
+
+		btDiscreteCollisionDetectorInterface::ClosestPointInput input;
+		input.m_transformA = transform1;
+		input.m_transformB = transform2;
+
+		btPointCollector res;
+
+		gjk.getClosestPointsNonVirtual(input, res, 0);
+
+		if (res.m_hasResult && res.m_distance < 0)
+		{
+			ConvexResult r;
+
+			r.point = res.m_pointInWorld;
+			r.separatingVector = res.m_normalOnBInWorld.normalized() * -res.m_distance;
+
+			return r;
+		}
+
+		return {};
+	}
+
+	std::vector<btRigidBody*> CollisionWorld::broadphase(const Aabb& aabb)
+	{
+		std::vector<btRigidBody*> r;
+
+		BroadphaseCallback callback(r);
+		this->dynamicsWorld->getBroadphase()->aabbTest(aabb.min, aabb.max, callback);
+
+		return r;
+	}
+
+	std::optional<RaycastResult> CollisionWorld::rayTest(btVector3 from, btVector3 to, std::vector<btCollisionObject*> blackList)
+	{
+		RaycastCallback raycast = RaycastCallback(from, to, blackList);
+		this->dynamicsWorld->rayTest(from, to, raycast);
+
+		if (!raycast.hasHit() || !raycast.m_collisionObject)
+			return {};
+
+		RaycastResult r;
+		r.collisionObject = raycast.m_collisionObject;
+		r.hitpoint = raycast.m_hitPointWorld;
+		r.normal = raycast.m_hitNormalWorld.normalized();
+		r.distance = btVector3(from - r.hitpoint).length();
+
+		return r;
 	}
 
 }

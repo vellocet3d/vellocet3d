@@ -196,6 +196,8 @@
     <ClCompile Include="src\scene\armature\Armature.cpp" />
     <ClCompile Include="src\scene\armature\Bone.cpp" />
     <ClCompile Include="src\AssetLoader.cpp" />
+    <ClCompile Include="src\scene\stage\Aabb.cpp" />
+    <ClCompile Include="src\scene\stage\BroadphaseCallback.cpp" />
     <ClCompile Include="src\scene\stage\Camera.cpp" />
     <ClCompile Include="src\Config.cpp" />
     <ClCompile Include="src\dep\glad.c" />
@@ -207,6 +209,7 @@
     <ClCompile Include="src\scene\Scene.cpp" />
     <ClCompile Include="src\CollisionDebugDrawer.cpp" />
     <ClCompile Include="src\scene\stage\CollisionWorld.cpp" />
+    <ClCompile Include="src\scene\stage\RaycastCallback.cpp" />
     <ClCompile Include="src\scene\stage\Sensor.cpp" />
     <ClCompile Include="src\scene\stage\RenderCommand.cpp" />
     <ClCompile Include="src\scene\stage\Stage.cpp" />
@@ -260,6 +263,11 @@
     <ClInclude Include="inc\vel\scene\mesh\Vertex.h" />
     <ClInclude Include="inc\vel\scene\mesh\VertexBoneData.h" />
     <ClInclude Include="inc\vel\scene\Scene.h" />
+    <ClInclude Include="inc\vel\scene\stage\Aabb.h" />
+    <ClInclude Include="inc\vel\scene\stage\BroadphaseCallback.h" />
+    <ClInclude Include="inc\vel\scene\stage\ConvexResult.h" />
+    <ClInclude Include="inc\vel\scene\stage\RaycastCallback.h" />
+    <ClInclude Include="inc\vel\scene\stage\RaycastResult.h" />
     <ClInclude Include="inc\vel\Shader.h" />
     <ClInclude Include="inc\vel\scene\stage\Actor.h" />
     <ClInclude Include="inc\vel\scene\stage\Camera.h" />

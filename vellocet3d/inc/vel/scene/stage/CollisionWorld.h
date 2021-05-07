@@ -9,8 +9,16 @@
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 
+#include "BulletCollision/NarrowPhaseCollision/btGjkEpaPenetrationDepthSolver.h"
+#include "BulletCollision/NarrowPhaseCollision/btGjkPairDetector.h"
+#include "BulletCollision/NarrowPhaseCollision/btPointCollector.h"
+
+
 #include "vel/scene/stage/Actor.h"
 #include "vel/scene/stage/Sensor.h"
+#include "vel/scene/stage/ConvexResult.h"
+#include "vel/scene/stage/Aabb.h"
+#include "vel/scene/stage/RaycastResult.h"
 
 
 
@@ -30,6 +38,10 @@ namespace vel::scene::stage
 		std::map<std::string, btCollisionShape*> collisionShapes;
 		std::vector<std::unique_ptr<Sensor>>	sensors;
 
+		btVoronoiSimplexSolver					voronoiSolver;
+		btGjkEpaPenetrationDepthSolver			epaSolver;
+		
+
 		void									removeSensorsUsingCollisionObject(btCollisionObject* co);
 	
 	public:
@@ -45,6 +57,9 @@ namespace vel::scene::stage
 		void									addSensor(Sensor* ct);
 		void									processSensors();
 
+		std::optional<ConvexResult>				gjkIntersection(const btConvexShape *shape1, const btTransform &transform1, const btConvexShape *shape2, const btTransform &transform2);
+		std::vector<btRigidBody*>				broadphase(const Aabb& aabb);
+		std::optional<RaycastResult>			rayTest(btVector3 from, btVector3 to, std::vector<btCollisionObject*> blackList = {});
 		
 
 	};
