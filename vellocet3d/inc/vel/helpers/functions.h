@@ -28,4 +28,6 @@ namespace vel::helpers::functions
 	glm::vec2 invertVec2(glm::vec2 in);
 	std::string str_replace(const std::string& from, const std::string& to, std::string str);
 	glm::mat4 bulletTransformToGlmMat4(btTransform t);
+	btMatrix3x3 glmMat3ToBulletMat3(const glm::mat3& m);
+	btTransform glmMat4ToBulletTransform(const glm::mat4& m);
 }

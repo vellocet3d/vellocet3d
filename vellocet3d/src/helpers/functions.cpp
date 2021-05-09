@@ -127,6 +127,16 @@ namespace vel::helpers::functions
 		return out;
 	}
 
-	
+	btMatrix3x3 glmMat3ToBulletMat3(const glm::mat3& m) 
+	{ 
+		return btMatrix3x3(m[0][0], m[1][0], m[2][0], m[0][1], m[1][1], m[2][1], m[0][2], m[1][2], m[2][2]); 
+	}
+
+
+	btTransform glmMat4ToBulletTransform(const glm::mat4& m)
+	{
+		glm::mat3 m3(m);
+		return btTransform(glmMat3ToBulletMat3(m3), glmToBulletVec3(glm::vec3(m[3][0], m[3][1], m[3][2])));
+	}
 
 }
