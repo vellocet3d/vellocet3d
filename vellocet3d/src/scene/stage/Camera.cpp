@@ -47,10 +47,10 @@ namespace vel::scene::stage
 
     void Camera::updateViewMatrix()
     {
-        if (!this->fixed) 
-		{
+  //      if (!this->fixed) 
+		//{
             this->viewMatrix = glm::lookAt(this->position, this->lookAt, this->up);
-        }
+        //}
     }
 
     void Camera::update()

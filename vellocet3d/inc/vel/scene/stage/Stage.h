@@ -81,10 +81,9 @@ namespace vel::scene::stage
 		CollisionWorld*								getCollisionWorld();
 
 		void										stepPhysics(float delta);
-		void										useCollisionDebugDrawer();
+		void										useCollisionDebugDrawer(int debugMode = 1);
 		bool										collisionDebugging();
 
-		GPU*										getSceneGPU();
 		vel::scene::Scene*							getParentScene();
 
 		vel::scene::armature::Armature*				addArmature(vel::scene::armature::Armature a);

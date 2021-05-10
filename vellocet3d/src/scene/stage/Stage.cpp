@@ -73,7 +73,7 @@ namespace vel::scene::stage
 		return this->collisionDebuggingSwitch;
 	}
 
-	void Stage::useCollisionDebugDrawer()
+	void Stage::useCollisionDebugDrawer(int debugMode)
 	{
 		if (!this->collisionWorld)
 		{
@@ -81,6 +81,8 @@ namespace vel::scene::stage
 		}
 
 		this->collisionDebuggingSwitch = true;
+
+		App::get().getGPU()->getCollisionDebugDrawer()->setDebugMode(debugMode);
 
 		this->getCollisionWorld()->getDynamicsWorld()->setDebugDrawer(App::get().getGPU()->getCollisionDebugDrawer());
 	}

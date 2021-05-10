@@ -146,6 +146,8 @@ namespace vel::scene::stage
 		return this->dynamicsWorld;
 	}
 
+	
+
 	/*
 		Create a single btBvhTriangleMeshShape and corresponding btRigidBody object from
 		the vector of passed Actor pointers. Call callback at the end of the method passing
@@ -226,6 +228,79 @@ namespace vel::scene::stage
 		return body;
 	}
 
+	/*
+		Same as above function, only instead of creating a single collision object from given actors, we create an individual collision object
+		with it's own AABB for each actor passed
+	*/
+	void CollisionWorld::addStaticCollisionBodies(std::vector<Actor*> actors, std::optional<std::function<void(btRigidBody* body)>> callback)
+	{
+		for (auto actor : actors)
+		{
+			if (!actor->getMeshIndex())
+				continue;
+
+			std::vector<glm::vec3> tmpVerts;
+			std::vector<size_t> tmpInds;
+			
+			auto transformMatrix = actor->getWorldMatrix();
+			auto mesh = &this->stage->getParentScene()->getMesh(actor->getMeshIndex().value());
+
+			size_t vertexOffset = tmpVerts.size();
+
+			for (auto& vert : mesh->getVertices())
+			{
+				tmpVerts.push_back(glm::vec3(transformMatrix * glm::vec4(vert.position, 1.0f)));
+			}
+
+			for (auto& ind : mesh->getIndices())
+			{
+				tmpInds.push_back(ind + vertexOffset);
+			}
+
+			btTriangleMesh* mergedTriangleMesh = new btTriangleMesh();
+			btVector3 p0, p1, p2;
+			for (int triCounter = 0; triCounter < tmpInds.size() / 3; triCounter++)
+			{
+				p0 = vel::helpers::functions::glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter]]);
+				p1 = vel::helpers::functions::glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 1]]);
+				p2 = vel::helpers::functions::glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 2]]);
+
+				mergedTriangleMesh->addTriangle(p0, p1, p2);
+			}
+
+			//btCollisionShape* staticCollisionShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);
+			btBvhTriangleMeshShape* bvhShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);
+			btCollisionShape* staticCollisionShape = bvhShape;
+			this->collisionShapes[actor->getName() + "_shape"] = staticCollisionShape;
+
+			btScalar mass(0.0);
+			btVector3 localInertia(0, 0, 0);
+			btDefaultMotionState* defaultMotionState = new btDefaultMotionState();
+			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, defaultMotionState, staticCollisionShape, localInertia);
+			btRigidBody* body = new btRigidBody(rbInfo);
+
+			///////// added below to handle jitter when objects sliding across faces
+			// https://stackoverflow.com/questions/25605659/avoid-ground-collision-with-bullet/25725502#25725502
+
+			gContactAddedCallback = &CollisionWorld::contactAddedCallback;
+			body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+			btTriangleInfoMap* triangleInfoMap = new btTriangleInfoMap();
+			btGenerateInternalEdgeInfo(bvhShape, triangleInfoMap);
+
+			/////////
+
+
+			this->dynamicsWorld->addRigidBody(body);
+
+			if (callback)
+			{
+				callback.value()(body);
+			}
+		}
+
+
+
+	}
 
 
 	std::optional<RaycastResult> CollisionWorld::rayTest(btVector3 from, btVector3 to, std::vector<btCollisionObject*> blackList)

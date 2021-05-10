@@ -47,6 +47,7 @@ namespace vel::scene::stage
 		btDiscreteDynamicsWorld* const			getDynamicsWorld();
 		void									addCollisionShape(std::string name, btCollisionShape* shape);
 		btRigidBody*							addStaticCollisionBody(std::string collisionObjectName, std::vector<Actor*> actors, std::optional<std::function<void(btRigidBody* body)>> callback = std::nullopt);
+		void									addStaticCollisionBodies(std::vector<Actor*> actors, std::optional<std::function<void(btRigidBody* body)>> callback = std::nullopt);
 		void									removeRigidBody(btRigidBody* rb);
 		void									removeGhostObject(btPairCachingGhostObject* go);
 		void									addSensor(Sensor* ct);

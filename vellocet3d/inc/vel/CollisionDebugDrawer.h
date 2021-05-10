@@ -19,6 +19,7 @@ namespace vel
 
 	private:
 		int					debug_mode = 1; // default to DBG_DrawWireframe
+											// 2 = AABB
 		std::vector<BulletDebugDrawData>	verts;
 		unsigned int		VAO;
 		unsigned int		VBO;
