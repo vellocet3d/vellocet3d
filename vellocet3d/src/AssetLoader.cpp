@@ -87,7 +87,8 @@ namespace vel
 				auto a = Animation();
 				a.name = this->aiScene->mAnimations[i]->mName.C_Str();
 				a.duration = this->aiScene->mAnimations[i]->mDuration;
-				a.tps = this->aiScene->mAnimations[i]->mTicksPerSecond;
+				//a.tps = this->aiScene->mAnimations[i]->mTicksPerSecond;
+				a.tps = this->aiScene->mAnimations[i]->mTicksPerSecond * 33.3333333; // account for the weird assimp/fbx "update" that multiplies duration by 33.3333333
 
 				// add all channels to animation
 
@@ -202,6 +203,8 @@ namespace vel
 
         
 		std::string nodeName = node->mName.C_Str();
+
+		//std::cout << nodeName << "\n";
 
 		if (nodeName == "RootNode")
 		{
@@ -382,20 +385,23 @@ namespace vel
 
 		if (aiMesh->HasBones())
 		{
+			unsigned int boneIndex = 0;
 			for (unsigned int i = 0; i < aiMesh->mNumBones; i++)
 			{
+				if (aiMesh->mBones[i]->mNumWeights == 0)
+					continue;
+
 				auto b = scene::mesh::Bone();
 				b.name = aiMesh->mBones[i]->mName.C_Str();
 				b.offsetMatrix = this->aiMatrix4x4ToGlm(aiMesh->mBones[i]->mOffsetMatrix);
 				bones.push_back(b);
 
 				for (unsigned int j = 0; j < aiMesh->mBones[i]->mNumWeights; j++)
-				{
-					mesh.addVertexWeight(aiMesh->mBones[i]->mWeights[j].mVertexId, i, aiMesh->mBones[i]->mWeights[j].mWeight);
-				}				
+					mesh.addVertexWeight(aiMesh->mBones[i]->mWeights[j].mVertexId, boneIndex, aiMesh->mBones[i]->mWeights[j].mWeight);
+				
+				boneIndex++;
 			}
 		}
-
 		mesh.setBones(bones);
 
 

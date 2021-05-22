@@ -254,29 +254,45 @@ namespace vel::scene
                 {
                     Actor* a = s.getActor(ai);
 
+					
 					//std::cout << a->getName() << ":" << rc.getShaderIndex() << "-" << rc.getMeshIndex() << "-" << rc.getTextureIndex() << "\n";
-					//std::cout << a->getName() << ":" << gpu.getActiveShaderIndex() << "-" << gpu.getActiveMeshRenderableIndex() << "-" << gpu.getActiveTextureIndex() << "\n";
+					//std::cout << a->getName() << ":" << gpu->getActiveShaderIndex() << "-" << gpu->getActiveMeshRenderableIndex() << "-" << gpu->getActiveTextureIndex() << "\n";
+					//std::cout << "--------------------------------\n";
+
+					//std::cout << a->getName() << "\n";
 
                     if (!a->isDeleted() && a->isVisible())
                     {
 						gpu->setShaderMat4("mvp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix() * a->getWorldRenderMatrix(alpha));
+
+						//std::cout << a->getName() << "\n";
 
 						// If this actor is animated, send the bone transforms of it's armature to the shader
 						if (a->isAnimated())
 						{
 							auto& mesh = a->getMesh();
 							auto armature = a->getArmature();
+
+							//std::cout << a->getName() << "\n";
+							//for(auto& b : armature->getBones())
+							//	std::cout << b.name << "\n";
+
 							
 							size_t boneIndex = 0;
 							for (auto& activeBone : a->getActiveBones().value())
 							{
 								glm::mat4 meshBoneTransform = mesh.getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrix(alpha) * mesh.getBone(boneIndex).offsetMatrix;
 
+								//std::cout << glm::to_string(meshBoneTransform) << "\n";
+								//std::cout << activeBone.second << ":" << armature->getBone(activeBone.first).name << "\n";
+
 								gpu->setShaderMat4(activeBone.second, meshBoneTransform);
 
 								boneIndex++;
 							}
 						}
+
+						
 
                         gpu->drawMeshRenderable();
                     }
