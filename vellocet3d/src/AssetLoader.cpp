@@ -55,9 +55,8 @@ namespace vel
 		for (auto& a : this->stageParentScene->getAnimations())
 		{
 			if (a.name == animationName)
-			{
 				return i;
-			}
+			
 			i++;
 		}
 		return std::nullopt;
@@ -149,9 +148,7 @@ namespace vel
 			std::string nodeParentName = node->mParent->mName.C_Str();
 
 			if (nodeParentName == "RootNode")
-			{
 				this->currentArmature = this->currentStage->addArmature(vel::scene::armature::Armature(boneName, this->currentStage));
-			}
 
 			vel::scene::armature::Bone bone;
 			bone.name = boneName;
@@ -164,9 +161,7 @@ namespace vel
 
 		// Do the same for each of its children
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
-		{
 			this->processArmatureNode(node->mChildren[i]);
-		}
 	}
 
 	bool AssetLoader::isRootArmatureNode(aiNode* node)
@@ -177,13 +172,10 @@ namespace vel
 		// to be more accurate)
 		std::string nodeName = node->mParent->mName.C_Str();
 		if (nodeName == "RootNode" && node->mNumChildren > 0 && node->mNumMeshes == 0)
-		{
 			return true;
-		}
 		else
-		{
 			return false;
-		}
+		
 	}
 
     void AssetLoader::processActorNode(aiNode* node)
@@ -207,9 +199,8 @@ namespace vel
 		//std::cout << nodeName << "\n";
 
 		if (nodeName == "RootNode")
-		{
 			this->currentGlobalInverseMatrix = glm::inverse(this->aiMatrix4x4ToGlm(node->mTransformation));
-		}
+
 
 		// If this is not the RootNode and this node has not already been processed
         if (nodeName != "RootNode" && !this->nodeHasBeenProcessed(node))
@@ -223,11 +214,8 @@ namespace vel
 				// Obtain parent indexes for each bone using their
 				// boneNames (done so that these indexes can be used at runtime instead
 				// of loops and string comparisons)
-				for (auto& b : this->currentArmature->getBones()) // ignore intellisense error for getBones()
-				{
-					// get index of parent
+				for (auto& b : this->currentArmature->getBones())
 					b.parent = this->currentArmature->getBoneIndex(b.parentName);
-				}
 			}
 			else
 			{
@@ -260,7 +248,6 @@ namespace vel
 						}
 
 						actor.setActiveBones(activeBones);
-
 					}
 
 					
@@ -274,13 +261,9 @@ namespace vel
 					if (!findShaderId)
 					{
 						if (!this->currentArmature)
-						{
 							actor.setShaderIndex(0); // actor does not have an armature so use default (non-skinned) shader
-						}
 						else
-						{
 							actor.setShaderIndex(1); // actor has an armature so it's a skinned mesh, use default skinned shader
-						}
 					}
 					else
 					{
@@ -297,9 +280,8 @@ namespace vel
 
         // Do the same for each of its children
         for (unsigned int i = 0; i < node->mNumChildren; i++)
-        {
             this->processActorNode(node->mChildren[i]);
-        }
+        
     }
 
     void AssetLoader::processTransformable(aiNode* node)
@@ -372,11 +354,8 @@ namespace vel
 
             // retrieve all indices of the face and store them in the indices vector
             for (unsigned int j = 0; j < face.mNumIndices; j++)
-            {
                 indices.push_back(face.mIndices[j]);
-            }
         }
-
 		mesh.setIndices(indices);
 
 
@@ -469,10 +448,8 @@ namespace vel
     std::string AssetLoader::generateUniqueActorName(std::string name)
     {
         if (!this->currentStage->hasActorWithName(name))
-        {
             return name;
-        }
-
+        
         std::string message = "While attempting to load object: " + name + " from file: " + this->currentAssetFile
             + " an existing actor contained this name. The following name has been used instead: ";
 
@@ -525,16 +502,12 @@ namespace vel
 		}
 
 		if (string_contains("\\", in))
-		{
 			in = str_replace("\\", "/", in);
-		}
-
+		
 		auto exp_val = explode_string(in, '/');
 
 		for (size_t i = 0; i <= exp_val.size() - 2; i++)
-		{
 			out.first += "/" + exp_val[i];
-		}
 
 		out.second = exp_val[exp_val.size() - 1];
 
