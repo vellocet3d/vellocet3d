@@ -6,7 +6,7 @@
 #include "glm/gtc/quaternion.hpp"
 
 
-namespace vel::scene::animation
+namespace vel
 {
 	struct Channel
 	{

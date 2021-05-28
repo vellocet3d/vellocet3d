@@ -5,7 +5,7 @@
 #include "vel/scene/stage/Actor.h"
 
 
-namespace vel::scene::stage
+namespace vel
 {
     Actor::Actor(std::string name, Transform t, Stage* parentStage) :
         name(name),
@@ -26,8 +26,8 @@ namespace vel::scene::stage
 		
 		if (!this->manualTransform && this->rigidBody != nullptr)
 		{
-			this->transform.setTranslation(vel::helpers::functions::bulletToGlmVec3(this->rigidBody->getWorldTransform().getOrigin()));
-			this->transform.setRotation(vel::helpers::functions::bulletToGlmQuat(this->rigidBody->getWorldTransform().getRotation()));
+			this->transform.setTranslation(bulletToGlmVec3(this->rigidBody->getWorldTransform().getOrigin()));
+			this->transform.setRotation(bulletToGlmQuat(this->rigidBody->getWorldTransform().getRotation()));
 		}
 	}
 
@@ -219,7 +219,7 @@ namespace vel::scene::stage
 		a->addChildActor(this);
 	}
 
-	void Actor::setParentActorBone(vel::scene::armature::Bone* b)
+	void Actor::setParentActorBone(ArmatureBone* b)
 	{
 		this->parentActorBone = b;
 	}
@@ -357,17 +357,17 @@ namespace vel::scene::stage
 		return false;
 	}
 
-	void Actor::setArmature(vel::scene::armature::Armature* arm)
+	void Actor::setArmature(Armature* arm)
 	{
 		this->armature = arm;
 	}
 
-	vel::scene::armature::Armature* Actor::getArmature()
+	Armature* Actor::getArmature()
 	{
 		return this->armature;
 	}
 
-	vel::scene::mesh::Mesh& Actor::getMesh()
+	Mesh& Actor::getMesh()
 	{
 		return this->parentStage->getParentScene()->getMesh(this->meshIndex.value());
 	}

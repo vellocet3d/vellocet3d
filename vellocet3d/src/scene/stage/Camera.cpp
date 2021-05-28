@@ -7,7 +7,7 @@
 
 
 
-namespace vel::scene::stage
+namespace vel
 {
     Camera::Camera(CameraType type, bool fixed, float nearPlane, float farPlane, float fovScale) :
         type(type),

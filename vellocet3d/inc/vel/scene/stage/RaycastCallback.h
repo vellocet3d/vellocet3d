@@ -7,7 +7,7 @@
 
 
 
-namespace vel::scene::stage
+namespace vel
 {
 
 	class RaycastCallback : public btCollisionWorld::ClosestRayResultCallback

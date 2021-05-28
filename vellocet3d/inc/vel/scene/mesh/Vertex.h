@@ -5,7 +5,7 @@
 #include "vel/scene/mesh/VertexBoneData.h"
 
 
-namespace vel::scene::mesh
+namespace vel
 {
 	struct Vertex
 	{

@@ -11,13 +11,8 @@
 #include "vel/scene/animation/Animation.h"
 
 
-using namespace vel::scene::stage;
-using namespace vel::scene::mesh;
-using namespace vel::scene::armature;
-using namespace vel::scene::animation;
 
-
-namespace vel::scene 
+namespace vel
 {
 	class Scene
 	{
@@ -56,8 +51,8 @@ namespace vel::scene
 		virtual void						postPhysics(float deltaTime);
 
 		bool								swapping = false;
-		void								swap(scene::Scene* scene);
-		scene::Scene*						sceneToSwap = nullptr;
+		void								swap(Scene* scene);
+		Scene*								sceneToSwap = nullptr;
 		virtual void						showLoadingIcon();
 		
 		void debugVertexBones();

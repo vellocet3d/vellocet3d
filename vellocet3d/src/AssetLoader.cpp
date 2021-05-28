@@ -15,11 +15,9 @@
 #include "vel/helpers/functions.h"
 
 
-using namespace vel::helpers::functions;
-
 namespace vel
 {
-	AssetLoader::AssetLoader(vel::scene::Scene* stageParentScene, Stage* stage, std::string assetFile, bool dynamic) :
+	AssetLoader::AssetLoader(Scene* stageParentScene, Stage* stage, std::string assetFile, bool dynamic) :
 		stageParentScene(stageParentScene),
         currentStage(stage),
         currentAssetFile(assetFile),
@@ -148,9 +146,9 @@ namespace vel
 			std::string nodeParentName = node->mParent->mName.C_Str();
 
 			if (nodeParentName == "RootNode")
-				this->currentArmature = this->currentStage->addArmature(vel::scene::armature::Armature(boneName, this->currentStage));
+				this->currentArmature = this->currentStage->addArmature(Armature(boneName, this->currentStage));
 
-			vel::scene::armature::Bone bone;
+			ArmatureBone bone;
 			bone.name = boneName;
 			bone.parentName = nodeParentName == "RootNode" ? boneName : node->mParent->mName.C_Str();
 
@@ -360,7 +358,7 @@ namespace vel
 
 
 		// if mesh has bones, process bones
-		std::vector<scene::mesh::Bone> bones;
+		std::vector<MeshBone> bones;
 
 		if (aiMesh->HasBones())
 		{
@@ -370,7 +368,7 @@ namespace vel
 				if (aiMesh->mBones[i]->mNumWeights == 0)
 					continue;
 
-				auto b = scene::mesh::Bone();
+				auto b = MeshBone();
 				b.name = aiMesh->mBones[i]->mName.C_Str();
 				b.offsetMatrix = this->aiMatrix4x4ToGlm(aiMesh->mBones[i]->mOffsetMatrix);
 				bones.push_back(b);
@@ -410,66 +408,6 @@ namespace vel
         // process materials
         aiMaterial* material = this->aiScene->mMaterials[aiMesh->mMaterialIndex];
         aiString str;
-
-		/*
-		material->GetTexture(aiTextureType_NONE, 0, &str);
-		std::cout << "aiTextureType_NONE:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
-		std::cout << "aiTextureType_DIFFUSE:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_SPECULAR, 0, &str);
-		std::cout << "aiTextureType_SPECULAR:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_AMBIENT, 0, &str);
-		std::cout << "aiTextureType_AMBIENT:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_EMISSIVE, 0, &str);
-		std::cout << "aiTextureType_EMISSIVE:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_HEIGHT, 0, &str);
-		std::cout << "aiTextureType_HEIGHT:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_NORMALS, 0, &str);
-		std::cout << "aiTextureType_NORMALS:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_SHININESS, 0, &str);
-		std::cout << "aiTextureType_SHININESS:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_OPACITY, 0, &str);
-		std::cout << "aiTextureType_OPACITY:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_DISPLACEMENT, 0, &str);
-		std::cout << "aiTextureType_DISPLACEMENT:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_LIGHTMAP, 0, &str);
-		std::cout << "aiTextureType_LIGHTMAP:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_REFLECTION, 0, &str);
-		std::cout << "aiTextureType_REFLECTION:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_BASE_COLOR, 0, &str);
-		std::cout << "aiTextureType_BASE_COLOR:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_NORMAL_CAMERA, 0, &str);
-		std::cout << "aiTextureType_NORMAL_CAMERA:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_EMISSION_COLOR, 0, &str);
-		std::cout << "aiTextureType_EMISSION_COLOR:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_METALNESS, 0, &str);
-		std::cout << "aiTextureType_METALNESS:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &str);
-		std::cout << "aiTextureType_DIFFUSE_ROUGHNESS:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &str);
-		std::cout << "aiTextureType_AMBIENT_OCCLUSION:" << str.C_Str() << "\n";
-		str.Clear();
-		material->GetTexture(aiTextureType_UNKNOWN, 0, &str);
-		std::cout << "aiTextureType_UNKNOWN:" << str.C_Str() << "\n";
-		str.Clear();
-		*/
 
 
         material->GetTexture(aiTextureType_DIFFUSE, 0, &str);

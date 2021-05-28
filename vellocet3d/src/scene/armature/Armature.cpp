@@ -12,16 +12,16 @@
 #include "vel/scene/stage/TRS.h"
 
 
-namespace vel::scene::armature
+namespace vel
 {
-	Armature::Armature(std::string name, vel::scene::stage::Stage* parentStage) :
+	Armature::Armature(std::string name, Stage* parentStage) :
 		parentStage(parentStage),
 		name(name),
 		runTime(0.0),
 		previousRunTime(0.0)
 	{}
 
-	glm::vec3 Armature::calcTranslation(const float& time, size_t currentKeyIndex, vel::scene::animation::Channel* channel)
+	glm::vec3 Armature::calcTranslation(const float& time, size_t currentKeyIndex, Channel* channel)
 	{
 		size_t nextKeyIndex = currentKeyIndex + 1;
 
@@ -31,7 +31,7 @@ namespace vel::scene::armature
 		return channel->positionKeyValues[currentKeyIndex] + factor * (channel->positionKeyValues[nextKeyIndex] - channel->positionKeyValues[currentKeyIndex]);
 	}
 
-	glm::quat Armature::calcRotation(const float& time, size_t currentKeyIndex, vel::scene::animation::Channel* channel)
+	glm::quat Armature::calcRotation(const float& time, size_t currentKeyIndex, Channel* channel)
 	{
 		size_t nextKeyIndex = currentKeyIndex + 1;
 
@@ -41,7 +41,7 @@ namespace vel::scene::armature
 		return glm::normalize(glm::slerp(channel->rotationKeyValues[currentKeyIndex], channel->rotationKeyValues[nextKeyIndex], factor));
 	}
 
-	glm::vec3 Armature::calcScale(const float& time, size_t currentKeyIndex, vel::scene::animation::Channel* channel)
+	glm::vec3 Armature::calcScale(const float& time, size_t currentKeyIndex, Channel* channel)
 	{
 		size_t nextKeyIndex = currentKeyIndex + 1;
 
@@ -272,27 +272,27 @@ namespace vel::scene::armature
 		this->animations.push_back(std::pair<std::string, size_t>(name, index));
 	}
 
-	void Armature::addBone(Bone b)
+	void Armature::addBone(ArmatureBone b)
 	{
 		this->bones.push_back(b);
 	}
 
-	Bone& Armature::getRootBone()
+	ArmatureBone& Armature::getRootBone()
 	{
 		return this->bones[0];
 	}
 
-	std::vector<Bone>& Armature::getBones()
+	std::vector<ArmatureBone>& Armature::getBones()
 	{
 		return this->bones;
 	}
 
-	const std::vector<Bone>& Armature::getBones() const
+	const std::vector<ArmatureBone>& Armature::getBones() const
 	{
 		return this->bones;
 	}
 
-	Bone* Armature::getBone(std::string boneName)
+	ArmatureBone* Armature::getBone(std::string boneName)
 	{
 		for (auto& b : this->bones)
 		{
@@ -302,7 +302,7 @@ namespace vel::scene::armature
 		return nullptr;
 	}
 
-	Bone& Armature::getBone(size_t index)
+	ArmatureBone& Armature::getBone(size_t index)
 	{
 		return this->bones.at(index);
 	}

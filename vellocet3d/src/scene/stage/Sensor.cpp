@@ -4,7 +4,7 @@
 #include "vel/scene/stage/Sensor.h"
 
 
-namespace vel::scene::stage
+namespace vel
 {
 
 	Sensor::Sensor(std::function<void(btPersistentManifold* contactManifold, std::pair<btCollisionObject*, btCollisionObject*>	contactPair)> onContactDiscovered, 

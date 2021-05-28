@@ -3,7 +3,7 @@
 #include <vector>
 
 
-namespace vel::scene::stage
+namespace vel
 {
     class RenderCommand
     {

@@ -22,8 +22,8 @@ namespace vel
     private:
         std::string							shaderDirectory;
         std::vector<Shader>					shaders;
-        std::vector<scene::mesh::Texture>			textures;
-		std::vector<scene::mesh::Renderable>		meshRenderables;
+        std::vector<Texture>				textures;
+		std::vector<Renderable>				meshRenderables;
         size_t								activeShaderIndex;
 		size_t								activeMeshRenderableIndex;
 		size_t								activeTextureIndex;
@@ -44,10 +44,10 @@ namespace vel
         const size_t						getActiveMeshRenderableIndex() const;
         const size_t						getActiveTextureIndex() const;
 		size_t								loadShader(const std::string name, const std::string vertFile, const std::string fragFile);
-		size_t								loadMesh(scene::mesh::Mesh& m);
+		size_t								loadMesh(Mesh& m);
 		size_t								loadTexture(std::string type, std::string dir, std::string filename);
         void								useTexture(size_t textureIndex);
-        const std::vector<scene::mesh::Texture>&	getTextures() const;
+        const std::vector<Texture>&			getTextures() const;
         void								useShader(size_t shaderIndex);
         void								setShaderBool(const std::string &name, bool value) const;
         void								setShaderInt(const std::string &name, int value) const;
@@ -59,7 +59,7 @@ namespace vel
 		void								clearDepthBuffer();
 		std::vector<std::string>			getActiveShaderNames(); // added this to assist debugging
 	
-		const scene::mesh::Texture&			getTexture(size_t i) const;
+		const Texture&						getTexture(size_t i) const;
 
 		void								wipe();
 		void								finish();

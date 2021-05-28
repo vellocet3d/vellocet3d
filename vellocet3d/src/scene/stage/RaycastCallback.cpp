@@ -1,7 +1,7 @@
 
 #include "vel/scene/stage/RaycastCallback.h"
 
-namespace vel::scene::stage
+namespace vel
 {
 	RaycastCallback::RaycastCallback(btVector3 from, btVector3 to, std::vector<btCollisionObject*> blackList) :
 		btCollisionWorld::ClosestRayResultCallback(from, to),

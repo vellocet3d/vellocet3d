@@ -15,13 +15,11 @@
 #include "vel/scene/stage/Sensor.h"
 #include "vel/GPU.h"
 
-namespace vel::scene
+
+namespace vel
 {
 	class Scene;
-}
 
-namespace vel::scene::stage
-{
     class Stage
     {
     private:
@@ -30,7 +28,7 @@ namespace vel::scene::stage
         std::optional<Camera>							camera;
         std::vector<Actor>								actors;
         std::vector<size_t>								actorFreeSlots;
-		std::vector<vel::scene::armature::Armature>		armatures;
+		std::vector<Armature>							armatures;
         std::optional<std::vector<RenderCommand>>		renderCommands;
         std::optional<std::vector<size_t>>				renderCommandsOrder;
 		std::optional<size_t>							renderCommandExists(size_t sI, size_t mI, size_t tI);
@@ -39,12 +37,12 @@ namespace vel::scene::stage
 		bool											collisionDebuggingSwitch;
 		bool											clearDepthBuffer;
 
-		vel::scene::Scene*								parentScene;
+		Scene*											parentScene;
 		
 
 
     public:
-													Stage(vel::scene::Scene* parentScene);
+													Stage(Scene* parentScene);
 		std::vector<size_t>							loadActors(std::string filename, bool dynamic = false);
 		std::vector<size_t>							loadActors(std::string filename, bool dynamic, int shaderIndex);
 		std::vector<size_t>							loadActors(std::string filename, bool dynamic, std::vector<std::pair<int, std::vector<std::string>>> actorShaderAssocs);
@@ -84,9 +82,9 @@ namespace vel::scene::stage
 		void										useCollisionDebugDrawer(int debugMode = 1);
 		bool										collisionDebugging();
 
-		vel::scene::Scene*							getParentScene();
+		Scene*										getParentScene();
 
-		vel::scene::armature::Armature*				addArmature(vel::scene::armature::Armature a);
+		Armature*									addArmature(Armature a);
 
 		void debugListNumberOfBonesPerArmature();
 		void debugActiveNumberOfBonesPerActor();

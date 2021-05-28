@@ -5,7 +5,7 @@
 #include "glm/gtx/quaternion.hpp"
 
 
-namespace vel::scene::stage
+namespace vel
 {
 	class Transform
 	{

@@ -9,7 +9,7 @@
 
 
 
-namespace vel::scene::stage
+namespace vel
 {
 	CollisionWorld::CollisionWorld(Stage* stage, float gravity) :
 		stage(stage),
@@ -187,9 +187,9 @@ namespace vel::scene::stage
 		btVector3 p0, p1, p2;
 		for (int triCounter = 0; triCounter < tmpInds.size() / 3; triCounter++)
 		{
-			p0 = vel::helpers::functions::glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter]]);
-			p1 = vel::helpers::functions::glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 1]]);
-			p2 = vel::helpers::functions::glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 2]]);
+			p0 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter]]);
+			p1 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 1]]);
+			p2 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 2]]);
 
 			mergedTriangleMesh->addTriangle(p0, p1, p2);
 		}
@@ -261,9 +261,9 @@ namespace vel::scene::stage
 			btVector3 p0, p1, p2;
 			for (int triCounter = 0; triCounter < tmpInds.size() / 3; triCounter++)
 			{
-				p0 = vel::helpers::functions::glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter]]);
-				p1 = vel::helpers::functions::glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 1]]);
-				p2 = vel::helpers::functions::glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 2]]);
+				p0 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter]]);
+				p1 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 1]]);
+				p2 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 2]]);
 
 				mergedTriangleMesh->addTriangle(p0, p1, p2);
 			}

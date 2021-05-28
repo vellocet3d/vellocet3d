@@ -3,7 +3,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 
-namespace vel::scene::stage
+namespace vel
 {
 	struct TRS
 	{

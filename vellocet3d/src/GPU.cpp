@@ -42,7 +42,7 @@ namespace vel
 		this->wipe();
 	}
 
-	const scene::mesh::Texture&	GPU::getTexture(size_t i) const
+	const Texture&	GPU::getTexture(size_t i) const
 	{
 		return this->textures.at(i);
 	}
@@ -167,9 +167,9 @@ namespace vel
         return this->shaders.size() - 1;
     }
 
-	size_t GPU::loadMesh(scene::mesh::Mesh& m)
+	size_t GPU::loadMesh(Mesh& m)
     {
-        scene::mesh::Renderable mr = scene::mesh::Renderable();
+        Renderable mr = Renderable();
         mr.indiceCount = (GLsizei)m.getIndices().size();
 
         // Generate and bind vertex attribute array
@@ -179,7 +179,7 @@ namespace vel
         // Generate and bind vertex buffer object
         glGenBuffers(1, &mr.VBO);
         glBindBuffer(GL_ARRAY_BUFFER, mr.VBO);
-        glBufferData(GL_ARRAY_BUFFER, m.getVertices().size() * sizeof(scene::mesh::Vertex), &m.getVertices()[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, m.getVertices().size() * sizeof(Vertex), &m.getVertices()[0], GL_STATIC_DRAW);
 
         // Generate and bind element buffer object
         glGenBuffers(1, &mr.EBO);
@@ -188,27 +188,27 @@ namespace vel
 
         // Assign vertex positions to location = 0
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(scene::mesh::Vertex), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 
         // Assign vertex normals to location = 1
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(scene::mesh::Vertex), (void*)offsetof(scene::mesh::Vertex, normal));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 
         // Assign vertex texture coordinates to location = 2
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(scene::mesh::Vertex), (void*)offsetof(scene::mesh::Vertex, textureCoordinates));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureCoordinates));
 
 		// Assign vertex bone ids to location = 3 (and 4 for second array element)
 		glEnableVertexAttribArray(3);
-		glVertexAttribIPointer(3, 4, GL_INT, sizeof(scene::mesh::Vertex), (void*)offsetof(scene::mesh::Vertex, weights.ids));
+		glVertexAttribIPointer(3, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, weights.ids));
 		glEnableVertexAttribArray(4);
-		glVertexAttribIPointer(4, 4, GL_INT, sizeof(scene::mesh::Vertex), (void*)(offsetof(scene::mesh::Vertex, weights.ids) + 16));
+		glVertexAttribIPointer(4, 4, GL_INT, sizeof(Vertex), (void*)(offsetof(Vertex, weights.ids) + 16));
 
 		// Assign vertex weights to location = 5 (and 6 for second array element)
 		glEnableVertexAttribArray(5);
-		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(scene::mesh::Vertex), (void*)offsetof(scene::mesh::Vertex, weights.weights));
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, weights.weights));
 		glEnableVertexAttribArray(6);
-		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(scene::mesh::Vertex), (void*)(offsetof(scene::mesh::Vertex, weights.weights) + 16));
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, weights.weights) + 16));
 
         // Unbind the vertex array to prevent accidental operations
         glBindVertexArray(0);
@@ -220,9 +220,9 @@ namespace vel
 
 	size_t GPU::loadTexture(std::string type, std::string dir, std::string filename)
     {
-		auto fileExploded = vel::helpers::functions::explode_string(filename, '.');
+		auto fileExploded = explode_string(filename, '.');
 
-		scene::mesh::Texture texture;
+		Texture texture;
         texture.type = "diffuse";
         texture.path = dir;
 		texture.fullPath = dir + "/" + filename;
@@ -297,12 +297,8 @@ namespace vel
 					int mipcount = 0;
 
 					for (auto& entry : dirIter)
-					{
 						if (entry.is_regular_file())
-						{
 							mipcount++;
-						}
-					}
 
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipcount);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -376,7 +372,7 @@ namespace vel
         return this->activeTextureIndex;
     }
 
-    const std::vector<scene::mesh::Texture>& GPU::getTextures() const
+    const std::vector<Texture>& GPU::getTextures() const
     {
         return this->textures;
     }
@@ -385,9 +381,7 @@ namespace vel
 	{
 		std::vector<std::string> names;
 		for (auto& s : this->shaders)
-		{
 			names.push_back(s.name);
-		}
 
 		return names;
 	}
@@ -487,14 +481,10 @@ namespace vel
         }
 
         for (auto& t : this->textures)
-        {
 			glDeleteTextures(1, &t.id);
-        }
 
         for (auto& s : this->shaders)
-        {
 			glDeleteProgram(s.id);
-        }
     }
 		
 	void GPU::finish()

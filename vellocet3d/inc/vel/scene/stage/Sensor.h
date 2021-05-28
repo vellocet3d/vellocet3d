@@ -5,7 +5,7 @@
 
 #include "btBulletCollisionCommon.h"
 
-namespace vel::scene::stage
+namespace vel
 {
 	struct Sensor
 	{

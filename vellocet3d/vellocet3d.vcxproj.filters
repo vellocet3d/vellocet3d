@@ -21,9 +21,6 @@
     <ClCompile Include="src\scene\armature\Armature.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\armature\Bone.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\scene\stage\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -103,6 +100,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\stage\RaycastCallback.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\armature\ArmatureBone.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -194,12 +194,6 @@
     <ClInclude Include="inc\vel\scene\armature\Armature.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\vel\scene\armature\Bone.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\vel\scene\mesh\Bone.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\vel\scene\mesh\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -285,6 +279,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\vel\scene\stage\RaycastCallback.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\vel\scene\armature\ArmatureBone.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\vel\scene\mesh\MeshBone.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

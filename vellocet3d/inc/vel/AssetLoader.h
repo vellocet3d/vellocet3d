@@ -17,7 +17,7 @@
 #include "vel/scene/mesh/VertexBoneData.h"
 #include "vel/scene/Scene.h"
 
-using namespace vel::scene::stage;
+
 
 
 namespace vel
@@ -28,17 +28,17 @@ namespace vel
 	private:
 		Assimp::Importer					aiImporter;
 		const aiScene*						aiScene;
-		vel::scene::Scene*					stageParentScene;
+		Scene*								stageParentScene;
 		Stage*								currentStage;
 		std::string							currentAssetFile;
 		std::string							currentAssetDirectory;
 		Transform							currentTransform;
 		std::optional<size_t>				currentMeshIndex;
 		std::optional<size_t>				currentMeshTextureIndex;
-		scene::armature::Armature*					currentArmature;
+		Armature*							currentArmature;
 		bool								currentIsDynamic;
 		std::vector<aiNode*>				processedNodes;
-		std::vector<scene::mesh::VertexBoneData>	currentMeshBones;
+		std::vector<VertexBoneData>			currentMeshBones;
 		glm::mat4							currentGlobalInverseMatrix;
 		glm::mat4							blenderRotationCorrectionMatrix;
 		glm::mat4							blenderRotationCorrectionPerVertexMatrix;
@@ -61,7 +61,7 @@ namespace vel
 		bool								nodeHasBeenProcessed(aiNode* in);
 
 	public:
-																	AssetLoader(vel::scene::Scene* stageParentScene, Stage* stage, std::string assetFile, bool dynamic);
+																	AssetLoader(Scene* stageParentScene, Stage* stage, std::string assetFile, bool dynamic);
 		std::optional<std::function<int(std::string actorName)>>	findShaderId;
 		std::vector<size_t>											loadActors();
 

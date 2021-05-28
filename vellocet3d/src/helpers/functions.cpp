@@ -6,7 +6,7 @@
 
 #include "vel/helpers/functions.h"
 
-namespace vel::helpers::functions
+namespace vel
 {
 
 	std::string str_replace(const std::string& from, const std::string& to, std::string str)

@@ -6,7 +6,7 @@
 
 
 
-namespace vel::scene::stage
+namespace vel
 {
 	struct RaycastResult 
 	{

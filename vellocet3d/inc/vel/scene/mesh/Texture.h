@@ -3,7 +3,7 @@
 #include <string>
 
 
-namespace vel::scene::mesh
+namespace vel
 {
 	struct Texture
 	{

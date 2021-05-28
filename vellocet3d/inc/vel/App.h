@@ -29,7 +29,7 @@ namespace vel
 														App(Config conf);
 		static App*										instance;
         std::unique_ptr<Window>							window;
-        std::unique_ptr<scene::Scene>					scene;
+        std::unique_ptr<Scene>							scene;
 		std::unique_ptr<GPU>							gpu;
         
 
@@ -56,8 +56,8 @@ namespace vel
         static void										init(Config conf);
 														App(App const&) = delete;
         void											operator=(App const&) = delete;
-        void											setScene(scene::Scene* scene);
-		scene::Scene*									getScene();
+        void											setScene(Scene* scene);
+		Scene*											getScene();
         void											clearScene();
         const double									time() const;
         const InputState&								getInputState() const;

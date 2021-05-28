@@ -63,17 +63,17 @@ namespace vel
 		return this->window->getImguiFont(key);
 	}
 
-	scene::Scene* App::getScene()
+	Scene* App::getScene()
 	{
 		return this->scene.get();
 	}
 
-    void App::setScene(scene::Scene* scene)
+    void App::setScene(Scene* scene)
     {
 		if(this->window->getImguiFrameOpen())
 			this->forceImguiRender();
 
-        this->scene = std::move(std::move(std::unique_ptr<scene::Scene>(scene)));
+        this->scene = std::move(std::move(std::unique_ptr<Scene>(scene)));
     }
 
     void App::close()
@@ -127,10 +127,9 @@ namespace vel
 			this->lastFrameTimeCalculation = this->time();
 
 			double average = 0.0;
+
 			for (auto& v : this->averageFrameTimeArray)
-			{
 				average += v;
-			}
 
 			average = average / this->averageFrameTimeArray.size();
 
@@ -173,9 +172,7 @@ namespace vel
         while (true)
         {
             if (this->shouldClose || this->window->shouldClose()) 
-            {
                 break;
-            }
 
             if (this->scene != nullptr && !this->scene->loaded)
             {
@@ -197,9 +194,7 @@ namespace vel
 
                 // prevent spiral of death
                 if (this->frameTime > 0.25)
-                {
                     this->frameTime = 0.25;
-                }
 
                 this->accumulator += this->frameTime;
 

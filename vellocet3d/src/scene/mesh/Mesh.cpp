@@ -7,19 +7,19 @@
 #include "vel/scene/mesh/Mesh.h"
 
 
-namespace vel::scene::mesh
+namespace vel
 {
 
     Mesh::Mesh(std::string name) :
         name(name)
     {}
 
-	const std::vector<Bone>& Mesh::getBones() const
+	const std::vector<MeshBone>& Mesh::getBones() const
 	{
 		return this->bones;
 	}
 
-	Bone* Mesh::getBone(std::string boneName)
+	MeshBone* Mesh::getBone(std::string boneName)
 	{
 		for (auto& b : this->bones)
 		{
@@ -29,7 +29,7 @@ namespace vel::scene::mesh
 		return nullptr;
 	}
 
-	Bone& Mesh::getBone(size_t index)
+	MeshBone& Mesh::getBone(size_t index)
 	{
 		return this->bones.at(index);
 	}
@@ -77,7 +77,7 @@ namespace vel::scene::mesh
 		this->indices = indices;
 	}
 
-	void Mesh::setBones(std::vector<Bone>& bones)
+	void Mesh::setBones(std::vector<MeshBone>& bones)
 	{
 		this->bones = bones;
 	}

@@ -52,7 +52,7 @@ namespace vel
             while (std::getline(conf, line))
             {
                 std::istringstream iss(line);
-                std::vector<std::string> e = helpers::functions::explode_string(iss.str(), '=');
+                std::vector<std::string> e = explode_string(iss.str(), '=');
                 returnMap[e[0]] = e[1];
             }
 

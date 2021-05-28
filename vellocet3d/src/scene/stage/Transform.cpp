@@ -8,7 +8,7 @@
 
 
 
-namespace vel::scene::stage
+namespace vel
 {
 
     Transform::Transform() :

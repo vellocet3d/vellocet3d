@@ -9,11 +9,12 @@
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
 
 #include "vel/scene/armature/Armature.h"
+#include "vel/scene/armature/ArmatureBone.h"
 #include "vel/scene/mesh/Mesh.h"
 #include "vel/scene/stage/Transform.h"
 
 
-namespace vel::scene::stage
+namespace vel
 {
 	class Stage;
 
@@ -27,9 +28,9 @@ namespace vel::scene::stage
         Transform										transform;
 		std::optional<Transform>						previousTransform;
 		std::optional<Actor*>							parentActor;
-		std::optional<vel::scene::armature::Bone*>		parentActorBone;
+		std::optional<ArmatureBone*>					parentActorBone;
 		std::vector<Actor*>								childActors;
-		vel::scene::armature::Armature*					armature;
+		Armature*										armature;
 		std::optional<std::vector<std::pair<size_t, std::string>>> activeBones; // the bones from the armature that are actually used by the mesh, 
 																				// the glue between an armature and a mesh (index is mesh bone index, value is armature bone index)
 		std::optional<std::pair<size_t, size_t>>		renderCommand;
@@ -64,13 +65,13 @@ namespace vel::scene::stage
 		const bool										isVisible() const;
 		const bool										isAnimated() const;
 		const bool										isDynamic() const;
-		void											setArmature(vel::scene::armature::Armature* arm);
-		vel::scene::armature::Armature*					getArmature();
-		vel::scene::mesh::Mesh&							getMesh();
+		void											setArmature(Armature* arm);
+		Armature*										getArmature();
+		Mesh&											getMesh();
 		const std::optional<std::vector<std::pair<size_t, std::string>>>& getActiveBones() const;
 		void											setActiveBones(std::vector<std::pair<size_t, std::string>> activeBones);
 		void											setParentActor(Actor* a);
-		void											setParentActorBone(vel::scene::armature::Bone* b);
+		void											setParentActorBone(ArmatureBone* b);
 		void											addChildActor(Actor* a);
 		Transform&										getTransform();
 		std::optional<Transform>&						getPreviousTransform();

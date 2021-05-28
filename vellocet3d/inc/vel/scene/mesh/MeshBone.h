@@ -5,9 +5,9 @@
 #include "glm/glm.hpp"
 
 
-namespace vel::scene::mesh
+namespace vel
 {
-	struct Bone
+	struct MeshBone
 	{
 		std::string name;
 		glm::mat4 offsetMatrix;

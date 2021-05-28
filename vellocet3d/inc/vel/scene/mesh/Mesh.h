@@ -12,10 +12,10 @@
 #include "vel/scene/mesh/Vertex.h"
 #include "vel/scene/mesh/Texture.h"
 #include "vel/scene/mesh/Renderable.h"
-#include "vel/scene/mesh/Bone.h"
+#include "vel/scene/mesh/MeshBone.h"
 
 
-namespace vel::scene::mesh
+namespace vel
 {
 	class Mesh
 	{
@@ -24,7 +24,7 @@ namespace vel::scene::mesh
 		std::string                         name;
 		std::vector<Vertex>					vertices;
 		std::vector<unsigned int>           indices;
-		std::vector<Bone>					bones;
+		std::vector<MeshBone>				bones;
 		std::optional<size_t>               meshRenderableIndex;
 		glm::mat4							globalInverseMatrix;
 
@@ -35,7 +35,7 @@ namespace vel::scene::mesh
 		void                                setMeshRenderableIndex(size_t index);
 		void								setVertices(std::vector<Vertex>& vertices);
 		void								setIndices(std::vector<unsigned int>& indices);
-		void								setBones(std::vector<Bone>& bones);
+		void								setBones(std::vector<MeshBone>& bones);
 		const std::optional<size_t>&        getMeshRenderableIndex() const;
 		const std::string                   getName() const;
 		const std::vector<Vertex>&			getVertices() const;
@@ -44,9 +44,9 @@ namespace vel::scene::mesh
 		const bool                          hasBones() const;
 		void								setGlobalInverseMatrix(glm::mat4 gim);
 		glm::mat4							getGlobalInverseMatrix();
-		Bone&								getBone(size_t index);
-		Bone*								getBone(std::string boneName);
-		const std::vector<Bone>&			getBones() const;
+		MeshBone&							getBone(size_t index);
+		MeshBone*							getBone(std::string boneName);
+		const std::vector<MeshBone>&		getBones() const;
 
 	};
     

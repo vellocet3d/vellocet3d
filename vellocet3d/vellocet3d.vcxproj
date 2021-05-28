@@ -194,7 +194,7 @@
     <ClCompile Include="src\helpers\MultiTweener.cpp" />
     <ClCompile Include="src\helpers\Tweener.cpp" />
     <ClCompile Include="src\scene\armature\Armature.cpp" />
-    <ClCompile Include="src\scene\armature\Bone.cpp" />
+    <ClCompile Include="src\scene\armature\ArmatureBone.cpp" />
     <ClCompile Include="src\AssetLoader.cpp" />
     <ClCompile Include="src\scene\stage\Camera.cpp" />
     <ClCompile Include="src\Config.cpp" />
@@ -252,9 +252,9 @@
     <ClInclude Include="inc\vel\scene\animation\Channel.h" />
     <ClInclude Include="inc\vel\scene\armature\ActiveAnimation.h" />
     <ClInclude Include="inc\vel\scene\armature\Armature.h" />
-    <ClInclude Include="inc\vel\scene\armature\Bone.h" />
+    <ClInclude Include="inc\vel\scene\armature\ArmatureBone.h" />
     <ClInclude Include="inc\vel\AssetLoader.h" />
-    <ClInclude Include="inc\vel\scene\mesh\Bone.h" />
+    <ClInclude Include="inc\vel\scene\mesh\MeshBone.h" />
     <ClInclude Include="inc\vel\scene\mesh\Mesh.h" />
     <ClInclude Include="inc\vel\scene\mesh\Renderable.h" />
     <ClInclude Include="inc\vel\scene\mesh\Texture.h" />

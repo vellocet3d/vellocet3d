@@ -6,7 +6,7 @@
 #include "vel/scene/animation/Channel.h"
 
 
-namespace vel::scene::animation
+namespace vel
 {
 	struct Animation
 	{

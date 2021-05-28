@@ -1,6 +1,6 @@
 #include "vel/scene/mesh/Vertex.h"
 
-namespace vel::scene::mesh
+namespace vel
 {
     bool Vertex::operator==(const Vertex &v) const
     {

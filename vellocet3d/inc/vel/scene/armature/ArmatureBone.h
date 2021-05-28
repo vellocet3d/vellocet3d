@@ -8,9 +8,9 @@
 #include "glm/gtc/quaternion.hpp"
 
 
-namespace vel::scene::armature
+namespace vel
 {
-	struct Bone
+	struct ArmatureBone
 	{
 		std::string		name;
 		std::string		parentName;

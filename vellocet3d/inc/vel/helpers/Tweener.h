@@ -3,7 +3,7 @@
 #include "glm/glm.hpp"
 
 
-namespace vel::helpers
+namespace vel
 {
 
 	class Tweener

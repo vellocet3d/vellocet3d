@@ -12,10 +12,10 @@
 
 
 
-namespace vel::scene::stage
+namespace vel
 {
 
-    Stage::Stage(vel::scene::Scene* parentScene) :
+    Stage::Stage(Scene* parentScene) :
 		parentScene(parentScene),
         visible(true),
 		collisionDebuggingSwitch(false),
@@ -51,7 +51,7 @@ namespace vel::scene::stage
 
     }
 
-	vel::scene::armature::Armature* Stage::addArmature(vel::scene::armature::Armature a)
+	Armature* Stage::addArmature(Armature a)
 	{
 		this->armatures.push_back(a);
 		
@@ -109,7 +109,7 @@ namespace vel::scene::stage
 		this->collisionWorld = std::make_unique<CollisionWorld>(this, gravity);
 	}
 
-	vel::scene::Scene* Stage::getParentScene()
+	Scene* Stage::getParentScene()
 	{
 		return this->parentScene;
 	}
@@ -202,18 +202,11 @@ namespace vel::scene::stage
         loader.findShaderId = [&](std::string actorName) {
             
             for (auto& a : actorShaderAssocs)
-            {
                 for (auto& p : a.second)
-                {
                     if (actorName.find(p) != std::string::npos)
-                    {
                         return a.first;
-                    }
-                }
-            }
 
             return 0; // if no shader assoc found, use default shader
-
         };
         return loader.loadActors();
     }
@@ -221,21 +214,14 @@ namespace vel::scene::stage
 	void Stage::updateActorAnimations(double runTime)
 	{
 		for (auto& a : this->actors)
-		{
-			//if (!a.isDeleted() && a.isAnimated() && a.isVisible())
 			if (!a.isDeleted() && a.isAnimated())
-			{
 				a.getArmature()->updateAnimation(runTime, a.getParentMatrix());
-			}
-		}
 	}
 
 	void Stage::applyTransformations()
 	{
 		for (auto& a : this->actors)
-		{
 			a.processTransform();
-		}
 	}
 
     const size_t Stage::getActorSize() const
@@ -302,21 +288,17 @@ namespace vel::scene::stage
     Actor* Stage::getActor(std::string name)
     {
         for (auto& a : this->actors) 
-        {
             if (a.getName() == name) 
-            {
                 return &a;
-            }
-        }
+
 		return nullptr;
     }
 
     Actor* Stage::getActor(size_t index) 
     {
 		if (this->actors.size() == 0 || !(index <= (this->actors.size() - 1)))
-		{
 			return nullptr;
-		}
+
         return &this->actors.at(index);
     }
 
@@ -325,10 +307,9 @@ namespace vel::scene::stage
         for (unsigned int i = 0; i < this->actors.size(); i++)
         {
             auto a = this->actors.at(i);
+
             if (a.getName() == name)
-            {
                 this->removeActor(i);
-            }
         }
     }
 
@@ -377,9 +358,7 @@ namespace vel::scene::stage
         std::vector<std::pair<size_t, RenderCommand>> toSort;
 
         for (size_t i = 0; i < this->renderCommands->size(); i++) 
-        {
             toSort.push_back(std::pair<size_t, RenderCommand>(i, this->renderCommands->at(i)));
-        }
 
 		// sort sharder
         std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
@@ -406,9 +385,7 @@ namespace vel::scene::stage
         this->renderCommandsOrder->clear();
 
         for (auto& p : toSort) 
-        {
             this->renderCommandsOrder->push_back(p.first);
-        }
 
 		//for debugging
 		//std::cout << "-----------------------\n";
@@ -441,12 +418,9 @@ namespace vel::scene::stage
     const bool Stage::hasActorWithName(std::string name) const
     {
         for (auto& a : this->actors)
-        {
             if (a.getName() == name)
-            {
-                return true;
-            }
-        }
+				return true;
+
         return false;
     }
 
@@ -458,18 +432,16 @@ namespace vel::scene::stage
         {
             std::cout << "shaderIndex:" << rc.getShaderIndex() << " meshIndex:" << rc.getMeshIndex() << " textureIndex:" << rc.getTextureIndex() << "\n";
             std::cout << "actors:";
+
             for (auto& a : rc.getActorIndexes()) 
-            {
                 if (a != -1) 
-                {
                     std::cout << this->actors.at(a).getName() << ",";
-                }
-            }
+                
             std::cout << "\norder:";
+
             for (auto& o : this->renderCommandsOrder.value()) 
-            {
                 std::cout << o << ",";
-            }
+
             std::cout << "\n------------------------------\n";
         }
     }

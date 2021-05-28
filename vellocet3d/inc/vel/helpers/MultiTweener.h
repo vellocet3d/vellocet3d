@@ -6,7 +6,7 @@
 
 #include "vel/helpers/Tweener.h"
 
-namespace vel::helpers
+namespace vel
 {
 
 	class MultiTweener

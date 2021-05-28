@@ -5,7 +5,7 @@
 
 
 
-namespace vel::helpers
+namespace vel
 {
 	/*
 		Smoothly translate from one glm::vec3 to another glm::vec3 at a given speed in units per second

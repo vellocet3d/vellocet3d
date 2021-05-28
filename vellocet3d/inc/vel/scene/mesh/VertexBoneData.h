@@ -1,7 +1,7 @@
 #pragma once
 
 
-namespace vel::scene::mesh
+namespace vel
 {
 	struct VertexBoneData
 	{

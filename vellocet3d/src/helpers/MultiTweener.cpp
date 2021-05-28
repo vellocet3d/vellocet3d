@@ -5,7 +5,7 @@
 
 
 
-namespace vel::helpers
+namespace vel
 {
 	/*
 	Smoothly translate between a vector of glm::vec3 values

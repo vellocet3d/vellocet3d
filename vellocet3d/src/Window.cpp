@@ -178,13 +178,9 @@ namespace vel
 		glfwSetWindowFocusCallback(this->glfwWindow, [](GLFWwindow* window, int focused) {
 		
 			if (focused)
-			{
 				std::cout << "window focused\n";
-			}
 			else
-			{
 				std::cout << "window NOT focused\n";
-			}
 		
 		});
 

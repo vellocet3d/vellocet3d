@@ -11,7 +11,7 @@
 #include "vel/scene/mesh/Texture.h"
 
 
-namespace vel::scene
+namespace vel
 {
 	Scene::Scene() :
 		loaded(false),
@@ -118,7 +118,7 @@ namespace vel::scene
 
 	void Scene::postPhysics(float delta){}
 
-	void Scene::swap(scene::Scene* sceneIn)
+	void Scene::swap(Scene* sceneIn)
 	{
 		this->swapping = true;
 		this->sceneToSwap = sceneIn;
@@ -127,8 +127,8 @@ namespace vel::scene
 
 	void Scene::showLoadingIcon()
 	{
-		auto screenX = (float)vel::App::get().getScreenSize().x;
-		auto screenY = (float)vel::App::get().getScreenSize().y;
+		auto screenX = (float)App::get().getScreenSize().x;
+		auto screenY = (float)App::get().getScreenSize().y;
 
 		// Set window size
 		ImGui::SetNextWindowSize(ImVec2(140.0f, 51.0f));
@@ -145,7 +145,7 @@ namespace vel::scene
 			| ImGuiWindowFlags_NoResize
 		);
 
-		ImGui::PushFont(vel::App::get().getImguiFont("Teko-35"));
+		ImGui::PushFont(App::get().getImguiFont("Teko-35"));
 
 		ImGui::Text("We Be Load'n...");
 
@@ -158,16 +158,12 @@ namespace vel::scene
 	void Scene::debugVertexBones()
 	{
 		int maxAttemptedVertexBoneAllocations = 0;
+
 		for (auto& m : this->meshes)
-		{
 			for (auto& v : m.getVertices())
-			{
 				if (v.attemptedVertexWeightAdditions > maxAttemptedVertexBoneAllocations)
-				{
 					maxAttemptedVertexBoneAllocations = v.attemptedVertexWeightAdditions;
-				}
-			}
-		}
+
 		std::cout << maxAttemptedVertexBoneAllocations << "\n";
 	}
 
@@ -194,15 +190,12 @@ namespace vel::scene
         for (auto& s : this->stages)
         {
 			if (!s.isVisible())
-			{
 				continue;
-			}
+
 
 			// clear depth buffer if flag set in stage
 			if (s.getClearDepthBuffer())
-			{
 				gpu->clearDepthBuffer();
-			}
 
 			// should always have a camera if we've made it this far
 			s.getCamera()->update();
@@ -235,19 +228,13 @@ namespace vel::scene
 				//std::cout << "rc:" << rc.getShaderIndex() << "," << rc.getMeshIndex() << "," << rc.getTextureIndex() << "\n";
 
                 if (rc.getShaderIndex() != gpu->getActiveShaderIndex())
-                {
                     gpu->useShader(rc.getShaderIndex());
-                }
 
                 if (rc.getMeshIndex() != gpu->getActiveMeshRenderableIndex())
-                {
                     gpu->useMeshRenderable(rc.getMeshIndex());
-                }
 
                 if (rc.getTextureIndex() != gpu->getActiveTextureIndex())
-                {
                     gpu->useTexture(rc.getTextureIndex());
-                }
 
                 // gpu state has been set, now draw all actors which use this gpu state
                 for (auto& ai : rc.getActorIndexes())

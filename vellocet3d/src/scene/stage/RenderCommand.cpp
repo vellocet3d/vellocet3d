@@ -4,7 +4,7 @@
 #include "vel/scene/stage/RenderCommand.h"
 
 
-namespace vel::scene::stage
+namespace vel
 {
 
     RenderCommand::RenderCommand(size_t sI, size_t mI, size_t tI, size_t ta) :

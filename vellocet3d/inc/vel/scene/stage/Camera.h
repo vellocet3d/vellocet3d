@@ -6,7 +6,7 @@
 
 #include "vel/scene/stage/Transform.h"
 
-namespace vel::scene::stage
+namespace vel
 {
     enum CameraType {
         ORTHOGRAPHIC,
