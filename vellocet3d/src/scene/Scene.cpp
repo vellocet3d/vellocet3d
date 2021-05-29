@@ -8,7 +8,8 @@
 #include "vel/App.h"
 #include "vel/scene/Scene.h"
 #include "vel/scene/mesh/Vertex.h"
-#include "vel/scene/mesh/Texture.h"
+#include "vel/scene/material/Texture.h"
+#include "vel/scene/AssetLoaderV2.h"
 
 
 namespace vel
@@ -33,20 +34,14 @@ namespace vel
 	void Scene::applyTransformations()
 	{
 		for (auto& s : this->stages)
-		{
 			s.applyTransformations();
-		}
 	}
 
 	void Scene::processSensors()
 	{
 		for (auto& s : this->stages)
-		{
 			if (s.getCollisionWorld())
-			{
 				s.getCollisionWorld()->processSensors();
-			}
-		}
 	}	
 
 	size_t Scene::addAnimation(Animation a)
@@ -55,9 +50,45 @@ namespace vel
 		return this->animations.size() - 1;
 	}
 
-	size_t Scene::addShader(std::string name, std::string vertName, std::string fragName)
+	size_t Scene::loadShader(std::string name, std::string vertName, std::string fragName)
 	{
 		return App::get().getGPU()->loadShader(name, vertName, fragName);
+	}
+
+	size_t Scene::loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips)
+	{
+		Texture texture;
+		texture.name = name;
+		texture.type = type;
+		texture.path = path;
+		texture.mips = mips;
+
+		return App::get().getGPU()->loadTexture(texture);
+	}
+
+	size_t Scene::loadMesh(std::string path) 
+	{
+		auto al = AssetLoaderV2(this, path);
+		al.loadMeshes();
+	}
+
+	size_t Scene::addMaterial(Material m)
+	{
+		this->materials.push_back(m);
+
+		return this->materials.size() - 1;
+	}
+
+	const Material&	Scene::getMaterial(size_t materialIndex)
+	{
+		return this->materials.at(materialIndex);
+	}
+
+	const Material&	Scene::getMaterial(std::string materialName)
+	{
+		for (auto& m : this->materials)
+			if (m.name == materialName)
+				return m;
 	}
 
 	Stage& Scene::addStage()
@@ -84,7 +115,7 @@ namespace vel
 
 	size_t Scene::addMesh(Mesh m)
 	{
-		m.setMeshRenderableIndex(App::get().getGPU()->loadMesh(m));
+		m.setGpuMeshIndex(App::get().getGPU()->loadMesh(m));
 		this->meshes.push_back(m);
 		return this->meshes.size() - 1;
 	}
@@ -103,17 +134,13 @@ namespace vel
 	{
 		this->animationTime += delta;
 		for (auto& s : this->stages)
-		{
 			s.updateActorAnimations(this->animationTime);
-		}
 	}
 
 	void Scene::stepPhysics(float delta)
 	{
 		for (auto& s : this->stages)
-		{
 			s.stepPhysics(delta);
-		}
 	}
 
 	void Scene::postPhysics(float delta){}
@@ -219,7 +246,7 @@ namespace vel
 
 			//std::cout << "----------------------------------\n";
 
-			//std::cout << "gpu active before rco loop:" << gpu.getActiveShaderIndex() << "," << gpu.getActiveMeshRenderableIndex() << "," << gpu.getActiveTextureIndex() << "\n";
+			//std::cout << "gpu active before rco loop:" << gpu.getActiveShaderIndex() << "," << gpu.getActiveGpuMeshIndex() << "," << gpu.getActiveTextureIndex() << "\n";
 
             for (auto& rco : s.getRenderCommandsOrder().value())
             {
@@ -230,8 +257,8 @@ namespace vel
                 if (rc.getShaderIndex() != gpu->getActiveShaderIndex())
                     gpu->useShader(rc.getShaderIndex());
 
-                if (rc.getMeshIndex() != gpu->getActiveMeshRenderableIndex())
-                    gpu->useMeshRenderable(rc.getMeshIndex());
+                if (rc.getMeshIndex() != gpu->getActiveGpuMeshIndex())
+                    gpu->useGpuMesh(rc.getMeshIndex());
 
                 if (rc.getTextureIndex() != gpu->getActiveTextureIndex())
                     gpu->useTexture(rc.getTextureIndex());
@@ -243,7 +270,7 @@ namespace vel
 
 					
 					//std::cout << a->getName() << ":" << rc.getShaderIndex() << "-" << rc.getMeshIndex() << "-" << rc.getTextureIndex() << "\n";
-					//std::cout << a->getName() << ":" << gpu->getActiveShaderIndex() << "-" << gpu->getActiveMeshRenderableIndex() << "-" << gpu->getActiveTextureIndex() << "\n";
+					//std::cout << a->getName() << ":" << gpu->getActiveShaderIndex() << "-" << gpu->getActiveGpuMeshIndex() << "-" << gpu->getActiveTextureIndex() << "\n";
 					//std::cout << "--------------------------------\n";
 
 					//std::cout << a->getName() << "\n";
@@ -281,7 +308,7 @@ namespace vel
 
 						
 
-                        gpu->drawMeshRenderable();
+                        gpu->drawGpuMesh();
                     }
                 }
 

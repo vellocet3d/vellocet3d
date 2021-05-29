@@ -4,7 +4,7 @@
 namespace vel
 {
 	typedef int GLsizei;
-	struct Renderable
+	struct GpuMesh
 	{
 		unsigned int	VAO;
 		unsigned int	VBO;

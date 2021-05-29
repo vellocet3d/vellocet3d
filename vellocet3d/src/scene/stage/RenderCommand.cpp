@@ -13,30 +13,6 @@ namespace vel
         textureIndex(tI),
 		textureHasAlpha(ta){}
 
-  //  size_t RenderCommand::addActorIndex(size_t actorIndex)
-  //  {
-		//size_t slotIndex;
-
-  //      if (this->freeSlots.size() > 0)
-  //      {
-  //          slotIndex = this->freeSlots.back();
-  //          this->freeSlots.pop_back();
-  //          this->actorIndexes.at(slotIndex) = actorIndex;
-  //      }
-  //      else
-  //      {
-  //          slotIndex = this->actorIndexes.size();
-  //          this->actorIndexes.push_back(actorIndex);
-  //      }
-
-  //      return slotIndex;
-  //  }
-
-	//void RenderCommand::freeActorIndex(size_t actorSlot)
-	//{
-	//	this->freeSlots.push_back(actorSlot);
-	//}
-
 	size_t RenderCommand::addActorIndex(size_t actorIndex)
 	{
 		size_t slotIndex = this->actorIndexes.size();

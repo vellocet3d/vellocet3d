@@ -11,7 +11,7 @@
 #include "vel/scene/stage/Camera.h"
 #include "vel/scene/mesh/Vertex.h"
 #include "vel/scene/mesh/Texture.h"
-#include "vel/scene/mesh/Renderable.h"
+#include "vel/scene/mesh/GpuMesh.h"
 #include "vel/scene/mesh/MeshBone.h"
 
 
@@ -25,18 +25,18 @@ namespace vel
 		std::vector<Vertex>					vertices;
 		std::vector<unsigned int>           indices;
 		std::vector<MeshBone>				bones;
-		std::optional<size_t>               meshRenderableIndex;
+		std::optional<size_t>               gpuMeshIndex;
 		glm::mat4							globalInverseMatrix;
 
 
 	public:
 											Mesh(std::string name);
 		void								addVertexWeight(unsigned int vertexIndex, unsigned int boneIndex, float weight);
-		void                                setMeshRenderableIndex(size_t index);
+		void                                setGpuMeshIndex(size_t index);
 		void								setVertices(std::vector<Vertex>& vertices);
 		void								setIndices(std::vector<unsigned int>& indices);
 		void								setBones(std::vector<MeshBone>& bones);
-		const std::optional<size_t>&        getMeshRenderableIndex() const;
+		const std::optional<size_t>&        getGpuMeshIndex() const;
 		const std::string                   getName() const;
 		const std::vector<Vertex>&			getVertices() const;
 		const std::vector<unsigned int>&	getIndices() const;

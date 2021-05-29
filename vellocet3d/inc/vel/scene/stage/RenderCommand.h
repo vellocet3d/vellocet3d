@@ -9,7 +9,6 @@ namespace vel
     {
     private:
         std::vector<size_t>			actorIndexes;
-        std::vector<size_t>			freeSlots;
 		size_t						shaderIndex;
 		size_t						meshIndex;
         size_t						textureIndex;
@@ -23,7 +22,7 @@ namespace vel
 		const size_t&				getTextureHasAlpha() const;
         const std::vector<size_t>&	getActorIndexes() const;
 		size_t						addActorIndex(size_t actorIndex);
-        void						freeActorIndex(size_t actorSlot);
+        void						freeActorIndex(size_t actorIndex);
 
 
     };

@@ -16,24 +16,13 @@
 
 namespace vel
 {
-    GPU::GPU(std::string shaderDirectory, std::string dvs, std::string dfs, std::string dsvs, std::string dsfs,
-		std::string ddvs, std::string ddfs, bool autoGenerateMipmaps) :
-        shaderDirectory(shaderDirectory),
+    GPU::GPU() :
         activeShaderIndex(-1),
-        activeMeshRenderableIndex(-1),
-        activeTextureIndex(-1),
-		autoGenerateMipmaps(autoGenerateMipmaps)
+        activeGpuMeshIndex(-1),
+        activeTextureIndex(-1)
     {
 		// create collision debug drawer
 		this->collisionDebugDrawer = CollisionDebugDrawer();
-
-		// create default shaders
-		this->loadShader("default", dvs, dfs);
-		this->loadShader("default_skinned", dsvs, dsfs);
-		this->loadShader("default_debug", ddvs, ddfs);
-
-		// create default texture
-		this->loadTexture("diffuse", "data/models", "default_texture.jpg");
 	
 	}
 
@@ -72,8 +61,8 @@ namespace vel
         try
         {
             // open files
-            vShaderFile.open(this->shaderDirectory + "/" + vertFile);
-            fShaderFile.open(this->shaderDirectory + "/" + fragFile);
+            vShaderFile.open(vertFile);
+            fShaderFile.open(fragFile);
 
             std::stringstream vShaderStream, fShaderStream;
 
@@ -169,21 +158,21 @@ namespace vel
 
 	size_t GPU::loadMesh(Mesh& m)
     {
-        Renderable mr = Renderable();
-        mr.indiceCount = (GLsizei)m.getIndices().size();
+        GpuMesh gm = GpuMesh();
+        gm.indiceCount = (GLsizei)m.getIndices().size();
 
         // Generate and bind vertex attribute array
-        glGenVertexArrays(1, &mr.VAO);
-        glBindVertexArray(mr.VAO);
+        glGenVertexArrays(1, &gm.VAO);
+        glBindVertexArray(gm.VAO);
 
         // Generate and bind vertex buffer object
-        glGenBuffers(1, &mr.VBO);
-        glBindBuffer(GL_ARRAY_BUFFER, mr.VBO);
+        glGenBuffers(1, &gm.VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, gm.VBO);
         glBufferData(GL_ARRAY_BUFFER, m.getVertices().size() * sizeof(Vertex), &m.getVertices()[0], GL_STATIC_DRAW);
 
         // Generate and bind element buffer object
-        glGenBuffers(1, &mr.EBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mr.EBO);
+        glGenBuffers(1, &gm.EBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gm.EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, m.getIndices().size() * sizeof(unsigned int), &m.getIndices()[0], GL_STATIC_DRAW);
 
         // Assign vertex positions to location = 0
@@ -213,33 +202,17 @@ namespace vel
         // Unbind the vertex array to prevent accidental operations
         glBindVertexArray(0);
 
-        this->meshRenderables.push_back(mr);
+        this->gpuMeshes.push_back(gm);
 
-        return this->meshRenderables.size() - 1;
+        return this->gpuMeshes.size() - 1;
     }
 
-	size_t GPU::loadTexture(std::string type, std::string dir, std::string filename)
+	size_t GPU::loadTexture(Texture texture)
     {
-		auto fileExploded = explode_string(filename, '.');
-
-		Texture texture;
-        texture.type = "diffuse";
-        texture.path = dir;
-		texture.fullPath = dir + "/" + filename;
-		texture.filename = fileExploded[0];
-		texture.fileExt = "." + fileExploded[1];
-
-		//std::cout << texture.path << "\n";
-		//std::cout << texture.fullPath << "\n";
-		//std::cout << texture.filename << "\n";
-		//std::cout << texture.fileExt << "\n";
-		//std::cout << "--------------\n";
-
         glGenTextures(1, &texture.id);
 
-
         int width, height, nrComponents;
-        unsigned char*	data = stbi_load(texture.fullPath.c_str(), &width, &height, &nrComponents, 0);
+        unsigned char*	data = stbi_load(texture.path.c_str(), &width, &height, &nrComponents, 0);
         if (data) 
         {
             GLenum format;
@@ -259,7 +232,6 @@ namespace vel
 				format = GL_RGBA;
 			}
                 
-
 			//std::cout << texture.filename << ":" << texture.alphaChannel << "\n";
 
             glBindTexture(GL_TEXTURE_2D, texture.id);
@@ -267,7 +239,7 @@ namespace vel
 			// load the base level texture
             glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
-			if (this->autoGenerateMipmaps)
+			if (texture.mips.size() == 0)
 				glGenerateMipmap(GL_TEXTURE_2D);
 
 			// set texture parameters
@@ -275,72 +247,50 @@ namespace vel
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			if (this->autoGenerateMipmaps)
+			if (texture.mips.size() == 0)
 			{
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			}
 			else
 			{
-				auto mip_dir_path = texture.path + "/" + texture.filename + "_mipmaps";
-				bool has_mip_dir = std::filesystem::is_directory(mip_dir_path);
+				int mipcount = texture.mips.size();
 
-				//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipcount);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-				if (!has_mip_dir)
+				while (mipcount > 0)
 				{
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				}
-				else
-				{
-					auto dirIter = std::filesystem::directory_iterator(mip_dir_path);
+					int mip_width, mip_height, mip_nrComponents;
+					unsigned char*	mip_data = stbi_load(texture.mips.at(mipcount).c_str(), &mip_width, &mip_height, &mip_nrComponents, 0);
 
-					int mipcount = 0;
-
-					for (auto& entry : dirIter)
-						if (entry.is_regular_file())
-							mipcount++;
-
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipcount);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-					while (mipcount > 0)
+					if (mip_data)
 					{
-						auto full_mip_file_path = mip_dir_path + "/" + std::to_string(mipcount) + texture.fileExt;
+						GLenum mip_format;
+						if (mip_nrComponents == 1)
+							mip_format = GL_RED;
+						else if (mip_nrComponents == 3)
+							mip_format = GL_RGB;
+						else if (mip_nrComponents == 4)
+							mip_format = GL_RGBA;
 
-						int mip_width, mip_height, mip_nrComponents;
-						unsigned char*	mip_data = stbi_load(full_mip_file_path.c_str(), &mip_width, &mip_height, &mip_nrComponents, 0);
+						//std::cout << full_mip_file_path << ":" << mip_nrComponents << "\n";
 
-						if (mip_data)
-						{
-							GLenum mip_format;
-							if (mip_nrComponents == 1)
-								mip_format = GL_RED;
-							else if (mip_nrComponents == 3)
-								mip_format = GL_RGB;
-							else if (mip_nrComponents == 4)
-								mip_format = GL_RGBA;
+						glTexImage2D(GL_TEXTURE_2D, mipcount, mip_format, mip_width, mip_height, 0, mip_format, GL_UNSIGNED_BYTE, mip_data);
 
-							//std::cout << full_mip_file_path << ":" << mip_nrComponents << "\n";
+						stbi_image_free(mip_data);
 
-							glTexImage2D(GL_TEXTURE_2D, mipcount, mip_format, mip_width, mip_height, 0, mip_format, GL_UNSIGNED_BYTE, mip_data);
-
-							stbi_image_free(mip_data);
-
-							mipcount--;
-						}
-						else
-						{
-							stbi_image_free(mip_data);
-							std::cout << "Texture failed to load at path: " << full_mip_file_path << "\n";
-							std::cin.get();
-							exit(EXIT_FAILURE);
-						}
+						mipcount--;
+					}
+					else
+					{
+						stbi_image_free(mip_data);
+						std::cout << "Texture failed to load at path: " << texture.mips.at(mipcount) << "\n";
+						std::cin.get();
+						exit(EXIT_FAILURE);
 					}
 				}
-			}
 				
-
-   
+			}
 
             stbi_image_free(data);
 
@@ -351,7 +301,7 @@ namespace vel
         else
         {
             stbi_image_free(data);
-            std::cout << "Texture failed to load at path: " << texture.fullPath << "\n";
+            std::cout << "Texture failed to load at path: " << texture.path << "\n";
             std::cin.get();
             exit(EXIT_FAILURE);
         }
@@ -362,9 +312,9 @@ namespace vel
         return this->activeShaderIndex;
     }
 
-    const size_t GPU::getActiveMeshRenderableIndex() const
+    const size_t GPU::getActiveGpuMeshIndex() const
     {
-        return this->activeMeshRenderableIndex;
+        return this->activeGpuMeshIndex;
     }
 
     const size_t GPU::getActiveTextureIndex() const
@@ -426,10 +376,10 @@ namespace vel
     }
 
 
-    void GPU::useMeshRenderable(size_t meshRenderableIndex)
+    void GPU::useGpuMesh(size_t gpuMeshIndex)
     {
-        this->activeMeshRenderableIndex = meshRenderableIndex;
-        glBindVertexArray(this->meshRenderables.at(meshRenderableIndex).VAO);
+        this->activeGpuMeshIndex = gpuMeshIndex;
+        glBindVertexArray(this->gpuMeshes.at(gpuMeshIndex).VAO);
     }
 
     void GPU::useTexture(size_t textureIndex)
@@ -441,11 +391,11 @@ namespace vel
         this->activeTextureIndex = textureIndex;
     }
 
-    void GPU::drawMeshRenderable()
+    void GPU::drawGpuMesh()
     {
         // The naive approach. But after researching how to optimize this for 3 days I decided to leave it alone
         // until there's an actual reason to (DRASTICALLY) complicate things.
-        glDrawElements(GL_TRIANGLES, this->meshRenderables.at(this->activeMeshRenderableIndex).indiceCount, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, this->gpuMeshes.at(this->activeGpuMeshIndex).indiceCount, GL_UNSIGNED_INT, 0);
     }
 
     void GPU::enableDepthTest()
@@ -473,7 +423,7 @@ namespace vel
     {
 		//std::cout << "wiping gpu data for previous GPU instance\n";
 
-        for (auto& mr : this->meshRenderables)
+        for (auto& mr : this->gpuMeshes)
         {
             glDeleteVertexArrays(1, &mr.VAO);
             glDeleteBuffers(1, &mr.VBO);

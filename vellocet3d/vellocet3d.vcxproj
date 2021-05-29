@@ -196,6 +196,7 @@
     <ClCompile Include="src\scene\armature\Armature.cpp" />
     <ClCompile Include="src\scene\armature\ArmatureBone.cpp" />
     <ClCompile Include="src\AssetLoader.cpp" />
+    <ClCompile Include="src\scene\AssetLoaderV2.cpp" />
     <ClCompile Include="src\scene\stage\Camera.cpp" />
     <ClCompile Include="src\Config.cpp" />
     <ClCompile Include="src\dep\glad.c" />
@@ -254,10 +255,12 @@
     <ClInclude Include="inc\vel\scene\armature\Armature.h" />
     <ClInclude Include="inc\vel\scene\armature\ArmatureBone.h" />
     <ClInclude Include="inc\vel\AssetLoader.h" />
+    <ClInclude Include="inc\vel\scene\AssetLoaderV2.h" />
+    <ClInclude Include="inc\vel\scene\material\Material.h" />
     <ClInclude Include="inc\vel\scene\mesh\MeshBone.h" />
     <ClInclude Include="inc\vel\scene\mesh\Mesh.h" />
-    <ClInclude Include="inc\vel\scene\mesh\Renderable.h" />
-    <ClInclude Include="inc\vel\scene\mesh\Texture.h" />
+    <ClInclude Include="inc\vel\scene\mesh\GpuMesh.h" />
+    <ClInclude Include="inc\vel\scene\material\Texture.h" />
     <ClInclude Include="inc\vel\scene\mesh\Vertex.h" />
     <ClInclude Include="inc\vel\scene\mesh\VertexBoneData.h" />
     <ClInclude Include="inc\vel\scene\Scene.h" />

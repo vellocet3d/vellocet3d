@@ -252,19 +252,19 @@ namespace vel
 			actor->getTextureIndex().has_value()) // If we are not in headless mode, AND this actor has a shader, mesh, and texture
         {
             size_t shaderIndex = actor->getShaderIndex().value();
-			size_t meshRenderableIndex = this->parentScene->getMesh(actor->getMeshIndex().value()).getMeshRenderableIndex().value();
+			size_t gpuMeshIndex = this->parentScene->getMesh(actor->getMeshIndex().value()).getGpuMeshIndex().value();
 			size_t textureIndex = actor->getTextureIndex().value();
 			size_t textureHasAlpha = actor->getTextureHasAlphaChannel() ? 1 : 0;
 
 			//std::cout << actor->getName() << " " << textureHasAlpha << "\n";
 
             // Search the existing render commands to see if one exists for the given criteria
-            std::optional<size_t> renderCommandIndex = this->renderCommandExists(shaderIndex, meshRenderableIndex, textureIndex);
+            std::optional<size_t> renderCommandIndex = this->renderCommandExists(shaderIndex, gpuMeshIndex, textureIndex);
 
             // If a render command does not exist for the given criteria, create one and get it's index
             if (!renderCommandIndex)
             {
-                auto rc = RenderCommand(shaderIndex, meshRenderableIndex, textureIndex, textureHasAlpha);
+                auto rc = RenderCommand(shaderIndex, gpuMeshIndex, textureIndex, textureHasAlpha);
                 renderCommandIndex = this->addRenderCommand(rc);
             }
 

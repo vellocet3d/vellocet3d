@@ -31,11 +31,7 @@ namespace vel
         config(conf),
         logger(this->config.LOG_ENABLED, this->config.LOG_PATH),
 		window(std::make_unique<Window>(this->config)),
-		gpu(std::make_unique<GPU>(
-			this->config.SHADER_FILE_PATH,
-			this->config.DEFAULT_VERTEX_SHADER, this->config.DEFAULT_FRAGMENT_SHADER,
-			this->config.DEFAULT_SKINNED_VERTEX_SHADER, this->config.DEFAULT_SKINNED_FRAGMENT_SHADER,
-			this->config.DEFAULT_DEBUG_VERTEX_SHADER, this->config.DEFAULT_DEBUG_FRAGMENT_SHADER, this->config.AUTO_GENERATE_MIPMAPS)),
+		gpu(std::make_unique<GPU>()),
 		scene(nullptr),
         startTime(std::chrono::high_resolution_clock::now())
     {

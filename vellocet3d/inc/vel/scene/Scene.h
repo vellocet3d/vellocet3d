@@ -9,6 +9,7 @@
 #include "vel/scene/stage/Stage.h"
 #include "vel/scene/armature/Armature.h"
 #include "vel/scene/animation/Animation.h"
+#include "vel/scene/material/Material.h"
 
 
 
@@ -19,12 +20,16 @@ namespace vel
 	private:
 		std::vector<Stage>					stages;
 		std::vector<Mesh>					meshes;
+		std::vector<Material>				materials;
 		std::vector<Animation>				animations;
 		double								animationTime;
 		
 
 	protected:
-		size_t								addShader(std::string name, std::string vertName, std::string fragName);
+		size_t								loadShader(std::string name, std::string vertName, std::string fragName);
+		size_t								loadMesh(std::string path);
+		size_t								loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips);
+		size_t								addMaterial(Material m);
 		Stage&								addStage();
 		Stage&								getStage(size_t index);
 
@@ -58,6 +63,9 @@ namespace vel
 		void debugVertexBones();
 		void debugListNumberOfBonesPerArmature();
 		void debugActiveNumberOfBonesPerActor();
+
+		const Material&						getMaterial(size_t materialIndex);
+		const Material&						getMaterial(std::string materialName);
 
 	};
 

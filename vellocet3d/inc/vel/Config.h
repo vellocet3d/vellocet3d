@@ -28,15 +28,7 @@ namespace vel
 		double								LOGIC_TICK = 60.0;
 		bool								CURSOR_HIDDEN = true;
 		bool								USE_IMGUI = true;
-		bool								AUTO_GENERATE_MIPMAPS = true;
         const std::string					LOG_PATH = "data/log.txt";
-        const std::string					SHADER_FILE_PATH = "data/shaders";
-        const std::string					DEFAULT_VERTEX_SHADER = "default.vert";
-        const std::string					DEFAULT_FRAGMENT_SHADER = "default.frag";
-		const std::string					DEFAULT_SKINNED_VERTEX_SHADER = "default_skinned.vert";
-		const std::string					DEFAULT_SKINNED_FRAGMENT_SHADER = "default_skinned.frag";
-		const std::string					DEFAULT_DEBUG_VERTEX_SHADER = "default_debug.vert";
-		const std::string					DEFAULT_DEBUG_FRAGMENT_SHADER = "default_debug.frag";
 
 		std::vector<ImGuiFont>				imguiFonts;
         
