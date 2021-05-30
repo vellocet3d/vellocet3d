@@ -25,18 +25,18 @@ namespace vel
 		std::vector<Vertex>					vertices;
 		std::vector<unsigned int>           indices;
 		std::vector<MeshBone>				bones;
-		std::optional<size_t>               gpuMeshIndex;
+		std::optional<GpuMesh>              gpuMesh;
 		glm::mat4							globalInverseMatrix;
 
 
 	public:
 											Mesh(std::string name);
 		void								addVertexWeight(unsigned int vertexIndex, unsigned int boneIndex, float weight);
-		void                                setGpuMeshIndex(size_t index);
+		void                                setGpuMesh(GpuMesh gm);
 		void								setVertices(std::vector<Vertex>& vertices);
 		void								setIndices(std::vector<unsigned int>& indices);
 		void								setBones(std::vector<MeshBone>& bones);
-		const std::optional<size_t>&        getGpuMeshIndex() const;
+		const std::optional<GpuMesh>&       getGpuMesh() const;
 		const std::string                   getName() const;
 		const std::vector<Vertex>&			getVertices() const;
 		const std::vector<unsigned int>&	getIndices() const;

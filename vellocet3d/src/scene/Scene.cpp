@@ -52,7 +52,16 @@ namespace vel
 
 	size_t Scene::loadShader(std::string name, std::string vertFile, std::string fragFile)
 	{
-		return App::get().getGPU()->loadShader(name, vertFile, fragFile);
+		Shader s;
+		s.name = name;
+		s.vertFile = vertFile;
+		s.fragFile = fragFile;
+
+		App::get().getGPU()->loadShader(s);
+
+		this->shaders.push_back(s);
+		
+		return this->shaders.size() - 1;
 	}
 
 	size_t Scene::loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips)
@@ -63,7 +72,16 @@ namespace vel
 		texture.path = path;
 		texture.mips = mips;
 
-		return App::get().getGPU()->loadTexture(texture);
+		App::get().getGPU()->loadTexture(texture);
+
+		this->textures.push_back(texture);
+
+		return this->textures.size() - 1;
+	}
+
+	Texture* Scene::getTexture(size_t textureIndex)
+	{
+		return &this->textures.at(textureIndex);
 	}
 
 	size_t Scene::loadMesh(std::string path) 
@@ -79,16 +97,16 @@ namespace vel
 		return this->materials.size() - 1;
 	}
 
-	const Material&	Scene::getMaterial(size_t materialIndex)
+	Material*	Scene::getMaterial(size_t materialIndex)
 	{
-		return this->materials.at(materialIndex);
+		return &this->materials.at(materialIndex);
 	}
 
-	const Material&	Scene::getMaterial(std::string materialName)
+	Material*	Scene::getMaterial(std::string materialName)
 	{
 		for (auto& m : this->materials)
 			if (m.name == materialName)
-				return m;
+				return &m;
 	}
 
 	Renderable Scene::getRenderable(std::string name)
@@ -129,14 +147,14 @@ namespace vel
 
 	size_t Scene::addMesh(Mesh m)
 	{
-		m.setGpuMeshIndex(App::get().getGPU()->loadMesh(m));
+		App::get().getGPU()->loadMesh(m);
 		this->meshes.push_back(m);
 		return this->meshes.size() - 1;
 	}
 
-	Mesh& Scene::getMesh(size_t index)
+	Mesh* Scene::getMesh(size_t index)
 	{
-		return this->meshes.at(index);
+		return &this->meshes.at(index);
 	}
 
 	Animation& Scene::getAnimation(size_t index)
@@ -238,6 +256,11 @@ namespace vel
 		exit(EXIT_FAILURE);
 	}
 
+	Shader* Scene::getShader(size_t si)
+	{
+		return &this->shaders.at(si);
+	}
+
     void Scene::draw(float alpha)
     {
 		//std::cout << "new draw iteration---------------------------------------\n";
@@ -259,17 +282,18 @@ namespace vel
 			// should always have a camera if we've made it this far
 			s.getCamera()->update();
 
-			// if debug drawer set, do debug draw
-			if (s.collisionDebugging())
-			{
-				s.getCollisionWorld()->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
+			// TODO - RETHINK HOW WE WANT TO HANDLE DEBUG DRAWING
+			//// if debug drawer set, do debug draw
+			//if (s.collisionDebugging())
+			//{
+			//	s.getCollisionWorld()->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
 
-				gpu->useShader(2);
-				gpu->setShaderMat4("vp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix());
-				gpu->getCollisionDebugDrawer()->draw(); // draw all loaded vertices with a single call and clear
+			//	gpu->useShader(2);
+			//	gpu->setShaderMat4("vp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix());
+			//	gpu->getCollisionDebugDrawer()->draw(); // draw all loaded vertices with a single call and clear
 
-				//std::cout << "debug draw\n";
-			}
+			//	//std::cout << "debug draw\n";
+			//}
 
             //s.printRenderables();            
 
@@ -278,31 +302,31 @@ namespace vel
 
 			//std::cout << "----------------------------------\n";
 
-			//std::cout << "gpu active before rco loop:" << gpu.getActiveShaderIndex() << "," << gpu.getActiveGpuMeshIndex() << "," << gpu.getActiveMaterialIndex() << "\n";
+			//std::cout << "gpu active before rco loop:" << gpu.getActiveShader() << "," << gpu.getActiveGpuMeshIndex() << "," << gpu.getActiveMaterialIndex() << "\n";
 
-            for (auto& rco : s.getRenderablesOrder().value())
+
+            for (auto& rco : s.getRenderablesOrder())
             {
                 Renderable& rc = s.getRenderable(rco);
 
 				//std::cout << "rc:" << rc.getShaderIndex() << "," << rc.getMeshIndex() << "," << rc.getTextureIndex() << "\n";
 
-                if (rc.getShaderIndex() != gpu->getActiveShaderIndex())
-                    gpu->useShader(rc.getShaderIndex());
+                if (rc.getShader() != gpu->getActiveShader())
+                    gpu->useShader(rc.getShader());
 
-                if (rc.getMeshIndex() != gpu->getActiveGpuMeshIndex())
-                    gpu->useGpuMesh(rc.getMeshIndex());
+                if (rc.getMesh() != gpu->getActiveMesh())
+                    gpu->useMesh(rc.getMesh());
 
-                if (rc.getMaterialIndex() != gpu->getActiveMaterialIndex())
-                    gpu->useMaterial(rc.getMaterialIndex());
+                if (rc.getMaterial() != gpu->getActiveMaterial())
+                    gpu->useMaterial(rc.getMaterial());
 
                 // gpu state has been set, now draw all actors which use this gpu state
                 for (auto& ai : rc.getActorIndexes())
                 {
                     Actor* a = s.getActor(ai);
-
 					
 					//std::cout << a->getName() << ":" << rc.getShaderIndex() << "-" << rc.getMeshIndex() << "-" << rc.getTextureIndex() << "\n";
-					//std::cout << a->getName() << ":" << gpu->getActiveShaderIndex() << "-" << gpu->getActiveGpuMeshIndex() << "-" << gpu->getActiveMaterialIndex() << "\n";
+					//std::cout << a->getName() << ":" << gpu->getActiveShader() << "-" << gpu->getActiveGpuMeshIndex() << "-" << gpu->getActiveMaterialIndex() << "\n";
 					//std::cout << "--------------------------------\n";
 
 					//std::cout << a->getName() << "\n";
@@ -311,32 +335,35 @@ namespace vel
                     {
 						gpu->setShaderMat4("mvp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix() * a->getWorldRenderMatrix(alpha));
 
+						
+
 						//std::cout << a->getName() << "\n";
 
-						// If this actor is animated, send the bone transforms of it's armature to the shader
-						if (a->isAnimated())
-						{
-							auto& mesh = a->getMesh();
-							auto armature = a->getArmature();
+						// TODO - FIX THIS WHEN WE CONTINUE WORK ON ARMATURES
+						//// If this actor is animated, send the bone transforms of it's armature to the shader
+						//if (a->isAnimated())
+						//{
+						//	auto& mesh = a->getMesh();
+						//	auto armature = a->getArmature();
 
-							//std::cout << a->getName() << "\n";
-							//for(auto& b : armature->getBones())
-							//	std::cout << b.name << "\n";
+						//	//std::cout << a->getName() << "\n";
+						//	//for(auto& b : armature->getBones())
+						//	//	std::cout << b.name << "\n";
 
-							
-							size_t boneIndex = 0;
-							for (auto& activeBone : a->getActiveBones().value())
-							{
-								glm::mat4 meshBoneTransform = mesh.getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrix(alpha) * mesh.getBone(boneIndex).offsetMatrix;
+						//	
+						//	size_t boneIndex = 0;
+						//	for (auto& activeBone : a->getActiveBones().value())
+						//	{
+						//		glm::mat4 meshBoneTransform = mesh.getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrix(alpha) * mesh.getBone(boneIndex).offsetMatrix;
 
-								//std::cout << glm::to_string(meshBoneTransform) << "\n";
-								//std::cout << activeBone.second << ":" << armature->getBone(activeBone.first).name << "\n";
+						//		//std::cout << glm::to_string(meshBoneTransform) << "\n";
+						//		//std::cout << activeBone.second << ":" << armature->getBone(activeBone.first).name << "\n";
 
-								gpu->setShaderMat4(activeBone.second, meshBoneTransform);
+						//		gpu->setShaderMat4(activeBone.second, meshBoneTransform);
 
-								boneIndex++;
-							}
-						}
+						//		boneIndex++;
+						//	}
+						//}
 
 						
 

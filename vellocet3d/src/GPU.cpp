@@ -17,9 +17,9 @@
 namespace vel
 {
     GPU::GPU() :
-        activeShaderIndex(-1),
-        activeGpuMeshIndex(-1),
-        activeMaterialIndex(-1)
+        activeShader(nullptr),
+        activeMesh(nullptr),
+        activeMaterial(nullptr)
     {
 		// create collision debug drawer
 		this->collisionDebugDrawer = CollisionDebugDrawer();
@@ -31,11 +31,6 @@ namespace vel
 		this->wipe();
 	}
 
-	const Texture&	GPU::getTexture(size_t i) const
-	{
-		return this->textures.at(i);
-	}
-
 	CollisionDebugDrawer* GPU::getCollisionDebugDrawer()
 	{
 		//return this->collisionDebugDrawer.get();
@@ -45,7 +40,7 @@ namespace vel
 			return nullptr;
 	}
 
-    size_t GPU::loadShader(const std::string name, const std::string vertFile, const std::string fragFile)
+    void GPU::loadShader(Shader& s)
     {
         unsigned int id;
 
@@ -61,8 +56,8 @@ namespace vel
         try
         {
             // open files
-            vShaderFile.open(vertFile);
-            fShaderFile.open(fragFile);
+            vShaderFile.open(s.vertFile);
+            fShaderFile.open(s.fragFile);
 
             std::stringstream vShaderStream, fShaderStream;
 
@@ -147,16 +142,11 @@ namespace vel
         glDeleteShader(vertex);
         glDeleteShader(fragment);
 
-        auto shader = Shader();
-        shader.name = name;
-        shader.id = id;
 
-        this->shaders.push_back(shader);
-
-        return this->shaders.size() - 1;
+        s.id = id;
     }
 
-	size_t GPU::loadMesh(Mesh& m)
+	void GPU::loadMesh(Mesh& m)
     {
         GpuMesh gm = GpuMesh();
         gm.indiceCount = (GLsizei)m.getIndices().size();
@@ -202,44 +192,42 @@ namespace vel
         // Unbind the vertex array to prevent accidental operations
         glBindVertexArray(0);
 
-        this->gpuMeshes.push_back(gm);
-
-        return this->gpuMeshes.size() - 1;
+		m.setGpuMesh(gm);
     }
 
-	size_t GPU::loadTexture(Texture texture)
+	void GPU::loadTexture(Texture& t)
     {
-        glGenTextures(1, &texture.id);
+        glGenTextures(1, &t.id);
 
         int width, height, nrComponents;
-        unsigned char*	data = stbi_load(texture.path.c_str(), &width, &height, &nrComponents, 0);
+        unsigned char*	data = stbi_load(t.path.c_str(), &width, &height, &nrComponents, 0);
         if (data) 
         {
             GLenum format;
 			if (nrComponents == 1)
 			{
-				texture.alphaChannel = false;
+				t.alphaChannel = false;
 				format = GL_RED;
 			} 
 			else if (nrComponents == 3)
 			{
-				texture.alphaChannel = false;
+				t.alphaChannel = false;
 				format = GL_RGB;
 			}
 			else if (nrComponents == 4)
 			{
-				texture.alphaChannel = true;
+				t.alphaChannel = true;
 				format = GL_RGBA;
 			}
                 
 			//std::cout << texture.filename << ":" << texture.alphaChannel << "\n";
 
-            glBindTexture(GL_TEXTURE_2D, texture.id);
+            glBindTexture(GL_TEXTURE_2D, t.id);
 
 			// load the base level texture
             glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
-			if (texture.mips.size() == 0)
+			if (t.mips.size() == 0)
 				glGenerateMipmap(GL_TEXTURE_2D);
 
 			// set texture parameters
@@ -247,13 +235,13 @@ namespace vel
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			if (texture.mips.size() == 0)
+			if (t.mips.size() == 0)
 			{
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			}
 			else
 			{
-				int mipcount = texture.mips.size();
+				int mipcount = t.mips.size();
 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipcount);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -261,7 +249,7 @@ namespace vel
 				while (mipcount > 0)
 				{
 					int mip_width, mip_height, mip_nrComponents;
-					unsigned char*	mip_data = stbi_load(texture.mips.at(mipcount).c_str(), &mip_width, &mip_height, &mip_nrComponents, 0);
+					unsigned char*	mip_data = stbi_load(t.mips.at(mipcount).c_str(), &mip_width, &mip_height, &mip_nrComponents, 0);
 
 					if (mip_data)
 					{
@@ -284,7 +272,7 @@ namespace vel
 					else
 					{
 						stbi_image_free(mip_data);
-						std::cout << "Texture failed to load at path: " << texture.mips.at(mipcount) << "\n";
+						std::cout << "Texture failed to load at path: " << t.mips.at(mipcount) << "\n";
 						std::cin.get();
 						exit(EXIT_FAILURE);
 					}
@@ -293,59 +281,41 @@ namespace vel
 			}
 
             stbi_image_free(data);
-
-            this->textures.push_back(texture);
-
-            return this->textures.size() - 1;
         }
         else
         {
             stbi_image_free(data);
-            std::cout << "Texture failed to load at path: " << texture.path << "\n";
+            std::cout << "Texture failed to load at path: " << t.path << "\n";
             std::cin.get();
             exit(EXIT_FAILURE);
         }
     }
 
-    const size_t GPU::getActiveShaderIndex() const
+    const Shader* GPU::getActiveShader() const
     {
-        return this->activeShaderIndex;
+        return this->activeShader;
     }
 
-    const size_t GPU::getActiveGpuMeshIndex() const
+    const Mesh* GPU::getActiveMesh() const
     {
-        return this->activeGpuMeshIndex;
+        return this->activeMesh;
     }
 
-    const size_t GPU::getActiveMaterialIndex() const
+    const Material* GPU::getActiveMaterial() const
     {
-        return this->activeMaterialIndex;
+        return this->activeMaterial;
     }
 
-    const std::vector<Texture>& GPU::getTextures() const
+    void GPU::useShader(Shader* s)
     {
-        return this->textures;
-    }
-
-	std::vector<std::string> GPU::getActiveShaderNames()
-	{
-		std::vector<std::string> names;
-		for (auto& s : this->shaders)
-			names.push_back(s.name);
-
-		return names;
-	}
-
-    void GPU::useShader(size_t shaderIndex)
-    {
-        this->activeShaderIndex = shaderIndex;
-        glUseProgram(this->shaders.at(shaderIndex).id);
+        this->activeShader = s;
+        glUseProgram(s->id);
     }
 
     void GPU::setShaderBool(const std::string& name, bool value) const
     {
         glUniform1i(glGetUniformLocation(
-            this->shaders.at(this->activeShaderIndex).id, 
+			this->activeShader->id,
             name.c_str()), 
             (int)value);
     }
@@ -353,7 +323,7 @@ namespace vel
     void GPU::setShaderInt(const std::string& name, int value) const
     {
         glUniform1i(glGetUniformLocation(
-            this->shaders.at(this->activeShaderIndex).id, 
+			this->activeShader->id,
             name.c_str()), 
             value);
     }
@@ -361,7 +331,7 @@ namespace vel
     void GPU::setShaderFloat(const std::string& name, float value) const
     {
         glUniform1f(glGetUniformLocation(
-            this->shaders.at(this->activeShaderIndex).id, 
+			this->activeShader->id,
             name.c_str()), 
             value);
     }
@@ -369,33 +339,39 @@ namespace vel
     void GPU::setShaderMat4(const std::string& name, glm::mat4 value) const
     {
         glUniformMatrix4fv(glGetUniformLocation(
-            this->shaders.at(this->activeShaderIndex).id, 
+			this->activeShader->id,
             name.c_str()), 
             1,
             GL_FALSE, glm::value_ptr(value));
     }
 
 
-    void GPU::useGpuMesh(size_t gpuMeshIndex)
+    void GPU::useMesh(Mesh* m)
     {
-        this->activeGpuMeshIndex = gpuMeshIndex;
-        glBindVertexArray(this->gpuMeshes.at(gpuMeshIndex).VAO);
+        this->activeMesh = m;
+        glBindVertexArray(m->getGpuMesh()->VAO);
     }
 
-    void GPU::useMaterial(size_t materialIndex)
+    void GPU::useMaterial(Material* m)
     {
+		// TODO - This will get much more complicated when we implement pbr, but for the time being, assume materials
+		// only contain a single albedo map
+
+		this->activeMaterial = m;
+
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, this->textures.at(textureIndex).id);
+        glBindTexture(GL_TEXTURE_2D, m->albedo.value());
         this->setShaderInt("texture1", 0);
 
-        this->activeMaterialIndex = textureIndex;
+		//std::cout << m->albedo.value() << "\n";
+
     }
 
     void GPU::drawGpuMesh()
     {
         // The naive approach. But after researching how to optimize this for 3 days I decided to leave it alone
         // until there's an actual reason to (DRASTICALLY) complicate things.
-        glDrawElements(GL_TRIANGLES, this->gpuMeshes.at(this->activeGpuMeshIndex).indiceCount, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, this->activeMesh->getGpuMesh()->indiceCount, GL_UNSIGNED_INT, 0);
     }
 
     void GPU::enableDepthTest()
@@ -421,20 +397,20 @@ namespace vel
 
     void GPU::wipe()
     {
-		//std::cout << "wiping gpu data for previous GPU instance\n";
+	// TODO - This will need to be invoked via Scene, passing required parameters
 
-        for (auto& mr : this->gpuMeshes)
-        {
-            glDeleteVertexArrays(1, &mr.VAO);
-            glDeleteBuffers(1, &mr.VBO);
-            glDeleteBuffers(1, &mr.EBO);
-        }
+   //     for (auto& mr : this->gpuMeshes)
+   //     {
+   //         glDeleteVertexArrays(1, &mr.VAO);
+   //         glDeleteBuffers(1, &mr.VBO);
+   //         glDeleteBuffers(1, &mr.EBO);
+   //     }
 
-        for (auto& t : this->textures)
-			glDeleteTextures(1, &t.id);
+   //     for (auto& t : this->textures)
+			//glDeleteTextures(1, &t.id);
 
-        for (auto& s : this->shaders)
-			glDeleteProgram(s.id);
+   //     for (auto& s : this->shaders)
+			//glDeleteProgram(s.id);
     }
 		
 	void GPU::finish()

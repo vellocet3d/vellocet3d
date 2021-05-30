@@ -12,5 +12,7 @@ namespace vel
 	{
 		unsigned int id;
 		std::string name;
+		std::string vertFile;
+		std::string fragFile;
 	};
 }

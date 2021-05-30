@@ -6,7 +6,7 @@
 
 #include "vel/App.h"
 #include "vel/scene/stage/Stage.h"
-#include "vel/AssetLoader.h"
+
 
 
 
@@ -389,9 +389,9 @@ namespace vel
         return this->renderables.at(index);
     }
 
-	std::optional<Renderable&> Stage::getRenderable(std::string name)
+	std::optional<Renderable>& Stage::getRenderable(std::string name)
 	{
-		auto rr = std::optional<Renderable&>();
+		auto rr = std::optional<Renderable>();
 		for (auto& r : this->renderables)
 		{
 			if (r.getName() == name)
@@ -403,7 +403,7 @@ namespace vel
 		return rr;
 	}
 
-    const std::optional<std::vector<size_t>>& Stage::getRenderablesOrder() const
+    const std::vector<size_t>& Stage::getRenderablesOrder() const
     {
         return this->renderablesOrder;
     }

@@ -12,7 +12,13 @@ namespace vel
         shaderIndex(shaderIndex),
         meshIndex(meshIndex),
         materialIndex(materialIndex),
-		materialHasAlpha((hasAlphaChannel ? 1 : 0)){}
+		materialHasAlpha((hasAlphaChannel ? 1 : 0)),
+		shader(App::get().getScene()->getShader(shaderIndex)),
+		mesh(App::get().getScene()->getMesh(meshIndex)),
+		material(App::get().getScene()->getMaterial(materialIndex))
+	{
+		
+	}
 
 	size_t Renderable::addActorIndex(size_t actorIndex)
 	{
@@ -57,4 +63,20 @@ namespace vel
     {
         return this->actorIndexes;
     }
+
+	Shader*	Renderable::getShader()
+	{
+		return this->shader;
+	}
+
+	Material* Renderable::getMaterial()
+	{
+		return this->material;
+	}
+
+	Mesh* Renderable::getMesh()
+	{
+		return this->mesh;
+	}
+
 }

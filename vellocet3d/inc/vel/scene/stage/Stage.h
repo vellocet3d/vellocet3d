@@ -55,8 +55,8 @@ namespace vel
 
         void										printRenderables() const;
         Renderable&									getRenderable(size_t index);
-		std::optional<Renderable&>					getRenderable(std::string name);
-        const std::optional<std::vector<size_t>>&	getRenderablesOrder() const;
+		std::optional<Renderable>&					getRenderable(std::string name);
+        const std::vector<size_t>&					getRenderablesOrder() const;
 		
 
         std::optional<Camera>&						getCamera();

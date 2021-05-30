@@ -18,12 +18,18 @@ namespace vel
 	class Scene
 	{
 	private:
-		std::vector<Stage>					stages;
+		std::vector<Shader>					shaders;
 		std::vector<Mesh>					meshes;
+		std::vector<Texture>				textures;
 		std::vector<Material>				materials;
+
+		std::vector<Renderable>				baseRenderables;
+
 		std::vector<Animation>				animations;
 		std::vector<Armature>				baseArmatures;
-		std::vector<Renderable>				baseRenderables;
+		
+		std::vector<Stage>					stages;
+
 		double								animationTime;
 		
 
@@ -44,7 +50,7 @@ namespace vel
 		bool								loaded;
 		const std::vector<Mesh>&			getMeshes() const;
 		size_t								addMesh(Mesh m);
-		Mesh&								getMesh(size_t index);
+		Mesh*								getMesh(size_t index);
 		size_t								addAnimation(Animation a);
 		const std::vector<Animation>&		getAnimations() const;
 		Animation&							getAnimation(size_t index);
@@ -68,8 +74,10 @@ namespace vel
 		void debugListNumberOfBonesPerArmature();
 		void debugActiveNumberOfBonesPerActor();
 
-		const Material&						getMaterial(size_t materialIndex);
-		const Material&						getMaterial(std::string materialName);
+		Texture*							getTexture(size_t textureIndex);
+		Material*							getMaterial(size_t materialIndex);
+		Material*							getMaterial(std::string materialName);
+		Shader*								getShader(size_t si);
 
 		Armature*							addArmature(Armature a);
 		size_t								getMeshIndex(std::string meshName);

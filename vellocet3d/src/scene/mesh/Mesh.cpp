@@ -82,9 +82,9 @@ namespace vel
 		this->bones = bones;
 	}
 
-    void Mesh::setGpuMeshIndex(size_t index)
+    void Mesh::setGpuMesh(GpuMesh gm)
     {
-        this->gpuMeshIndex = index;
+		this->gpuMesh = gm;
     }
 
     const std::vector<Vertex>& Mesh::getVertices() const
@@ -104,12 +104,12 @@ namespace vel
 
     const bool Mesh::isRenderable() const
     {
-        return this->gpuMeshIndex.has_value();
+        return this->gpuMesh.has_value();
     }
 
-    const std::optional<size_t>& Mesh::getGpuMeshIndex() const
+    const std::optional<GpuMesh>& Mesh::getGpuMesh() const
     {
-        return this->gpuMeshIndex;
+        return this->gpuMesh;
     }
 
 }

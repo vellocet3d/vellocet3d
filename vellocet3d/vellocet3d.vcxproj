@@ -195,7 +195,6 @@
     <ClCompile Include="src\helpers\Tweener.cpp" />
     <ClCompile Include="src\scene\armature\Armature.cpp" />
     <ClCompile Include="src\scene\armature\ArmatureBone.cpp" />
-    <ClCompile Include="src\AssetLoader.cpp" />
     <ClCompile Include="src\scene\AssetLoaderV2.cpp" />
     <ClCompile Include="src\scene\stage\Camera.cpp" />
     <ClCompile Include="src\Config.cpp" />
@@ -254,7 +253,6 @@
     <ClInclude Include="inc\vel\scene\armature\ActiveAnimation.h" />
     <ClInclude Include="inc\vel\scene\armature\Armature.h" />
     <ClInclude Include="inc\vel\scene\armature\ArmatureBone.h" />
-    <ClInclude Include="inc\vel\AssetLoader.h" />
     <ClInclude Include="inc\vel\scene\AssetLoaderV2.h" />
     <ClInclude Include="inc\vel\scene\material\Material.h" />
     <ClInclude Include="inc\vel\scene\mesh\MeshBone.h" />
