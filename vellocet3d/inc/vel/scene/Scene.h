@@ -33,6 +33,7 @@ namespace vel
 		size_t								loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
 		size_t								addMaterial(Material m);
 		size_t								addRenderable(Renderable r);
+		Renderable							getRenderable(std::string name);
 		Stage&								addStage();
 		Stage&								getStage(size_t index);
 

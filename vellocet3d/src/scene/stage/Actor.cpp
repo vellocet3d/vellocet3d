@@ -1,23 +1,22 @@
 
 
 #include "vel/helpers/functions.h"
-#include "vel/App.h"
 #include "vel/scene/stage/Actor.h"
 
 
 namespace vel
 {
-    Actor::Actor() :
-        name(""),
+    Actor::Actor(std::string name) :
+        name(name),
         deleted(false),
 		visible(true),
 		dynamic(false),
         transform(Transform()) ,
 		rigidBody(nullptr),
 		armature(nullptr),
-		manualTransform(true), //TODO: tf is the point of this?
+		manualTransform(true) //TODO: tf is the point of this?
 		//parentStage(parentStage),
-		textureHasAlphaChannel(false)
+
     {}
 
 	void Actor::processTransform()
@@ -104,6 +103,21 @@ namespace vel
 	void Actor::setName(std::string newName)
 	{
 		this->name = newName;
+	}
+
+	void Actor::addRenderable(Renderable r)
+	{
+		this->tempRenderables.push_back(r);
+	}
+
+	std::vector<Renderable>& Actor::getRenderables()
+	{
+		return this->tempRenderables;
+	}
+
+	void Actor::clearTempRenderables()
+	{
+		this->tempRenderables.clear();
 	}
 
 	std::optional<glm::mat4> Actor::getParentMatrix()
@@ -239,21 +253,6 @@ namespace vel
 		return this->activeBones;
 	}
 
-    void Actor::setMeshIndex(size_t i)
-    {
-        this->meshIndex = i;
-    }
-
-    void Actor::setShaderIndex(size_t i)
-    {
-        this->shaderIndex = i;
-    }
-
-    void Actor::setTextureIndex(size_t i)
-    {
-        this->textureIndex = i;
-    }
-
     Transform& Actor::getTransform()
     {
         return this->transform;
@@ -308,9 +307,19 @@ namespace vel
 
 	}
 
-    const std::pair<size_t, size_t>& Actor::getRenderableAndActorIndex() const
+	const std::optional<size_t>& Actor::getContainerIndex() const
+	{
+		return this->containerIndex;
+	}
+
+	void Actor::setContainerIndex(size_t ci)
+	{
+		this->containerIndex = ci;
+	}
+
+    const std::vector<size_t>& Actor::getParentRenderableIndexes() const
     {
-        return this->renderableAndActorIndex.value();
+        return this->parentRenderableIndexes;
     }
 
     const std::string Actor::getName() const
@@ -318,35 +327,10 @@ namespace vel
         return this->name;
     }
 
-    const std::optional<size_t>& Actor::getShaderIndex() const
+    void Actor::addParentRenderableIndex(size_t ri)
     {
-        return this->shaderIndex;
+		this->parentRenderableIndexes.push_back(ri);
     }
-
-    const std::optional<size_t>& Actor::getMeshIndex() const
-    {
-        return this->meshIndex;
-    }
-
-    const std::optional<size_t>& Actor::getMaterialIndex() const
-    {
-        return this->textureIndex;
-    }
-
-    void Actor::setRenderableAndActorIndex(std::pair<size_t, size_t> cmd)
-    {
-        this->renderableAndActorIndex = cmd;
-    }
-
-	void Actor::setTextureHasAlphaChannel(bool in)
-	{
-		this->textureHasAlphaChannel = in;
-	}
-
-	bool Actor::getTextureHasAlphaChannel()
-	{
-		return this->textureHasAlphaChannel;
-	}
 
 	const bool Actor::isAnimated() const
 	{
@@ -366,10 +350,5 @@ namespace vel
 	{
 		return this->armature;
 	}
-
-	//Mesh& Actor::getMesh()
-	//{
-	//	return this->parentStage->getParentScene()->getMesh(this->meshIndex.value());
-	//}
 
 }

@@ -29,23 +29,21 @@ namespace vel
         std::vector<Actor>								actors;
         std::vector<size_t>								actorFreeSlots;
 		std::vector<Armature>							armatures;
-        std::optional<std::vector<Renderable>>			renderables;
-        std::optional<std::vector<size_t>>				renderablesOrder;
-		std::optional<size_t>							renderableExists(std::string rn);
-        size_t											setRenderableAndActorIndex(Renderable rc);
+        std::vector<Renderable>							renderables;
+        std::vector<size_t>								renderablesOrder;
+		std::optional<size_t>							renderableExists(const std::string& rn);
+        size_t											addRenderable(Renderable rc);
 		std::optional<std::unique_ptr<CollisionWorld>>	collisionWorld;
 		bool											collisionDebuggingSwitch;
 		bool											clearDepthBuffer;
 
-		Scene*											parentScene;
+
 		
 
 
     public:
-													Stage(Scene* parentScene);
-		std::vector<size_t>							loadActors(std::string filename, bool dynamic = false);
-		std::vector<size_t>							loadActors(std::string filename, bool dynamic, int shaderIndex);
-		std::vector<size_t>							loadActors(std::string filename, bool dynamic, std::vector<std::pair<int, std::vector<std::string>>> actorShaderAssocs);
+													Stage();
+
 		void										updateActorAnimations(double runTime);
         size_t										addActor(Actor a);
         void										removeActor(std::string name);
@@ -54,9 +52,13 @@ namespace vel
         Actor*										getActor(std::string name);
 		std::vector<Actor>&							getActors();
         const size_t								getActorSize() const;
+
         void										printRenderables() const;
-        Renderable&								getRenderableAndActorIndex(size_t index);
+        Renderable&									getRenderable(size_t index);
+		std::optional<Renderable&>					getRenderable(std::string name);
         const std::optional<std::vector<size_t>>&	getRenderablesOrder() const;
+		
+
         std::optional<Camera>&						getCamera();
         const bool									hasActorWithName(std::string name) const;
         void										setActorContainerSize(unsigned int size);
@@ -82,7 +84,6 @@ namespace vel
 		void										useCollisionDebugDrawer(int debugMode = 1);
 		bool										collisionDebugging();
 
-		Scene*										getParentScene();
 
 		Armature*									addArmature(Armature a);
 

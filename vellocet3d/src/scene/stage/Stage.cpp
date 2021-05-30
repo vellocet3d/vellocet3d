@@ -15,8 +15,7 @@
 namespace vel
 {
 
-    Stage::Stage(Scene* parentScene) :
-		parentScene(parentScene),
+    Stage::Stage() :
         visible(true),
 		collisionDebuggingSwitch(false),
 		clearDepthBuffer(false)
@@ -109,11 +108,6 @@ namespace vel
 		this->collisionWorld = std::make_unique<CollisionWorld>(this, gravity);
 	}
 
-	Scene* Stage::getParentScene()
-	{
-		return this->parentScene;
-	}
-
 	std::vector<Actor>& Stage::getActors()
 	{
 		return this->actors;
@@ -180,37 +174,6 @@ namespace vel
         );
     }
 
-	std::vector<size_t> Stage::loadActors(std::string filename, bool dynamic)
-    {
-        auto loader = AssetLoader(this->parentScene, this, filename, dynamic);
-        return loader.loadActors();
-    }
-
-	std::vector<size_t> Stage::loadActors(std::string filename, bool dynamic, int shaderIndex)
-    {
-        auto loader = AssetLoader(this->parentScene, this, filename, dynamic);
-        loader.findShaderId = [&](std::string actorName) {
-            return shaderIndex;
-        };
-        return loader.loadActors();
-    }
-
-	std::vector<size_t> Stage::loadActors(std::string filename, bool dynamic,
-        std::vector<std::pair<int, std::vector<std::string>>> actorShaderAssocs)
-    {
-        auto loader = AssetLoader(this->parentScene, this, filename, dynamic);
-        loader.findShaderId = [&](std::string actorName) {
-            
-            for (auto& a : actorShaderAssocs)
-                for (auto& p : a.second)
-                    if (actorName.find(p) != std::string::npos)
-                        return a.first;
-
-            return 0; // if no shader assoc found, use default shader
-        };
-        return loader.loadActors();
-    }
-
 	void Stage::updateActorAnimations(double runTime)
 	{
 		for (auto& a : this->actors)
@@ -246,8 +209,24 @@ namespace vel
         }
 
         auto actor = &this->actors.at(slotIndex);
+		actor->setContainerIndex(slotIndex);
 
 		//TODO renderable things
+		if (actor->getRenderables().size() > 0)
+		{
+			for (auto& tempRenderable : actor->getRenderables())
+			{
+				auto parentRenderableIndex = this->renderableExists(tempRenderable.getName());
+
+				if (!parentRenderableIndex) // add renderable to stage if we do not already have an instance
+					parentRenderableIndex = this->addRenderable(tempRenderable);
+
+				actor->addParentRenderableIndex(parentRenderableIndex.value());
+				this->getRenderable(parentRenderableIndex.value()).addActorIndex(slotIndex);
+			}
+
+			actor->clearTempRenderables();
+		}
 
 		return slotIndex;
     }
@@ -285,8 +264,9 @@ namespace vel
         Actor& a = this->actors.at(index);
 
         // free actor slot in render command
-        if (this->renderables)
-            this->renderables.value().at(a.getRenderableAndActorIndex().first).freeActorIndex(a.getRenderableAndActorIndex().second);
+		for (auto& ar : a.getParentRenderableIndexes())
+			this->renderables.at(ar).freeActorIndex(a.getContainerIndex().value());
+		
 
 		// TODO: need to add logic for removing ghostObjects as well, AND remove all sensors which use either the
 		// rigidBody or ghostObject of this actor
@@ -310,18 +290,18 @@ namespace vel
         this->actorFreeSlots.push_back(index);
     }
 
-    size_t Stage::setRenderableAndActorIndex(Renderable rc) 
+    size_t Stage::addRenderable(Renderable rc) 
     {
-        this->renderables->push_back(rc);
-        size_t renderableIndex = this->renderables->size() - 1;
+        this->renderables.push_back(rc);
+        size_t renderableIndex = this->renderables.size() - 1;
 
         // loop through renderables and sort order saving indexes
         // within this->renderablesOrder
 
         std::vector<std::pair<size_t, Renderable>> toSort;
 
-        for (size_t i = 0; i < this->renderables->size(); i++) 
-            toSort.push_back(std::pair<size_t, Renderable>(i, this->renderables->at(i)));
+        for (size_t i = 0; i < this->renderables.size(); i++) 
+            toSort.push_back(std::pair<size_t, Renderable>(i, this->renderables.at(i)));
 
 		// sort sharder
         std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
@@ -333,7 +313,7 @@ namespace vel
 			return left.second.getMeshIndex() < right.second.getMeshIndex();
 		});
 
-		// sort texture
+		// sort material
 		std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
 			return left.second.getMaterialIndex() < right.second.getMaterialIndex();
 		});
@@ -345,10 +325,10 @@ namespace vel
 
 
 
-        this->renderablesOrder->clear();
+        this->renderablesOrder.clear();
 
         for (auto& p : toSort) 
-            this->renderablesOrder->push_back(p.first);
+            this->renderablesOrder.push_back(p.first);
 
 		//for debugging
 		//std::cout << "-----------------------\n";
@@ -364,10 +344,10 @@ namespace vel
 
     }
 
-    std::optional<size_t> Stage::renderableExists(std::string rn)
+    std::optional<size_t> Stage::renderableExists(const std::string& rn)
     {
-        for (unsigned int i = 0; i < this->renderables->size(); i++)
-            if (this->renderables.value()[i].getName() == rn)
+        for (unsigned int i = 0; i < this->renderables.size(); i++)
+            if (this->renderables[i].getName() == rn)
                 return i;
         
         return std::nullopt;
@@ -386,7 +366,7 @@ namespace vel
     {
         std::cout << "Renderables\n";
         std::cout << "----------------------------------\n";
-        for (auto& rc : this->renderables.value()) 
+        for (auto& rc : this->renderables) 
         {
             std::cout << "shaderIndex:" << rc.getShaderIndex() << " meshIndex:" << rc.getMeshIndex() << " materialIndex:" << rc.getMaterialIndex() << "\n";
             std::cout << "actors:";
@@ -397,17 +377,31 @@ namespace vel
                 
             std::cout << "\norder:";
 
-            for (auto& o : this->renderablesOrder.value()) 
+            for (auto& o : this->renderablesOrder) 
                 std::cout << o << ",";
 
             std::cout << "\n------------------------------\n";
         }
     }
 
-    Renderable& Stage::getRenderableAndActorIndex(size_t index)
+    Renderable& Stage::getRenderable(size_t index)
     {
-        return this->renderables->at(index);
+        return this->renderables.at(index);
     }
+
+	std::optional<Renderable&> Stage::getRenderable(std::string name)
+	{
+		auto rr = std::optional<Renderable&>();
+		for (auto& r : this->renderables)
+		{
+			if (r.getName() == name)
+			{
+				rr = r;
+				return rr;
+			}
+		}
+		return rr;
+	}
 
     const std::optional<std::vector<size_t>>& Stage::getRenderablesOrder() const
     {

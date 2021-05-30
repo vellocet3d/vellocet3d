@@ -25,7 +25,7 @@ namespace vel
 		std::vector<GpuMesh>				gpuMeshes;
         size_t								activeShaderIndex;
 		size_t								activeGpuMeshIndex;
-		size_t								activeTextureIndex;
+		size_t								activeMaterialIndex;
 		//std::unique_ptr<CollisionDebugDrawer> collisionDebugDrawer;
 		std::optional<CollisionDebugDrawer> collisionDebugDrawer;
 		
@@ -39,11 +39,11 @@ namespace vel
         void								drawLinesOnly();
         const size_t						getActiveShaderIndex() const;
         const size_t						getActiveGpuMeshIndex() const;
-        const size_t						getActiveTextureIndex() const;
+        const size_t						getActiveMaterialIndex() const;
 		size_t								loadShader(const std::string name, const std::string vertFile, const std::string fragFile);
 		size_t								loadMesh(Mesh& m);
 		size_t								loadTexture(Texture texture);
-        void								useTexture(size_t textureIndex);
+        void								useMaterial(size_t materialIndex);
         const std::vector<Texture>&			getTextures() const;
         void								useShader(size_t shaderIndex);
         void								setShaderBool(const std::string &name, bool value) const;

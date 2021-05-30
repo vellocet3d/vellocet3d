@@ -19,7 +19,7 @@ namespace vel
     GPU::GPU() :
         activeShaderIndex(-1),
         activeGpuMeshIndex(-1),
-        activeTextureIndex(-1)
+        activeMaterialIndex(-1)
     {
 		// create collision debug drawer
 		this->collisionDebugDrawer = CollisionDebugDrawer();
@@ -317,9 +317,9 @@ namespace vel
         return this->activeGpuMeshIndex;
     }
 
-    const size_t GPU::getActiveTextureIndex() const
+    const size_t GPU::getActiveMaterialIndex() const
     {
-        return this->activeTextureIndex;
+        return this->activeMaterialIndex;
     }
 
     const std::vector<Texture>& GPU::getTextures() const
@@ -382,13 +382,13 @@ namespace vel
         glBindVertexArray(this->gpuMeshes.at(gpuMeshIndex).VAO);
     }
 
-    void GPU::useTexture(size_t textureIndex)
+    void GPU::useMaterial(size_t materialIndex)
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, this->textures.at(textureIndex).id);
         this->setShaderInt("texture1", 0);
 
-        this->activeTextureIndex = textureIndex;
+        this->activeMaterialIndex = textureIndex;
     }
 
     void GPU::drawGpuMesh()

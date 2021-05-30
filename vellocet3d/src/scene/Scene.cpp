@@ -91,6 +91,13 @@ namespace vel
 				return m;
 	}
 
+	Renderable Scene::getRenderable(std::string name)
+	{
+		for (auto& r : this->baseRenderables)
+			if (r.getName() == name)
+				return r;
+	}
+
 	Armature* Scene::addArmature(Armature a)
 	{
 		this->baseArmatures.push_back(a);
@@ -100,7 +107,7 @@ namespace vel
 
 	Stage& Scene::addStage()
 	{
-		this->stages.push_back(Stage(this));
+		this->stages.push_back(Stage());
 
 		return this->getStage(this->stages.size() - 1);
 	}
@@ -271,11 +278,11 @@ namespace vel
 
 			//std::cout << "----------------------------------\n";
 
-			//std::cout << "gpu active before rco loop:" << gpu.getActiveShaderIndex() << "," << gpu.getActiveGpuMeshIndex() << "," << gpu.getActiveTextureIndex() << "\n";
+			//std::cout << "gpu active before rco loop:" << gpu.getActiveShaderIndex() << "," << gpu.getActiveGpuMeshIndex() << "," << gpu.getActiveMaterialIndex() << "\n";
 
             for (auto& rco : s.getRenderablesOrder().value())
             {
-                Renderable& rc = s.getRenderableAndActorIndex(rco);
+                Renderable& rc = s.getRenderable(rco);
 
 				//std::cout << "rc:" << rc.getShaderIndex() << "," << rc.getMeshIndex() << "," << rc.getTextureIndex() << "\n";
 
@@ -285,8 +292,8 @@ namespace vel
                 if (rc.getMeshIndex() != gpu->getActiveGpuMeshIndex())
                     gpu->useGpuMesh(rc.getMeshIndex());
 
-                if (rc.getMaterialIndex() != gpu->getActiveTextureIndex())
-                    gpu->useTexture(rc.getMaterialIndex());
+                if (rc.getMaterialIndex() != gpu->getActiveMaterialIndex())
+                    gpu->useMaterial(rc.getMaterialIndex());
 
                 // gpu state has been set, now draw all actors which use this gpu state
                 for (auto& ai : rc.getActorIndexes())
@@ -295,7 +302,7 @@ namespace vel
 
 					
 					//std::cout << a->getName() << ":" << rc.getShaderIndex() << "-" << rc.getMeshIndex() << "-" << rc.getTextureIndex() << "\n";
-					//std::cout << a->getName() << ":" << gpu->getActiveShaderIndex() << "-" << gpu->getActiveGpuMeshIndex() << "-" << gpu->getActiveTextureIndex() << "\n";
+					//std::cout << a->getName() << ":" << gpu->getActiveShaderIndex() << "-" << gpu->getActiveGpuMeshIndex() << "-" << gpu->getActiveMaterialIndex() << "\n";
 					//std::cout << "--------------------------------\n";
 
 					//std::cout << a->getName() << "\n";
