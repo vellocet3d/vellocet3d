@@ -50,9 +50,9 @@ namespace vel
 		return this->animations.size() - 1;
 	}
 
-	size_t Scene::loadShader(std::string name, std::string vertName, std::string fragName)
+	size_t Scene::loadShader(std::string name, std::string vertFile, std::string fragFile)
 	{
-		return App::get().getGPU()->loadShader(name, vertName, fragName);
+		return App::get().getGPU()->loadShader(name, vertFile, fragFile);
 	}
 
 	size_t Scene::loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips)
@@ -69,7 +69,7 @@ namespace vel
 	size_t Scene::loadMesh(std::string path) 
 	{
 		auto al = AssetLoaderV2(this, path);
-		al.loadMeshes();
+		al.load();
 	}
 
 	size_t Scene::addMaterial(Material m)
@@ -89,6 +89,13 @@ namespace vel
 		for (auto& m : this->materials)
 			if (m.name == materialName)
 				return m;
+	}
+
+	Armature* Scene::addArmature(Armature a)
+	{
+		this->baseArmatures.push_back(a);
+
+		return &this->baseArmatures.back();
 	}
 
 	Stage& Scene::addStage()
@@ -206,6 +213,24 @@ namespace vel
 			s.debugActiveNumberOfBonesPerActor();
 	}
 
+	size_t Scene::addRenderable(Renderable r)
+	{
+		this->baseRenderables.push_back(r);
+
+		return this->baseRenderables.size() - 1;
+	}
+
+	size_t Scene::getMeshIndex(std::string meshName)
+	{
+		for (int i = 0; i < this->meshes.size(); i++)
+			if (this->meshes.at(i).getName() == meshName)
+				return i;
+
+		std::cout << "CANNOT GET MESH INDEX FOR NON EXISTING MESH NAME\n";
+		std::cin.get();
+		exit(EXIT_FAILURE);
+	}
+
     void Scene::draw(float alpha)
     {
 		//std::cout << "new draw iteration---------------------------------------\n";
@@ -239,7 +264,7 @@ namespace vel
 				//std::cout << "debug draw\n";
 			}
 
-            //s.printRenderCommands();            
+            //s.printRenderables();            
 
             // should always have a camera if we've made it this far
             //s.getCamera()->update(alpha);
@@ -248,9 +273,9 @@ namespace vel
 
 			//std::cout << "gpu active before rco loop:" << gpu.getActiveShaderIndex() << "," << gpu.getActiveGpuMeshIndex() << "," << gpu.getActiveTextureIndex() << "\n";
 
-            for (auto& rco : s.getRenderCommandsOrder().value())
+            for (auto& rco : s.getRenderablesOrder().value())
             {
-                RenderCommand& rc = s.getRenderCommand(rco);
+                Renderable& rc = s.getRenderableAndActorIndex(rco);
 
 				//std::cout << "rc:" << rc.getShaderIndex() << "," << rc.getMeshIndex() << "," << rc.getTextureIndex() << "\n";
 
@@ -260,8 +285,8 @@ namespace vel
                 if (rc.getMeshIndex() != gpu->getActiveGpuMeshIndex())
                     gpu->useGpuMesh(rc.getMeshIndex());
 
-                if (rc.getTextureIndex() != gpu->getActiveTextureIndex())
-                    gpu->useTexture(rc.getTextureIndex());
+                if (rc.getMaterialIndex() != gpu->getActiveTextureIndex())
+                    gpu->useTexture(rc.getMaterialIndex());
 
                 // gpu state has been set, now draw all actors which use this gpu state
                 for (auto& ai : rc.getActorIndexes())

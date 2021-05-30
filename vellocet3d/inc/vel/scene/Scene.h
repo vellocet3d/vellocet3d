@@ -22,14 +22,17 @@ namespace vel
 		std::vector<Mesh>					meshes;
 		std::vector<Material>				materials;
 		std::vector<Animation>				animations;
+		std::vector<Armature>				baseArmatures;
+		std::vector<Renderable>				baseRenderables;
 		double								animationTime;
 		
 
 	protected:
-		size_t								loadShader(std::string name, std::string vertName, std::string fragName);
+		size_t								loadShader(std::string name, std::string vertFile, std::string fragFile);
 		size_t								loadMesh(std::string path);
-		size_t								loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips);
+		size_t								loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
 		size_t								addMaterial(Material m);
+		size_t								addRenderable(Renderable r);
 		Stage&								addStage();
 		Stage&								getStage(size_t index);
 
@@ -66,6 +69,9 @@ namespace vel
 
 		const Material&						getMaterial(size_t materialIndex);
 		const Material&						getMaterial(std::string materialName);
+
+		Armature*							addArmature(Armature a);
+		size_t								getMeshIndex(std::string meshName);
 
 	};
 

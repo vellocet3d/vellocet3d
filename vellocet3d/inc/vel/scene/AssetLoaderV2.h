@@ -26,24 +26,29 @@ namespace vel
 	class AssetLoaderV2
 	{
 	private:
-		Assimp::Importer	aiImporter;
-		const aiScene*		aiScene;
-		Scene*				currentScene;
-		std::string			currentAssetFile;
+		Assimp::Importer					aiImporter;
+		const aiScene*						aiScene;
+		Scene*								currentScene;
 
-		void				processNodeForMeshes(aiNode* node);
-
-		glm::mat4			currentGlobalInverseMatrix;
-		glm::mat4			aiMatrix4x4ToGlm(const aiMatrix4x4 &from);
-
-		bool				isRootArmatureNode(aiNode* node);
-		void				processMesh(aiMesh* node);
-
+		std::string							currentAssetFile;
+		std::optional<size_t>				currentMeshIndex;
+		Armature*							currentArmature;
+		std::vector<aiNode*>				processedNodes;
+		std::vector<VertexBoneData>			currentMeshBones;
+		glm::mat4							currentGlobalInverseMatrix;
+		void								processAnimations();
+		void								processArmatureNode(aiNode* node);
+		void								processNode(aiNode* node);
+		void								processMesh(aiMesh* aiMesh);
+		bool								isRootArmatureNode(aiNode* node);
+		glm::mat4							aiMatrix4x4ToGlm(const aiMatrix4x4 &from);
+		std::optional<size_t>				getExistingAnimationIndex(std::string animationName);
+		aiMatrix4x4							glmToAssImpMat4(glm::mat4 mat);
+		bool								nodeHasBeenProcessed(aiNode* in);
 
 	public:
 		AssetLoaderV2(Scene* currentScene, std::string assetFile);
-
-		void loadMeshes();
+		void								load();
 
 	};
 

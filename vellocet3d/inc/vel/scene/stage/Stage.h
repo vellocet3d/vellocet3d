@@ -9,7 +9,7 @@
 
 #include "vel/scene/stage/Actor.h"
 #include "vel/scene/stage/Camera.h"
-#include "vel/scene/stage/RenderCommand.h"
+#include "vel/scene/Renderable.h"
 #include "vel/scene/stage/CollisionWorld.h"
 #include "vel/CollisionDebugDrawer.h"
 #include "vel/scene/stage/Sensor.h"
@@ -29,10 +29,10 @@ namespace vel
         std::vector<Actor>								actors;
         std::vector<size_t>								actorFreeSlots;
 		std::vector<Armature>							armatures;
-        std::optional<std::vector<RenderCommand>>		renderCommands;
-        std::optional<std::vector<size_t>>				renderCommandsOrder;
-		std::optional<size_t>							renderCommandExists(size_t sI, size_t mI, size_t tI);
-        size_t											addRenderCommand(RenderCommand rc);
+        std::optional<std::vector<Renderable>>			renderables;
+        std::optional<std::vector<size_t>>				renderablesOrder;
+		std::optional<size_t>							renderableExists(std::string rn);
+        size_t											setRenderableAndActorIndex(Renderable rc);
 		std::optional<std::unique_ptr<CollisionWorld>>	collisionWorld;
 		bool											collisionDebuggingSwitch;
 		bool											clearDepthBuffer;
@@ -54,9 +54,9 @@ namespace vel
         Actor*										getActor(std::string name);
 		std::vector<Actor>&							getActors();
         const size_t								getActorSize() const;
-        void										printRenderCommands() const;
-        RenderCommand&								getRenderCommand(size_t index);
-        const std::optional<std::vector<size_t>>&	getRenderCommandsOrder() const;
+        void										printRenderables() const;
+        Renderable&								getRenderableAndActorIndex(size_t index);
+        const std::optional<std::vector<size_t>>&	getRenderablesOrder() const;
         std::optional<Camera>&						getCamera();
         const bool									hasActorWithName(std::string name) const;
         void										setActorContainerSize(unsigned int size);

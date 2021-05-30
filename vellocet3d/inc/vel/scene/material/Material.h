@@ -14,5 +14,6 @@ namespace vel
 		std::optional<size_t> metalness;
 		std::optional<size_t> roughness;
 		std::optional<size_t> ao; // ambient occlusion
+		bool hasAlphaChannel = false;
 	};
 }

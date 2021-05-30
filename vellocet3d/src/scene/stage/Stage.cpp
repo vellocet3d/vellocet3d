@@ -46,8 +46,8 @@ namespace vel
 
 		this->armatures.reserve(100);
 
-        this->renderCommands = std::vector<RenderCommand>();
-        this->renderCommandsOrder = std::vector<size_t>();
+        this->renderables = std::vector<Renderable>();
+        this->renderablesOrder = std::vector<size_t>();
 
     }
 
@@ -247,40 +247,7 @@ namespace vel
 
         auto actor = &this->actors.at(slotIndex);
 
-        if (actor->getShaderIndex().has_value() && 
-            actor->getMeshIndex().has_value() &&
-			actor->getTextureIndex().has_value()) // If we are not in headless mode, AND this actor has a shader, mesh, and texture
-        {
-            size_t shaderIndex = actor->getShaderIndex().value();
-			size_t gpuMeshIndex = this->parentScene->getMesh(actor->getMeshIndex().value()).getGpuMeshIndex().value();
-			size_t textureIndex = actor->getTextureIndex().value();
-			size_t textureHasAlpha = actor->getTextureHasAlphaChannel() ? 1 : 0;
-
-			//std::cout << actor->getName() << " " << textureHasAlpha << "\n";
-
-            // Search the existing render commands to see if one exists for the given criteria
-            std::optional<size_t> renderCommandIndex = this->renderCommandExists(shaderIndex, gpuMeshIndex, textureIndex);
-
-            // If a render command does not exist for the given criteria, create one and get it's index
-            if (!renderCommandIndex)
-            {
-                auto rc = RenderCommand(shaderIndex, gpuMeshIndex, textureIndex, textureHasAlpha);
-                renderCommandIndex = this->addRenderCommand(rc);
-            }
-
-            // Add this actor's slot index to the actorIndexes container of it's RenderCommand
-			// REVISED
-			//size_t indexOfActorInRenderCommand = this->renderCommands->at(renderCommandIndex.value()).addActorIndex(slotIndex);
-			this->renderCommands->at(renderCommandIndex.value()).addActorIndex(slotIndex);
-
-            // Now add the renderCommandIndex AND indexOfActorInRenderCommandActorIndexes to the actor's 
-            // std::optional<std::pair<int, int>> renderCommand member, which is used to quickly remove the 
-            // actor from the render command if it is ever removed from the stage
-			// REVISED: removed slot system from render command as it was not implemented correctly, and im not sure there was really
-			// a reason for it in the first place, so the second value in the below pair, is now the value of the actor's index in the actors slot container
-            actor->addRenderCommand(std::pair<size_t, size_t>(renderCommandIndex.value(), slotIndex));
-
-        }
+		//TODO renderable things
 
 		return slotIndex;
     }
@@ -318,12 +285,8 @@ namespace vel
         Actor& a = this->actors.at(index);
 
         // free actor slot in render command
-        if (this->renderCommands)
-        {
-			//std::cout << a.getRenderCommand().first << ":" << a.getRenderCommand().second << "\n";
-
-            this->renderCommands.value().at(a.getRenderCommand().first).freeActorIndex(a.getRenderCommand().second);
-        }
+        if (this->renderables)
+            this->renderables.value().at(a.getRenderableAndActorIndex().first).freeActorIndex(a.getRenderableAndActorIndex().second);
 
 		// TODO: need to add logic for removing ghostObjects as well, AND remove all sensors which use either the
 		// rigidBody or ghostObject of this actor
@@ -347,18 +310,18 @@ namespace vel
         this->actorFreeSlots.push_back(index);
     }
 
-    size_t Stage::addRenderCommand(RenderCommand rc) 
+    size_t Stage::setRenderableAndActorIndex(Renderable rc) 
     {
-        this->renderCommands->push_back(rc);
-        size_t renderCommandIndex = this->renderCommands->size() - 1;
+        this->renderables->push_back(rc);
+        size_t renderableIndex = this->renderables->size() - 1;
 
-        // loop through render commands and sort order saving indexes
-        // within this->renderCommandsOrder
+        // loop through renderables and sort order saving indexes
+        // within this->renderablesOrder
 
-        std::vector<std::pair<size_t, RenderCommand>> toSort;
+        std::vector<std::pair<size_t, Renderable>> toSort;
 
-        for (size_t i = 0; i < this->renderCommands->size(); i++) 
-            toSort.push_back(std::pair<size_t, RenderCommand>(i, this->renderCommands->at(i)));
+        for (size_t i = 0; i < this->renderables->size(); i++) 
+            toSort.push_back(std::pair<size_t, Renderable>(i, this->renderables->at(i)));
 
 		// sort sharder
         std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
@@ -372,46 +335,41 @@ namespace vel
 
 		// sort texture
 		std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
-			return left.second.getTextureIndex() < right.second.getTextureIndex();
+			return left.second.getMaterialIndex() < right.second.getMaterialIndex();
 		});
 
 		// sort texture alpha
 		std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
-			return left.second.getTextureHasAlpha() < right.second.getTextureHasAlpha();
+			return left.second.getMaterialHasAlpha() < right.second.getMaterialHasAlpha();
 		});
 
 
 
-        this->renderCommandsOrder->clear();
+        this->renderablesOrder->clear();
 
         for (auto& p : toSort) 
-            this->renderCommandsOrder->push_back(p.first);
+            this->renderablesOrder->push_back(p.first);
 
 		//for debugging
 		//std::cout << "-----------------------\n";
-		//for (auto& rco : this->renderCommandsOrder.value())
+		//for (auto& rco : this->renderablesOrder.value())
 		//{
-		//	auto rc = this->renderCommands.value().at(rco);
+		//	auto rc = this->renderables.value().at(rco);
 
 		//	std::cout << "s:" << rc.getShaderIndex() << " m:" << rc.getMeshIndex() << " t:" << rc.getTextureIndex() << " a:" << rc.getTextureHasAlpha() << "\n";
 
 		//}
 
-        return renderCommandIndex;
+        return renderableIndex;
 
     }
 
-    std::optional<size_t> Stage::renderCommandExists(size_t sI, size_t mI, size_t tI)
+    std::optional<size_t> Stage::renderableExists(std::string rn)
     {
-        for (unsigned int i = 0; i < this->renderCommands->size(); i++)
-        {
-            if ((this->renderCommands.value()[i].getShaderIndex() == sI) &&
-                (this->renderCommands.value()[i].getMeshIndex() == mI) &&
-                (this->renderCommands.value()[i].getTextureIndex() == tI))
-            {
+        for (unsigned int i = 0; i < this->renderables->size(); i++)
+            if (this->renderables.value()[i].getName() == rn)
                 return i;
-            }
-        }
+        
         return std::nullopt;
     }
 
@@ -424,13 +382,13 @@ namespace vel
         return false;
     }
 
-    void Stage::printRenderCommands() const
+    void Stage::printRenderables() const
     {
-        std::cout << "RenderCommands\n";
+        std::cout << "Renderables\n";
         std::cout << "----------------------------------\n";
-        for (auto& rc : this->renderCommands.value()) 
+        for (auto& rc : this->renderables.value()) 
         {
-            std::cout << "shaderIndex:" << rc.getShaderIndex() << " meshIndex:" << rc.getMeshIndex() << " textureIndex:" << rc.getTextureIndex() << "\n";
+            std::cout << "shaderIndex:" << rc.getShaderIndex() << " meshIndex:" << rc.getMeshIndex() << " materialIndex:" << rc.getMaterialIndex() << "\n";
             std::cout << "actors:";
 
             for (auto& a : rc.getActorIndexes()) 
@@ -439,21 +397,21 @@ namespace vel
                 
             std::cout << "\norder:";
 
-            for (auto& o : this->renderCommandsOrder.value()) 
+            for (auto& o : this->renderablesOrder.value()) 
                 std::cout << o << ",";
 
             std::cout << "\n------------------------------\n";
         }
     }
 
-    RenderCommand& Stage::getRenderCommand(size_t index)
+    Renderable& Stage::getRenderableAndActorIndex(size_t index)
     {
-        return this->renderCommands->at(index);
+        return this->renderables->at(index);
     }
 
-    const std::optional<std::vector<size_t>>& Stage::getRenderCommandsOrder() const
+    const std::optional<std::vector<size_t>>& Stage::getRenderablesOrder() const
     {
-        return this->renderCommandsOrder;
+        return this->renderablesOrder;
     }
 
     std::optional<Camera>& Stage::getCamera()

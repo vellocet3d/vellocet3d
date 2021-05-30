@@ -7,16 +7,16 @@
 
 namespace vel
 {
-    Actor::Actor(std::string name, Transform t, Stage* parentStage) :
-        name(name),
+    Actor::Actor() :
+        name(""),
         deleted(false),
 		visible(true),
 		dynamic(false),
-        transform(t) ,
+        transform(Transform()) ,
 		rigidBody(nullptr),
 		armature(nullptr),
 		manualTransform(true), //TODO: tf is the point of this?
-		parentStage(parentStage),
+		//parentStage(parentStage),
 		textureHasAlphaChannel(false)
     {}
 
@@ -308,9 +308,9 @@ namespace vel
 
 	}
 
-    const std::pair<size_t, size_t>& Actor::getRenderCommand() const
+    const std::pair<size_t, size_t>& Actor::getRenderableAndActorIndex() const
     {
-        return this->renderCommand.value();
+        return this->renderableAndActorIndex.value();
     }
 
     const std::string Actor::getName() const
@@ -328,14 +328,14 @@ namespace vel
         return this->meshIndex;
     }
 
-    const std::optional<size_t>& Actor::getTextureIndex() const
+    const std::optional<size_t>& Actor::getMaterialIndex() const
     {
         return this->textureIndex;
     }
 
-    void Actor::addRenderCommand(std::pair<size_t, size_t> cmd)
+    void Actor::setRenderableAndActorIndex(std::pair<size_t, size_t> cmd)
     {
-        this->renderCommand = cmd;
+        this->renderableAndActorIndex = cmd;
     }
 
 	void Actor::setTextureHasAlphaChannel(bool in)
@@ -367,9 +367,9 @@ namespace vel
 		return this->armature;
 	}
 
-	Mesh& Actor::getMesh()
-	{
-		return this->parentStage->getParentScene()->getMesh(this->meshIndex.value());
-	}
+	//Mesh& Actor::getMesh()
+	//{
+	//	return this->parentStage->getParentScene()->getMesh(this->meshIndex.value());
+	//}
 
 }

@@ -19,7 +19,8 @@ namespace vel
 {
 	AssetLoaderV2::AssetLoaderV2(Scene* currentScene, std::string assetFile) :
 		currentScene(currentScene),
-		currentAssetFile(assetFile)
+		currentAssetFile(assetFile),
+		currentArmature(nullptr)
 	{
 		this->aiScene = this->aiImporter.ReadFile(this->currentAssetFile, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
 
@@ -32,22 +33,165 @@ namespace vel
 		}
 	}
 
-	void AssetLoaderV2::loadMeshes()
+	void AssetLoaderV2::load()
 	{
-		this->processNodeForMeshes(this->aiScene->mRootNode);
+		this->processNode(this->aiScene->mRootNode);
 	}
 
-	void AssetLoaderV2::processNodeForMeshes(aiNode* node)
+	std::optional<size_t> AssetLoaderV2::getExistingAnimationIndex(std::string animationName)
+	{
+		size_t i = 0;
+		for (auto& a : this->currentScene->getAnimations())
+		{
+			if (a.name == animationName)
+				return i;
+
+			i++;
+		}
+		return std::nullopt;
+	}
+
+	void AssetLoaderV2::processAnimations()
+	{
+		for (unsigned int i = 0; i < this->aiScene->mNumAnimations; i++)
+		{
+			std::string animationName = this->aiScene->mAnimations[i]->mName.C_Str();
+
+			// if an animation exists with the same name, use that animation
+			auto existingAnimationIndex = this->getExistingAnimationIndex(animationName);
+
+			if (existingAnimationIndex)
+			{
+				// obtain this animation name relative to the armature
+				auto name = explode_string(animationName, '|')[1];
+
+				this->currentArmature->addAnimation(name, existingAnimationIndex.value());
+			}
+			// otherwise create a new animation
+			else
+			{
+
+				// create a new animation
+				auto a = Animation();
+				a.name = this->aiScene->mAnimations[i]->mName.C_Str();
+				a.duration = this->aiScene->mAnimations[i]->mDuration;
+				//a.tps = this->aiScene->mAnimations[i]->mTicksPerSecond;
+				a.tps = this->aiScene->mAnimations[i]->mTicksPerSecond * 33.3333333; // account for the weird assimp/fbx "update" that multiplies duration by 33.3333333
+
+				// add all channels to animation
+
+				for (unsigned int j = 0; j < this->aiScene->mAnimations[i]->mNumChannels; j++)
+				{
+					auto c = Channel();
+
+					// positions
+					for (unsigned int k = 0; k < this->aiScene->mAnimations[i]->mChannels[j]->mNumPositionKeys; k++)
+					{
+						auto position = this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mValue;
+						auto time = (float)this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
+						c.positionKeyTimes.push_back(time);
+						c.positionKeyValues.push_back(glm::vec3(position.x, position.y, position.z));
+					}
+
+					// rotations
+					for (unsigned int k = 0; k < this->aiScene->mAnimations[i]->mChannels[j]->mNumRotationKeys; k++)
+					{
+						auto rotation = this->aiScene->mAnimations[i]->mChannels[j]->mRotationKeys[k].mValue;
+						auto time = (float)this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
+						c.rotationKeyTimes.push_back(time);
+						c.rotationKeyValues.push_back(glm::quat(rotation.w, rotation.x, rotation.y, rotation.z));
+					}
+
+					// scalings
+					for (unsigned int k = 0; k < this->aiScene->mAnimations[i]->mChannels[j]->mNumScalingKeys; k++)
+					{
+						auto scale = this->aiScene->mAnimations[i]->mChannels[j]->mScalingKeys[k].mValue;
+						auto time = (float)this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
+						c.scalingKeyTimes.push_back(time);
+						c.scalingKeyValues.push_back(glm::vec3(scale.x, scale.y, scale.z));
+					}
+
+					// add channel to animation
+					a.channels[this->aiScene->mAnimations[i]->mChannels[j]->mNodeName.C_Str()] = c;
+				}
+
+				// add animation to scene's animations container, retrieving index
+				auto ai = this->currentScene->addAnimation(a);
+
+				// obtain this animation name relative to the armature
+				auto name = explode_string(a.name, '|')[1];
+
+				// add this animation name/index to the armature's animations vector
+				this->currentArmature->addAnimation(name, ai);
+			}
+		}
+	}
+
+	void AssetLoaderV2::processArmatureNode(aiNode* node)
 	{
 		std::string nodeName = node->mName.C_Str();
 
-		if (nodeName == "RootNode")
+		if (nodeName != "RootNode" && !string_contains("_end", nodeName))
 		{
-			this->currentGlobalInverseMatrix = glm::inverse(this->aiMatrix4x4ToGlm(node->mTransformation));
+			std::string boneName = nodeName;
+			std::string nodeParentName = node->mParent->mName.C_Str();
+
+			if (nodeParentName == "RootNode")
+				this->currentArmature = this->currentScene->addArmature(Armature(boneName, this->currentScene));
+
+			ArmatureBone bone;
+			bone.name = boneName;
+			bone.parentName = nodeParentName == "RootNode" ? boneName : node->mParent->mName.C_Str();
+
+			this->currentArmature->addBone(bone);
 		}
+
+		this->processedNodes.push_back(node);
+
+		// Do the same for each of its children
+		for (unsigned int i = 0; i < node->mNumChildren; i++)
+			this->processArmatureNode(node->mChildren[i]);
+	}
+
+	bool AssetLoaderV2::isRootArmatureNode(aiNode* node)
+	{
+		// if this node has children, and no mesh, assume that it is an armature
+		// (this is very naive, but should work for the time being so we can move forward
+		// with skeletal animation implementation. This method can be revised in the future
+		// to be more accurate)
+		std::string nodeName = node->mParent->mName.C_Str();
+		if (nodeName == "RootNode" && node->mNumChildren > 0 && node->mNumMeshes == 0)
+			return true;
 		else
+			return false;
+
+	}
+
+	void AssetLoaderV2::processNode(aiNode* node)
+	{
+		std::string nodeName = node->mName.C_Str();
+
+
+		if (nodeName == "RootNode")
+			this->currentGlobalInverseMatrix = glm::inverse(this->aiMatrix4x4ToGlm(node->mTransformation));
+
+
+		// If this is not the RootNode and this node has not already been processed
+		if (nodeName != "RootNode" && !this->nodeHasBeenProcessed(node))
 		{
-			if (!this->isRootArmatureNode(node))
+
+			if (this->isRootArmatureNode(node))
+			{
+				this->processArmatureNode(node);
+				this->processAnimations();
+
+				// Obtain parent indexes for each bone using their
+				// boneNames (done so that these indexes can be used at runtime instead
+				// of loops and string comparisons)
+				for (auto& b : this->currentArmature->getBones())
+					b.parent = this->currentArmature->getBoneIndex(b.parentName);
+			}
+			else
 			{
 				auto meshCount = node->mNumMeshes;
 				while (meshCount > 0)
@@ -58,8 +202,9 @@ namespace vel
 			}
 		}
 
+		// Do the same for each of its children
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
-			this->processNodeForMeshes(node->mChildren[i]);
+			this->processNode(node->mChildren[i]);
 	}
 
 	void AssetLoaderV2::processMesh(aiMesh* aiMesh)
@@ -148,19 +293,6 @@ namespace vel
 		this->currentScene->addMesh(mesh);
 	}
 
-	bool AssetLoaderV2::isRootArmatureNode(aiNode* node)
-	{
-		// if this node has children, and no mesh, assume that it is an armature
-		// (this is very naive, but should work for the time being so we can move forward
-		// with skeletal animation implementation. This method can be revised in the future
-		// to be more accurate)
-		std::string nodeName = node->mParent->mName.C_Str();
-		if (nodeName == "RootNode" && node->mNumChildren > 0 && node->mNumMeshes == 0)
-			return true;
-		else
-			return false;
-	}
-
 	glm::mat4 AssetLoaderV2::aiMatrix4x4ToGlm(const aiMatrix4x4 &from)
 	{
 		glm::mat4 to;
@@ -170,6 +302,27 @@ namespace vel
 		to[0][2] = from.c1; to[1][2] = from.c2; to[2][2] = from.c3; to[3][2] = from.c4;
 		to[0][3] = from.d1; to[1][3] = from.d2; to[2][3] = from.d3; to[3][3] = from.d4;
 		return to;
+	}
+
+	aiMatrix4x4 AssetLoaderV2::glmToAssImpMat4(glm::mat4 mat)
+	{
+		const float* glmMat = (const float*)glm::value_ptr(mat);
+
+		return aiMatrix4x4(
+			glmMat[0], glmMat[1], glmMat[2], glmMat[3],
+			glmMat[4], glmMat[5], glmMat[6], glmMat[7],
+			glmMat[8], glmMat[9], glmMat[10], glmMat[11],
+			glmMat[12], glmMat[13], glmMat[14], glmMat[15]
+		);
+	}
+
+	bool AssetLoaderV2::nodeHasBeenProcessed(aiNode* in)
+	{
+		for (auto& pn : this->processedNodes)
+			if (pn == in)
+				return true;
+
+		return false;
 	}
 
 }

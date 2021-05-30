@@ -14,8 +14,8 @@
 
 namespace vel
 {
-	Armature::Armature(std::string name, Stage* parentStage) :
-		parentStage(parentStage),
+	Armature::Armature(std::string name, Scene* parentScene) :
+		parentScene(parentScene),
 		name(name),
 		runTime(0.0),
 		previousRunTime(0.0)
@@ -213,7 +213,7 @@ namespace vel
 	void Armature::playAnimation(std::string animationName, bool repeat, int blendTime)
 	{
 		ActiveAnimation a;
-		a.animation = &this->parentStage->getParentScene()->getAnimation(this->getAnimationIndex(animationName));
+		a.animation = &this->parentScene->getAnimation(this->getAnimationIndex(animationName));
 		a.animationName = animationName;
 		a.blendTime = (double)blendTime;
 		a.animationTime = 0.0;

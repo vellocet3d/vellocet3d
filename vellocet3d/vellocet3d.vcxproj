@@ -210,7 +210,7 @@
     <ClCompile Include="src\scene\stage\CollisionWorld.cpp" />
     <ClCompile Include="src\scene\stage\RaycastCallback.cpp" />
     <ClCompile Include="src\scene\stage\Sensor.cpp" />
-    <ClCompile Include="src\scene\stage\RenderCommand.cpp" />
+    <ClCompile Include="src\scene\Renderable.cpp" />
     <ClCompile Include="src\scene\stage\Stage.cpp" />
     <ClCompile Include="src\scene\stage\Transform.cpp" />
     <ClCompile Include="src\scene\mesh\Vertex.cpp" />
@@ -272,7 +272,7 @@
     <ClInclude Include="inc\vel\scene\stage\Sensor.h" />
     <ClInclude Include="inc\vel\scene\stage\CollisionWorld.h" />
     <ClInclude Include="inc\vel\CollisionDebugDrawer.h" />
-    <ClInclude Include="inc\vel\scene\stage\RenderCommand.h" />
+    <ClInclude Include="inc\vel\scene\Renderable.h" />
     <ClInclude Include="inc\vel\scene\stage\Stage.h" />
     <ClInclude Include="inc\vel\scene\stage\Transform.h" />
     <ClInclude Include="inc\vel\scene\stage\TRS.h" />

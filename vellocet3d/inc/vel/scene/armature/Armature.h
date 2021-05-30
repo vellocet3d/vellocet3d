@@ -19,13 +19,13 @@
 
 namespace vel
 {
-	class Stage;
+	class Scene;
 
 	class Armature
 	{
 	private:
 		std::string											name;
-		Stage*												parentStage;
+		Scene*												parentScene;
 		std::vector<ArmatureBone>							bones;
 		std::vector<std::pair<std::string, size_t>>			animations;
 		std::deque<ActiveAnimation>							activeAnimations;
@@ -38,7 +38,7 @@ namespace vel
 
 
 	public:
-															Armature(std::string name, Stage* parentStage);
+															Armature(std::string name, Scene* parentScene);
 		void												addBone(ArmatureBone b);
 		void												addAnimation(std::string name, size_t index);
 		ArmatureBone&										getRootBone();

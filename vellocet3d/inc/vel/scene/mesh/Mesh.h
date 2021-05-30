@@ -10,7 +10,7 @@
 #include "vel/Shader.h"
 #include "vel/scene/stage/Camera.h"
 #include "vel/scene/mesh/Vertex.h"
-#include "vel/scene/mesh/Texture.h"
+#include "vel/scene/material/Texture.h"
 #include "vel/scene/mesh/GpuMesh.h"
 #include "vel/scene/mesh/MeshBone.h"
 

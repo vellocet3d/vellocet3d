@@ -45,9 +45,6 @@
     <ClCompile Include="src\scene\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\stage\RenderCommand.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\scene\stage\Stage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -106,6 +103,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\AssetLoaderV2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\Renderable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -212,9 +212,6 @@
     <ClInclude Include="inc\vel\scene\stage\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\vel\scene\stage\RenderCommand.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\vel\scene\stage\Stage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -294,6 +291,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\vel\scene\AssetLoaderV2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\vel\scene\Renderable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
