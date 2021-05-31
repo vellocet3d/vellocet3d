@@ -211,6 +211,8 @@ namespace vel
 	{
 		auto mesh = Mesh(aiMesh->mName.C_Str());
 
+		//std::cout << mesh.getName() << "\n";
+
 		// walk through each of the mesh's vertices
 		std::vector<Vertex> vertices;
 		for (unsigned int i = 0; i < aiMesh->mNumVertices; i++)

@@ -35,8 +35,8 @@ namespace vel
 		std::optional<std::vector<std::pair<size_t, std::string>>> activeBones; // the bones from the armature that are actually used by the mesh, 
 																				// the glue between an armature and a mesh (index is mesh bone index, value is armature bone index)
 		
-		std::vector<Renderable>							tempRenderables;
-		std::vector<size_t>								parentRenderableIndexes;
+		std::optional<Renderable>						tempRenderable;
+		std::optional<size_t>							parentRenderableIndex;
 		std::optional<size_t>							containerIndex;
 
 		
@@ -58,13 +58,13 @@ namespace vel
 		void											setName(std::string newName);
 
 		void											addRenderable(Renderable r);
-		std::vector<Renderable>&						getRenderables();
-		void											clearTempRenderables();
-        void											addParentRenderableIndex(size_t ri);
-        const std::vector<size_t>&						getParentRenderableIndexes() const;
+		std::optional<Renderable>&						getRenderable();
+		void											clearTempRenderable();
+        void											setParentRenderableIndex(size_t ri);
+        const size_t&									getParentRenderableIndex() const;
 
 		void											setContainerIndex(size_t ci);
-		const std::optional<size_t>&					getContainerIndex() const;
+		const size_t&									getContainerIndex() const;
 
         void											setDeleted(bool d);
         const bool										isDeleted() const;
@@ -100,8 +100,6 @@ namespace vel
 
 		
 		void											processTransform();
-		void											setTextureHasAlphaChannel(bool in);
-		bool											getTextureHasAlphaChannel();
 
 		void											removeParentActor(bool calledFromRemoveChildActor = false);
 		void											removeChildActor(Actor* a, bool calledFromRemoveParentActor = false);

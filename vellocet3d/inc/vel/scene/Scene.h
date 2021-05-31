@@ -22,10 +22,9 @@ namespace vel
 		std::vector<Mesh>					meshes;
 		std::vector<Texture>				textures;
 		std::vector<Material>				materials;
+		std::vector<Animation>				animations;
 
 		std::vector<Renderable>				baseRenderables;
-
-		std::vector<Animation>				animations;
 		std::vector<Armature>				baseArmatures;
 		
 		std::vector<Stage>					stages;
@@ -35,10 +34,10 @@ namespace vel
 
 	protected:
 		size_t								loadShader(std::string name, std::string vertFile, std::string fragFile);
-		size_t								loadMesh(std::string path);
+		void								loadMesh(std::string path);
 		size_t								loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
 		size_t								addMaterial(Material m);
-		size_t								addRenderable(Renderable r);
+		size_t								addRenderable(std::string name, size_t defaultShaderIndex, size_t crateMeshIndex, size_t crateMaterialIndex);
 		Renderable							getRenderable(std::string name);
 		Stage&								addStage();
 		Stage&								getStage(size_t index);
@@ -74,13 +73,22 @@ namespace vel
 		void debugListNumberOfBonesPerArmature();
 		void debugActiveNumberOfBonesPerActor();
 
+
+
+		Shader*								getShader(size_t si);
 		Texture*							getTexture(size_t textureIndex);
 		Material*							getMaterial(size_t materialIndex);
 		Material*							getMaterial(std::string materialName);
-		Shader*								getShader(size_t si);
+		
+
+		size_t								getShaderIndex(std::string shaderName);
+		size_t								getTextureGpuId(std::string textureName);
+		size_t								getMaterialIndex(std::string materialName);
+		size_t								getMeshIndex(std::string meshName);
+		
 
 		Armature*							addArmature(Armature a);
-		size_t								getMeshIndex(std::string meshName);
+		
 
 	};
 

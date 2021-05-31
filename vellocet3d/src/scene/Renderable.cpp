@@ -7,15 +7,16 @@
 namespace vel
 {
 
-    Renderable::Renderable(std::string rn, size_t shaderIndex, size_t meshIndex, size_t materialIndex, bool hasAlphaChannel) :
+    Renderable::Renderable(std::string rn, size_t shaderIndex, size_t meshIndex, size_t materialIndex,
+		Shader* shader, Mesh* mesh, Material* material, bool hasAlphaChannel) :
 		name(rn),
         shaderIndex(shaderIndex),
         meshIndex(meshIndex),
         materialIndex(materialIndex),
 		materialHasAlpha((hasAlphaChannel ? 1 : 0)),
-		shader(App::get().getScene()->getShader(shaderIndex)),
-		mesh(App::get().getScene()->getMesh(meshIndex)),
-		material(App::get().getScene()->getMaterial(materialIndex))
+		shader(shader),
+		mesh(mesh),
+		material(material)
 	{
 		
 	}

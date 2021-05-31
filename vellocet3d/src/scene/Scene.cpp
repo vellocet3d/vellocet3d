@@ -84,7 +84,7 @@ namespace vel
 		return &this->textures.at(textureIndex);
 	}
 
-	size_t Scene::loadMesh(std::string path) 
+	void Scene::loadMesh(std::string path) 
 	{
 		auto al = AssetLoaderV2(this, path);
 		al.load();
@@ -102,7 +102,7 @@ namespace vel
 		return &this->materials.at(materialIndex);
 	}
 
-	Material*	Scene::getMaterial(std::string materialName)
+	Material* Scene::getMaterial(std::string materialName)
 	{
 		for (auto& m : this->materials)
 			if (m.name == materialName)
@@ -114,6 +114,10 @@ namespace vel
 		for (auto& r : this->baseRenderables)
 			if (r.getName() == name)
 				return r;
+
+		std::cout << "Scene: attempting to get renderable by name that does not exist\n";
+		std::cin.get();
+		exit(EXIT_FAILURE);
 	}
 
 	Armature* Scene::addArmature(Armature a)
@@ -238,11 +242,48 @@ namespace vel
 			s.debugActiveNumberOfBonesPerActor();
 	}
 
-	size_t Scene::addRenderable(Renderable r)
+	size_t Scene::addRenderable(std::string name, size_t shaderIndex, size_t meshIndex, size_t materialIndex)
 	{
+		Renderable r = Renderable(name, shaderIndex, meshIndex, materialIndex, 
+			&this->shaders.at(shaderIndex), &this->meshes.at(meshIndex), &this->materials.at(materialIndex),
+			this->materials.at(materialIndex).hasAlphaChannel);
+
 		this->baseRenderables.push_back(r);
 
 		return this->baseRenderables.size() - 1;
+	}
+
+	size_t Scene::getTextureGpuId(std::string textureName)
+	{
+		for (int i = 0; i < this->textures.size(); i++)
+			if (this->textures.at(i).name == textureName)
+				return this->textures.at(i).id;
+
+		std::cout << "CANNOT GET GPU ID FOR NON EXISTING TEXTURE NAME\n";
+		std::cin.get();
+		exit(EXIT_FAILURE);
+	}
+
+	size_t Scene::getMaterialIndex(std::string materialName)
+	{
+		for (int i = 0; i < this->materials.size(); i++)
+			if (this->materials.at(i).name == materialName)
+				return i;
+
+		std::cout << "CANNOT GET MATERIAL INDEX FOR NON EXISTING MATERIAL NAME\n";
+		std::cin.get();
+		exit(EXIT_FAILURE);
+	}
+
+	size_t Scene::getShaderIndex(std::string shaderName)
+	{
+		for (int i = 0; i < this->shaders.size(); i++)
+			if (this->shaders.at(i).name == shaderName)
+				return i;
+
+		std::cout << "CANNOT GET SHADER INDEX FOR NON EXISTING SHADER NAME\n";
+		std::cin.get();
+		exit(EXIT_FAILURE);
 	}
 
 	size_t Scene::getMeshIndex(std::string meshName)

@@ -1,4 +1,4 @@
-
+#include <iostream>
 
 #include "vel/helpers/functions.h"
 #include "vel/scene/stage/Actor.h"
@@ -107,17 +107,17 @@ namespace vel
 
 	void Actor::addRenderable(Renderable r)
 	{
-		this->tempRenderables.push_back(r);
+		this->tempRenderable = r;
 	}
 
-	std::vector<Renderable>& Actor::getRenderables()
+	std::optional<Renderable>& Actor::getRenderable()
 	{
-		return this->tempRenderables;
+		return this->tempRenderable;
 	}
 
-	void Actor::clearTempRenderables()
+	void Actor::clearTempRenderable()
 	{
-		this->tempRenderables.clear();
+		this->tempRenderable.reset();
 	}
 
 	std::optional<glm::mat4> Actor::getParentMatrix()
@@ -307,9 +307,21 @@ namespace vel
 
 	}
 
-	const std::optional<size_t>& Actor::getContainerIndex() const
+	const std::string Actor::getName() const
 	{
-		return this->containerIndex;
+		return this->name;
+	}
+
+	const size_t& Actor::getContainerIndex() const
+	{
+		if (!this->containerIndex)
+		{
+			std::cout << "Attempting to get actor container index before it has been set\n";
+			std::cin.get();
+			exit(EXIT_FAILURE);
+		}
+
+		return this->containerIndex.value();
 	}
 
 	void Actor::setContainerIndex(size_t ci)
@@ -317,19 +329,20 @@ namespace vel
 		this->containerIndex = ci;
 	}
 
-    const std::vector<size_t>& Actor::getParentRenderableIndexes() const
+    const size_t& Actor::getParentRenderableIndex() const
     {
-        return this->parentRenderableIndexes;
+		if (!this->parentRenderableIndex)
+		{
+			std::cout << "Attempting to get actor parentRenderableIndex before it has been set\n";
+			std::cin.get();
+			exit(EXIT_FAILURE);
+		}
+        return this->parentRenderableIndex.value();
     }
 
-    const std::string Actor::getName() const
+    void Actor::setParentRenderableIndex(size_t ri)
     {
-        return this->name;
-    }
-
-    void Actor::addParentRenderableIndex(size_t ri)
-    {
-		this->parentRenderableIndexes.push_back(ri);
+		this->parentRenderableIndex = ri;
     }
 
 	const bool Actor::isAnimated() const

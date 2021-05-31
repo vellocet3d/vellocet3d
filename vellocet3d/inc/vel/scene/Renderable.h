@@ -24,7 +24,8 @@ namespace vel
 		Material*					material;
 
     public:
-									Renderable(std::string rn, size_t shaderIndex, size_t meshIndex, size_t materialIndex, bool hasAlphaChannel = false);
+									Renderable(std::string rn, size_t shaderIndex, size_t meshIndex, size_t materialIndex,
+										Shader* shader, Mesh* mesh, Material* material, bool hasAlphaChannel = false);
         const size_t&				getShaderIndex() const;
 		const size_t&				getMeshIndex() const;
         const size_t&				getMaterialIndex() const;

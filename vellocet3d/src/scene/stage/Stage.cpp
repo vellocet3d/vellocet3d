@@ -212,20 +212,19 @@ namespace vel
 		actor->setContainerIndex(slotIndex);
 
 		//TODO renderable things
-		if (actor->getRenderables().size() > 0)
+		if (actor->getRenderable())
 		{
-			for (auto& tempRenderable : actor->getRenderables())
-			{
-				auto parentRenderableIndex = this->renderableExists(tempRenderable.getName());
+			auto& tempRenderable = actor->getRenderable().value();
 
-				if (!parentRenderableIndex) // add renderable to stage if we do not already have an instance
-					parentRenderableIndex = this->addRenderable(tempRenderable);
+			auto parentRenderableIndex = this->renderableExists(tempRenderable.getName());
 
-				actor->addParentRenderableIndex(parentRenderableIndex.value());
-				this->getRenderable(parentRenderableIndex.value()).addActorIndex(slotIndex);
-			}
+			if (!parentRenderableIndex) // add renderable to stage if we do not already have an instance
+				parentRenderableIndex = this->addRenderable(tempRenderable);
 
-			actor->clearTempRenderables();
+			actor->setParentRenderableIndex(parentRenderableIndex.value());
+			this->getRenderable(parentRenderableIndex.value()).addActorIndex(slotIndex);
+			
+			actor->clearTempRenderable();
 		}
 
 		return slotIndex;
@@ -264,8 +263,7 @@ namespace vel
         Actor& a = this->actors.at(index);
 
         // free actor slot in render command
-		for (auto& ar : a.getParentRenderableIndexes())
-			this->renderables.at(ar).freeActorIndex(a.getContainerIndex().value());
+		this->renderables.at(a.getParentRenderableIndex()).freeActorIndex(a.getContainerIndex());
 		
 
 		// TODO: need to add logic for removing ghostObjects as well, AND remove all sensors which use either the
