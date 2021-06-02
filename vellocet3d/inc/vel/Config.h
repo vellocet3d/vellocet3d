@@ -25,6 +25,7 @@ namespace vel
 											Config();
         // Application defined
         bool								LOG_ENABLED = true;
+		bool								LOG_USE_CONSOLE = true;
 		double								LOGIC_TICK = 60.0;
 		bool								CURSOR_HIDDEN = true;
 		bool								USE_IMGUI = true;

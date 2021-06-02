@@ -50,11 +50,16 @@ namespace vel
 
     }
 
-	Armature* Stage::addArmature(Armature a)
+	Armature* Stage::addArmature(Armature a, std::vector<std::string> actors)
 	{
 		this->armatures.push_back(a);
 		
-		return &this->armatures.back();
+		Armature* sa = &this->armatures.back();
+
+		for (auto& actorName : actors)
+			this->getActor(actorName)->setArmature(sa);
+
+		return sa;
 	}
 
 	bool Stage::getClearDepthBuffer()

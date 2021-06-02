@@ -85,7 +85,7 @@ namespace vel
 		bool										collisionDebugging();
 
 
-		Armature*									addArmature(Armature a);
+		Armature*									addArmature(Armature a, std::vector<std::string> actors);
 
 		void debugListNumberOfBonesPerArmature();
 		void debugActiveNumberOfBonesPerActor();

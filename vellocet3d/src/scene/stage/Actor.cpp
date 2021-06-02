@@ -348,9 +348,8 @@ namespace vel
 	const bool Actor::isAnimated() const
 	{
 		if (this->armature) 
-		{
 			return true;
-		}
+		
 		return false;
 	}
 

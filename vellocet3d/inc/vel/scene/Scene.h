@@ -39,6 +39,7 @@ namespace vel
 		size_t								addMaterial(Material m);
 		size_t								addRenderable(std::string name, size_t defaultShaderIndex, size_t crateMeshIndex, size_t crateMaterialIndex);
 		Renderable							getRenderable(std::string name);
+		Armature							getArmature(std::string name);
 		Stage&								addStage();
 		Stage&								getStage(size_t index);
 

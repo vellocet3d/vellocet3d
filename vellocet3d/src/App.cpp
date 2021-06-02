@@ -29,7 +29,7 @@ namespace vel
 
     App::App(Config conf) :
         config(conf),
-        logger(this->config.LOG_ENABLED, this->config.LOG_PATH),
+        logger(this->config.LOG_ENABLED, this->config.LOG_PATH, this->config.LOG_USE_CONSOLE),
 		window(std::make_unique<Window>(this->config)),
 		gpu(std::make_unique<GPU>()),
 		scene(nullptr),

@@ -115,9 +115,7 @@ namespace vel
 			if (r.getName() == name)
 				return r;
 
-		std::cout << "Scene: attempting to get renderable by name that does not exist\n";
-		std::cin.get();
-		exit(EXIT_FAILURE);
+		App::get().logger.die("Scene: attempting to get renderable by name that does not exist");
 	}
 
 	Armature* Scene::addArmature(Armature a)
@@ -125,6 +123,13 @@ namespace vel
 		this->baseArmatures.push_back(a);
 
 		return &this->baseArmatures.back();
+	}
+
+	Armature Scene::getArmature(std::string name)
+	{
+		for (auto& a : this->baseArmatures)
+			if (a.getName() == name)
+				return a;
 	}
 
 	Stage& Scene::addStage()
@@ -227,7 +232,7 @@ namespace vel
 				if (v.attemptedVertexWeightAdditions > maxAttemptedVertexBoneAllocations)
 					maxAttemptedVertexBoneAllocations = v.attemptedVertexWeightAdditions;
 
-		std::cout << maxAttemptedVertexBoneAllocations << "\n";
+		std::cout << maxAttemptedVertexBoneAllocations << std::endl;
 	}
 
 	void Scene::debugListNumberOfBonesPerArmature()
@@ -259,9 +264,7 @@ namespace vel
 			if (this->textures.at(i).name == textureName)
 				return this->textures.at(i).id;
 
-		std::cout << "CANNOT GET GPU ID FOR NON EXISTING TEXTURE NAME\n";
-		std::cin.get();
-		exit(EXIT_FAILURE);
+		App::get().logger.die("CANNOT GET GPU ID FOR NON EXISTING TEXTURE NAME");
 	}
 
 	size_t Scene::getMaterialIndex(std::string materialName)
@@ -270,9 +273,7 @@ namespace vel
 			if (this->materials.at(i).name == materialName)
 				return i;
 
-		std::cout << "CANNOT GET MATERIAL INDEX FOR NON EXISTING MATERIAL NAME\n";
-		std::cin.get();
-		exit(EXIT_FAILURE);
+		App::get().logger.die("CANNOT GET MATERIAL INDEX FOR NON EXISTING MATERIAL NAME");
 	}
 
 	size_t Scene::getShaderIndex(std::string shaderName)
@@ -281,9 +282,7 @@ namespace vel
 			if (this->shaders.at(i).name == shaderName)
 				return i;
 
-		std::cout << "CANNOT GET SHADER INDEX FOR NON EXISTING SHADER NAME\n";
-		std::cin.get();
-		exit(EXIT_FAILURE);
+		App::get().logger.die("CANNOT GET SHADER INDEX FOR NON EXISTING SHADER NAME");
 	}
 
 	size_t Scene::getMeshIndex(std::string meshName)
@@ -292,9 +291,7 @@ namespace vel
 			if (this->meshes.at(i).getName() == meshName)
 				return i;
 
-		std::cout << "CANNOT GET MESH INDEX FOR NON EXISTING MESH NAME\n";
-		std::cin.get();
-		exit(EXIT_FAILURE);
+		App::get().logger.die("CANNOT GET MESH INDEX FOR NON EXISTING MESH NAME");
 	}
 
 	Shader* Scene::getShader(size_t si)
@@ -381,7 +378,7 @@ namespace vel
 						//std::cout << a->getName() << "\n";
 
 						// TODO - FIX THIS WHEN WE CONTINUE WORK ON ARMATURES
-						//// If this actor is animated, send the bone transforms of it's armature to the shader
+						// If this actor is animated, send the bone transforms of it's armature to the shader
 						//if (a->isAnimated())
 						//{
 						//	auto& mesh = a->getMesh();
