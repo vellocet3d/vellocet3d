@@ -57,7 +57,22 @@ namespace vel
 		Armature* sa = &this->armatures.back();
 
 		for (auto& actorName : actors)
-			this->getActor(actorName)->setArmature(sa);
+		{
+			auto act = this->getActor(actorName);
+			act->setArmature(sa);
+
+			std::vector<std::pair<size_t, std::string>> activeBones;
+			size_t index = 0;
+			for (auto& meshBone : this->renderables.at(act->getRenderableIndex()).getMesh()->getBones())
+			{
+				activeBones.push_back(std::pair<size_t, std::string>(act->getArmature()->getBoneIndex(meshBone.name), "bones[" + std::to_string(index) + "]"));
+				index++;
+			}
+
+			act->setActiveBones(activeBones);
+
+		}
+			
 
 		return sa;
 	}
@@ -217,16 +232,16 @@ namespace vel
 		actor->setContainerIndex(slotIndex);
 
 		//TODO renderable things
-		if (actor->getRenderable())
+		if (actor->getTempRenderable())
 		{
-			auto& tempRenderable = actor->getRenderable().value();
+			auto& tempRenderable = actor->getTempRenderable().value();
 
 			auto parentRenderableIndex = this->renderableExists(tempRenderable.getName());
 
 			if (!parentRenderableIndex) // add renderable to stage if we do not already have an instance
 				parentRenderableIndex = this->addRenderable(tempRenderable);
 
-			actor->setParentRenderableIndex(parentRenderableIndex.value());
+			actor->setRenderableIndex(parentRenderableIndex.value());
 			this->getRenderable(parentRenderableIndex.value()).addActorIndex(slotIndex);
 			
 			actor->clearTempRenderable();
@@ -268,7 +283,7 @@ namespace vel
         Actor& a = this->actors.at(index);
 
         // free actor slot in render command
-		this->renderables.at(a.getParentRenderableIndex()).freeActorIndex(a.getContainerIndex());
+		this->renderables.at(a.getRenderableIndex()).freeActorIndex(a.getContainerIndex());
 		
 
 		// TODO: need to add logic for removing ghostObjects as well, AND remove all sensors which use either the

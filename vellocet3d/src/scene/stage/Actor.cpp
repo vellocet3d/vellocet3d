@@ -110,7 +110,7 @@ namespace vel
 		this->tempRenderable = r;
 	}
 
-	std::optional<Renderable>& Actor::getRenderable()
+	std::optional<Renderable>& Actor::getTempRenderable()
 	{
 		return this->tempRenderable;
 	}
@@ -329,7 +329,7 @@ namespace vel
 		this->containerIndex = ci;
 	}
 
-    const size_t& Actor::getParentRenderableIndex() const
+    const size_t& Actor::getRenderableIndex() const
     {
 		if (!this->parentRenderableIndex)
 		{
@@ -340,7 +340,7 @@ namespace vel
         return this->parentRenderableIndex.value();
     }
 
-    void Actor::setParentRenderableIndex(size_t ri)
+    void Actor::setRenderableIndex(size_t ri)
     {
 		this->parentRenderableIndex = ri;
     }

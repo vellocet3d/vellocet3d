@@ -58,10 +58,10 @@ namespace vel
 		void											setName(std::string newName);
 
 		void											addRenderable(Renderable r);
-		std::optional<Renderable>&						getRenderable();
+		std::optional<Renderable>&						getTempRenderable();
 		void											clearTempRenderable();
-        void											setParentRenderableIndex(size_t ri);
-        const size_t&									getParentRenderableIndex() const;
+        void											setRenderableIndex(size_t ri);
+        const size_t&									getRenderableIndex() const;
 
 		void											setContainerIndex(size_t ci);
 		const size_t&									getContainerIndex() const;
