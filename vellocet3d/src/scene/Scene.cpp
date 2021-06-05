@@ -18,40 +18,35 @@ namespace vel
 		loaded(false),
 		animationTime(0.0)
 	{
-		this->stages.reserve(10); // can't see ever needing more than 10 stages (naive, but good enough until it's not)
-
-		this->animations.reserve(100); // TODO: threw this in here as temporary fix for now
-
-		//std::cout << "scene constructing - Context:" << this->getGPU().value().getOpenGLContext() << "\n";
-
+		// Set default container capacities. Capacities will never be smaller than these
+		// values (reserving a smaller amount does not re-allocate)
+		this->shaders.reserve(10);
+		this->meshes.reserve(100);
+		this->textures.reserve(100);
+		this->materials.reserve(100);
+		this->animations.reserve(100);
+		this->renderables.reserve(100);
+		this->armatures.reserve(100);
+		this->stages.reserve(10);
 	}
 
 	Scene::~Scene()
 	{
-		//std::cout << "scene destructing - Context:" << this->getGPU().value().getOpenGLContext() << "\n";
+
 	}
 
-	void Scene::applyTransformations()
+	/* Shaders
+	--------------------------------------------------*/
+	void Scene::setShaderCapacity(size_t cap)
 	{
-		for (auto& s : this->stages)
-			s.applyTransformations();
-	}
-
-	void Scene::processSensors()
-	{
-		for (auto& s : this->stages)
-			if (s.getCollisionWorld())
-				s.getCollisionWorld()->processSensors();
-	}	
-
-	size_t Scene::addAnimation(Animation a)
-	{
-		this->animations.push_back(a);
-		return this->animations.size() - 1;
+		this->shaders.reserve(cap);
 	}
 
 	size_t Scene::loadShader(std::string name, std::string vertFile, std::string fragFile)
 	{
+		if (this->shaders.size() == this->shaders.capacity())
+			App::get().logger.die("Scene::loadShader(): Attempting to add shader after shaders capacity has been reached");
+
 		Shader s;
 		s.name = name;
 		s.vertFile = vertFile;
@@ -60,12 +55,79 @@ namespace vel
 		App::get().getGPU()->loadShader(s);
 
 		this->shaders.push_back(s);
-		
+
 		return this->shaders.size() - 1;
+	}
+
+	size_t Scene::getShaderIndex(std::string shaderName)
+	{
+		for (int i = 0; i < this->shaders.size(); i++)
+			if (this->shaders.at(i).name == shaderName)
+				return i;
+
+		App::get().logger.die("CANNOT GET SHADER INDEX FOR NON EXISTING SHADER NAME");
+	}
+
+	Shader* Scene::getShader(size_t si)
+	{
+		return &this->shaders.at(si);
+	}
+
+	/* Meshes
+	--------------------------------------------------*/
+	void Scene::setMeshCapacity(size_t cap)
+	{
+		this->meshes.reserve(cap);
+	}
+
+	void Scene::loadMesh(std::string path)
+	{
+		auto al = AssetLoaderV2(this, path);
+		al.load();
+	}
+
+	size_t Scene::addMesh(Mesh m)
+	{
+		if (this->meshes.size() == this->meshes.capacity())
+			App::get().logger.die("Scene::addMesh(): Attempting to add mesh after meshes capacity has been reached");
+
+		App::get().getGPU()->loadMesh(m);
+		this->meshes.push_back(m);
+		return this->meshes.size() - 1;
+	}
+
+	const std::vector<Mesh>& Scene::getMeshes() const
+	{
+		return this->meshes;
+	}
+
+	size_t Scene::getMeshIndex(std::string meshName)
+	{
+		for (int i = 0; i < this->meshes.size(); i++)
+			if (this->meshes.at(i).getName() == meshName)
+				return i;
+
+		App::get().logger.die("CANNOT GET MESH INDEX FOR NON EXISTING MESH NAME");
+	}
+
+	Mesh* Scene::getMesh(size_t index)
+	{
+		return &this->meshes.at(index);
+	}
+
+
+	/* Textures
+	--------------------------------------------------*/
+	void Scene::setTextureCapacity(size_t cap)
+	{
+		this->textures.reserve(cap);
 	}
 
 	size_t Scene::loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips)
 	{
+		if (this->textures.size() == this->textures.capacity())
+			App::get().logger.die("Scene::loadTexture(): Attempting to add texture after textures capacity has been reached");
+
 		Texture texture;
 		texture.name = name;
 		texture.type = type;
@@ -84,22 +146,44 @@ namespace vel
 		return &this->textures.at(textureIndex);
 	}
 
-	void Scene::loadMesh(std::string path) 
+	size_t Scene::getTextureGpuId(std::string textureName)
 	{
-		auto al = AssetLoaderV2(this, path);
-		al.load();
+		for (int i = 0; i < this->textures.size(); i++)
+			if (this->textures.at(i).name == textureName)
+				return this->textures.at(i).id;
+
+		App::get().logger.die("CANNOT GET GPU ID FOR NON EXISTING TEXTURE NAME");
+	}
+
+	/* Materials
+	--------------------------------------------------*/
+	void Scene::setMaterialCapacity(size_t cap)
+	{
+		this->materials.reserve(cap);
 	}
 
 	size_t Scene::addMaterial(Material m)
 	{
+		if (this->materials.size() == this->materials.capacity())
+			App::get().logger.die("Scene::addMaterial(): Attempting to add material after materials capacity has been reached");
+
 		this->materials.push_back(m);
 
 		return this->materials.size() - 1;
 	}
 
-	Material*	Scene::getMaterial(size_t materialIndex)
+	Material* Scene::getMaterial(size_t materialIndex)
 	{
 		return &this->materials.at(materialIndex);
+	}
+
+	size_t Scene::getMaterialIndex(std::string materialName)
+	{
+		for (int i = 0; i < this->materials.size(); i++)
+			if (this->materials.at(i).name == materialName)
+				return i;
+
+		App::get().logger.die("CANNOT GET MATERIAL INDEX FOR NON EXISTING MATERIAL NAME");
 	}
 
 	Material* Scene::getMaterial(std::string materialName)
@@ -109,61 +193,25 @@ namespace vel
 				return &m;
 	}
 
-	Renderable Scene::getRenderable(std::string name)
+	/* Animations
+	--------------------------------------------------*/
+	void Scene::setAnimationCapacity(size_t cap)
 	{
-		for (auto& r : this->baseRenderables)
-			if (r.getName() == name)
-				return r;
-
-		App::get().logger.die("Scene: attempting to get renderable by name that does not exist");
+		this->animations.reserve(cap);
 	}
 
-	Armature* Scene::addArmature(Armature a)
+	size_t Scene::addAnimation(Animation a)
 	{
-		this->baseArmatures.push_back(a);
+		if (this->animations.size() == this->animations.capacity())
+			App::get().logger.die("Scene::addAnimation(): Attempting to add animation after animations capacity has been reached");
 
-		return &this->baseArmatures.back();
-	}
-
-	Armature Scene::getArmature(std::string name)
-	{
-		for (auto& a : this->baseArmatures)
-			if (a.getName() == name)
-				return a;
-	}
-
-	Stage& Scene::addStage()
-	{
-		this->stages.push_back(Stage());
-
-		return this->getStage(this->stages.size() - 1);
-	}
-
-	Stage& Scene::getStage(size_t index)
-	{
-		return this->stages.at(index);
-	}
-
-	const std::vector<Mesh>& Scene::getMeshes() const
-	{
-		return this->meshes;
+		this->animations.push_back(a);
+		return this->animations.size() - 1;
 	}
 
 	const std::vector<Animation>& Scene::getAnimations() const
 	{
 		return this->animations;
-	}
-
-	size_t Scene::addMesh(Mesh m)
-	{
-		App::get().getGPU()->loadMesh(m);
-		this->meshes.push_back(m);
-		return this->meshes.size() - 1;
-	}
-
-	Mesh* Scene::getMesh(size_t index)
-	{
-		return &this->meshes.at(index);
 	}
 
 	Animation& Scene::getAnimation(size_t index)
@@ -178,13 +226,95 @@ namespace vel
 			s.updateActorAnimations(this->animationTime);
 	}
 
+	/* Renderables
+	--------------------------------------------------*/
+	void Scene::setRenderableCapacity(size_t cap)
+	{
+		this->renderables.reserve(cap);
+	}
+
+	size_t Scene::addRenderable(std::string name, size_t shaderIndex, size_t meshIndex, size_t materialIndex)
+	{
+		if (this->renderables.size() == this->renderables.capacity())
+			App::get().logger.die("Scene::addRenderable(): Attempting to add renderable after renderables capacity has been reached");
+
+		Renderable r = Renderable(name, shaderIndex, meshIndex, materialIndex,
+			&this->shaders.at(shaderIndex), &this->meshes.at(meshIndex), &this->materials.at(materialIndex),
+			this->materials.at(materialIndex).hasAlphaChannel);
+
+		this->renderables.push_back(r);
+
+		return this->renderables.size() - 1;
+	}
+
+	Renderable Scene::getRenderable(std::string name)
+	{
+		for (auto& r : this->renderables)
+			if (r.getName() == name)
+				return r;
+
+		App::get().logger.die("Scene: attempting to get renderable by name that does not exist");
+	}
+
+
+	/* Armatures
+	--------------------------------------------------*/
+	void Scene::setArmatureCapacity(size_t cap)
+	{
+		this->armatures.reserve(cap);
+	}
+
+	Armature* Scene::addArmature(Armature a)
+	{
+		if (this->armatures.size() == this->armatures.capacity())
+			App::get().logger.die("Scene::addArmature(): Attempting to add armature after armatures capacity has been reached");
+
+		this->armatures.push_back(a);
+
+		return &this->armatures.back();
+	}
+
+	Armature Scene::getArmature(std::string name)
+	{
+		for (auto& a : this->armatures)
+			if (a.getName() == name)
+				return a;
+
+		App::get().logger.die("Scene::getArmature(): Attempting to get armature by name that does not exist");
+	}
+
+	/* Stages
+	--------------------------------------------------*/
+	void Scene::setStageCapacity(size_t cap)
+	{
+		this->stages.reserve(cap);
+	}
+
+	Stage& Scene::addStage()
+	{
+		if (this->stages.size() == this->stages.capacity())
+			App::get().logger.die("Scene::addStage(): Attempting to add stage after stages capacity has been reached");
+
+		this->stages.push_back(Stage());
+
+		return this->getStage(this->stages.size() - 1);
+	}
+
+	Stage& Scene::getStage(size_t index)
+	{
+		return this->stages.at(index);
+	}
+
+
+	/* Misc
+	--------------------------------------------------*/
 	void Scene::stepPhysics(float delta)
 	{
 		for (auto& s : this->stages)
 			s.stepPhysics(delta);
 	}
 
-	void Scene::postPhysics(float delta){}
+	void Scene::postPhysics(float delta) {}
 
 	void Scene::swap(Scene* sceneIn)
 	{
@@ -247,68 +377,29 @@ namespace vel
 			s.debugActiveNumberOfBonesPerActor();
 	}
 
-	size_t Scene::addRenderable(std::string name, size_t shaderIndex, size_t meshIndex, size_t materialIndex)
+	void Scene::applyTransformations()
 	{
-		Renderable r = Renderable(name, shaderIndex, meshIndex, materialIndex, 
-			&this->shaders.at(shaderIndex), &this->meshes.at(meshIndex), &this->materials.at(materialIndex),
-			this->materials.at(materialIndex).hasAlphaChannel);
-
-		this->baseRenderables.push_back(r);
-
-		return this->baseRenderables.size() - 1;
+		for (auto& s : this->stages)
+			s.applyTransformations();
 	}
 
-	size_t Scene::getTextureGpuId(std::string textureName)
+	void Scene::processSensors()
 	{
-		for (int i = 0; i < this->textures.size(); i++)
-			if (this->textures.at(i).name == textureName)
-				return this->textures.at(i).id;
-
-		App::get().logger.die("CANNOT GET GPU ID FOR NON EXISTING TEXTURE NAME");
+		for (auto& s : this->stages)
+			if (s.getCollisionWorld())
+				s.getCollisionWorld()->processSensors();
 	}
 
-	size_t Scene::getMaterialIndex(std::string materialName)
+	void Scene::draw(float alpha)
 	{
-		for (int i = 0; i < this->materials.size(); i++)
-			if (this->materials.at(i).name == materialName)
-				return i;
-
-		App::get().logger.die("CANNOT GET MATERIAL INDEX FOR NON EXISTING MATERIAL NAME");
-	}
-
-	size_t Scene::getShaderIndex(std::string shaderName)
-	{
-		for (int i = 0; i < this->shaders.size(); i++)
-			if (this->shaders.at(i).name == shaderName)
-				return i;
-
-		App::get().logger.die("CANNOT GET SHADER INDEX FOR NON EXISTING SHADER NAME");
-	}
-
-	size_t Scene::getMeshIndex(std::string meshName)
-	{
-		for (int i = 0; i < this->meshes.size(); i++)
-			if (this->meshes.at(i).getName() == meshName)
-				return i;
-
-		App::get().logger.die("CANNOT GET MESH INDEX FOR NON EXISTING MESH NAME");
-	}
-
-	Shader* Scene::getShader(size_t si)
-	{
-		return &this->shaders.at(si);
-	}
-
-    void Scene::draw(float alpha)
-    {
 		//std::cout << "new draw iteration---------------------------------------\n";
 
-        GPU* gpu = App::get().getGPU(); // for convenience
+		GPU* gpu = App::get().getGPU(); // for convenience
 
 		gpu->enableBlend();
 
-        for (auto& s : this->stages)
-        {
+		for (auto& s : this->stages)
+		{
 			if (!s.isVisible())
 				continue;
 
@@ -333,47 +424,47 @@ namespace vel
 			//	//std::cout << "debug draw\n";
 			//}
 
-            //s.printRenderables();            
+			//s.printRenderables();            
 
-            // should always have a camera if we've made it this far
-            //s.getCamera()->update(alpha);
+			// should always have a camera if we've made it this far
+			//s.getCamera()->update(alpha);
 
 			//std::cout << "----------------------------------\n";
 
 			//std::cout << "gpu active before rco loop:" << gpu.getActiveShader() << "," << gpu.getActiveGpuMeshIndex() << "," << gpu.getActiveMaterialIndex() << "\n";
 
 
-            for (auto& rco : s.getRenderablesOrder())
-            {
-                Renderable& rc = s.getRenderable(rco);
+			for (auto& rco : s.getRenderablesOrder())
+			{
+				Renderable& rc = s.getRenderable(rco);
 
 				//std::cout << "rc:" << rc.getShaderIndex() << "," << rc.getMeshIndex() << "," << rc.getTextureIndex() << "\n";
 
-                if (rc.getShader() != gpu->getActiveShader())
-                    gpu->useShader(rc.getShader());
+				if (rc.getShader() != gpu->getActiveShader())
+					gpu->useShader(rc.getShader());
 
-                if (rc.getMesh() != gpu->getActiveMesh())
-                    gpu->useMesh(rc.getMesh());
+				if (rc.getMesh() != gpu->getActiveMesh())
+					gpu->useMesh(rc.getMesh());
 
-                if (rc.getMaterial() != gpu->getActiveMaterial())
-                    gpu->useMaterial(rc.getMaterial());
+				if (rc.getMaterial() != gpu->getActiveMaterial())
+					gpu->useMaterial(rc.getMaterial());
 
-                // gpu state has been set, now draw all actors which use this gpu state
-                for (auto& ai : rc.getActorIndexes())
-                {
-                    Actor* a = s.getActor(ai);
-					
+				// gpu state has been set, now draw all actors which use this gpu state
+				for (auto& ai : rc.getActorIndexes())
+				{
+					Actor* a = s.getActor(ai);
+
 					//std::cout << a->getName() << ":" << rc.getShaderIndex() << "-" << rc.getMeshIndex() << "-" << rc.getTextureIndex() << "\n";
 					//std::cout << a->getName() << ":" << gpu->getActiveShader() << "-" << gpu->getActiveGpuMeshIndex() << "-" << gpu->getActiveMaterialIndex() << "\n";
 					//std::cout << "--------------------------------\n";
 
 					//std::cout << a->getName() << "\n";
 
-                    if (!a->isDeleted() && a->isVisible())
-                    {
+					if (!a->isDeleted() && a->isVisible())
+					{
 						gpu->setShaderMat4("mvp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix() * a->getWorldRenderMatrix(alpha));
 
-						
+
 
 						//std::cout << a->getName() << "\n";
 
@@ -388,7 +479,7 @@ namespace vel
 							//for(auto& b : armature->getBones())
 							//	std::cout << b.name << "\n";
 
-							
+
 							size_t boneIndex = 0;
 							for (auto& activeBone : a->getActiveBones().value())
 							{
@@ -403,17 +494,17 @@ namespace vel
 							}
 						}
 
-						
-
-                        gpu->drawGpuMesh();
-                    }
-                }
-
-            }
-            
-        }
 
 
-    }
+						gpu->drawGpuMesh();
+					}
+				}
+
+			}
+
+		}
+
+
+	}
 
 }

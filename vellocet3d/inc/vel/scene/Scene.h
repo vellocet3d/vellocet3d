@@ -24,15 +24,24 @@ namespace vel
 		std::vector<Material>				materials;
 		std::vector<Animation>				animations;
 
-		std::vector<Renderable>				baseRenderables;
-		std::vector<Armature>				baseArmatures;
-		
+		std::vector<Renderable>				renderables;
+		std::vector<Armature>				armatures;
+
 		std::vector<Stage>					stages;
 
 		double								animationTime;
-		
+
 
 	protected:
+		void								setShaderCapacity(size_t cap);
+		void								setMeshCapacity(size_t cap);
+		void								setTextureCapacity(size_t cap);
+		void								setMaterialCapacity(size_t cap);
+		void								setAnimationCapacity(size_t cap);
+		void								setRenderableCapacity(size_t cap);
+		void								setArmatureCapacity(size_t cap);
+		void								setStageCapacity(size_t cap);
+
 		size_t								loadShader(std::string name, std::string vertFile, std::string fragFile);
 		void								loadMesh(std::string path);
 		size_t								loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
@@ -44,9 +53,11 @@ namespace vel
 		Stage&								getStage(size_t index);
 
 
+
+
 	public:
-											Scene();
-											~Scene();
+		Scene();
+		~Scene();
 		bool								loaded;
 		const std::vector<Mesh>&			getMeshes() const;
 		size_t								addMesh(Mesh m);
@@ -69,7 +80,7 @@ namespace vel
 		void								swap(Scene* scene);
 		Scene*								sceneToSwap = nullptr;
 		virtual void						showLoadingIcon();
-		
+
 		void debugVertexBones();
 		void debugListNumberOfBonesPerArmature();
 		void debugActiveNumberOfBonesPerActor();
@@ -80,16 +91,16 @@ namespace vel
 		Texture*							getTexture(size_t textureIndex);
 		Material*							getMaterial(size_t materialIndex);
 		Material*							getMaterial(std::string materialName);
-		
+
 
 		size_t								getShaderIndex(std::string shaderName);
 		size_t								getTextureGpuId(std::string textureName);
 		size_t								getMaterialIndex(std::string materialName);
 		size_t								getMeshIndex(std::string meshName);
-		
+
 
 		Armature*							addArmature(Armature a);
-		
+
 
 	};
 

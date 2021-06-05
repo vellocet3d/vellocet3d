@@ -241,7 +241,7 @@ namespace vel
 			}
 			else
 			{
-				int mipcount = t.mips.size();
+				int mipcount = (int)t.mips.size();
 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipcount);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

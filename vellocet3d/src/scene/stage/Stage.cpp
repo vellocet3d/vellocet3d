@@ -15,46 +15,28 @@
 namespace vel
 {
 
-    Stage::Stage() :
-        visible(true),
+	Stage::Stage() :
+		visible(true),
 		collisionDebuggingSwitch(false),
 		clearDepthBuffer(false)
-    {
-        // Set default actors container to 1000 slots. If more space
-        // is required, call setActorContainerSize before adding
-        // actors to the stage. If this is not done and actors
-        // are added past the reserved limit, it will result in
-        // undefined behavior (as push_back will reallocate
-        // all data to a new block every time it is called)
-		//
-		// Yes, this is a naive approach, but for the time being it
-		// solves the problem at hand and allows me to move forward.
-		// A more elegant solution should be put into place once
-		// time allows
-		//
-		// 6ish months later this really isn't that bad of a way to handle
-		// this...it's straight forward, works, and is sufficiently performant.
-		//
-		// TODO: simply add some logic to check if we are close to filling
-		// up the reserve, and if so, allocate an additional 1000 blocks and
-		// go about our day....yeah, that'd be a great way to invalidate all
-		// of our pointers...wow...so yeah, you will need to implement multiple
-		// 1000 block vectors, OR just make this value user defined and allow
-		// user to provide value which application will not exceed?
-        this->actors.reserve(1000);
-
+	{
+		// Reserve default amount of space for each container. Can be updated via
+		// setActorContainerSize() and setArmatureContainerSize()...BUT those calls
+		// MUST be done before adding any actors or armatures to the stage.
+		this->actors.reserve(100);
 		this->armatures.reserve(100);
 
-        this->renderables = std::vector<Renderable>();
-        this->renderablesOrder = std::vector<size_t>();
+	}
 
-    }
-
-	Armature* Stage::addArmature(Armature a, std::vector<std::string> actors)
+	Armature* Stage::addArmature(Armature a, std::string defaultAnimation, std::vector<std::string> actors)
 	{
+		if (this->armatures.size() == this->armatures.capacity())
+			App::get().logger.die("Scene::addArmature(): Attempting to add armature after armatures capacity has been reached");
+
 		this->armatures.push_back(a);
-		
+
 		Armature* sa = &this->armatures.back();
+		sa->playAnimation(defaultAnimation);
 
 		for (auto& actorName : actors)
 		{
@@ -72,7 +54,7 @@ namespace vel
 			act->setActiveBones(activeBones);
 
 		}
-			
+
 
 		return sa;
 	}
@@ -95,9 +77,7 @@ namespace vel
 	void Stage::useCollisionDebugDrawer(int debugMode)
 	{
 		if (!this->collisionWorld)
-		{
 			return;
-		}
 
 		this->collisionDebuggingSwitch = true;
 
@@ -109,17 +89,15 @@ namespace vel
 	void Stage::stepPhysics(float delta)
 	{
 		if (this->collisionWorld)
-		{
 			this->collisionWorld.value()->getDynamicsWorld()->stepSimulation(delta, 0);
-		}
+		
 	}
 
 	CollisionWorld* Stage::getCollisionWorld()
 	{
 		if (!this->collisionWorld)
-		{
 			return nullptr;
-		}
+		
 		return this->collisionWorld.value().get();
 	}
 
@@ -157,42 +135,47 @@ namespace vel
 		return this->visible;
 	}
 
-    void Stage::setActorContainerSize(unsigned int size)
-    {
-        this->actors.reserve(size);
-    }
+	void Stage::setActorCapacity(size_t size)
+	{
+		this->actors.reserve(size);
+	}
 
-    void Stage::hide()
-    {
-        this->visible = false;
-    }
+	void Stage::setArmatureCapacity(size_t size)
+	{
+		this->armatures.reserve(size);
+	}
 
-    void Stage::show()
-    {
-        this->visible = true;
-    }
+	void Stage::hide()
+	{
+		this->visible = false;
+	}
 
-    void Stage::addPerspectiveCamera(bool fixed, float nearPlane, float farPlane, float fov)
-    {
-        this->camera = Camera(
-            CameraType::PERSPECTIVE,
-            fixed,
-            nearPlane,
-            farPlane,
-            fov
-        );
-    }
+	void Stage::show()
+	{
+		this->visible = true;
+	}
 
-    void Stage::addOrthographicCamera(bool fixed, float nearPlane, float farPlane, float scale)
-    {
-        this->camera = Camera(
-            CameraType::ORTHOGRAPHIC,
-            fixed,
-            nearPlane,
-            farPlane,
-            scale
-        );
-    }
+	void Stage::addPerspectiveCamera(bool fixed, float nearPlane, float farPlane, float fov)
+	{
+		this->camera = Camera(
+			CameraType::PERSPECTIVE,
+			fixed,
+			nearPlane,
+			farPlane,
+			fov
+		);
+	}
+
+	void Stage::addOrthographicCamera(bool fixed, float nearPlane, float farPlane, float scale)
+	{
+		this->camera = Camera(
+			CameraType::ORTHOGRAPHIC,
+			fixed,
+			nearPlane,
+			farPlane,
+			scale
+		);
+	}
 
 	void Stage::updateActorAnimations(double runTime)
 	{
@@ -207,31 +190,33 @@ namespace vel
 			a.processTransform();
 	}
 
-    const size_t Stage::getActorSize() const
-    {
-        return this->actors.size();
-    }
+	const size_t Stage::getActorSize() const
+	{
+		return this->actors.size();
+	}
 
-    size_t Stage::addActor(Actor a)
-    {
-        size_t slotIndex;
+	size_t Stage::addActor(Actor a)
+	{
+		if (this->actors.size() == this->actors.capacity() && this->actorFreeSlots.size() == 0)
+			App::get().logger.die("Stage::addActor(): Attempting to add actor after actors capacity has been reached");
 
-        if (this->actorFreeSlots.size() > 0)
-        {
-            slotIndex = this->actorFreeSlots.back();
-            this->actorFreeSlots.pop_back();
-            this->actors.at(slotIndex) = a;
-        }
-        else
-        {
-            slotIndex = this->actors.size();
-            this->actors.push_back(a);
-        }
+		size_t slotIndex;
 
-        auto actor = &this->actors.at(slotIndex);
+		if (this->actorFreeSlots.size() > 0)
+		{
+			slotIndex = this->actorFreeSlots.back();
+			this->actorFreeSlots.pop_back();
+			this->actors.at(slotIndex) = a;
+		}
+		else
+		{
+			slotIndex = this->actors.size();
+			this->actors.push_back(a);
+		}
+
+		auto actor = &this->actors.at(slotIndex);
 		actor->setContainerIndex(slotIndex);
 
-		//TODO renderable things
 		if (actor->getTempRenderable())
 		{
 			auto& tempRenderable = actor->getTempRenderable().value();
@@ -243,48 +228,48 @@ namespace vel
 
 			actor->setRenderableIndex(parentRenderableIndex.value());
 			this->getRenderable(parentRenderableIndex.value()).addActorIndex(slotIndex);
-			
+
 			actor->clearTempRenderable();
 		}
 
 		return slotIndex;
-    }
+	}
 
-    Actor* Stage::getActor(std::string name)
-    {
-        for (auto& a : this->actors) 
-            if (a.getName() == name) 
-                return &a;
+	Actor* Stage::getActor(std::string name)
+	{
+		for (auto& a : this->actors)
+			if (a.getName() == name)
+				return &a;
 
 		return nullptr;
-    }
+	}
 
-    Actor* Stage::getActor(size_t index) 
-    {
+	Actor* Stage::getActor(size_t index)
+	{
 		if (this->actors.size() == 0 || !(index <= (this->actors.size() - 1)))
 			return nullptr;
 
-        return &this->actors.at(index);
-    }
+		return &this->actors.at(index);
+	}
 
-    void Stage::removeActor(std::string name) 
-    {
-        for (unsigned int i = 0; i < this->actors.size(); i++)
-        {
-            auto a = this->actors.at(i);
+	void Stage::removeActor(std::string name)
+	{
+		for (unsigned int i = 0; i < this->actors.size(); i++)
+		{
+			auto a = this->actors.at(i);
 
-            if (a.getName() == name)
-                this->removeActor(i);
-        }
-    }
+			if (a.getName() == name)
+				this->removeActor(i);
+		}
+	}
 
-    void Stage::removeActor(size_t index)
-    {
-        Actor& a = this->actors.at(index);
+	void Stage::removeActor(size_t index)
+	{
+		Actor& a = this->actors.at(index);
 
-        // free actor slot in render command
+		// free actor slot in render command
 		this->renderables.at(a.getRenderableIndex()).freeActorIndex(a.getContainerIndex());
-		
+
 
 		// TODO: need to add logic for removing ghostObjects as well, AND remove all sensors which use either the
 		// rigidBody or ghostObject of this actor
@@ -304,27 +289,27 @@ namespace vel
 			a.setGhostObject(nullptr);
 		}
 
-        a.setDeleted(true);
-        this->actorFreeSlots.push_back(index);
-    }
+		a.setDeleted(true);
+		this->actorFreeSlots.push_back(index);
+	}
 
-    size_t Stage::addRenderable(Renderable rc) 
-    {
-        this->renderables.push_back(rc);
-        size_t renderableIndex = this->renderables.size() - 1;
+	size_t Stage::addRenderable(Renderable rc)
+	{
+		this->renderables.push_back(rc);
+		size_t renderableIndex = this->renderables.size() - 1;
 
-        // loop through renderables and sort order saving indexes
-        // within this->renderablesOrder
+		// loop through renderables and sort order saving indexes
+		// within this->renderablesOrder
 
-        std::vector<std::pair<size_t, Renderable>> toSort;
+		std::vector<std::pair<size_t, Renderable>> toSort;
 
-        for (size_t i = 0; i < this->renderables.size(); i++) 
-            toSort.push_back(std::pair<size_t, Renderable>(i, this->renderables.at(i)));
+		for (size_t i = 0; i < this->renderables.size(); i++)
+			toSort.push_back(std::pair<size_t, Renderable>(i, this->renderables.at(i)));
 
 		// sort sharder
-        std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
-            return left.second.getShaderIndex() < right.second.getShaderIndex();
-        });
+		std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
+			return left.second.getShaderIndex() < right.second.getShaderIndex();
+		});
 
 		// sort mesh
 		std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
@@ -342,11 +327,10 @@ namespace vel
 		});
 
 
+		this->renderablesOrder.clear();
 
-        this->renderablesOrder.clear();
-
-        for (auto& p : toSort) 
-            this->renderablesOrder.push_back(p.first);
+		for (auto& p : toSort)
+			this->renderablesOrder.push_back(p.first);
 
 		//for debugging
 		//std::cout << "-----------------------\n";
@@ -358,54 +342,54 @@ namespace vel
 
 		//}
 
-        return renderableIndex;
+		return renderableIndex;
 
-    }
+	}
 
-    std::optional<size_t> Stage::renderableExists(const std::string& rn)
-    {
-        for (unsigned int i = 0; i < this->renderables.size(); i++)
-            if (this->renderables[i].getName() == rn)
-                return i;
-        
-        return std::nullopt;
-    }
+	std::optional<size_t> Stage::renderableExists(const std::string& rn)
+	{
+		for (unsigned int i = 0; i < this->renderables.size(); i++)
+			if (this->renderables[i].getName() == rn)
+				return i;
 
-    const bool Stage::hasActorWithName(std::string name) const
-    {
-        for (auto& a : this->actors)
-            if (a.getName() == name)
+		return std::nullopt;
+	}
+
+	const bool Stage::hasActorWithName(std::string name) const
+	{
+		for (auto& a : this->actors)
+			if (a.getName() == name)
 				return true;
 
-        return false;
-    }
+		return false;
+	}
 
-    void Stage::printRenderables() const
-    {
-        std::cout << "Renderables\n";
-        std::cout << "----------------------------------\n";
-        for (auto& rc : this->renderables) 
-        {
-            std::cout << "shaderIndex:" << rc.getShaderIndex() << " meshIndex:" << rc.getMeshIndex() << " materialIndex:" << rc.getMaterialIndex() << "\n";
-            std::cout << "actors:";
+	void Stage::printRenderables() const
+	{
+		std::cout << "Renderables\n";
+		std::cout << "----------------------------------\n";
+		for (auto& rc : this->renderables)
+		{
+			std::cout << "shaderIndex:" << rc.getShaderIndex() << " meshIndex:" << rc.getMeshIndex() << " materialIndex:" << rc.getMaterialIndex() << "\n";
+			std::cout << "actors:";
 
-            for (auto& a : rc.getActorIndexes()) 
-                if (a != -1) 
-                    std::cout << this->actors.at(a).getName() << ",";
-                
-            std::cout << "\norder:";
+			for (auto& a : rc.getActorIndexes())
+				if (a != -1)
+					std::cout << this->actors.at(a).getName() << ",";
 
-            for (auto& o : this->renderablesOrder) 
-                std::cout << o << ",";
+			std::cout << "\norder:";
 
-            std::cout << "\n------------------------------\n";
-        }
-    }
+			for (auto& o : this->renderablesOrder)
+				std::cout << o << ",";
 
-    Renderable& Stage::getRenderable(size_t index)
-    {
-        return this->renderables.at(index);
-    }
+			std::cout << "\n------------------------------\n";
+		}
+	}
+
+	Renderable& Stage::getRenderable(size_t index)
+	{
+		return this->renderables.at(index);
+	}
 
 	std::optional<Renderable>& Stage::getRenderable(std::string name)
 	{
@@ -421,15 +405,15 @@ namespace vel
 		return rr;
 	}
 
-    const std::vector<size_t>& Stage::getRenderablesOrder() const
-    {
-        return this->renderablesOrder;
-    }
+	const std::vector<size_t>& Stage::getRenderablesOrder() const
+	{
+		return this->renderablesOrder;
+	}
 
-    std::optional<Camera>& Stage::getCamera()
-    {
-        return this->camera;
-    }
+	std::optional<Camera>& Stage::getCamera()
+	{
+		return this->camera;
+	}
 
 	void Stage::debugListNumberOfBonesPerArmature()
 	{
