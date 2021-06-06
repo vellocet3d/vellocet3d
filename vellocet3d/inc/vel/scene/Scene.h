@@ -45,6 +45,7 @@ namespace vel
 		size_t								loadShader(std::string name, std::string vertFile, std::string fragFile);
 		void								loadMesh(std::string path);
 		size_t								loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
+		void								loadSceneConfig(std::string path);
 		size_t								addMaterial(Material m);
 		size_t								addRenderable(std::string name, size_t defaultShaderIndex, size_t crateMeshIndex, size_t crateMaterialIndex);
 		Renderable							getRenderable(std::string name);
@@ -94,7 +95,7 @@ namespace vel
 
 
 		size_t								getShaderIndex(std::string shaderName);
-		size_t								getTextureGpuId(std::string textureName);
+		size_t								getTextureIndex(std::string textureName);
 		size_t								getMaterialIndex(std::string materialName);
 		size_t								getMeshIndex(std::string meshName);
 

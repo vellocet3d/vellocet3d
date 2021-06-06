@@ -31,8 +31,7 @@ namespace vel
         void                    updateProjectionMatrix();
 
     public:
-								Camera(CameraType type, bool fixed, float nearPlane, float farPlane, float fovScale);
-        bool                    fixed;
+								Camera(CameraType type, float nearPlane, float farPlane, float fovScale);
         void                    update();
 		glm::mat4               getViewMatrix();
         glm::mat4               getProjectionMatrix();

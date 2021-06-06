@@ -9,10 +9,9 @@
 
 namespace vel
 {
-    Camera::Camera(CameraType type, bool fixed, float nearPlane, float farPlane, float fovScale) :
+    Camera::Camera(CameraType type, float nearPlane, float farPlane, float fovScale) :
         type(type),
         screenSize(&App::get().getScreenSize()),
-        fixed(fixed),
         nearPlane(nearPlane),
         farPlane(farPlane),
         fovScale(fovScale)
@@ -47,10 +46,7 @@ namespace vel
 
     void Camera::updateViewMatrix()
     {
-  //      if (!this->fixed) 
-		//{
-            this->viewMatrix = glm::lookAt(this->position, this->lookAt, this->up);
-        //}
+        this->viewMatrix = glm::lookAt(this->position, this->lookAt, this->up);
     }
 
     void Camera::update()

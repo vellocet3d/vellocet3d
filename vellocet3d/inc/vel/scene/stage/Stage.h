@@ -65,8 +65,8 @@ namespace vel
 		void										setArmatureCapacity(size_t size);
 		void										show();
 		void										hide();
-		void										addPerspectiveCamera(bool fixed, float nearPlane, float farPlane, float fov);
-		void										addOrthographicCamera(bool fixed, float nearPlane, float farPlane, float scale);
+		void										addPerspectiveCamera(float nearPlane, float farPlane, float fov);
+		void										addOrthographicCamera(float nearPlane, float farPlane, float scale);
 		const bool									isVisible();
 		void										parentActorToActor(std::string childName, std::string parentName);
 		void										parentActorToActorBone(std::string childName, std::string parentName, std::string parentBoneName);

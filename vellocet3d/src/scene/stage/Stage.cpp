@@ -155,22 +155,20 @@ namespace vel
 		this->visible = true;
 	}
 
-	void Stage::addPerspectiveCamera(bool fixed, float nearPlane, float farPlane, float fov)
+	void Stage::addPerspectiveCamera(float nearPlane, float farPlane, float fov)
 	{
 		this->camera = Camera(
 			CameraType::PERSPECTIVE,
-			fixed,
 			nearPlane,
 			farPlane,
 			fov
 		);
 	}
 
-	void Stage::addOrthographicCamera(bool fixed, float nearPlane, float farPlane, float scale)
+	void Stage::addOrthographicCamera(float nearPlane, float farPlane, float scale)
 	{
 		this->camera = Camera(
 			CameraType::ORTHOGRAPHIC,
-			fixed,
 			nearPlane,
 			farPlane,
 			scale
