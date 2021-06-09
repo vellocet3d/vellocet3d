@@ -19,14 +19,14 @@ namespace vel
 {
 	class Stage;
 
-    class Actor
-    {
-    private:
-        bool											deleted;
+	class Actor
+	{
+	private:
+		bool											deleted;
 		bool											visible;
-        std::string										name;
+		std::string										name;
 		bool											dynamic;
-        Transform										transform;
+		Transform										transform;
 		std::optional<Transform>						previousTransform;
 		std::optional<Actor*>							parentActor;
 		std::optional<ArmatureBone*>					parentActorBone;
@@ -34,40 +34,39 @@ namespace vel
 		Armature*										armature;
 		std::optional<std::vector<std::pair<size_t, std::string>>> activeBones; // the bones from the armature that are actually used by the mesh, 
 																				// the glue between an armature and a mesh (index is mesh bone index, value is armature bone index)
-		
+
 		std::optional<Renderable>						tempRenderable;
 		std::optional<size_t>							parentRenderableIndex;
 		std::optional<size_t>							containerIndex;
 
-		
+
 		btRigidBody*									rigidBody;
 		btPairCachingGhostObject*						ghostObject;
 		bool											manualTransform;
-		//Stage*											parentStage;
 
-		
-		
 
-    public:
-														//Actor(std::string name, Transform t, Stage* parentStage);
-														Actor(std::string name);
+
+
+	public:
+		//Actor(std::string name, Transform t, Stage* parentStage);
+		Actor(std::string name);
 		Actor											cleanCopy(std::string newName);
 		void											setDynamic(bool dynamic);
 
-        const std::string								getName() const;
+		const std::string								getName() const;
 		void											setName(std::string newName);
 
 		void											addRenderable(Renderable r);
 		std::optional<Renderable>&						getTempRenderable();
 		void											clearTempRenderable();
-        void											setRenderableIndex(size_t ri);
-        const size_t&									getRenderableIndex() const;
+		void											setRenderableIndex(size_t ri);
+		const size_t&									getRenderableIndex() const;
 
 		void											setContainerIndex(size_t ci);
 		const size_t&									getContainerIndex() const;
 
-        void											setDeleted(bool d);
-        const bool										isDeleted() const;
+		void											setDeleted(bool d);
+		const bool										isDeleted() const;
 		void											setVisible(bool v);
 		const bool										isVisible() const;
 		const bool										isAnimated() const;
@@ -98,7 +97,7 @@ namespace vel
 		void											setManualTransform(bool mt);
 		bool											getManualTransform();
 
-		
+
 		void											processTransform();
 
 		void											removeParentActor(bool calledFromRemoveChildActor = false);
@@ -106,5 +105,5 @@ namespace vel
 
 
 
-    };
+	};
 }

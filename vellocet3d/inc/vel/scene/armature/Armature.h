@@ -25,12 +25,12 @@ namespace vel
 	{
 	private:
 		std::string											name;
-		Scene*												parentScene;
 		std::vector<ArmatureBone>							bones;
-		std::vector<std::pair<std::string, size_t>>			animations;
+		std::vector<std::pair<std::string, Animation*>>		animations;
 		std::deque<ActiveAnimation>							activeAnimations;
 		double												runTime;
-		double												previousRunTime;		
+		double												previousRunTime;
+
 		void												updateBone(size_t index, glm::mat4 parentMatrix);
 		glm::vec3											calcTranslation(const float& time, size_t currentKeyIndex, Channel* channel);
 		glm::quat											calcRotation(const float& time, size_t currentKeyIndex, Channel* channel);
@@ -38,19 +38,19 @@ namespace vel
 
 
 	public:
-															Armature(std::string name, Scene* parentScene);
+		Armature(std::string name);
 		void												addBone(ArmatureBone b);
-		void												addAnimation(std::string name, size_t index);
+		void												addAnimation(std::string name, Animation* anim);
 		ArmatureBone&										getRootBone();
 		std::vector<ArmatureBone>&							getBones();
 		const std::vector<ArmatureBone>&					getBones() const;
 		ArmatureBone&										getBone(size_t index);
 		ArmatureBone*										getBone(std::string boneName);
 		const std::string&									getName() const;
-		const std::vector<std::pair<std::string, size_t>>&	getAnimations() const;
+		const std::vector<std::pair<std::string, Animation*>>&		getAnimations() const;
 		size_t												getBoneIndex(std::string boneName);
 		void												updateAnimation(double runTime, std::optional<glm::mat4> parentMatrix);
-		size_t												getAnimationIndex(std::string animationName);
+		Animation*											getAnimation(std::string animationName);
 
 		std::string											getCurrentAnimationName();
 		unsigned int										getCurrentAnimationCycle();

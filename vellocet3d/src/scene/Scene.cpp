@@ -36,7 +36,7 @@ namespace vel
 
 	Scene::~Scene()
 	{
-
+		App::get().getGPU()->wipe(this->shaders, this->meshes, this->textures);
 	}
 
 	/* Json Scene Loader
@@ -86,7 +86,7 @@ namespace vel
 		for (auto& r : j["scene"]["renderables"])
 		{
 			this->addRenderable(
-				r["name"], 
+				r["name"],
 				this->getShaderIndex(r["shader"]),
 				this->getMeshIndex(r["mesh"]),
 				this->getMaterialIndex(r["material"])
@@ -97,7 +97,7 @@ namespace vel
 		for (auto& s : j["stages"])
 		{
 			auto& stage = this->addStage();
-			
+
 			if (s["camera"]["type"] == "perspective")
 				stage.addPerspectiveCamera(s["camera"]["near"], s["camera"]["far"], s["camera"]["fov"]);
 			else if (s["camera"]["type"] == "orthographic")
@@ -367,16 +367,16 @@ namespace vel
 		this->animations.reserve(cap);
 	}
 
-	size_t Scene::addAnimation(Animation a)
+	Animation* Scene::addAnimation(Animation a)
 	{
 		if (this->animations.size() == this->animations.capacity())
 			App::get().logger.die("Scene::addAnimation(): Attempting to add animation after animations capacity has been reached");
 
 		this->animations.push_back(a);
-		return this->animations.size() - 1;
+		return &this->animations.at((this->animations.size() - 1));
 	}
 
-	const std::vector<Animation>& Scene::getAnimations() const
+	std::vector<Animation>& Scene::getAnimations()
 	{
 		return this->animations;
 	}
@@ -631,11 +631,8 @@ namespace vel
 					{
 						gpu->setShaderMat4("mvp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix() * a->getWorldRenderMatrix(alpha));
 
-
-
 						//std::cout << a->getName() << "\n";
 
-						// TODO - FIX THIS WHEN WE CONTINUE WORK ON ARMATURES
 						// If this actor is animated, send the bone transforms of it's armature to the shader
 						if (a->isAnimated())
 						{

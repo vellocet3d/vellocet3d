@@ -38,16 +38,12 @@ namespace vel
 		this->processNode(this->aiScene->mRootNode);
 	}
 
-	std::optional<size_t> AssetLoaderV2::getExistingAnimationIndex(std::string animationName)
+	std::optional<Animation*> AssetLoaderV2::getExistingAnimation(std::string animationName)
 	{
-		size_t i = 0;
 		for (auto& a : this->currentScene->getAnimations())
-		{
 			if (a.name == animationName)
-				return i;
+				return &a;
 
-			i++;
-		}
 		return std::nullopt;
 	}
 
@@ -58,14 +54,14 @@ namespace vel
 			std::string animationName = this->aiScene->mAnimations[i]->mName.C_Str();
 
 			// if an animation exists with the same name, use that animation
-			auto existingAnimationIndex = this->getExistingAnimationIndex(animationName);
+			auto existingAnimation = this->getExistingAnimation(animationName);
 
-			if (existingAnimationIndex)
+			if (existingAnimation)
 			{
 				// obtain this animation name relative to the armature
 				auto name = explode_string(animationName, '|')[1];
 
-				this->currentArmature->addAnimation(name, existingAnimationIndex.value());
+				this->currentArmature->addAnimation(name, existingAnimation.value());
 			}
 			// otherwise create a new animation
 			else
@@ -116,13 +112,13 @@ namespace vel
 				}
 
 				// add animation to scene's animations container, retrieving index
-				auto ai = this->currentScene->addAnimation(a);
+				auto aPtr = this->currentScene->addAnimation(a);
 
 				// obtain this animation name relative to the armature
 				auto name = explode_string(a.name, '|')[1];
 
 				// add this animation name/index to the armature's animations vector
-				this->currentArmature->addAnimation(name, ai);
+				this->currentArmature->addAnimation(name, aPtr);
 			}
 		}
 	}
@@ -137,7 +133,7 @@ namespace vel
 			std::string nodeParentName = node->mParent->mName.C_Str();
 
 			if (nodeParentName == "RootNode")
-				this->currentArmature = this->currentScene->addArmature(Armature(boneName, this->currentScene));
+				this->currentArmature = this->currentScene->addArmature(Armature(boneName));
 
 			ArmatureBone bone;
 			bone.name = boneName;

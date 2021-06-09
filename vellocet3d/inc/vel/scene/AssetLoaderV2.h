@@ -16,6 +16,7 @@
 #include "vel/scene/armature/Armature.h"
 #include "vel/scene/mesh/VertexBoneData.h"
 #include "vel/scene/Scene.h"
+#include "vel/scene/animation/Animation.h"
 
 
 
@@ -42,7 +43,7 @@ namespace vel
 		void								processMesh(aiMesh* aiMesh);
 		bool								isRootArmatureNode(aiNode* node);
 		glm::mat4							aiMatrix4x4ToGlm(const aiMatrix4x4 &from);
-		std::optional<size_t>				getExistingAnimationIndex(std::string animationName);
+		std::optional<Animation*>			getExistingAnimation(std::string animationName);
 		aiMatrix4x4							glmToAssImpMat4(glm::mat4 mat);
 		bool								nodeHasBeenProcessed(aiNode* in);
 

@@ -63,9 +63,9 @@ namespace vel
 		const std::vector<Mesh>&			getMeshes() const;
 		size_t								addMesh(Mesh m);
 		Mesh*								getMesh(size_t index);
-		size_t								addAnimation(Animation a);
-		const std::vector<Animation>&		getAnimations() const;
-		Animation&							getAnimation(size_t index);
+		Animation*							addAnimation(Animation a);
+		std::vector<Animation>&				getAnimations(); //TODO - I really REALLY need to go back through this whole project and properly use const
+		Animation&							getAnimation(size_t index); //TODO
 		void								updateAnimations(double runTime);
 		void								draw(float alpha);
 		void								stepPhysics(float delta);

@@ -6,23 +6,21 @@
 
 namespace vel
 {
-    Actor::Actor(std::string name) :
-        name(name),
-        deleted(false),
+	Actor::Actor(std::string name) :
+		name(name),
+		deleted(false),
 		visible(true),
 		dynamic(false),
-        transform(Transform()) ,
+		transform(Transform()),
 		rigidBody(nullptr),
 		armature(nullptr),
 		manualTransform(true) //TODO: tf is the point of this?
-		//parentStage(parentStage),
-
-    {}
+	{}
 
 	void Actor::processTransform()
 	{
 		this->updatePreviousTransform();
-		
+
 		if (!this->manualTransform && this->rigidBody != nullptr)
 		{
 			this->transform.setTranslation(bulletToGlmVec3(this->rigidBody->getWorldTransform().getOrigin()));
@@ -46,7 +44,7 @@ namespace vel
 
 				this->childActors.erase(this->childActors.begin() + i); //TODO this will shift memory, possibly revise in future
 			}
-		}	
+		}
 	}
 
 	void Actor::removeParentActor(bool calledFromRemoveChildActor)
@@ -157,7 +155,7 @@ namespace vel
 	{
 		// actor is not dynamic (does not move) so interpolation is not required, simply return it's world matrix
 		if (!this->isDynamic() || !this->previousTransform)
-		//if (!this->isDynamic() || !this->previousTransform || (App::get().getFrameTime() >= App::get().getLogicTime()))
+			//if (!this->isDynamic() || !this->previousTransform || (App::get().getFrameTime() >= App::get().getLogicTime()))
 		{
 			return this->getWorldMatrix();
 		}
@@ -253,25 +251,25 @@ namespace vel
 		return this->activeBones;
 	}
 
-    Transform& Actor::getTransform()
-    {
-        return this->transform;
-    }
+	Transform& Actor::getTransform()
+	{
+		return this->transform;
+	}
 
 	std::optional<Transform>& Actor::getPreviousTransform()
 	{
 		return this->previousTransform;
 	}
 
-    const bool Actor::isDeleted() const
-    {
-        return this->deleted;
-    }
+	const bool Actor::isDeleted() const
+	{
+		return this->deleted;
+	}
 
-    void Actor::setDeleted(bool d)
-    {
-        this->deleted = d;
-    }
+	void Actor::setDeleted(bool d)
+	{
+		this->deleted = d;
+	}
 
 	void Actor::setRigidBody(btRigidBody* rb)
 	{
@@ -301,7 +299,7 @@ namespace vel
 	void Actor::setVisible(bool v)
 	{
 		this->visible = v;
-		
+
 		for (auto& ca : this->childActors)
 			ca->setVisible(v);
 
@@ -329,27 +327,27 @@ namespace vel
 		this->containerIndex = ci;
 	}
 
-    const size_t& Actor::getRenderableIndex() const
-    {
+	const size_t& Actor::getRenderableIndex() const
+	{
 		if (!this->parentRenderableIndex)
 		{
 			std::cout << "Attempting to get actor parentRenderableIndex before it has been set\n";
 			std::cin.get();
 			exit(EXIT_FAILURE);
 		}
-        return this->parentRenderableIndex.value();
-    }
+		return this->parentRenderableIndex.value();
+	}
 
-    void Actor::setRenderableIndex(size_t ri)
-    {
+	void Actor::setRenderableIndex(size_t ri)
+	{
 		this->parentRenderableIndex = ri;
-    }
+	}
 
 	const bool Actor::isAnimated() const
 	{
-		if (this->armature) 
+		if (this->armature)
 			return true;
-		
+
 		return false;
 	}
 

@@ -14,8 +14,7 @@
 
 namespace vel
 {
-	Armature::Armature(std::string name, Scene* parentScene) :
-		parentScene(parentScene),
+	Armature::Armature(std::string name) :
 		name(name),
 		runTime(0.0),
 		previousRunTime(0.0)
@@ -106,7 +105,7 @@ namespace vel
 					}
 				}
 			}
-			
+
 			bone.matrix = glm::mat4(1.0f);
 			bone.matrix = glm::translate(bone.matrix, lerpTRS.translation);
 			bone.matrix = bone.matrix * glm::toMat4(lerpTRS.rotation);
@@ -144,13 +143,9 @@ namespace vel
 		{
 
 			if (activeAnimation.blendTime > 0.0)
-			{
 				activeAnimation.blendPercentage = (float)(activeAnimation.animationTime / (activeAnimation.blendTime / 1000.0));
-			}
 			else
-			{
 				activeAnimation.blendPercentage = 1.0f;
-			}
 
 			// if blendPercentage is greater than or equal to 1.0f, then we have completed the blending phase and this animation
 			// can continue to play without interpolating between previous animations, therefore we clear all previous animations
@@ -158,9 +153,7 @@ namespace vel
 			if (activeAnimation.blendPercentage >= 1.0f)
 			{
 				for (size_t i = 0; i < this->activeAnimations.size() - 1; i++)
-				{
 					this->activeAnimations.pop_front();
-				}
 
 				activeAnimation = this->activeAnimations.back();
 			}
@@ -173,9 +166,8 @@ namespace vel
 			//std::cout << activeAnimation.animationKeyTime << "\n";
 
 			if (activeAnimation.animationKeyTime < activeAnimation.lastAnimationKeyTime)
-			{
 				activeAnimation.currentAnimationCycle++;
-			}
+
 
 			if (activeAnimation.currentAnimationCycle == 1 && !activeAnimation.repeat)
 			{
@@ -194,13 +186,9 @@ namespace vel
 				for (size_t i = 0; i < this->bones.size(); i++)
 				{
 					if (i == 0)
-					{
 						this->updateBone(0, glm::mat4(1.0f));
-					}
 					else
-					{
 						this->updateBone(i, this->bones[this->bones[i].parent].matrix);
-					}
 				}
 
 				activeAnimation.animationTime += stepTime;
@@ -213,7 +201,7 @@ namespace vel
 	void Armature::playAnimation(std::string animationName, bool repeat, int blendTime)
 	{
 		ActiveAnimation a;
-		a.animation = &this->parentScene->getAnimation(this->getAnimationIndex(animationName));
+		a.animation = this->getAnimation(animationName);
 		a.animationName = animationName;
 		a.blendTime = (double)blendTime;
 		a.animationTime = 0.0;
@@ -222,8 +210,6 @@ namespace vel
 		a.currentAnimationCycle = 0;
 		a.blendPercentage = 0.0f;
 		a.repeat = repeat;
-
-		//std::cout << "aan:" << a.animation->name << "\n";
 
 		this->activeAnimations.push_back(a);
 	}
@@ -236,28 +222,20 @@ namespace vel
 	unsigned int Armature::getCurrentAnimationCycle()
 	{
 		if (this->activeAnimations.size() > 0)
-		{
 			return this->activeAnimations.back().currentAnimationCycle;
-		}
 		else
-		{
 			return 0;
-		}
 	}
 
 	std::string Armature::getCurrentAnimationName()
 	{
 		if (this->activeAnimations.size() > 0)
-		{
 			return this->activeAnimations.back().animationName;
-		}
 		else
-		{
 			return "";
-		}
 	}
 
-	const std::vector<std::pair<std::string, size_t>>& Armature::getAnimations() const
+	const std::vector<std::pair<std::string, Animation*>>& Armature::getAnimations() const
 	{
 		return this->animations;
 	}
@@ -267,9 +245,9 @@ namespace vel
 		return this->name;
 	}
 
-	void Armature::addAnimation(std::string name, size_t index)
+	void Armature::addAnimation(std::string name, Animation* anim)
 	{
-		this->animations.push_back(std::pair<std::string, size_t>(name, index));
+		this->animations.push_back(std::pair<std::string, Animation*>(name, anim));
 	}
 
 	void Armature::addBone(ArmatureBone b)
@@ -295,10 +273,9 @@ namespace vel
 	ArmatureBone* Armature::getBone(std::string boneName)
 	{
 		for (auto& b : this->bones)
-		{
 			if (b.name == boneName)
 				return &b;
-		}
+
 		return nullptr;
 	}
 
@@ -307,34 +284,22 @@ namespace vel
 		return this->bones.at(index);
 	}
 
-	
-
-	size_t Armature::getAnimationIndex(std::string animationName)
+	Animation* Armature::getAnimation(std::string animationName)
 	{
 		for (auto& p : this->animations)
-		{
 			if (p.first == animationName)
-			{
 				return p.second;
-			}
-		}
-		std::cout << "Trying to get index of non-existing animationName:" << animationName << "\n";
-		std::cin.get();
-		exit(EXIT_FAILURE);
+
+		App::get().logger.die(("Armature::getAnimation(): Attempting to get animation pointer of non-existing animation name: " + animationName));
 	}
 
 	size_t Armature::getBoneIndex(std::string boneName)
 	{
 		for (size_t i = 0; i < this->bones.size(); i++)
-		{
 			if (this->bones.at(i).name == boneName)
-			{
 				return i;
-			}
-		}
-		std::cout << "Trying to get index of non-existing boneName:" << boneName << "\n";
-		std::cin.get();
-		exit(EXIT_FAILURE);
+
+		App::get().logger.die(("Armature::getBoneIndex(): Attempting to get index of non-existing bone name: " + boneName));
 	}
 
 }
