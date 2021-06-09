@@ -21,8 +21,6 @@ namespace vel
 		activeMesh(nullptr),
 		activeMaterial(nullptr)
 	{
-		// create collision debug drawer
-		this->collisionDebugDrawer = CollisionDebugDrawer();
 
 	}
 
@@ -65,15 +63,6 @@ namespace vel
 		for (auto& t : textures)
 			glDeleteTextures(1, &t.id);
 
-	}
-
-	CollisionDebugDrawer* GPU::getCollisionDebugDrawer()
-	{
-		//return this->collisionDebugDrawer.get();
-		if (this->collisionDebugDrawer)
-			return &this->collisionDebugDrawer.value();
-		else
-			return nullptr;
 	}
 
 	void GPU::loadShader(Shader& s)
@@ -440,6 +429,39 @@ namespace vel
 	{
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+
+	void GPU::debugDrawCollisionWorld(CollisionDebugDrawer* cdd)
+	{
+		if (cdd->getVerts().size() > 0)
+		{
+			unsigned int VAO, VBO;
+			glGenVertexArrays(1, &VAO);
+			glGenBuffers(1, &VBO);
+
+			glBindVertexArray(VAO);
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+			glBufferData(GL_ARRAY_BUFFER, cdd->getVerts().size() * sizeof(BulletDebugDrawData), &cdd->getVerts()[0], GL_STATIC_DRAW);
+
+			// Assign vertex positions to location = 0
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BulletDebugDrawData), (void*)0);
+
+			// Assign vertex color to location = 1
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(BulletDebugDrawData), (void*)offsetof(BulletDebugDrawData, color));
+
+			//glDrawArrays(GL_LINES, 0, (GLsizei)this->verts.size() / 3);
+			glDrawArrays(GL_LINES, 0, (GLsizei)cdd->getVerts().size());
+
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArray(0);
+			cdd->getVerts().clear();
+
+			glDeleteVertexArrays(1, &VAO);
+			glDeleteBuffers(1, &VBO);
+		}
 	}
 
 }

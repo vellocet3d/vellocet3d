@@ -8,40 +8,40 @@
 
 namespace vel
 {
-    enum CameraType {
-        ORTHOGRAPHIC,
-        PERSPECTIVE
-    };
+	enum CameraType {
+		ORTHOGRAPHIC,
+		PERSPECTIVE
+	};
 
-    class Camera
-    {        
-    private:
-        std::string             name;
-        CameraType              type;
-        float                   fovScale;
-        const glm::ivec2*       screenSize;
-        float                   nearPlane;
-        float                   farPlane;
-        glm::vec3			    position = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::vec3			    lookAt = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::vec3			    up = glm::vec3(0.0f, 1.0f, 0.0f);
-        glm::mat4			    viewMatrix = glm::mat4(1.0f);
-        glm::mat4			    projectionMatrix = glm::mat4(1.0f);
-        void                    updateViewMatrix();
-        void                    updateProjectionMatrix();
+	class Camera
+	{
+	private:
+		CameraType              type;
+		float                   fovScale;
+		const glm::ivec2*       screenSize;
+		float                   nearPlane;
+		float                   farPlane;
+		glm::vec3			    position;
+		glm::vec3			    lookAt;
+		glm::vec3			    up;
+		glm::mat4			    viewMatrix;
+		glm::mat4			    projectionMatrix;
 
-    public:
-								Camera(CameraType type, float nearPlane, float farPlane, float fovScale);
-        void                    update();
+		void                    updateViewMatrix();
+		void                    updateProjectionMatrix();
+
+	public:
+		Camera(CameraType type, float nearPlane, float farPlane, float fovScale);
+		void                    update();
 		glm::mat4               getViewMatrix();
-        glm::mat4               getProjectionMatrix();
-        glm::vec3               getPosition();
+		glm::mat4               getProjectionMatrix();
+		glm::vec3               getPosition();
 		glm::ivec2				getScreenSize();
-        void                    setPosition(float x, float y, float z);
+		void                    setPosition(float x, float y, float z);
 		void                    setPosition(glm::vec3 position);
-        void                    setLookAt(float x, float y, float z);
+		void                    setLookAt(float x, float y, float z);
 		void                    setLookAt(glm::vec3 direction);
 
 
-    };
+	};
 }

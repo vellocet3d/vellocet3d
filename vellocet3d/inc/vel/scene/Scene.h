@@ -89,6 +89,7 @@ namespace vel
 
 
 		Shader*								getShader(size_t si);
+		Shader*								getShader(std::string shaderName);
 		Texture*							getTexture(size_t textureIndex);
 		Material*							getMaterial(size_t materialIndex);
 		Material*							getMaterial(std::string materialName);

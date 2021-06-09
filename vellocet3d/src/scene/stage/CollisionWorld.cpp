@@ -11,8 +11,7 @@
 
 namespace vel
 {
-	CollisionWorld::CollisionWorld(Stage* stage, float gravity) :
-		stage(stage),
+	CollisionWorld::CollisionWorld(float gravity) :
 		collisionConfiguration(new btDefaultCollisionConfiguration()),
 		dispatcher(new btCollisionDispatcher(collisionConfiguration)),
 		overlappingPairCache(new btDbvtBroadphase()),
@@ -31,10 +30,10 @@ namespace vel
 		{
 			btCollisionObject* obj = this->dynamicsWorld->getCollisionObjectArray()[i];
 			btRigidBody* body = btRigidBody::upcast(obj);
+
 			if (body && body->getMotionState())
-			{
 				delete body->getMotionState();
-			}
+
 			this->dynamicsWorld->removeCollisionObject(obj);
 			delete obj;
 		}
@@ -46,12 +45,6 @@ namespace vel
 			cs.second = 0;
 			delete shape;
 		}
-		//for (int j = 0; j < this->collisionShapes.size(); j++)
-		//{
-		//	btCollisionShape* shape = this->collisionShapes[j];
-		//	this->collisionShapes[j] = 0;
-		//	delete shape;
-		//}
 
 		//delete dynamics world
 		delete this->dynamicsWorld;
@@ -87,7 +80,24 @@ namespace vel
 				}
 			}
 		}
-		
+
+	}
+
+	void CollisionWorld::useDebugDrawer(Shader* s, int debugMode)
+	{
+		this->collisionDebugDrawer = CollisionDebugDrawer();
+		this->collisionDebugDrawer->setDebugMode(debugMode);
+		this->collisionDebugDrawer->setShaderProgram(s);
+
+		this->dynamicsWorld->setDebugDrawer(&this->collisionDebugDrawer.value());
+	}
+
+	CollisionDebugDrawer* CollisionWorld::getDebugDrawer() //TODO should this really return nullptr OOORrrrrrrr??????
+	{
+		if (this->collisionDebugDrawer)
+			return &this->collisionDebugDrawer.value();
+		else
+			return nullptr;
 	}
 
 	void CollisionWorld::addSensor(Sensor* ct)
@@ -101,9 +111,7 @@ namespace vel
 		for (auto& s : this->sensors)
 		{
 			if (s->contactPair.first == co || s->contactPair.second == co)
-			{
 				this->sensors.erase(this->sensors.begin() + index);
-			}
 
 			index++;
 		}
@@ -121,9 +129,7 @@ namespace vel
 		this->removeSensorsUsingCollisionObject(rb);
 
 		if (rb->getMotionState())
-		{
 			delete rb->getMotionState();
-		}
 
 		this->dynamicsWorld->removeCollisionObject(rb);
 
@@ -146,7 +152,7 @@ namespace vel
 		return this->dynamicsWorld;
 	}
 
-	
+
 
 	/*
 		Create a single btBvhTriangleMeshShape and corresponding btRigidBody object from
@@ -154,34 +160,26 @@ namespace vel
 		the newly generated btRigidBody object allowing users to modify it as necessary (applying
 		friction and whatnot)
 	*/
-	btRigidBody* CollisionWorld::addStaticCollisionBody(std::string collisionObjectName, std::vector<Actor*> actors, std::optional<std::function<void(btRigidBody* body)>> callback)
+	btRigidBody* CollisionWorld::addStaticCollisionBody(std::string collisionObjectName, std::vector<Actor*> actors)
 	{
 		std::vector<glm::vec3> tmpVerts;
 		std::vector<size_t> tmpInds;
 
 		for (auto actor : actors)
 		{
-			// TODO - FIX THIS
-			////if (!actor->getMeshIndex())
-			////{
-			////	//return; //not sure why i was returning here...probably should have been continue
-			////	continue;
-			////}
+			if (actor->getMesh() == nullptr)
+				continue;
 
-			////auto transformMatrix = actor->getWorldMatrix();
-			////auto mesh = &this->stage->getParentScene()->getMesh(actor->getMeshIndex().value());
+			auto transformMatrix = actor->getWorldMatrix();
+			auto mesh = actor->getMesh();
 
-			////size_t vertexOffset = tmpVerts.size();
+			size_t vertexOffset = tmpVerts.size();
 
-			////for (auto& vert : mesh->getVertices())
-			////{
-			////	tmpVerts.push_back(glm::vec3(transformMatrix * glm::vec4(vert.position, 1.0f)));
-			////}
+			for (auto& vert : mesh->getVertices())
+				tmpVerts.push_back(glm::vec3(transformMatrix * glm::vec4(vert.position, 1.0f)));
 
-			////for (auto& ind : mesh->getIndices())
-			////{
-			////	tmpInds.push_back(ind + vertexOffset);
-			////}
+			for (auto& ind : mesh->getIndices())
+				tmpInds.push_back(ind + vertexOffset);
 		}
 
 		btTriangleMesh* mergedTriangleMesh = new btTriangleMesh();
@@ -200,31 +198,23 @@ namespace vel
 		btCollisionShape* staticCollisionShape = bvhShape;
 		this->collisionShapes[collisionObjectName] = staticCollisionShape;
 
-		
+
 
 		btScalar mass(0.0);
 		btVector3 localInertia(0, 0, 0);
 		btDefaultMotionState* defaultMotionState = new btDefaultMotionState();
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, defaultMotionState, staticCollisionShape, localInertia);
 		btRigidBody* body = new btRigidBody(rbInfo);
-		
+
 		///////// added below to handle jitter when objects sliding across faces
 		// https://stackoverflow.com/questions/25605659/avoid-ground-collision-with-bullet/25725502#25725502
-
 		gContactAddedCallback = &CollisionWorld::contactAddedCallback;
 		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 		btTriangleInfoMap* triangleInfoMap = new btTriangleInfoMap();
 		btGenerateInternalEdgeInfo(bvhShape, triangleInfoMap);
-
 		/////////
 
-
 		this->dynamicsWorld->addRigidBody(body);
-
-		if (callback)
-		{
-			callback.value()(body);
-		}
 
 		return body;
 	}
@@ -233,75 +223,59 @@ namespace vel
 		Same as above function, only instead of creating a single collision object from given actors, we create an individual collision object
 		with it's own AABB for each actor passed
 	*/
-	void CollisionWorld::addStaticCollisionBodies(std::vector<Actor*> actors, std::optional<std::function<void(btRigidBody* body)>> callback)
+	void CollisionWorld::addStaticCollisionBodies(std::vector<Actor*> actors)
 	{
 		for (auto actor : actors)
 		{
-			// TODO - FIX THIS
-			////if (!actor->getMeshIndex())
-			////	continue;
+			if (actor->getMesh() == nullptr)
+				continue;
 
-			////std::vector<glm::vec3> tmpVerts;
-			////std::vector<size_t> tmpInds;
-			////
-			////auto transformMatrix = actor->getWorldMatrix();
-			////auto mesh = &this->stage->getParentScene()->getMesh(actor->getMeshIndex().value());
+			std::vector<glm::vec3> tmpVerts;
+			std::vector<size_t> tmpInds;
 
-			////size_t vertexOffset = tmpVerts.size();
+			auto transformMatrix = actor->getWorldMatrix();
+			auto mesh = actor->getMesh();
 
-			////for (auto& vert : mesh->getVertices())
-			////{
-			////	tmpVerts.push_back(glm::vec3(transformMatrix * glm::vec4(vert.position, 1.0f)));
-			////}
+			size_t vertexOffset = tmpVerts.size();
 
-			////for (auto& ind : mesh->getIndices())
-			////{
-			////	tmpInds.push_back(ind + vertexOffset);
-			////}
+			for (auto& vert : mesh->getVertices())
+				tmpVerts.push_back(glm::vec3(transformMatrix * glm::vec4(vert.position, 1.0f)));
 
-			////btTriangleMesh* mergedTriangleMesh = new btTriangleMesh();
-			////btVector3 p0, p1, p2;
-			////for (int triCounter = 0; triCounter < tmpInds.size() / 3; triCounter++)
-			////{
-			////	p0 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter]]);
-			////	p1 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 1]]);
-			////	p2 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 2]]);
+			for (auto& ind : mesh->getIndices())
+				tmpInds.push_back(ind + vertexOffset);
 
-			////	mergedTriangleMesh->addTriangle(p0, p1, p2);
-			////}
+			btTriangleMesh* mergedTriangleMesh = new btTriangleMesh();
+			btVector3 p0, p1, p2;
+			for (int triCounter = 0; triCounter < tmpInds.size() / 3; triCounter++)
+			{
+				p0 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter]]);
+				p1 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 1]]);
+				p2 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 2]]);
 
-			//////btCollisionShape* staticCollisionShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);
-			////btBvhTriangleMeshShape* bvhShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);
-			////btCollisionShape* staticCollisionShape = bvhShape;
-			////this->collisionShapes[actor->getName() + "_shape"] = staticCollisionShape;
+				mergedTriangleMesh->addTriangle(p0, p1, p2);
+			}
 
-			////btScalar mass(0.0);
-			////btVector3 localInertia(0, 0, 0);
-			////btDefaultMotionState* defaultMotionState = new btDefaultMotionState();
-			////btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, defaultMotionState, staticCollisionShape, localInertia);
-			////btRigidBody* body = new btRigidBody(rbInfo);
+			//btCollisionShape* staticCollisionShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);
+			btBvhTriangleMeshShape* bvhShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);
+			btCollisionShape* staticCollisionShape = bvhShape;
+			this->collisionShapes[actor->getName() + "_shape"] = staticCollisionShape;
 
-			///////////// added below to handle jitter when objects sliding across faces
-			////// https://stackoverflow.com/questions/25605659/avoid-ground-collision-with-bullet/25725502#25725502
+			btScalar mass(0.0);
+			btVector3 localInertia(0, 0, 0);
+			btDefaultMotionState* defaultMotionState = new btDefaultMotionState();
+			btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, defaultMotionState, staticCollisionShape, localInertia);
+			btRigidBody* body = new btRigidBody(rbInfo);
 
-			////gContactAddedCallback = &CollisionWorld::contactAddedCallback;
-			////body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
-			////btTriangleInfoMap* triangleInfoMap = new btTriangleInfoMap();
-			////btGenerateInternalEdgeInfo(bvhShape, triangleInfoMap);
+			///////// added below to handle jitter when objects sliding across faces
+			// https://stackoverflow.com/questions/25605659/avoid-ground-collision-with-bullet/25725502#25725502
+			gContactAddedCallback = &CollisionWorld::contactAddedCallback;
+			body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+			btTriangleInfoMap* triangleInfoMap = new btTriangleInfoMap();
+			btGenerateInternalEdgeInfo(bvhShape, triangleInfoMap);
+			/////////
 
-			/////////////
-
-
-			////this->dynamicsWorld->addRigidBody(body);
-
-			////if (callback)
-			////{
-			////	callback.value()(body);
-			////}
+			this->dynamicsWorld->addRigidBody(body);
 		}
-
-
-
 	}
 
 

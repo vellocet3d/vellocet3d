@@ -17,7 +17,6 @@ namespace vel
 
 	Stage::Stage() :
 		visible(true),
-		collisionDebuggingSwitch(false),
 		clearDepthBuffer(false)
 	{
 		// Reserve default amount of space for each container. Can be updated via
@@ -52,9 +51,7 @@ namespace vel
 			}
 
 			act->setActiveBones(activeBones);
-
 		}
-
 
 		return sa;
 	}
@@ -69,41 +66,23 @@ namespace vel
 		this->clearDepthBuffer = b;
 	}
 
-	bool Stage::collisionDebugging()
-	{
-		return this->collisionDebuggingSwitch;
-	}
-
-	void Stage::useCollisionDebugDrawer(int debugMode)
-	{
-		if (!this->collisionWorld)
-			return;
-
-		this->collisionDebuggingSwitch = true;
-
-		App::get().getGPU()->getCollisionDebugDrawer()->setDebugMode(debugMode);
-
-		this->getCollisionWorld()->getDynamicsWorld()->setDebugDrawer(App::get().getGPU()->getCollisionDebugDrawer());
-	}
-
 	void Stage::stepPhysics(float delta)
 	{
 		if (this->collisionWorld)
 			this->collisionWorld.value()->getDynamicsWorld()->stepSimulation(delta, 0);
-		
 	}
 
 	CollisionWorld* Stage::getCollisionWorld()
 	{
 		if (!this->collisionWorld)
 			return nullptr;
-		
+
 		return this->collisionWorld.value().get();
 	}
 
 	void Stage::setCollisionWorld(float gravity)
 	{
-		this->collisionWorld = std::make_unique<CollisionWorld>(this, gravity);
+		this->collisionWorld = std::make_unique<CollisionWorld>(gravity);
 	}
 
 	std::vector<Actor>& Stage::getActors()

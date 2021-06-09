@@ -17,6 +17,7 @@
 #include "vel/scene/stage/Actor.h"
 #include "vel/scene/stage/Sensor.h"
 #include "vel/scene/stage/RaycastResult.h"
+#include "vel/CollisionDebugDrawer.h"
 
 
 
@@ -27,7 +28,6 @@ namespace vel
 	class CollisionWorld
 	{
 	private:
-		Stage*									stage;
 		btDefaultCollisionConfiguration*		collisionConfiguration;
 		btCollisionDispatcher*					dispatcher;
 		btBroadphaseInterface*					overlappingPairCache;
@@ -35,19 +35,20 @@ namespace vel
 		btDiscreteDynamicsWorld*				dynamicsWorld;
 		std::map<std::string, btCollisionShape*> collisionShapes;
 		std::vector<std::unique_ptr<Sensor>>	sensors;
-		
+		std::optional<CollisionDebugDrawer> 	collisionDebugDrawer;
+
 
 		void									removeSensorsUsingCollisionObject(btCollisionObject* co);
-	
+
 	public:
 		static bool								contactAddedCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1);
-												
-												CollisionWorld(Stage* stage, float gravity = -10);
-												~CollisionWorld();
+
+		CollisionWorld(float gravity = -10);
+		~CollisionWorld();
 		btDiscreteDynamicsWorld* const			getDynamicsWorld();
 		void									addCollisionShape(std::string name, btCollisionShape* shape);
-		btRigidBody*							addStaticCollisionBody(std::string collisionObjectName, std::vector<Actor*> actors, std::optional<std::function<void(btRigidBody* body)>> callback = std::nullopt);
-		void									addStaticCollisionBodies(std::vector<Actor*> actors, std::optional<std::function<void(btRigidBody* body)>> callback = std::nullopt);
+		btRigidBody*							addStaticCollisionBody(std::string collisionObjectName, std::vector<Actor*> actors);
+		void									addStaticCollisionBodies(std::vector<Actor*> actors);
 		void									removeRigidBody(btRigidBody* rb);
 		void									removeGhostObject(btPairCachingGhostObject* go);
 		void									addSensor(Sensor* ct);
@@ -55,7 +56,9 @@ namespace vel
 
 
 		std::optional<RaycastResult>			rayTest(btVector3 from, btVector3 to, std::vector<btCollisionObject*> blackList = {});
-		
+
+		void									useDebugDrawer(Shader* s, int debugMode = 1);
+		CollisionDebugDrawer* 					getDebugDrawer();
 
 	};
 

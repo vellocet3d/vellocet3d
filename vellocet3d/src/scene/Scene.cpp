@@ -220,12 +220,21 @@ namespace vel
 			if (this->shaders.at(i).name == shaderName)
 				return i;
 
-		App::get().logger.die("CANNOT GET SHADER INDEX FOR NON EXISTING SHADER NAME");
+		App::get().logger.die("Scene::getShaderIndex(): CANNOT GET SHADER INDEX FOR NON EXISTING SHADER NAME");
 	}
 
 	Shader* Scene::getShader(size_t si)
 	{
 		return &this->shaders.at(si);
+	}
+
+	Shader* Scene::getShader(std::string shaderName)
+	{
+		for (auto& s : this->shaders)
+			if (s.name == shaderName)
+				return &s;
+
+		App::get().logger.die("Scene::getShader(): CANNOT GET SHADER FOR NON EXISTING SHADER NAME");
 	}
 
 	/* Meshes
@@ -578,23 +587,21 @@ namespace vel
 			// should always have a camera if we've made it this far
 			s.getCamera()->update();
 
-			// TODO - RETHINK HOW WE WANT TO HANDLE DEBUG DRAWING
-			//// if debug drawer set, do debug draw
-			//if (s.collisionDebugging())
-			//{
-			//	s.getCollisionWorld()->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
 
-			//	gpu->useShader(2);
-			//	gpu->setShaderMat4("vp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix());
-			//	gpu->getCollisionDebugDrawer()->draw(); // draw all loaded vertices with a single call and clear
+			// if debug drawer set, do debug draw
+			if (s.getCollisionWorld()->getDebugDrawer() != nullptr)
+			{
+				s.getCollisionWorld()->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
 
-			//	//std::cout << "debug draw\n";
-			//}
+				gpu->useShader(s.getCollisionWorld()->getDebugDrawer()->getShaderProgram());
+				gpu->setShaderMat4("vp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix());
+				gpu->debugDrawCollisionWorld(s.getCollisionWorld()->getDebugDrawer()); // draw all loaded vertices with a single call and clear
+
+				//std::cout << "debug draw\n";
+			}
+
 
 			//s.printRenderables();            
-
-			// should always have a camera if we've made it this far
-			//s.getCamera()->update(alpha);
 
 			//std::cout << "----------------------------------\n";
 

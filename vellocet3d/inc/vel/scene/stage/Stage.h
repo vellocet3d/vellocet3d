@@ -31,14 +31,11 @@ namespace vel
 		std::vector<Armature>							armatures;
 		std::vector<Renderable>							renderables;
 		std::vector<size_t>								renderablesOrder;
-		std::optional<size_t>							renderableExists(const std::string& rn);
-		size_t											addRenderable(Renderable rc);
-		std::optional<std::unique_ptr<CollisionWorld>>	collisionWorld;
-		bool											collisionDebuggingSwitch;
+		std::optional<std::unique_ptr<CollisionWorld>>	collisionWorld; // TODO: why on earth is this unique_ptr optional?
 		bool											clearDepthBuffer;
 
-
-
+		std::optional<size_t>							renderableExists(const std::string& rn);
+		size_t											addRenderable(Renderable rc);
 
 
 	public:
@@ -82,9 +79,6 @@ namespace vel
 		CollisionWorld*								getCollisionWorld();
 
 		void										stepPhysics(float delta);
-		void										useCollisionDebugDrawer(int debugMode = 1);
-		bool										collisionDebugging();
-
 
 		Armature*									addArmature(Armature a, std::string defaultAnimation, std::vector<std::string> actors);
 

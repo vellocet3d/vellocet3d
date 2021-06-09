@@ -14,6 +14,7 @@ namespace vel
 		transform(Transform()),
 		rigidBody(nullptr),
 		armature(nullptr),
+		mesh(nullptr),
 		manualTransform(true) //TODO: tf is the point of this?
 	{}
 
@@ -52,10 +53,7 @@ namespace vel
 		if (this->parentActor.has_value())
 		{
 			if (!calledFromRemoveChildActor)
-			{
-				// remove this actor's pointer from it's parent's childActors container
 				this->parentActor.value()->removeChildActor(this, true);
-			}
 
 			this->parentActor.reset();
 		}
@@ -106,6 +104,17 @@ namespace vel
 	void Actor::addRenderable(Renderable r)
 	{
 		this->tempRenderable = r;
+		this->mesh = r.getMesh();
+	}
+
+	void Actor::setMesh(Mesh* m)
+	{
+		this->mesh = m;
+	}
+
+	Mesh* Actor::getMesh()
+	{
+		return this->mesh;
 	}
 
 	std::optional<Renderable>& Actor::getTempRenderable()
@@ -121,14 +130,10 @@ namespace vel
 	std::optional<glm::mat4> Actor::getParentMatrix()
 	{
 		if (!this->parentActor)
-		{
 			return std::nullopt;
-		}
 
 		if (!this->parentActorBone)
-		{
 			return this->parentActor.value()->getTransform().getMatrix();
-		}
 
 		return this->parentActor.value()->getTransform().getMatrix() * this->parentActorBone.value()->matrix;
 	}
@@ -137,15 +142,11 @@ namespace vel
 	{
 		// if this actor has no parent, simply return the matrix of it's transform
 		if (!this->parentActor)
-		{
 			return this->transform.getMatrix();
-		}
 
 		// if this actor is parented to another actor (and not a bone of that actor)
 		if (!this->parentActorBone)
-		{
 			return this->parentActor.value()->getTransform().getMatrix() * this->transform.getMatrix();
-		}
 
 		return this->parentActor.value()->getTransform().getMatrix() * this->parentActorBone.value()->matrix * this->transform.getMatrix();
 
@@ -155,27 +156,19 @@ namespace vel
 	{
 		// actor is not dynamic (does not move) so interpolation is not required, simply return it's world matrix
 		if (!this->isDynamic() || !this->previousTransform)
-			//if (!this->isDynamic() || !this->previousTransform || (App::get().getFrameTime() >= App::get().getLogicTime()))
-		{
 			return this->getWorldMatrix();
-		}
-
 
 		auto actorMatrix = Transform::interpolateTransforms(this->previousTransform.value(), this->transform, alpha);
 
 		// if this actor has no parent, simply return the matrix of it's transform
 		if (!this->parentActor)
-		{
 			return actorMatrix;
-		}
 
 		auto parentActorMatrix = Transform::interpolateTransforms(this->parentActor.value()->getPreviousTransform().value(), this->parentActor.value()->getTransform(), alpha);
 
 		// if this actor is parented to another actor (and not a bone of that actor)
 		if (!this->parentActorBone)
-		{
 			return parentActorMatrix * actorMatrix;
-		}
 
 		auto boneMatrix = this->parentActorBone.value()->getRenderMatrix(alpha);
 
@@ -186,29 +179,24 @@ namespace vel
 	glm::vec3 Actor::getInterpolatedTranslation(float alpha)
 	{
 		if (this->previousTransform) // insure we have a value for previousTransform from which to interpolate
-		{
 			return Transform::interpolateTranslations(this->previousTransform.value(), this->transform, alpha);
-		}
+
 		return this->transform.getTranslation();
 	}
 
 	glm::quat Actor::getInterpolatedRotation(float alpha)
 	{
 		if (this->previousTransform) // insure we have a value for previousTransform from which to interpolate
-		{
 			return Transform::interpolateRotations(this->previousTransform.value(), this->transform, alpha);
-		}
-		//return this->transform.getTranslation();
+
 		return this->transform.getRotation();
 	}
 
 	glm::vec3 Actor::getInterpolatedScale(float alpha)
 	{
 		if (this->previousTransform) // insure we have a value for previousTransform from which to interpolate
-		{
 			return Transform::interpolateScales(this->previousTransform.value(), this->transform, alpha);
-		}
-		//return this->transform.getTranslation();
+
 		return this->transform.getScale();
 	}
 
@@ -220,9 +208,7 @@ namespace vel
 	void Actor::updatePreviousTransform()
 	{
 		if (!this->isDeleted() && this->isDynamic())
-		{
 			this->previousTransform = this->getTransform();
-		}
 	}
 
 	void Actor::setParentActor(Actor* a)
@@ -302,7 +288,6 @@ namespace vel
 
 		for (auto& ca : this->childActors)
 			ca->setVisible(v);
-
 	}
 
 	const std::string Actor::getName() const

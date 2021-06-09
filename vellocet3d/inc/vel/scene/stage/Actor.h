@@ -34,11 +34,13 @@ namespace vel
 		Armature*										armature;
 		std::optional<std::vector<std::pair<size_t, std::string>>> activeBones; // the bones from the armature that are actually used by the mesh, 
 																				// the glue between an armature and a mesh (index is mesh bone index, value is armature bone index)
+																				// TODO - why is this vector optional???
 
 		std::optional<Renderable>						tempRenderable;
 		std::optional<size_t>							parentRenderableIndex;
 		std::optional<size_t>							containerIndex;
 
+		Mesh*											mesh; // pointer to mesh used by this Actor independant of renderable. required for headless mode since there will be no renderable instance
 
 		btRigidBody*									rigidBody;
 		btPairCachingGhostObject*						ghostObject;
@@ -102,6 +104,9 @@ namespace vel
 
 		void											removeParentActor(bool calledFromRemoveChildActor = false);
 		void											removeChildActor(Actor* a, bool calledFromRemoveParentActor = false);
+
+		Mesh*											getMesh();
+		void											setMesh(Mesh* m);
 
 
 

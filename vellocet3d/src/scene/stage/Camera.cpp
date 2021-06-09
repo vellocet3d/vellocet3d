@@ -9,15 +9,20 @@
 
 namespace vel
 {
-    Camera::Camera(CameraType type, float nearPlane, float farPlane, float fovScale) :
-        type(type),
-        screenSize(&App::get().getScreenSize()),
-        nearPlane(nearPlane),
-        farPlane(farPlane),
-        fovScale(fovScale)
-    {
-        
-    }
+	Camera::Camera(CameraType type, float nearPlane, float farPlane, float fovScale) :
+		type(type),
+		screenSize(&App::get().getScreenSize()),
+		nearPlane(nearPlane),
+		farPlane(farPlane),
+		fovScale(fovScale),
+		position(glm::vec3(0.0f, 0.0f, 0.0f)),
+		lookAt(glm::vec3(0.0f, 0.0f, 0.0f)),
+		up(glm::vec3(0.0f, 1.0f, 0.0f)),
+		viewMatrix(glm::mat4(1.0f)),
+		projectionMatrix(glm::mat4(1.0f))
+	{
+
+	}
 
 	glm::ivec2 Camera::getScreenSize()
 	{
@@ -44,52 +49,52 @@ namespace vel
 
 	}
 
-    void Camera::updateViewMatrix()
-    {
-        this->viewMatrix = glm::lookAt(this->position, this->lookAt, this->up);
-    }
+	void Camera::updateViewMatrix()
+	{
+		this->viewMatrix = glm::lookAt(this->position, this->lookAt, this->up);
+	}
 
-    void Camera::update()
-    {
-        this->updateViewMatrix();
-        this->updateProjectionMatrix();
-    }
+	void Camera::update()
+	{
+		this->updateViewMatrix();
+		this->updateProjectionMatrix();
+	}
 
-    glm::mat4 Camera::getViewMatrix()
-    {
-        return this->viewMatrix;
-    }
+	glm::mat4 Camera::getViewMatrix()
+	{
+		return this->viewMatrix;
+	}
 
-    glm::mat4 Camera::getProjectionMatrix()
-    {
-        return this->projectionMatrix;
-    }
+	glm::mat4 Camera::getProjectionMatrix()
+	{
+		return this->projectionMatrix;
+	}
 
-    void Camera::setPosition(float x, float y, float z)
-    {
-        this->position = glm::vec3(x, y, z);
-    }
+	void Camera::setPosition(float x, float y, float z)
+	{
+		this->position = glm::vec3(x, y, z);
+	}
 
 	void Camera::setPosition(glm::vec3 position)
 	{
 		this->position = position;
 	}
 
-    void Camera::setLookAt(float x, float y, float z)
-    {
-        this->lookAt = glm::vec3(x, y, z);
-    }
+	void Camera::setLookAt(float x, float y, float z)
+	{
+		this->lookAt = glm::vec3(x, y, z);
+	}
 
 	void Camera::setLookAt(glm::vec3 direction)
 	{
 		this->lookAt = direction;
 	}
 
-    glm::vec3 Camera::getPosition()
-    {
-        return this->position;
-    }
+	glm::vec3 Camera::getPosition()
+	{
+		return this->position;
+	}
 
-    
+
 
 }

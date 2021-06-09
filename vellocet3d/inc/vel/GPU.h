@@ -25,8 +25,6 @@ namespace vel
 		Mesh*								activeMesh;
 		Material*							activeMaterial;
 
-		std::optional<CollisionDebugDrawer> collisionDebugDrawer;
-
 	public:
 		GPU();
 		~GPU();
@@ -54,12 +52,13 @@ namespace vel
 		void								setShaderMat4(const std::string &name, glm::mat4 value) const;
 
 		void								drawGpuMesh();
-		CollisionDebugDrawer*				getCollisionDebugDrawer();
 		void								clearDepthBuffer();
 
 		void								wipe(std::vector<Shader>& shaders, std::vector<Mesh>& meshes, std::vector<Texture>& textures);
 		void								finish();
 		void								enableBlend();
+
+		void								debugDrawCollisionWorld(CollisionDebugDrawer* cdd);
 
 	};
 }
