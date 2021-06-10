@@ -12,6 +12,7 @@ namespace vel
 		visible(true),
 		dynamic(false),
 		transform(Transform()),
+		parentActor(nullptr),
 		rigidBody(nullptr),
 		armature(nullptr),
 		mesh(nullptr),
@@ -50,12 +51,12 @@ namespace vel
 
 	void Actor::removeParentActor(bool calledFromRemoveChildActor)
 	{
-		if (this->parentActor.has_value())
+		if (this->parentActor != nullptr)
 		{
 			if (!calledFromRemoveChildActor)
-				this->parentActor.value()->removeChildActor(this, true);
+				this->parentActor->removeChildActor(this, true);
 
-			this->parentActor.reset();
+			this->parentActor = nullptr;
 		}
 	}
 
@@ -80,7 +81,7 @@ namespace vel
 		newActor.setName(newName);
 
 		// Clear parents and children
-		newActor.parentActor = std::nullopt;
+		newActor.parentActor = nullptr;
 		newActor.parentActorBone = std::nullopt;
 		newActor.childActors.clear();
 
@@ -129,27 +130,26 @@ namespace vel
 
 	std::optional<glm::mat4> Actor::getParentMatrix()
 	{
-		if (!this->parentActor)
+		if (this->parentActor == nullptr)
 			return std::nullopt;
 
 		if (!this->parentActorBone)
-			return this->parentActor.value()->getTransform().getMatrix();
+			return this->parentActor->getTransform().getMatrix();
 
-		return this->parentActor.value()->getTransform().getMatrix() * this->parentActorBone.value()->matrix;
+		return this->parentActor->getTransform().getMatrix() * this->parentActorBone.value()->matrix;
 	}
 
 	glm::mat4 Actor::getWorldMatrix()
 	{
 		// if this actor has no parent, simply return the matrix of it's transform
-		if (!this->parentActor)
+		if (this->parentActor == nullptr)
 			return this->transform.getMatrix();
 
 		// if this actor is parented to another actor (and not a bone of that actor)
 		if (!this->parentActorBone)
-			return this->parentActor.value()->getTransform().getMatrix() * this->transform.getMatrix();
+			return this->parentActor->getTransform().getMatrix() * this->transform.getMatrix();
 
-		return this->parentActor.value()->getTransform().getMatrix() * this->parentActorBone.value()->matrix * this->transform.getMatrix();
-
+		return this->parentActor->getTransform().getMatrix() * this->parentActorBone.value()->matrix * this->transform.getMatrix();
 	}
 
 	glm::mat4 Actor::getWorldRenderMatrix(float alpha)
@@ -161,10 +161,10 @@ namespace vel
 		auto actorMatrix = Transform::interpolateTransforms(this->previousTransform.value(), this->transform, alpha);
 
 		// if this actor has no parent, simply return the matrix of it's transform
-		if (!this->parentActor)
+		if (this->parentActor == nullptr)
 			return actorMatrix;
 
-		auto parentActorMatrix = Transform::interpolateTransforms(this->parentActor.value()->getPreviousTransform().value(), this->parentActor.value()->getTransform(), alpha);
+		auto parentActorMatrix = Transform::interpolateTransforms(this->parentActor->getPreviousTransform().value(), this->parentActor->getTransform(), alpha);
 
 		// if this actor is parented to another actor (and not a bone of that actor)
 		if (!this->parentActorBone)

@@ -28,7 +28,7 @@ namespace vel
 		bool											dynamic;
 		Transform										transform;
 		std::optional<Transform>						previousTransform;
-		std::optional<Actor*>							parentActor;
+		Actor*											parentActor;
 		std::optional<ArmatureBone*>					parentActorBone;
 		std::vector<Actor*>								childActors;
 		Armature*										armature;
