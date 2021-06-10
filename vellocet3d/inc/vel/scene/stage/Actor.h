@@ -29,7 +29,7 @@ namespace vel
 		Transform										transform;
 		std::optional<Transform>						previousTransform;
 		Actor*											parentActor;
-		std::optional<ArmatureBone*>					parentActorBone;
+		ArmatureBone*									parentActorBone;
 		std::vector<Actor*>								childActors;
 		Armature*										armature;
 		std::vector<std::pair<size_t, std::string>>		activeBones; // the bones from the armature that are actually used by the mesh, 

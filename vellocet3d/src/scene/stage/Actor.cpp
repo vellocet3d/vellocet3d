@@ -13,6 +13,7 @@ namespace vel
 		dynamic(false),
 		transform(Transform()),
 		parentActor(nullptr),
+		parentActorBone(nullptr),
 		rigidBody(nullptr),
 		armature(nullptr),
 		mesh(nullptr),
@@ -82,7 +83,7 @@ namespace vel
 
 		// Clear parents and children
 		newActor.parentActor = nullptr;
-		newActor.parentActorBone = std::nullopt;
+		newActor.parentActorBone = nullptr;
 		newActor.childActors.clear();
 
 		// Clear rigidbody pointer, ghost pointer, and transform flag
@@ -133,10 +134,10 @@ namespace vel
 		if (this->parentActor == nullptr)
 			return std::nullopt;
 
-		if (!this->parentActorBone)
+		if (this->parentActorBone == nullptr)
 			return this->parentActor->getTransform().getMatrix();
 
-		return this->parentActor->getTransform().getMatrix() * this->parentActorBone.value()->matrix;
+		return this->parentActor->getTransform().getMatrix() * this->parentActorBone->matrix;
 	}
 
 	glm::mat4 Actor::getWorldMatrix()
@@ -146,10 +147,10 @@ namespace vel
 			return this->transform.getMatrix();
 
 		// if this actor is parented to another actor (and not a bone of that actor)
-		if (!this->parentActorBone)
+		if (this->parentActorBone == nullptr)
 			return this->parentActor->getTransform().getMatrix() * this->transform.getMatrix();
 
-		return this->parentActor->getTransform().getMatrix() * this->parentActorBone.value()->matrix * this->transform.getMatrix();
+		return this->parentActor->getTransform().getMatrix() * this->parentActorBone->matrix * this->transform.getMatrix();
 	}
 
 	glm::mat4 Actor::getWorldRenderMatrix(float alpha)
@@ -167,10 +168,10 @@ namespace vel
 		auto parentActorMatrix = Transform::interpolateTransforms(this->parentActor->getPreviousTransform().value(), this->parentActor->getTransform(), alpha);
 
 		// if this actor is parented to another actor (and not a bone of that actor)
-		if (!this->parentActorBone)
+		if (this->parentActorBone == nullptr)
 			return parentActorMatrix * actorMatrix;
 
-		auto boneMatrix = this->parentActorBone.value()->getRenderMatrix(alpha);
+		auto boneMatrix = this->parentActorBone->getRenderMatrix(alpha);
 
 		return parentActorMatrix * boneMatrix * actorMatrix;
 
