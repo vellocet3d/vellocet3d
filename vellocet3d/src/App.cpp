@@ -59,11 +59,6 @@ namespace vel
 		return this->window->getImguiFont(key);
 	}
 
-	Scene* App::getScene()
-	{
-		return this->scene.get();
-	}
-
     void App::setScene(Scene* scene)
     {
 		if(this->window->getImguiFrameOpen())

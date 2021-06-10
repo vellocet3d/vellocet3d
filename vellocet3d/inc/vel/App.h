@@ -57,7 +57,6 @@ namespace vel
 														App(App const&) = delete;
         void											operator=(App const&) = delete;
         void											setScene(Scene* scene);
-		Scene*											getScene();
         void											clearScene();
         const double									time() const;
         const InputState&								getInputState() const;

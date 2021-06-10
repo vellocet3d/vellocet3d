@@ -33,9 +33,9 @@ namespace vel
 		void								clearBuffers(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 0.0f);
 		void								drawLinesOnly();
 
-		const Shader*						getActiveShader() const;
-		const Mesh*							getActiveMesh() const;
-		const Material*						getActiveMaterial() const;
+		const Shader* const					getActiveShader() const;
+		const Mesh*	const					getActiveMesh() const;
+		const Material*	const				getActiveMaterial() const;
 
 		void								loadShader(Shader& s);
 		void								loadMesh(Mesh& m);

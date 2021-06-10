@@ -316,17 +316,17 @@ namespace vel
 		}
 	}
 
-	const Shader* GPU::getActiveShader() const
+	const Shader* const GPU::getActiveShader() const
 	{
 		return this->activeShader;
 	}
 
-	const Mesh* GPU::getActiveMesh() const
+	const Mesh* const GPU::getActiveMesh() const
 	{
 		return this->activeMesh;
 	}
 
-	const Material* GPU::getActiveMaterial() const
+	const Material* const GPU::getActiveMaterial() const
 	{
 		return this->activeMaterial;
 	}
