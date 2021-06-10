@@ -652,7 +652,7 @@ namespace vel
 
 
 							size_t boneIndex = 0;
-							for (auto& activeBone : a->getActiveBones().value())
+							for (auto& activeBone : a->getActiveBones())
 							{
 								glm::mat4 meshBoneTransform = mesh->getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrix(alpha) * mesh->getBone(boneIndex).offsetMatrix;
 

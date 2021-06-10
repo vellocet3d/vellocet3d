@@ -32,9 +32,9 @@ namespace vel
 		std::optional<ArmatureBone*>					parentActorBone;
 		std::vector<Actor*>								childActors;
 		Armature*										armature;
-		std::optional<std::vector<std::pair<size_t, std::string>>> activeBones; // the bones from the armature that are actually used by the mesh, 
-																				// the glue between an armature and a mesh (index is mesh bone index, value is armature bone index)
-																				// TODO - why is this vector optional???
+		std::vector<std::pair<size_t, std::string>>		activeBones; // the bones from the armature that are actually used by the mesh, 
+																	// the glue between an armature and a mesh (index is mesh bone index, value is armature bone index)
+																				
 
 		std::optional<Renderable>						tempRenderable;
 		std::optional<size_t>							parentRenderableIndex;
@@ -76,7 +76,7 @@ namespace vel
 		void											setArmature(Armature* arm);
 		Armature*										getArmature();
 
-		const std::optional<std::vector<std::pair<size_t, std::string>>>& getActiveBones() const;
+		const std::vector<std::pair<size_t, std::string>>& getActiveBones() const;
 		void											setActiveBones(std::vector<std::pair<size_t, std::string>> activeBones);
 		void											setParentActor(Actor* a);
 		void											setParentActorBone(ArmatureBone* b);

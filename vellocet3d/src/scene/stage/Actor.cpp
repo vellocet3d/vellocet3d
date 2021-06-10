@@ -232,7 +232,7 @@ namespace vel
 		this->activeBones = activeBones;
 	}
 
-	const std::optional<std::vector<std::pair<size_t, std::string>>>& Actor::getActiveBones() const
+	const std::vector<std::pair<size_t, std::string>>& Actor::getActiveBones() const
 	{
 		return this->activeBones;
 	}

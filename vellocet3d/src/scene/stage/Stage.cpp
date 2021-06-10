@@ -401,7 +401,7 @@ namespace vel
 	void Stage::debugActiveNumberOfBonesPerActor()
 	{
 		for (auto& a : this->actors)
-			std::cout << a.getName() << ":" << a.getActiveBones().value().size() << "\n";
+			std::cout << a.getName() << ":" << a.getActiveBones().size() << "\n";
 	}
 
 }
