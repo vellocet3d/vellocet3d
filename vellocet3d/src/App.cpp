@@ -54,7 +54,7 @@ namespace vel
 		this->window->hideMouseCursor();
 	}
 
-	ImFont* App::getImguiFont(std::string key)
+	ImFont* App::getImguiFont(std::string key) const
 	{
 		return this->window->getImguiFont(key);
 	}
@@ -233,16 +233,7 @@ namespace vel
 				float renderLerpInterval = (float)(this->accumulator / this->fixedLogicTime);
 
 				// execute outer loop (immediate) logic
-				if (this->scene->swapping)
-				{
-					this->setPauseBufferClearAndSwap(true);
-					std::this_thread::sleep_for(2000ms); // for testing, can be removed
-					this->setScene(this->scene->sceneToSwap);
-				}
-				else
-				{
-					this->scene->outerLoop((float)this->frameTime, renderLerpInterval);
-				}
+				this->scene->outerLoop((float)this->frameTime, renderLerpInterval);
 				
 
 				// perform draw (render) logic

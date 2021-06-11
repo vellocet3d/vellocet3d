@@ -23,10 +23,8 @@ namespace vel
 		std::vector<Texture>				textures;
 		std::vector<Material>				materials;
 		std::vector<Animation>				animations;
-
 		std::vector<Renderable>				renderables;
 		std::vector<Armature>				armatures;
-
 		std::vector<Stage>					stages;
 
 		double								animationTime;
@@ -46,63 +44,50 @@ namespace vel
 		void								loadMesh(std::string path);
 		size_t								loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
 		void								loadSceneConfig(std::string path);
+
 		size_t								addMaterial(Material m);
 		size_t								addRenderable(std::string name, size_t defaultShaderIndex, size_t crateMeshIndex, size_t crateMaterialIndex);
+		Stage&								addStage();
+
 		Renderable							getRenderable(std::string name);
 		Armature							getArmature(std::string name);
-		Stage&								addStage();
 		Stage&								getStage(size_t index);
-
-
 
 
 	public:
 		Scene();
 		~Scene();
-		bool								loaded;
-		const std::vector<Mesh>&			getMeshes() const;
-		size_t								addMesh(Mesh m);
-		Mesh*								getMesh(size_t index);
-		Animation*							addAnimation(Animation a);
-		std::vector<Animation>&				getAnimations(); //TODO - I really REALLY need to go back through this whole project and properly use const
-		Animation&							getAnimation(size_t index); //TODO
-		void								updateAnimations(double runTime);
-		void								draw(float alpha);
-		void								stepPhysics(float delta);
-		void								applyTransformations();
-		void								processSensors();
-
 		virtual void						load() = 0;
 		virtual void						innerLoop(float deltaTime) = 0;
 		virtual void						outerLoop(float frameTime, float renderLerpInterval) = 0;
 		virtual void						postPhysics(float deltaTime);
 
-		bool								swapping = false;
-		void								swap(Scene* scene);
-		Scene*								sceneToSwap = nullptr;
-		virtual void						showLoadingIcon();
-
-		void debugVertexBones();
-		void debugListNumberOfBonesPerArmature();
-		void debugActiveNumberOfBonesPerActor();
-
-
+		bool								loaded;
+		
+		Mesh*								addMesh(Mesh m);
+		Animation*							addAnimation(Animation a);
+		Armature*							addArmature(Armature a);
 
 		Shader*								getShader(size_t si);
 		Shader*								getShader(std::string shaderName);
 		Texture*							getTexture(size_t textureIndex);
 		Material*							getMaterial(size_t materialIndex);
 		Material*							getMaterial(std::string materialName);
-
-
+		Mesh*								getMesh(size_t index);
+		const std::vector<Mesh>&			getMeshes() const;
+		Animation&							getAnimation(size_t index);
+		std::vector<Animation>&				getAnimations();
+		
 		size_t								getShaderIndex(std::string shaderName);
 		size_t								getTextureIndex(std::string textureName);
 		size_t								getMaterialIndex(std::string materialName);
 		size_t								getMeshIndex(std::string meshName);
 
-
-		Armature*							addArmature(Armature a);
-
+		void								updateAnimations(double runTime);
+		void								draw(float alpha);
+		void								stepPhysics(float delta);
+		void								applyTransformations();
+		void								processSensors();
 
 	};
 

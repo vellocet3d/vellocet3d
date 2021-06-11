@@ -33,7 +33,7 @@ namespace vel
 		this->armatures.reserve(100);
 		this->stages.reserve(10);
 	}
-
+	
 	Scene::~Scene()
 	{
 		App::get().getGPU()->wipe(this->shaders, this->meshes, this->textures);
@@ -250,14 +250,16 @@ namespace vel
 		al.load();
 	}
 
-	size_t Scene::addMesh(Mesh m)
+	Mesh* Scene::addMesh(Mesh m)
 	{
 		if (this->meshes.size() == this->meshes.capacity())
 			App::get().logger.die("Scene::addMesh(): Attempting to add mesh after meshes capacity has been reached");
 
 		App::get().getGPU()->loadMesh(m);
+
 		this->meshes.push_back(m);
-		return this->meshes.size() - 1;
+
+		return &this->meshes.at((this->meshes.size() - 1));
 	}
 
 	const std::vector<Mesh>& Scene::getMeshes() const
@@ -491,67 +493,6 @@ namespace vel
 	}
 
 	void Scene::postPhysics(float delta) {}
-
-	void Scene::swap(Scene* sceneIn)
-	{
-		this->swapping = true;
-		this->sceneToSwap = sceneIn;
-		this->showLoadingIcon();
-	}
-
-	void Scene::showLoadingIcon()
-	{
-		auto screenX = (float)App::get().getScreenSize().x;
-		auto screenY = (float)App::get().getScreenSize().y;
-
-		// Set window size
-		ImGui::SetNextWindowSize(ImVec2(140.0f, 51.0f));
-
-		// Center window
-		ImGui::SetNextWindowPos(
-			ImVec2((screenX * 0.5f) - 70.0f, (screenY * 0.5f) - 26.0f),
-			ImGuiCond_Always
-		);
-
-		// Create "loading" window
-		ImGui::Begin("Loading", NULL, ImGuiWindowFlags_NoMove
-			| ImGuiWindowFlags_NoTitleBar
-			| ImGuiWindowFlags_NoResize
-		);
-
-		ImGui::PushFont(App::get().getImguiFont("Teko-35"));
-
-		ImGui::Text("We Be Load'n...");
-
-		ImGui::PopFont();
-
-		ImGui::End();
-	}
-
-	// Use this when running into vertex bone buffer size issues
-	void Scene::debugVertexBones()
-	{
-		int maxAttemptedVertexBoneAllocations = 0;
-
-		for (auto& m : this->meshes)
-			for (auto& v : m.getVertices())
-				if (v.attemptedVertexWeightAdditions > maxAttemptedVertexBoneAllocations)
-					maxAttemptedVertexBoneAllocations = v.attemptedVertexWeightAdditions;
-
-		std::cout << maxAttemptedVertexBoneAllocations << std::endl;
-	}
-
-	void Scene::debugListNumberOfBonesPerArmature()
-	{
-		for (auto& s : this->stages)
-			s.debugListNumberOfBonesPerArmature();
-	}
-
-	void Scene::debugActiveNumberOfBonesPerActor()
-	{
-		for (auto& s : this->stages)
-			s.debugActiveNumberOfBonesPerActor();
-	}
 
 	void Scene::applyTransformations()
 	{

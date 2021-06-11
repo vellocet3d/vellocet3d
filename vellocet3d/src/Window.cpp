@@ -139,9 +139,9 @@ namespace vel
 		//glfwSetInputMode(this->glfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 	}
 
-	ImFont* Window::getImguiFont(std::string key)
+	ImFont* Window::getImguiFont(std::string key) const
 	{
-		return this->imguiFonts[key];
+		return this->imguiFonts.at(key);
 	}
 
     void Window::setTitle(std::string title)

@@ -53,7 +53,7 @@ namespace vel
         //void				vsync();
 
 
-		ImFont*				getImguiFont(std::string key);
+		ImFont* 			getImguiFont(std::string key) const;
 		void				hideMouseCursor();
 		void				showMouseCursor();
 		bool				getImguiFrameOpen();

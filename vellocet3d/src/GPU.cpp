@@ -31,27 +31,11 @@ namespace vel
 
 	void GPU::wipe(std::vector<Shader>& shaders, std::vector<Mesh>& meshes, std::vector<Texture>& textures)
 	{
-		// TODO - This will need to be invoked via Scene, passing required parameters
-
-	   //     for (auto& mr : this->gpuMeshes)
-	   //     {
-	   //         glDeleteVertexArrays(1, &mr.VAO);
-	   //         glDeleteBuffers(1, &mr.VBO);
-	   //         glDeleteBuffers(1, &mr.EBO);
-	   //     }
-
-	   //     for (auto& t : this->textures)
-				//glDeleteTextures(1, &t.id);
-
-	   //     for (auto& s : this->shaders)
-				//glDeleteProgram(s.id);
-
 		for (auto& s : shaders)
 			glDeleteProgram(s.id);
 
 		for (auto& m : meshes)
 		{
-			// TODO - IDK if this will work or not
 			if (m.getGpuMesh())
 			{
 				glDeleteVertexArrays(1, &m.getGpuMesh().value().VAO);
@@ -62,7 +46,6 @@ namespace vel
 
 		for (auto& t : textures)
 			glDeleteTextures(1, &t.id);
-
 	}
 
 	void GPU::loadShader(Shader& s)
