@@ -9,10 +9,10 @@
 
 #include "vel/scene/stage/Actor.h"
 #include "vel/scene/stage/Camera.h"
-#include "vel/scene/Renderable.h"
-#include "vel/scene/stage/CollisionWorld.h"
-#include "vel/CollisionDebugDrawer.h"
-#include "vel/scene/stage/Sensor.h"
+#include "vel/assets/Renderable.h"
+#include "vel/scene/stage/collision/CollisionWorld.h"
+#include "vel/scene/stage/collision/CollisionDebugDrawer.h"
+#include "vel/scene/stage/collision/Sensor.h"
 #include "vel/GPU.h"
 
 

@@ -2,7 +2,7 @@
 
 #include "glm/glm.hpp"
 
-#include "vel/scene/mesh/VertexBoneData.h"
+#include "vel/assets/mesh/VertexBoneData.h"
 
 
 namespace vel

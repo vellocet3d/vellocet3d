@@ -1,7 +1,7 @@
 
 
 #include "vel/App.h"
-#include "vel/scene/Renderable.h"
+#include "vel/assets/Renderable.h"
 
 
 namespace vel

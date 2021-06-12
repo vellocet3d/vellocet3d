@@ -8,11 +8,11 @@
 #include "btBulletDynamicsCommon.h"
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
 
-#include "vel/scene/armature/Armature.h"
-#include "vel/scene/armature/ArmatureBone.h"
-#include "vel/scene/mesh/Mesh.h"
+#include "vel/assets/armature/Armature.h"
+#include "vel/assets/armature/ArmatureBone.h"
+#include "vel/assets/mesh/Mesh.h"
 #include "vel/scene/stage/Transform.h"
-#include "vel/scene/Renderable.h"
+#include "vel/assets/Renderable.h"
 
 
 namespace vel

@@ -3,9 +3,9 @@
 #include "glm/glm.hpp"
 
 #include "vel/App.h"
-#include "vel/scene/stage/CollisionWorld.h"
+#include "vel/scene/stage/collision/CollisionWorld.h"
 #include "vel/helpers/functions.h"
-#include "vel/scene/stage/RaycastCallback.h"
+#include "vel/scene/stage/collision/RaycastCallback.h"
 
 
 

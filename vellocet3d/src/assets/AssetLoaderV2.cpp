@@ -10,8 +10,8 @@
 
 
 #include "vel/App.h"
-#include "vel/scene/AssetLoaderV2.h"
-#include "vel/scene/mesh/Vertex.h"
+#include "vel/assets/AssetLoaderV2.h"
+#include "vel/assets/mesh/Vertex.h"
 #include "vel/helpers/functions.h"
 
 

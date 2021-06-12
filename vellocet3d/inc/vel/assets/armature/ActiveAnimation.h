@@ -1,6 +1,8 @@
 #pragma once
 
-#include "vel/scene/animation/Animation.h"
+#include <string>
+
+#include "vel/assets/animation/Animation.h"
 
 
 namespace vel

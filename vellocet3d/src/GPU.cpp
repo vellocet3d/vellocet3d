@@ -11,7 +11,7 @@
 #include "STB_IMAGE/stb_image.h"
 
 #include "vel/GPU.h"
-#include "vel/scene/mesh/Vertex.h"
+#include "vel/assets/mesh/Vertex.h"
 #include "vel/helpers/functions.h"
 
 namespace vel

@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <string>
 
-#include "vel/scene/animation/Channel.h"
+#include "vel/assets/animation/Channel.h"
 
 
 namespace vel

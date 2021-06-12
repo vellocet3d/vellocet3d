@@ -8,11 +8,11 @@
 #include "glm/glm.hpp"
 
 
-#include "vel/Shader.h"
-#include "vel/scene/mesh/Mesh.h"
-#include "vel/scene/material/Texture.h"
-#include "vel/scene/material/Material.h"
-#include "vel/CollisionDebugDrawer.h"
+#include "vel/assets/Shader.h"
+#include "vel/assets/mesh/Mesh.h"
+#include "vel/assets/material/Texture.h"
+#include "vel/assets/material/Material.h"
+#include "vel/scene/stage/collision/CollisionDebugDrawer.h"
 
 struct GLFWusercontext;
 

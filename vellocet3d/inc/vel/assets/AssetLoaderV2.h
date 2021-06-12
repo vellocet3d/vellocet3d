@@ -9,14 +9,14 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
-#include "vel/scene/mesh/Mesh.h"
+#include "vel/assets/mesh/Mesh.h"
 #include "vel/scene/stage/Stage.h"
-#include "vel/Shader.h"
+#include "vel/assets/Shader.h"
 #include "vel/scene/stage/Transform.h"
-#include "vel/scene/armature/Armature.h"
-#include "vel/scene/mesh/VertexBoneData.h"
+#include "vel/assets/armature/Armature.h"
+#include "vel/assets/mesh/VertexBoneData.h"
 #include "vel/scene/Scene.h"
-#include "vel/scene/animation/Animation.h"
+#include "vel/assets/animation/Animation.h"
 
 
 

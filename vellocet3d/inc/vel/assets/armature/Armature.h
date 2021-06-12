@@ -8,11 +8,11 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 
-#include "vel/scene/animation/Animation.h"
-#include "vel/scene/mesh/Mesh.h"
-#include "vel/scene/armature/ArmatureBone.h"
+#include "vel/assets/animation/Animation.h"
+#include "vel/assets/mesh/Mesh.h"
+#include "vel/assets/armature/ArmatureBone.h"
 #include "vel/scene/stage/Transform.h"
-#include "vel/scene/armature/ActiveAnimation.h"
+#include "vel/assets/armature/ActiveAnimation.h"
 
 
 
@@ -20,6 +20,13 @@
 namespace vel
 {
 	class Scene;
+
+	struct TRS
+	{
+		glm::vec3		translation;
+		glm::quat		rotation;
+		glm::vec3		scale;
+	};
 
 	class Armature
 	{

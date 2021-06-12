@@ -8,8 +8,8 @@
 #include "glm/gtx/string_cast.hpp"
 
 #include "vel/App.h"
-#include "vel/scene/armature/Armature.h"
-#include "vel/scene/stage/TRS.h"
+#include "vel/assets/armature/Armature.h"
+
 
 
 namespace vel

@@ -8,9 +8,9 @@
 
 #include "vel/App.h"
 #include "vel/scene/Scene.h"
-#include "vel/scene/mesh/Vertex.h"
-#include "vel/scene/material/Texture.h"
-#include "vel/scene/AssetLoaderV2.h"
+#include "vel/assets/mesh/Vertex.h"
+#include "vel/assets/material/Texture.h"
+#include "vel/assets/AssetLoaderV2.h"
 
 #include "dep/json.hpp"
 

@@ -3,7 +3,7 @@
 
 
 #include "vel/scene/stage/Transform.h"
-#include "vel/scene/armature/ArmatureBone.h"
+#include "vel/assets/armature/ArmatureBone.h"
 
 namespace vel
 {

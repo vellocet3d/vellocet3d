@@ -1,4 +1,4 @@
-#include "vel/scene/mesh/Vertex.h"
+#include "vel/assets/mesh/Vertex.h"
 
 namespace vel
 {

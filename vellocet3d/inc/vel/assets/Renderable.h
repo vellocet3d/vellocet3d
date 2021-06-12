@@ -3,9 +3,9 @@
 #include <vector>
 #include <string>
 
-#include "vel/Shader.h"
-#include "vel/scene/mesh/Mesh.h"
-#include "vel/scene/material/Material.h"
+#include "vel/assets/Shader.h"
+#include "vel/assets/mesh/Mesh.h"
+#include "vel/assets/material/Material.h"
 
 namespace vel
 {

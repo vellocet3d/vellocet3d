@@ -7,12 +7,12 @@
 
 #include "glm/glm.hpp"
 
-#include "vel/Shader.h"
+#include "vel/assets/Shader.h"
 #include "vel/scene/stage/Camera.h"
-#include "vel/scene/mesh/Vertex.h"
-#include "vel/scene/material/Texture.h"
-#include "vel/scene/mesh/GpuMesh.h"
-#include "vel/scene/mesh/MeshBone.h"
+#include "vel/assets/mesh/Vertex.h"
+#include "vel/assets/material/Texture.h"
+#include "vel/assets/mesh/GpuMesh.h"
+#include "vel/assets/mesh/MeshBone.h"
 
 
 namespace vel

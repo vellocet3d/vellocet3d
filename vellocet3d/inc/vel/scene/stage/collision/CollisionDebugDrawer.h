@@ -5,7 +5,7 @@
 #include "btBulletCollisionCommon.h"
 #include "glm/glm.hpp"
 
-#include "vel/Shader.h"
+#include "vel/assets/Shader.h"
 
 namespace vel
 {

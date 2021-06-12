@@ -2,7 +2,7 @@
 
 #include "glad/glad.h"
 
-#include "vel/CollisionDebugDrawer.h"
+#include "vel/scene/stage/collision/CollisionDebugDrawer.h"
 
 
 

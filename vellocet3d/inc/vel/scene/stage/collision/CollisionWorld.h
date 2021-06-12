@@ -15,9 +15,9 @@
 
 
 #include "vel/scene/stage/Actor.h"
-#include "vel/scene/stage/Sensor.h"
-#include "vel/scene/stage/RaycastResult.h"
-#include "vel/CollisionDebugDrawer.h"
+#include "vel/scene/stage/collision/Sensor.h"
+#include "vel/scene/stage/collision/RaycastResult.h"
+#include "vel/scene/stage/collision/CollisionDebugDrawer.h"
 
 
 

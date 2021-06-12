@@ -1,5 +1,5 @@
 
-#include "vel/scene/stage/RaycastCallback.h"
+#include "vel/scene/stage/collision/RaycastCallback.h"
 
 namespace vel
 {

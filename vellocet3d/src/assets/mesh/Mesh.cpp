@@ -4,7 +4,7 @@
 #include "glad/glad.h"
 #include "STB_IMAGE/stb_image.h"
 
-#include "vel/scene/mesh/Mesh.h"
+#include "vel/assets/mesh/Mesh.h"
 
 
 namespace vel

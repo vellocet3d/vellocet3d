@@ -1,7 +1,7 @@
 
 
 
-#include "vel/scene/stage/Sensor.h"
+#include "vel/scene/stage/collision/Sensor.h"
 
 
 namespace vel

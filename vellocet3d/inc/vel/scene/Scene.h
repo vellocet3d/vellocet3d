@@ -5,11 +5,11 @@
 #include <string>
 #include <optional>
 
-#include "vel/scene/mesh/Mesh.h"
+#include "vel/assets/mesh/Mesh.h"
 #include "vel/scene/stage/Stage.h"
-#include "vel/scene/armature/Armature.h"
-#include "vel/scene/animation/Animation.h"
-#include "vel/scene/material/Material.h"
+#include "vel/assets/armature/Armature.h"
+#include "vel/assets/animation/Animation.h"
+#include "vel/assets/material/Material.h"
 
 
 
