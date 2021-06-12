@@ -14,21 +14,18 @@ namespace vel
     private:
 		std::string					name;
         std::vector<size_t>			actorIndexes;
-		size_t						shaderIndex;
-		size_t						meshIndex;
-        size_t						materialIndex;
-		size_t						materialHasAlpha;
+
+		
 
 		Shader*						shader;
 		Mesh*						mesh;
 		Material*					material;
 
+		size_t						materialHasAlpha;
+
     public:
-									Renderable(std::string rn, size_t shaderIndex, size_t meshIndex, size_t materialIndex,
-										Shader* shader, Mesh* mesh, Material* material, bool hasAlphaChannel = false);
-        const size_t&				getShaderIndex() const;
-		const size_t&				getMeshIndex() const;
-        const size_t&				getMaterialIndex() const;
+									Renderable(std::string rn, Shader* shader, Mesh* mesh, Material* material);
+
 		const size_t&				getMaterialHasAlpha() const;
         const std::vector<size_t>&	getActorIndexes() const;
 		size_t						addActorIndex(size_t actorIndex);

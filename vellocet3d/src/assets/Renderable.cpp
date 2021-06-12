@@ -7,16 +7,12 @@
 namespace vel
 {
 
-    Renderable::Renderable(std::string rn, size_t shaderIndex, size_t meshIndex, size_t materialIndex,
-		Shader* shader, Mesh* mesh, Material* material, bool hasAlphaChannel) :
+    Renderable::Renderable(std::string rn, Shader* shader, Mesh* mesh, Material* material) :
 		name(rn),
-        shaderIndex(shaderIndex),
-        meshIndex(meshIndex),
-        materialIndex(materialIndex),
-		materialHasAlpha((hasAlphaChannel ? 1 : 0)),
 		shader(shader),
 		mesh(mesh),
-		material(material)
+		material(material),
+		materialHasAlpha((material->hasAlphaChannel ? 1 : 0))
 	{
 		
 	}
@@ -39,21 +35,6 @@ namespace vel
 	{
 		return this->name;
 	}
-
-    const size_t& Renderable::getShaderIndex() const
-    {
-        return this->shaderIndex;
-    }
-
-    const size_t& Renderable::getMeshIndex() const
-    {
-        return this->meshIndex;
-    }
-
-    const size_t& Renderable::getMaterialIndex() const
-    {
-        return this->materialIndex;
-    }
     
 	const size_t& Renderable::getMaterialHasAlpha() const
 	{

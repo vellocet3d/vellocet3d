@@ -9,13 +9,13 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
+#include "vel/assets/AssetManager.h"
 #include "vel/assets/mesh/Mesh.h"
 #include "vel/scene/stage/Stage.h"
 #include "vel/assets/Shader.h"
 #include "vel/scene/stage/Transform.h"
 #include "vel/assets/armature/Armature.h"
 #include "vel/assets/mesh/VertexBoneData.h"
-#include "vel/scene/Scene.h"
 #include "vel/assets/animation/Animation.h"
 
 
@@ -29,7 +29,7 @@ namespace vel
 	private:
 		Assimp::Importer					aiImporter;
 		const aiScene*						aiScene;
-		Scene*								currentScene;
+		AssetManager*						assetManager;
 
 		std::string							currentAssetFile;
 		std::optional<size_t>				currentMeshIndex;
@@ -48,7 +48,7 @@ namespace vel
 		bool								nodeHasBeenProcessed(aiNode* in);
 
 	public:
-		AssetLoaderV2(Scene* currentScene, std::string assetFile);
+		AssetLoaderV2(AssetManager* currentScene, std::string assetFile);
 		void								load();
 
 	};

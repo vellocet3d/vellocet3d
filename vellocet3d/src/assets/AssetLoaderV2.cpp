@@ -17,8 +17,8 @@
 
 namespace vel
 {
-	AssetLoaderV2::AssetLoaderV2(Scene* currentScene, std::string assetFile) :
-		currentScene(currentScene),
+	AssetLoaderV2::AssetLoaderV2(AssetManager* assetManager, std::string assetFile) :
+		assetManager(assetManager),
 		currentAssetFile(assetFile),
 		currentArmature(nullptr)
 	{
@@ -40,7 +40,7 @@ namespace vel
 
 	std::optional<Animation*> AssetLoaderV2::getExistingAnimation(std::string animationName)
 	{
-		for (auto& a : this->currentScene->getAnimations())
+		for (auto& a : this->assetManager->getAnimations())
 			if (a.name == animationName)
 				return &a;
 
@@ -112,7 +112,7 @@ namespace vel
 				}
 
 				// add animation to scene's animations container, retrieving index
-				auto aPtr = this->currentScene->addAnimation(a);
+				auto aPtr = this->assetManager->addAnimation(a);
 
 				// obtain this animation name relative to the armature
 				auto name = explode_string(a.name, '|')[1];
@@ -133,7 +133,7 @@ namespace vel
 			std::string nodeParentName = node->mParent->mName.C_Str();
 
 			if (nodeParentName == "RootNode")
-				this->currentArmature = this->currentScene->addArmature(Armature(boneName));
+				this->currentArmature = this->assetManager->addArmature(Armature(boneName));
 
 			ArmatureBone bone;
 			bone.name = boneName;
@@ -288,7 +288,7 @@ namespace vel
 
 		mesh.setGlobalInverseMatrix(this->currentGlobalInverseMatrix);
 
-		this->currentScene->addMesh(mesh);
+		this->assetManager->addMesh(mesh);
 	}
 
 	glm::mat4 AssetLoaderV2::aiMatrix4x4ToGlm(const aiMatrix4x4 &from)

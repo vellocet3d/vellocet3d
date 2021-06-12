@@ -6,14 +6,16 @@
 
 namespace vel
 {
+	struct Texture;
+
 	struct Material
 	{
 		std::string name;
-		std::optional<size_t> albedo;
-		std::optional<size_t> normal;
-		std::optional<size_t> metalness;
-		std::optional<size_t> roughness;
-		std::optional<size_t> ao; // ambient occlusion
+		Texture* albedo = nullptr;
+		Texture* normal = nullptr;
+		Texture* metalness = nullptr;
+		Texture* roughness = nullptr;
+		Texture* ao = nullptr; // ambient occlusion
 		bool hasAlphaChannel = false;
 	};
 }
