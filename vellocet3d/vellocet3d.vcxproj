@@ -185,6 +185,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\assets\AssetManager.cpp" />
     <ClCompile Include="src\dep\imgui\imgui.cpp" />
     <ClCompile Include="src\dep\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\dep\imgui\imgui_impl_glfw.cpp" />
@@ -218,6 +219,7 @@
   <ItemGroup>
     <ClInclude Include="inc\App.h" />
     <ClInclude Include="inc\dep\json.hpp" />
+    <ClInclude Include="inc\dep\plf_colony.h" />
     <ClInclude Include="inc\GPU.h" />
     <ClInclude Include="inc\scene\animation\Animation.h" />
     <ClInclude Include="inc\scene\armature\Armature.h" />
@@ -242,6 +244,7 @@
     <ClInclude Include="inc\scene\stage\Transform.h" />
     <ClInclude Include="inc\scene\mesh\Vertex.h" />
     <ClInclude Include="inc\vel\App.h" />
+    <ClInclude Include="inc\vel\assets\AssetManager.h" />
     <ClInclude Include="inc\vel\Config.h" />
     <ClInclude Include="inc\vel\GPU.h" />
     <ClInclude Include="inc\vel\helpers\functions.h" />
