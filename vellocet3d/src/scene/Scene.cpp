@@ -19,7 +19,8 @@ using json = nlohmann::json;
 namespace vel
 {
 	Scene::Scene() :
-		loaded(false),
+		mainMemoryloaded(false),
+		swapWhenLoaded(false),
 		animationTime(0.0)
 	{
 
@@ -32,170 +33,265 @@ namespace vel
 
 	/* Json Scene Loader
 	--------------------------------------------------*/
-	void Scene::loadSceneConfig(std::string path)
-	{
-		std::ifstream i(path);
-		json j;
-		i >> j;
+	// void Scene::loadSceneConfig(std::string path)
+	// {
+		// std::ifstream i(path);
+		// json j;
+		// i >> j;
 
-		//std::cout << j["scene"]["materials"][0]["ao"] << "\n";
+		////std::cout << j["scene"]["materials"][0]["ao"] << "\n";
 
-		//for (auto& el : j.items())
-		//{
-		//	std::cout << el.key() << " : " << el.value() << "\n";
-		//}
+		////for (auto& el : j.items())
+		////{
+		////	std::cout << el.key() << " : " << el.value() << "\n";
+		////}
 
 		// load elements into scene
-		for (auto& s : j["scene"]["shaders"])
-			this->loadShader(s["name"], s["vert_path"], s["frag_path"]);
+		// for (auto& s : j["scene"]["shaders"])
+			// this->loadShader(s["name"], s["vert_path"], s["frag_path"]);
 
-		for (auto& m : j["scene"]["meshes"])
-			this->loadMesh(m);
+		// for (auto& m : j["scene"]["meshes"])
+			// this->loadMesh(m);
 
-		for (auto& t : j["scene"]["textures"])
-			this->loadTexture(t["name"], t["type"], t["path"]);
+		// for (auto& t : j["scene"]["textures"])
+			// this->loadTexture(t["name"], t["type"], t["path"]);
 
-		for (auto& m : j["scene"]["materials"])
-		{
-			Material mat;
-			mat.name = m["name"];
+		// for (auto& m : j["scene"]["materials"])
+		// {
+			// Material mat;
+			// mat.name = m["name"];
 
-			if (!m["albedo"].is_null())
-				mat.albedo = this->getTextureIndex(m["albedo"]);
-			if (!m["normal"].is_null())
-				mat.normal = this->getTextureIndex(m["normal"]);
-			if (!m["metallic"].is_null())
-				mat.metalness = this->getTextureIndex(m["metallic"]);
-			if (!m["roughness"].is_null())
-				mat.roughness = this->getTextureIndex(m["roughness"]);
-			if (!m["ao"].is_null())
-				mat.ao = this->getTextureIndex(m["ao"]);
+			// if (!m["albedo"].is_null())
+				// mat.albedo = this->getTextureIndex(m["albedo"]);
+			// if (!m["normal"].is_null())
+				// mat.normal = this->getTextureIndex(m["normal"]);
+			// if (!m["metallic"].is_null())
+				// mat.metalness = this->getTextureIndex(m["metallic"]);
+			// if (!m["roughness"].is_null())
+				// mat.roughness = this->getTextureIndex(m["roughness"]);
+			// if (!m["ao"].is_null())
+				// mat.ao = this->getTextureIndex(m["ao"]);
 
-			this->addMaterial(mat);
-		}
+			// this->addMaterial(mat);
+		// }
 
-		for (auto& r : j["scene"]["renderables"])
-		{
-			this->addRenderable(
-				r["name"],
-				this->getShaderIndex(r["shader"]),
-				this->getMeshIndex(r["mesh"]),
-				this->getMaterialIndex(r["material"])
-			);
-		}
+		// for (auto& r : j["scene"]["renderables"])
+		// {
+			// this->addRenderable(
+				// r["name"],
+				// this->getShaderIndex(r["shader"]),
+				// this->getMeshIndex(r["mesh"]),
+				// this->getMaterialIndex(r["material"])
+			// );
+		// }
 
 		// load stages into scene
-		for (auto& s : j["stages"])
-		{
-			auto& stage = this->addStage();
+		// for (auto& s : j["stages"])
+		// {
+			// auto& stage = this->addStage();
 
-			if (s["camera"]["type"] == "perspective")
-				stage.addPerspectiveCamera(s["camera"]["near"], s["camera"]["far"], s["camera"]["fov"]);
-			else if (s["camera"]["type"] == "orthographic")
-				stage.addOrthographicCamera(s["camera"]["near"], s["camera"]["far"], s["camera"]["scale"]);
-			else
-				App::get().logger.die("Scene::loadSceneConfig(): config contains a camera type other than 'perspective' or 'orthographic'");
+			// if (s["camera"]["type"] == "perspective")
+				// stage.addPerspectiveCamera(s["camera"]["near"], s["camera"]["far"], s["camera"]["fov"]);
+			// else if (s["camera"]["type"] == "orthographic")
+				// stage.addOrthographicCamera(s["camera"]["near"], s["camera"]["far"], s["camera"]["scale"]);
+			// else
+				// App::get().logger.die("Scene::loadSceneConfig(): config contains a camera type other than 'perspective' or 'orthographic'");
 
-			stage.getCamera()->setPosition(glm::vec3(
-				(float)s["camera"]["position"][0],
-				(float)s["camera"]["position"][1],
-				(float)s["camera"]["position"][2]
-			));
+			// stage.getCamera()->setPosition(glm::vec3(
+				// (float)s["camera"]["position"][0],
+				// (float)s["camera"]["position"][1],
+				// (float)s["camera"]["position"][2]
+			// ));
 
-			stage.getCamera()->setLookAt(glm::vec3(
-				(float)s["camera"]["lookat"][0],
-				(float)s["camera"]["lookat"][1],
-				(float)s["camera"]["lookat"][2]
-			));
+			// stage.getCamera()->setLookAt(glm::vec3(
+				// (float)s["camera"]["lookat"][0],
+				// (float)s["camera"]["lookat"][1],
+				// (float)s["camera"]["lookat"][2]
+			// ));
 
-			for (auto& a : s["actors"])
-			{
-				auto act = Actor(a["name"]);
-				act.setDynamic(a["dynamic"]);
-				act.setVisible(a["visible"]);
-				act.addRenderable(this->getRenderable(a["renderable"]));
+			// for (auto& a : s["actors"])
+			// {
+				// auto act = Actor(a["name"]);
+				// act.setDynamic(a["dynamic"]);
+				// act.setVisible(a["visible"]);
+				// act.addRenderable(this->getRenderable(a["renderable"]));
 
-				if (!a["transform"].is_null())
-				{
-					auto trans = a["transform"]["translation"];
-					auto rot = a["transform"]["rotation"];
-					auto scale = a["transform"]["scale"];
+				// if (!a["transform"].is_null())
+				// {
+					// auto trans = a["transform"]["translation"];
+					// auto rot = a["transform"]["rotation"];
+					// auto scale = a["transform"]["scale"];
 
-					if (!trans.is_null())
-					{
-						act.getTransform().setTranslation(glm::vec3(
-							(float)trans[0],
-							(float)trans[1],
-							(float)trans[2]
-						));
-					}
+					// if (!trans.is_null())
+					// {
+						// act.getTransform().setTranslation(glm::vec3(
+							// (float)trans[0],
+							// (float)trans[1],
+							// (float)trans[2]
+						// ));
+					// }
 
-					if (!rot.is_null())
-					{
-						if (rot["type"] == "euler")
-						{
-							act.getTransform().setRotation((float)rot["val"]["angle"], glm::vec3(
-								(float)rot["val"]["axis"][0],
-								(float)rot["val"]["axis"][1],
-								(float)rot["val"]["axis"][2]
-							));
-						}
-						else if (rot["type"] == "quaternion")
-						{
-							act.getTransform().setRotation(glm::quat(
-								(float)rot["val"][3],
-								(float)rot["val"][0],
-								(float)rot["val"][1],
-								(float)rot["val"][2]
-							));
-						}
-						else
-						{
-							App::get().logger.die("Scene::loadSceneConfig(): config contains an actor transform rotation type other than 'euler' or 'quaternion'");
-						}
-					}
+					// if (!rot.is_null())
+					// {
+						// if (rot["type"] == "euler")
+						// {
+							// act.getTransform().setRotation((float)rot["val"]["angle"], glm::vec3(
+								// (float)rot["val"]["axis"][0],
+								// (float)rot["val"]["axis"][1],
+								// (float)rot["val"]["axis"][2]
+							// ));
+						// }
+						// else if (rot["type"] == "quaternion")
+						// {
+							// act.getTransform().setRotation(glm::quat(
+								// (float)rot["val"][3],
+								// (float)rot["val"][0],
+								// (float)rot["val"][1],
+								// (float)rot["val"][2]
+							// ));
+						// }
+						// else
+						// {
+							// App::get().logger.die("Scene::loadSceneConfig(): config contains an actor transform rotation type other than 'euler' or 'quaternion'");
+						// }
+					// }
 
-					if (!scale.is_null())
-					{
-						act.getTransform().setScale(glm::vec3(
-							(float)scale[0],
-							(float)scale[1],
-							(float)scale[2]
-						));
-					}
-				}
+					// if (!scale.is_null())
+					// {
+						// act.getTransform().setScale(glm::vec3(
+							// (float)scale[0],
+							// (float)scale[1],
+							// (float)scale[2]
+						// ));
+					// }
+				// }
 
-				stage.addActor(act);
-			}
+				// stage.addActor(act);
+			// }
 
-			for (auto& a : s["armatures"])
-			{
-				std::vector<std::string> actorNames;
+			// for (auto& a : s["armatures"])
+			// {
+				// std::vector<std::string> actorNames;
 
-				for (auto& actName : a["actors"])
-					actorNames.push_back(actName);
+				// for (auto& actName : a["actors"])
+					// actorNames.push_back(actName);
 
-				stage.addArmature(this->getArmature(a["base"]), a["defaultAnimation"], actorNames);
-			}
-		}
+				// stage.addArmature(this->getArmature(a["base"]), a["defaultAnimation"], actorNames);
+			// }
+		// }
+	// }
+
+	void Scene::freeAssets()
+	{
+		// loop through all asset trackers and decrement their usageCount value by 1
 	}
 
-	/* Animations
-	--------------------------------------------------*/
-	void Scene::updateAnimations(double delta)
+	bool Scene::isFullyLoaded()
 	{
-		this->animationTime += delta;
-		for (auto& s : this->stages)
-			s.updateActorAnimations(this->animationTime);
+		if (!this->mainMemoryloaded)
+			return false;
+
+		for (auto& t : this->shaderTrackers)
+			if (!t->gpuLoaded)
+				return false;
+
+		for (auto& t : this->meshTrackers)
+			if (!t->gpuLoaded)
+				return false;
+
+		for (auto& t : this->textureTrackers)
+			if (!t->gpuLoaded)
+				return false;
+
+		return true;
+	}
+
+	void Scene::loadShader(std::string name, std::string vertFile, std::string fragFile)
+	{
+		this->shaderTrackers.push_back(App::get().getAssetManager().loadShader(name, vertFile, fragFile));
+	}
+	
+	void Scene::loadMesh(std::string path)
+	{
+		auto tts = App::get().getAssetManager().loadMesh(path);
+		for(auto& t : tts.first)
+			this->meshTrackers.push_back(t);
+		
+		if(tts.second != nullptr)
+			this->armatureTrackers.push_back(tts.second);
+	}
+	
+	void Scene::loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips)
+	{
+		this->textureTrackers.push_back(App::get().getAssetManager().loadTexture(name, type, path, mips));
+	}
+	
+	void Scene::addMaterial(Material m)
+	{
+		this->materialTrackers.push_back(App::get().getAssetManager().addMaterial(m));
+	}
+	
+	void Scene::addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material)
+	{
+		this->renderableTrackers.push_back(App::get().getAssetManager().addRenderable(name, shader, mesh, material));
+	}
+
+	Shader* Scene::getShader(std::string name)
+	{
+		for (auto& t : this->shaderTrackers)
+			if (t->ptr->name == name)
+				return t->ptr;
+
+		App::get().logger.die(("Scene::getShader(): Attempting to get shader that does not exist: " + name));
+	}
+
+	Mesh* Scene::getMesh(std::string name)
+	{
+		for (auto& t : this->meshTrackers)
+			if (t->ptr->getName() == name)
+				return t->ptr;
+
+		App::get().logger.die(("Scene::getMesh(): Attempting to get mesh that does not exist: " + name));
+	}
+
+	Texture* Scene::getTexture(std::string name)
+	{
+		for (auto& t : this->textureTrackers)
+			if (t->ptr->name == name)
+				return t->ptr;
+
+		App::get().logger.die(("Scene::getTexture(): Attempting to get texture that does not exist: " + name));
+	}
+
+	Material* Scene::getMaterial(std::string name)
+	{
+		for (auto& t : this->materialTrackers)
+			if (t->ptr->name == name)
+				return t->ptr;
+
+		App::get().logger.die(("Scene::getMaterial(): Attempting to get material that does not exist: " + name));
+	}
+
+	Renderable Scene::getRenderable(std::string name)
+	{
+		for (auto& t : this->renderableTrackers)
+			if (t->ptr->getName() == name)
+				return *t->ptr;
+
+		App::get().logger.die(("Scene::getRenderable(): Attempting to get renderable that does not exist: " + name));
+	}
+
+	Armature Scene::getArmature(std::string name)
+	{
+		for (auto& t : this->armatureTrackers)
+			if (t->ptr->getName() == name)
+				return *t->ptr;
+
+		App::get().logger.die(("Scene::getArmature(): Attempting to get armature that does not exist: " + name));
 	}
 
 	/* Stages
 	--------------------------------------------------*/
-	void Scene::setStageCapacity(size_t cap)
-	{
-		this->stages.reserve(cap);
-	}
-
 	Stage& Scene::addStage()
 	{
 		if (this->stages.size() == this->stages.capacity())
@@ -214,6 +310,18 @@ namespace vel
 
 	/* Misc
 	--------------------------------------------------*/
+	void Scene::updateAnimations(double delta)
+	{
+		this->animationTime += delta;
+		for (auto& s : this->stages)
+			s.updateActorAnimations(this->animationTime);
+	}
+	
+	std::string Scene::getName()
+	{
+		return this->name;
+	}
+
 	void Scene::stepPhysics(float delta)
 	{
 		for (auto& s : this->stages)

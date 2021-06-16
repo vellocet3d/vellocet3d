@@ -245,6 +245,7 @@
     <ClInclude Include="inc\scene\mesh\Vertex.h" />
     <ClInclude Include="inc\vel\App.h" />
     <ClInclude Include="inc\vel\assets\AssetManager.h" />
+    <ClInclude Include="inc\vel\assets\AssetTrackers.h" />
     <ClInclude Include="inc\vel\Config.h" />
     <ClInclude Include="inc\vel\GPU.h" />
     <ClInclude Include="inc\vel\helpers\functions.h" />

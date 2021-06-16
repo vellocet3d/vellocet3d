@@ -20,7 +20,9 @@ namespace vel
 	AssetLoaderV2::AssetLoaderV2(AssetManager* assetManager, std::string assetFile) :
 		assetManager(assetManager),
 		currentAssetFile(assetFile),
-		currentArmature(nullptr)
+		armatureTracker(nullptr),
+		currentArmature(nullptr),
+		existingArmature(false)
 	{
 		this->aiScene = this->aiImporter.ReadFile(this->currentAssetFile, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
 
@@ -38,13 +40,9 @@ namespace vel
 		this->processNode(this->aiScene->mRootNode);
 	}
 
-	std::optional<Animation*> AssetLoaderV2::getExistingAnimation(std::string animationName)
+	std::pair<std::vector<MeshTracker*>, ArmatureTracker*> AssetLoaderV2::getTrackers()
 	{
-		for (auto& a : this->assetManager->getAnimations())
-			if (a.name == animationName)
-				return &a;
-
-		return std::nullopt;
+		return std::pair<std::vector<MeshTracker*>, ArmatureTracker*>(this->meshTrackers, this->armatureTracker);
 	}
 
 	void AssetLoaderV2::processAnimations()
@@ -53,73 +51,58 @@ namespace vel
 		{
 			std::string animationName = this->aiScene->mAnimations[i]->mName.C_Str();
 
-			// if an animation exists with the same name, use that animation
-			auto existingAnimation = this->getExistingAnimation(animationName);
+			// create a new animation
+			auto a = Animation();
+			a.name = this->aiScene->mAnimations[i]->mName.C_Str();
+			a.duration = this->aiScene->mAnimations[i]->mDuration;
+			//a.tps = this->aiScene->mAnimations[i]->mTicksPerSecond;
+			a.tps = this->aiScene->mAnimations[i]->mTicksPerSecond * 33.3333333; // account for the weird assimp/fbx "update" that multiplies duration by 33.3333333
 
-			if (existingAnimation)
+			// add all channels to animation
+
+			for (unsigned int j = 0; j < this->aiScene->mAnimations[i]->mNumChannels; j++)
 			{
-				// obtain this animation name relative to the armature
-				auto name = explode_string(animationName, '|')[1];
+				auto c = Channel();
 
-				this->currentArmature->addAnimation(name, existingAnimation.value());
-			}
-			// otherwise create a new animation
-			else
-			{
-
-				// create a new animation
-				auto a = Animation();
-				a.name = this->aiScene->mAnimations[i]->mName.C_Str();
-				a.duration = this->aiScene->mAnimations[i]->mDuration;
-				//a.tps = this->aiScene->mAnimations[i]->mTicksPerSecond;
-				a.tps = this->aiScene->mAnimations[i]->mTicksPerSecond * 33.3333333; // account for the weird assimp/fbx "update" that multiplies duration by 33.3333333
-
-				// add all channels to animation
-
-				for (unsigned int j = 0; j < this->aiScene->mAnimations[i]->mNumChannels; j++)
+				// positions
+				for (unsigned int k = 0; k < this->aiScene->mAnimations[i]->mChannels[j]->mNumPositionKeys; k++)
 				{
-					auto c = Channel();
-
-					// positions
-					for (unsigned int k = 0; k < this->aiScene->mAnimations[i]->mChannels[j]->mNumPositionKeys; k++)
-					{
-						auto position = this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mValue;
-						auto time = (float)this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
-						c.positionKeyTimes.push_back(time);
-						c.positionKeyValues.push_back(glm::vec3(position.x, position.y, position.z));
-					}
-
-					// rotations
-					for (unsigned int k = 0; k < this->aiScene->mAnimations[i]->mChannels[j]->mNumRotationKeys; k++)
-					{
-						auto rotation = this->aiScene->mAnimations[i]->mChannels[j]->mRotationKeys[k].mValue;
-						auto time = (float)this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
-						c.rotationKeyTimes.push_back(time);
-						c.rotationKeyValues.push_back(glm::quat(rotation.w, rotation.x, rotation.y, rotation.z));
-					}
-
-					// scalings
-					for (unsigned int k = 0; k < this->aiScene->mAnimations[i]->mChannels[j]->mNumScalingKeys; k++)
-					{
-						auto scale = this->aiScene->mAnimations[i]->mChannels[j]->mScalingKeys[k].mValue;
-						auto time = (float)this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
-						c.scalingKeyTimes.push_back(time);
-						c.scalingKeyValues.push_back(glm::vec3(scale.x, scale.y, scale.z));
-					}
-
-					// add channel to animation
-					a.channels[this->aiScene->mAnimations[i]->mChannels[j]->mNodeName.C_Str()] = c;
+					auto position = this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mValue;
+					auto time = (float)this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
+					c.positionKeyTimes.push_back(time);
+					c.positionKeyValues.push_back(glm::vec3(position.x, position.y, position.z));
 				}
 
-				// add animation to scene's animations container, retrieving index
-				auto aPtr = this->assetManager->addAnimation(a);
+				// rotations
+				for (unsigned int k = 0; k < this->aiScene->mAnimations[i]->mChannels[j]->mNumRotationKeys; k++)
+				{
+					auto rotation = this->aiScene->mAnimations[i]->mChannels[j]->mRotationKeys[k].mValue;
+					auto time = (float)this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
+					c.rotationKeyTimes.push_back(time);
+					c.rotationKeyValues.push_back(glm::quat(rotation.w, rotation.x, rotation.y, rotation.z));
+				}
 
-				// obtain this animation name relative to the armature
-				auto name = explode_string(a.name, '|')[1];
+				// scalings
+				for (unsigned int k = 0; k < this->aiScene->mAnimations[i]->mChannels[j]->mNumScalingKeys; k++)
+				{
+					auto scale = this->aiScene->mAnimations[i]->mChannels[j]->mScalingKeys[k].mValue;
+					auto time = (float)this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
+					c.scalingKeyTimes.push_back(time);
+					c.scalingKeyValues.push_back(glm::vec3(scale.x, scale.y, scale.z));
+				}
 
-				// add this animation name/index to the armature's animations vector
-				this->currentArmature->addAnimation(name, aPtr);
+				// add channel to animation
+				a.channels[this->aiScene->mAnimations[i]->mChannels[j]->mNodeName.C_Str()] = c;
 			}
+
+			// add animation to scene's animations container, retrieving index
+			auto aPtr = this->assetManager->addAnimation(a);
+
+			// obtain this animation name relative to the armature
+			auto name = explode_string(a.name, '|')[1];
+
+			// add this animation name/index to the armature's animations vector
+			this->currentArmature->addAnimation(name, aPtr);
 		}
 	}
 
@@ -129,17 +112,36 @@ namespace vel
 
 		if (nodeName != "RootNode" && !string_contains("_end", nodeName))
 		{
+			
 			std::string boneName = nodeName;
 			std::string nodeParentName = node->mParent->mName.C_Str();
 
 			if (nodeParentName == "RootNode")
-				this->currentArmature = this->assetManager->addArmature(Armature(boneName));
+			{
+				// check if armature with this name already exists within the asset manager
+				auto armTracker = this->assetManager->getArmatureTracker(boneName);
+				if(armTracker != nullptr)
+				{
+					armTracker->usageCount++;
+					this->armatureTracker = armTracker;
+					this->existingArmature = true;
+					this->currentArmature = armTracker->ptr;
+				}
+				else
+				{					
+					this->armatureTracker = this->assetManager->addArmature(Armature(boneName));
+					this->currentArmature = this->armatureTracker->ptr;
+				}
+			}
+				
+			if(!this->existingArmature)
+			{
+				ArmatureBone bone;
+				bone.name = boneName;
+				bone.parentName = nodeParentName == "RootNode" ? boneName : node->mParent->mName.C_Str();
 
-			ArmatureBone bone;
-			bone.name = boneName;
-			bone.parentName = nodeParentName == "RootNode" ? boneName : node->mParent->mName.C_Str();
-
-			this->currentArmature->addBone(bone);
+				this->currentArmature->addBone(bone);
+			}
 		}
 
 		this->processedNodes.push_back(node);
@@ -175,17 +177,20 @@ namespace vel
 		// If this is not the RootNode and this node has not already been processed
 		if (nodeName != "RootNode" && !this->nodeHasBeenProcessed(node))
 		{
-
 			if (this->isRootArmatureNode(node))
 			{
 				this->processArmatureNode(node);
-				this->processAnimations();
+				
+				if(!this->existingArmature)
+				{
+					this->processAnimations();
 
-				// Obtain parent indexes for each bone using their
-				// boneNames (done so that these indexes can be used at runtime instead
-				// of loops and string comparisons)
-				for (auto& b : this->currentArmature->getBones())
-					b.parent = this->currentArmature->getBoneIndex(b.parentName);
+					// Obtain parent indexes for each bone using their
+					// boneNames (done so that these indexes can be used at runtime instead
+					// of loops and string comparisons)
+					for (auto& b : this->currentArmature->getBones())
+						b.parent = this->currentArmature->getBoneIndex(b.parentName);
+				}
 			}
 			else
 			{
@@ -206,6 +211,15 @@ namespace vel
 	void AssetLoaderV2::processMesh(aiMesh* aiMesh)
 	{
 		auto mesh = Mesh(aiMesh->mName.C_Str());
+		
+		// if mesh already exists in AssetManager, do not load again
+		auto meshTracker = this->assetManager->getMeshTracker(mesh.getName());
+		if(meshTracker != nullptr)
+		{
+			meshTracker->usageCount++;
+			this->meshTrackers.push_back(meshTracker);
+			return;
+		}
 
 		//std::cout << mesh.getName() << "\n";
 

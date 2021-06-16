@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <deque>
 #include <optional>
 #include <chrono>
 
@@ -10,7 +11,7 @@
 #include "vel/Window.h"
 #include "vel/GPU.h"
 #include "vel/scene/Scene.h"
-
+#include "vel/assets/AssetManager.h"
 
 
 struct GLFWusercontext;
@@ -29,8 +30,12 @@ namespace vel
 														App(Config conf);
 		static App*										instance;
         std::unique_ptr<Window>							window;
-        std::unique_ptr<Scene>							scene;
 		std::unique_ptr<GPU>							gpu;
+		AssetManager									assetManager;
+		std::deque<std::unique_ptr<Scene>>				sceneLoadingQueue;
+        std::vector<std::unique_ptr<Scene>>				scenes;
+		Scene*											activeScene;
+		
         
 
         std::chrono::high_resolution_clock::time_point	startTime;
@@ -56,8 +61,7 @@ namespace vel
         static void										init(Config conf);
 														App(App const&) = delete;
         void											operator=(App const&) = delete;
-        void											setScene(Scene* scene);
-        void											clearScene();
+        void											addScene(Scene* scene, bool swapWhenLoaded = false);
         const double									time() const;
         const InputState&								getInputState() const;
         const glm::ivec2&								getScreenSize() const;
@@ -74,12 +78,14 @@ namespace vel
 
 		void											forceImguiRender();
 
-		GPU*											getGPU(); //TODO const confusion
+		GPU*											getGPU();
 		bool											getPauseBufferClearAndSwap();
 		void											setPauseBufferClearAndSwap(bool in);
 
+		AssetManager&									getAssetManager();
+		Scene*											getNextSceneToLoad();
 
-		
+		void											removeScene(std::string name);
 
     };
 };

@@ -5,13 +5,15 @@
 #include <string>
 #include <optional>
 
+#include "dep/plf_colony.h"
+
 #include "vel/assets/mesh/Mesh.h"
 #include "vel/scene/stage/Stage.h"
 #include "vel/assets/armature/Armature.h"
 #include "vel/assets/animation/Animation.h"
 #include "vel/assets/material/Material.h"
 
-
+#include "vel/assets/AssetTrackers.h"
 
 namespace vel
 {
@@ -22,15 +24,31 @@ namespace vel
 		double								animationTime;
 
 
-	protected:
-		size_t								loadShader(std::string name, std::string vertFile, std::string fragFile);
-		void								loadMesh(std::string path);
-		size_t								loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
-		void								loadSceneConfig(std::string path);
+		std::vector<ShaderTracker*>			shaderTrackers;
+		std::vector<MeshTracker*>			meshTrackers;
+		std::vector<TextureTracker*> 		textureTrackers;
+		std::vector<MaterialTracker*> 		materialTrackers;
+		std::vector<RenderableTracker*> 	renderableTrackers;
+		std::vector<ArmatureTracker*>		armatureTrackers;
+		
 
-		size_t								addMaterial(Material m);
-		size_t								addRenderable(std::string name, size_t defaultShaderIndex, size_t crateMeshIndex, size_t crateMaterialIndex);
+	protected:
+		std::string							name = "default";
+		
+
+		void								loadShader(std::string name, std::string vertFile, std::string fragFile);
+		void								loadMesh(std::string path);
+		void								loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
+		//void								loadSceneConfig(std::string path);
+
+		void								addMaterial(Material m);
+		void								addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material);
 		Stage&								addStage();
+
+		Shader*								getShader(std::string n);
+		Mesh*								getMesh(std::string n);
+		Texture*							getTexture(std::string n);
+		Material*							getMaterial(std::string n);
 
 		Renderable							getRenderable(std::string name);
 		Armature							getArmature(std::string name);
@@ -45,26 +63,12 @@ namespace vel
 		virtual void						outerLoop(float frameTime, float renderLerpInterval) = 0;
 		virtual void						postPhysics(float deltaTime);
 
-		bool								loaded;
-		
-		Mesh*								addMesh(Mesh m);
-		Animation*							addAnimation(Animation a);
-		Armature*							addArmature(Armature a);
+		bool								mainMemoryloaded;
+		bool								swapWhenLoaded;
+		std::string							getName();
+		bool								isFullyLoaded();
+		void								freeAssets();
 
-		Shader*								getShader(size_t si);
-		Shader*								getShader(std::string shaderName);
-		Texture*							getTexture(size_t textureIndex);
-		Material*							getMaterial(size_t materialIndex);
-		Material*							getMaterial(std::string materialName);
-		Mesh*								getMesh(size_t index);
-		const std::vector<Mesh>&			getMeshes() const;
-		Animation&							getAnimation(size_t index);
-		std::vector<Animation>&				getAnimations();
-		
-		size_t								getShaderIndex(std::string shaderName);
-		size_t								getTextureIndex(std::string textureName);
-		size_t								getMaterialIndex(std::string materialName);
-		size_t								getMeshIndex(std::string meshName);
 
 		void								updateAnimations(double runTime);
 		void								draw(float alpha);

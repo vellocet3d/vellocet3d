@@ -285,17 +285,17 @@ namespace vel
 
 		// sort sharder
 		std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
-			return left.second.getShaderIndex() < right.second.getShaderIndex();
+			return left.second.getShader() < right.second.getShader();
 		});
 
 		// sort mesh
 		std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
-			return left.second.getMeshIndex() < right.second.getMeshIndex();
+			return left.second.getMesh() < right.second.getMesh();
 		});
 
 		// sort material
 		std::sort(toSort.begin(), toSort.end(), [](auto &left, auto &right) {
-			return left.second.getMaterialIndex() < right.second.getMaterialIndex();
+			return left.second.getMaterial() < right.second.getMaterial();
 		});
 
 		// sort texture alpha
@@ -309,18 +309,8 @@ namespace vel
 		for (auto& p : toSort)
 			this->renderablesOrder.push_back(p.first);
 
-		//for debugging
-		//std::cout << "-----------------------\n";
-		//for (auto& rco : this->renderablesOrder.value())
-		//{
-		//	auto rc = this->renderables.value().at(rco);
-
-		//	std::cout << "s:" << rc.getShaderIndex() << " m:" << rc.getMeshIndex() << " t:" << rc.getTextureIndex() << " a:" << rc.getTextureHasAlpha() << "\n";
-
-		//}
 
 		return renderableIndex;
-
 	}
 
 	std::optional<size_t> Stage::renderableExists(const std::string& rn)
@@ -343,24 +333,24 @@ namespace vel
 
 	void Stage::printRenderables() const
 	{
-		std::cout << "Renderables\n";
-		std::cout << "----------------------------------\n";
-		for (auto& rc : this->renderables)
-		{
-			std::cout << "shaderIndex:" << rc.getShaderIndex() << " meshIndex:" << rc.getMeshIndex() << " materialIndex:" << rc.getMaterialIndex() << "\n";
-			std::cout << "actors:";
+		//std::cout << "Renderables\n";
+		//std::cout << "----------------------------------\n";
+		//for (auto& rc : this->renderables)
+		//{
+		//	std::cout << "shaderIndex:" << rc.getShaderIndex() << " meshIndex:" << rc.getMeshIndex() << " materialIndex:" << rc.getMaterialIndex() << "\n";
+		//	std::cout << "actors:";
 
-			for (auto& a : rc.getActorIndexes())
-				if (a != -1)
-					std::cout << this->actors.at(a).getName() << ",";
+		//	for (auto& a : rc.getActorIndexes())
+		//		if (a != -1)
+		//			std::cout << this->actors.at(a).getName() << ",";
 
-			std::cout << "\norder:";
+		//	std::cout << "\norder:";
 
-			for (auto& o : this->renderablesOrder)
-				std::cout << o << ",";
+		//	for (auto& o : this->renderablesOrder)
+		//		std::cout << o << ",";
 
-			std::cout << "\n------------------------------\n";
-		}
+		//	std::cout << "\n------------------------------\n";
+		//}
 	}
 
 	Renderable& Stage::getRenderable(size_t index)

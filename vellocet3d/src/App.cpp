@@ -32,12 +32,39 @@ namespace vel
         logger(this->config.LOG_ENABLED, this->config.LOG_PATH, this->config.LOG_USE_CONSOLE),
 		window(std::make_unique<Window>(this->config)),
 		gpu(std::make_unique<GPU>()),
-		scene(nullptr),
+		assetManager(AssetManager()),
+		activeScene(nullptr),
         startTime(std::chrono::high_resolution_clock::now())
     {
 
+		// create separate thread that will poll scenes and load them into system memory asynchronously
+		std::thread t([this] {
+
+			while (true)
+			{
+				std::this_thread::sleep_for(250ms);
+
+				Scene* nextScene = this->getNextSceneToLoad();
+
+				if (nextScene != nullptr)
+				{
+					nextScene->load();
+					nextScene->mainMemoryloaded = true;
+				}
+			}
+
+		});
+		t.detach();
 
     }
+
+	Scene* App::getNextSceneToLoad()
+	{
+		if (this->sceneLoadingQueue.size() == 0)
+			return nullptr;
+
+		return this->sceneLoadingQueue.at(0).get();
+	}
 
 	void App::forceImguiRender()
 	{
@@ -59,12 +86,30 @@ namespace vel
 		return this->window->getImguiFont(key);
 	}
 
-    void App::setScene(Scene* scene)
-    {
-		if(this->window->getImguiFrameOpen())
-			this->forceImguiRender();
+	void App::removeScene(std::string name)
+	{
+		size_t i = 0;
+		for (auto& s : this->scenes)
+		{
+			if (s->getName() == name)
+			{
+				s->freeAssets();
+				break;
+			}
+			i++;
+		}
 
-        this->scene = std::move(std::move(std::unique_ptr<Scene>(scene)));
+		this->scenes.erase(this->scenes.begin() + i);
+	}
+
+    void App::addScene(Scene* scene, bool swapWhenLoaded)
+    {
+		//if(this->window->getImguiFrameOpen())
+		//	this->forceImguiRender();
+
+        //this->scene = std::move(std::move(std::unique_ptr<Scene>(scene)));
+
+		this->sceneLoadingQueue.push_back(std::move(std::unique_ptr<Scene>(scene)));
     }
 
     void App::close()
@@ -89,14 +134,14 @@ namespace vel
         return this->window->getInputState();
     }
 
-    void App::clearScene()
-    {
-        this->scene.reset();
-    }
-
 	GPU* App::getGPU()
 	{
 		return this->gpu.get();
+	}
+
+	AssetManager& App::getAssetManager()
+	{
+		return this->assetManager;
 	}
 
 	float App::getFrameTime()
@@ -165,12 +210,43 @@ namespace vel
             if (this->shouldClose || this->window->shouldClose()) 
                 break;
 
-            if (this->scene != nullptr && !this->scene->loaded)
-            {
-                this->scene->load();
-                this->scene->loaded = true;
-				this->setPauseBufferClearAndSwap(false);
-            }
+			
+
+			// if the assetmanager has checkForGpuLoads flag set to true, then load a single gpu asset
+			// for this loop cycle
+			if (this->assetManager.checkForGpuLoads)
+			{
+				this->assetManager.sendToGpu();
+			}
+
+			if (this->sceneLoadingQueue.size() > 0)
+			{
+				// if there is a scene in the loading queue, then check whether all of it's assets have
+				// been loaded into both main memory and gpu memory and if so and it has swapWhenLoaded set
+				// then set activeScene to this scene after moving it into this->scenes, then pop it off sceneLoadingQueue
+
+				if (this->sceneLoadingQueue.at(0)->isFullyLoaded())
+				{
+					if (this->sceneLoadingQueue.at(0)->swapWhenLoaded)
+						this->activeScene = this->sceneLoadingQueue.at(0).get();
+
+					this->scenes.push_back(std::move(this->sceneLoadingQueue.at(0)));
+
+					// TODO: I believe this is necessary, but not 100%, so this COULD be a nasty runtime bug
+					this->sceneLoadingQueue.pop_front();
+				}
+
+			}
+
+			if (this->activeScene == nullptr)
+				continue;
+
+    //        if (this->scene != nullptr && !this->scene->loaded)
+    //        {
+    //            this->scene->load();
+    //            this->scene->loaded = true;
+				//this->setPauseBufferClearAndSwap(false);
+    //        }
 
             this->newTime = this->time();
             this->frameTime = this->newTime - this->currentTime;
@@ -197,32 +273,31 @@ namespace vel
                 // process update logic
                 while (this->accumulator >= this->fixedLogicTime)
                 {                    
-                    if (this->scene != nullptr && this->scene->loaded) 
-                    {
-						//// update animations
-						//this->scene->updateAnimations(this->fixedLogicTime);
 
-						//// step physics simulation
-						//this->scene->stepPhysics((float)this->fixedLogicTime);
+					//// update animations
+					//this->scene->updateAnimations(this->fixedLogicTime);
 
-						// applyTransforms() ? incorporating current savePreviousTransforms() logic
-						this->scene->applyTransformations();
+					//// step physics simulation
+					//this->scene->stepPhysics((float)this->fixedLogicTime);
 
-						// execute all contact triggers
-						this->scene->processSensors();
+					// applyTransforms() ? incorporating current savePreviousTransforms() logic
+					this->activeScene->applyTransformations();
 
-						// execute inner loop (fixed rate) logic
-						this->scene->innerLoop((float)this->fixedLogicTime);
+					// execute all contact triggers
+					this->activeScene->processSensors();
 
-						// update animations
-						this->scene->updateAnimations(this->fixedLogicTime);
+					// execute inner loop (fixed rate) logic
+					this->activeScene->innerLoop((float)this->fixedLogicTime);
 
-						// step physics simulation
-						this->scene->stepPhysics((float)this->fixedLogicTime);
+					// update animations
+					this->activeScene->updateAnimations(this->fixedLogicTime);
 
-						// call postPhysics method to allow correction of any issues caused by collision solver
-						this->scene->postPhysics((float)this->fixedLogicTime);
-                    }
+					// step physics simulation
+					this->activeScene->stepPhysics((float)this->fixedLogicTime);
+
+					// call postPhysics method to allow correction of any issues caused by collision solver
+					this->activeScene->postPhysics((float)this->fixedLogicTime);
+                    
                     
                     // decrement accumulator
                     this->accumulator -= this->fixedLogicTime;
@@ -233,7 +308,7 @@ namespace vel
 				float renderLerpInterval = (float)(this->accumulator / this->fixedLogicTime);
 
 				// execute outer loop (immediate) logic
-				this->scene->outerLoop((float)this->frameTime, renderLerpInterval);
+				this->activeScene->outerLoop((float)this->frameTime, renderLerpInterval);
 				
 
 				// perform draw (render) logic
@@ -242,13 +317,11 @@ namespace vel
 				if(!this->pauseBufferClearAndSwap)
 					this->gpu->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);
 
-                if (this->scene != nullptr && this->scene->loaded)
-                {
-					//std::cout << "call draw:" << this->currentTime << "\n";
-                    this->scene->draw(renderLerpInterval);
+				//std::cout << "call draw:" << this->currentTime << "\n";
+                this->activeScene->draw(renderLerpInterval);
 
-					this->window->renderGui();
-                }
+				this->window->renderGui();
+                
 				if (!this->pauseBufferClearAndSwap)
 					this->window->swapBuffers();
                 

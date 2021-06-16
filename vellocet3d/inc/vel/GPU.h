@@ -37,9 +37,9 @@ namespace vel
 		const Mesh*	const					getActiveMesh() const;
 		const Material*	const				getActiveMaterial() const;
 
-		void								loadShader(Shader& s);
-		void								loadMesh(Mesh& m);
-		void								loadTexture(Texture& t);
+		void								loadShader(Shader* s);
+		void								loadMesh(Mesh* m);
+		void								loadTexture(Texture* t);
 
 
 		void								useShader(Shader* s);

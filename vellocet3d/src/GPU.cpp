@@ -29,6 +29,7 @@ namespace vel
 
 	}
 
+	// TODO: this definately needs revised
 	void GPU::wipe(std::vector<Shader>& shaders, std::vector<Mesh>& meshes, std::vector<Texture>& textures)
 	{
 		for (auto& s : shaders)
@@ -48,7 +49,7 @@ namespace vel
 			glDeleteTextures(1, &t.id);
 	}
 
-	void GPU::loadShader(Shader& s)
+	void GPU::loadShader(Shader* s)
 	{
 		unsigned int id;
 
@@ -64,8 +65,8 @@ namespace vel
 		try
 		{
 			// open files
-			vShaderFile.open(s.vertFile);
-			fShaderFile.open(s.fragFile);
+			vShaderFile.open(s->vertFile);
+			fShaderFile.open(s->fragFile);
 
 			std::stringstream vShaderStream, fShaderStream;
 
@@ -151,13 +152,13 @@ namespace vel
 		glDeleteShader(fragment);
 
 
-		s.id = id;
+		s->id = id;
 	}
 
-	void GPU::loadMesh(Mesh& m)
+	void GPU::loadMesh(Mesh* m)
 	{
 		GpuMesh gm = GpuMesh();
-		gm.indiceCount = (GLsizei)m.getIndices().size();
+		gm.indiceCount = (GLsizei)m->getIndices().size();
 
 		// Generate and bind vertex attribute array
 		glGenVertexArrays(1, &gm.VAO);
@@ -166,12 +167,12 @@ namespace vel
 		// Generate and bind vertex buffer object
 		glGenBuffers(1, &gm.VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, gm.VBO);
-		glBufferData(GL_ARRAY_BUFFER, m.getVertices().size() * sizeof(Vertex), &m.getVertices()[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, m->getVertices().size() * sizeof(Vertex), &m->getVertices()[0], GL_STATIC_DRAW);
 
 		// Generate and bind element buffer object
 		glGenBuffers(1, &gm.EBO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gm.EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m.getIndices().size() * sizeof(unsigned int), &m.getIndices()[0], GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->getIndices().size() * sizeof(unsigned int), &m->getIndices()[0], GL_STATIC_DRAW);
 
 		// Assign vertex positions to location = 0
 		glEnableVertexAttribArray(0);
@@ -200,42 +201,42 @@ namespace vel
 		// Unbind the vertex array to prevent accidental operations
 		glBindVertexArray(0);
 
-		m.setGpuMesh(gm);
+		m->setGpuMesh(gm);
 	}
 
-	void GPU::loadTexture(Texture& t)
+	void GPU::loadTexture(Texture* t)
 	{
-		glGenTextures(1, &t.id);
+		glGenTextures(1, &t->id);
 
 		int width, height, nrComponents;
-		unsigned char*	data = stbi_load(t.path.c_str(), &width, &height, &nrComponents, 0);
+		unsigned char*	data = stbi_load(t->path.c_str(), &width, &height, &nrComponents, 0);
 		if (data)
 		{
 			GLenum format;
 			if (nrComponents == 1)
 			{
-				t.alphaChannel = false;
+				t->alphaChannel = false;
 				format = GL_RED;
 			}
 			else if (nrComponents == 3)
 			{
-				t.alphaChannel = false;
+				t->alphaChannel = false;
 				format = GL_RGB;
 			}
 			else if (nrComponents == 4)
 			{
-				t.alphaChannel = true;
+				t->alphaChannel = true;
 				format = GL_RGBA;
 			}
 
 			//std::cout << texture.filename << ":" << texture.alphaChannel << "\n";
 
-			glBindTexture(GL_TEXTURE_2D, t.id);
+			glBindTexture(GL_TEXTURE_2D, t->id);
 
 			// load the base level texture
 			glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
-			if (t.mips.size() == 0)
+			if (t->mips.size() == 0)
 				glGenerateMipmap(GL_TEXTURE_2D);
 
 			// set texture parameters
@@ -243,13 +244,13 @@ namespace vel
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			if (t.mips.size() == 0)
+			if (t->mips.size() == 0)
 			{
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			}
 			else
 			{
-				int mipcount = (int)t.mips.size();
+				int mipcount = (int)t->mips.size();
 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipcount);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -257,7 +258,7 @@ namespace vel
 				while (mipcount > 0)
 				{
 					int mip_width, mip_height, mip_nrComponents;
-					unsigned char*	mip_data = stbi_load(t.mips.at(mipcount).c_str(), &mip_width, &mip_height, &mip_nrComponents, 0);
+					unsigned char*	mip_data = stbi_load(t->mips.at(mipcount).c_str(), &mip_width, &mip_height, &mip_nrComponents, 0);
 
 					if (mip_data)
 					{
@@ -280,7 +281,7 @@ namespace vel
 					else
 					{
 						stbi_image_free(mip_data);
-						std::cout << "Texture failed to load at path: " << t.mips.at(mipcount) << "\n";
+						std::cout << "Texture failed to load at path: " << t->mips.at(mipcount) << "\n";
 						std::cin.get();
 						exit(EXIT_FAILURE);
 					}
@@ -293,7 +294,7 @@ namespace vel
 		else
 		{
 			stbi_image_free(data);
-			std::cout << "Texture failed to load at path: " << t.path << "\n";
+			std::cout << "Texture failed to load at path: " << t->path << "\n";
 			std::cin.get();
 			exit(EXIT_FAILURE);
 		}
@@ -368,7 +369,7 @@ namespace vel
 		this->activeMaterial = m;
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m->albedo.value());
+		glBindTexture(GL_TEXTURE_2D, m->albedo->id);
 		this->setShaderInt("texture1", 0);
 
 		//std::cout << m->albedo.value() << "\n";

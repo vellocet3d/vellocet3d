@@ -13,48 +13,74 @@
 #include "vel/assets/animation/Animation.h"
 #include "vel/assets/armature/Armature.h"
 
-
+#include "vel/assets/AssetTrackers.h"
 
 namespace vel
 {
 	class AssetManager
 	{
 	private:
-		plf::colony<Shader>			shaders;
-		plf::colony<Mesh>			meshes;
-		plf::colony<Texture>		textures;
-		plf::colony<Material>		materials;
-		plf::colony<Renderable>		renderables;
-		plf::colony<Animation>		animations;
-		plf::colony<Armature>		armatures;
+		plf::colony<Shader>				shaders;
+		plf::colony<ShaderTracker>		shaderTrackers;
+		std::deque<ShaderTracker*>		shadersThatNeedGpuLoad;
+		
+		plf::colony<Mesh>				meshes;
+		plf::colony<MeshTracker>		meshTrackers;
+		std::deque<MeshTracker*>		meshesThatNeedGpuLoad;
+		
+		plf::colony<Texture>			textures;
+		plf::colony<TextureTracker> 	textureTrackers;
+		std::deque<TextureTracker*>		texturesThatNeedGpuLoad;
+		
+		plf::colony<Material>			materials;
+		plf::colony<MaterialTracker> 	materialTrackers;
+		
+		plf::colony<Renderable>			renderables;
+		plf::colony<RenderableTracker> 	renderableTrackers;
+		
+		plf::colony<Armature>			armatures;
+		plf::colony<ArmatureTracker>	armatureTrackers;
+		
+		plf::colony<Animation>			animations;
+		// since animations are tracked within an Armature, and they are only associated with a single armatureTrackers
+		// we shouldn't need to track them, just account for them when adding/removing an armature
+		//plf::colony<AnimationTracker>	animationTrackers;
+		
 
 	public:
 		AssetManager();
 		~AssetManager();
 
-		void						loadShader(std::string name, std::string vertFile, std::string fragFile);
+		bool						collectGarbage = false;
+		bool						checkForGpuLoads = false;
+		void						sendToGpu();
+
+		ShaderTracker*				loadShader(std::string name, std::string vertFile, std::string fragFile);
 		Shader*						getShader(std::string name);
 
-		void						loadMesh(std::string path);
-		void						addMesh(Mesh m);
+		std::pair<std::vector<MeshTracker*>, ArmatureTracker*> loadMesh(std::string path);
+		MeshTracker*				addMesh(Mesh m);
 		const plf::colony<Mesh>&	getMeshes() const;
-		Mesh*						getMeshes(std::string name);
+		Mesh*						getMesh(std::string name);
 
-		void						loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
+		TextureTracker*				loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
 		Texture*					getTexture(std::string textureName);
 
-		void						addMaterial(Material m);
+		MaterialTracker*			addMaterial(Material m);
 		Material*					getMaterial(std::string materialName);
 
 		Animation*					addAnimation(Animation a);
-		Animation*					getAnimation(std::string animationName);
-		plf::colony<Animation>&		getAnimations();
 
-		void						addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material);
+		RenderableTracker*			addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material);
 		Renderable					getRenderable(std::string name);
 
-		Armature*					addArmature(Armature a);
+		ArmatureTracker*			addArmature(Armature a);
 		Armature					getArmature(std::string name);
+
+		MeshTracker*				getMeshTracker(std::string name);
+		ArmatureTracker*			getArmatureTracker(std::string name);
+
+		void						runGarbageCollector();
 
 	};
 

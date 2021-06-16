@@ -299,5 +299,8 @@
     <ClInclude Include="inc\dep\plf_colony.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\vel\assets\AssetTrackers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -18,7 +18,7 @@
 #include "vel/assets/mesh/VertexBoneData.h"
 #include "vel/assets/animation/Animation.h"
 
-
+#include "vel/assets/AssetTrackers.h"
 
 
 namespace vel
@@ -30,6 +30,11 @@ namespace vel
 		Assimp::Importer					aiImporter;
 		const aiScene*						aiScene;
 		AssetManager*						assetManager;
+		
+		std::vector<MeshTracker*>			meshTrackers;		
+		ArmatureTracker*					armatureTracker; // currently only support one armature per .fbx file
+		bool								existingArmature;
+		
 
 		std::string							currentAssetFile;
 		std::optional<size_t>				currentMeshIndex;
@@ -50,6 +55,8 @@ namespace vel
 	public:
 		AssetLoaderV2(AssetManager* currentScene, std::string assetFile);
 		void								load();
+		
+		std::pair<std::vector<MeshTracker*>, ArmatureTracker*> getTrackers();
 
 	};
 
