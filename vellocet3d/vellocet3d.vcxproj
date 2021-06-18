@@ -220,6 +220,7 @@
     <ClInclude Include="inc\App.h" />
     <ClInclude Include="inc\dep\json.hpp" />
     <ClInclude Include="inc\dep\plf_colony.h" />
+    <ClInclude Include="inc\dep\robin_hood.h" />
     <ClInclude Include="inc\GPU.h" />
     <ClInclude Include="inc\scene\animation\Animation.h" />
     <ClInclude Include="inc\scene\armature\Armature.h" />

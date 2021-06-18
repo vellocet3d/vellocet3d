@@ -11,16 +11,6 @@ namespace vel
 	AssetManager::AssetManager(){}
 	AssetManager::~AssetManager() {}
 
-	void AssetManager::runGarbageCollector()
-	{
-		//TODO: loop through all asset trackers and delete all assets that have a usageCount of 0
-		// from main memory and gpu
-
-		//TODO: figure out when we're going to call this, have member collectGarbage that I was doing
-		// something with
-
-	}
-
 	void AssetManager::sendToGpu()
 	{
 		if (this->shadersThatNeedGpuLoad.size() > 0)
@@ -49,23 +39,18 @@ namespace vel
 			this->texturesThatNeedGpuLoad.pop_front();
 			return;
 		}
-
-		this->checkForGpuLoads = false;
 	}
 
 	/* Shaders
 	--------------------------------------------------*/
-	ShaderTracker* AssetManager::loadShader(std::string name, std::string vertFile, std::string fragFile)
+	std::string AssetManager::loadShader(std::string name, std::string vertFile, std::string fragFile)
 	{
 		// first check if shader name already exists
 		// if so, return the ShaderTracker* to that element
-		for(auto& s : this->shaderTrackers)
+		if (this->shaderTrackerMap.contains(name))
 		{
-			if(s.ptr->name == name)
-			{
-				s.usageCount++;
-				return &s;
-			}
+			this->shaderTrackerMap[name]->usageCount++;
+			return name;
 		}
 		
 		// else, create the shader and ShaderTracker then return ShaderTracker*
@@ -85,37 +70,60 @@ namespace vel
 		auto tmpTracker = &(*it2);
 
 		this->shadersThatNeedGpuLoad.push_back(tmpTracker);
-		this->checkForGpuLoads = true;
 
-		return tmpTracker;
+		this->shaderTrackerMap[name] = tmpTracker;
+
+		return name;
 	}
 
 	Shader* AssetManager::getShader(std::string name)
 	{
-		for (auto& s : this->shaders)
-			if (s.name == name)
-				return &s;
+		if(!this->shaderTrackerMap.contains(name))
+			App::get().logger.die(("AssetManager::getShader(): Attempting to get shader that does not exist: " + name));
 
-		App::get().logger.die("AssetManager::getShader(): CANNOT GET SHADER FOR NON EXISTING SHADER NAME");
+		return this->shaderTrackerMap[name]->ptr;
+	}
+
+	bool AssetManager::shaderIsGpuLoaded(std::string name)
+	{
+		if (!this->shaderTrackerMap.contains(name))
+			App::get().logger.die(("AssetManager::shaderIsGpuLoaded(): Attempting to get shader that does not exist: " + name));
+
+		return this->shaderTrackerMap[name]->gpuLoaded;
+	}
+
+	void AssetManager::removeShader(std::string name)
+	{
+		if (!this->shaderTrackerMap.contains(name))
+			App::get().logger.die(("AssetManager::removeShader(): Attempting to remove shader that does not exist: " + name));
+
+		//TODO: This wouldn't be thread safe would it, since the thread that loads scenes into main memory could potentially see a value
+		// as valid, right before we remove it here
+
+		auto t = this->shaderTrackerMap[name];
+		t->usageCount--;
+		if (t->usageCount == 0)
+		{
+
+		}
 	}
 
 	/* Meshes
 	--------------------------------------------------*/
-	MeshTracker* AssetManager::getMeshTracker(std::string name)
-	{
-		for (auto& m : this->meshTrackers)
-			if (m.ptr->getName() == name)
-				return &m;
-			
-		return nullptr;
-	}
-	
-	std::pair<std::vector<MeshTracker*>, ArmatureTracker*> AssetManager::loadMesh(std::string path)
+	std::pair<std::vector<std::string>, std::string> AssetManager::loadMesh(std::string path)
 	{
 		auto al = AssetLoaderV2(this, path);
 		al.load();
-		
-		return al.getTrackers();
+
+		std::pair<std::vector<std::string>, std::string> out;
+		auto trackers = al.getTrackers();
+
+		for (auto& mt : trackers.first)
+			out.first.push_back(mt->ptr->getName());
+
+		out.second = trackers.second == nullptr ? "" : trackers.second->ptr->getName();
+
+		return out;
 	}
 
 	MeshTracker* AssetManager::addMesh(Mesh m)
@@ -134,39 +142,41 @@ namespace vel
 		auto tmpTracker = &(*it2);
 
 		this->meshesThatNeedGpuLoad.push_back(tmpTracker);
-		this->checkForGpuLoads = true;
+
+		this->meshTrackerMap[m.getName()] = tmpTracker;
 
 		return tmpTracker;
-		
-		//App::get().getGPU()->loadMesh(m);
-		//this->meshes.insert(m);
+	}
+
+	MeshTracker* AssetManager::getMeshTracker(std::string name)
+	{
+		if (!this->meshTrackerMap.contains(name))
+			return nullptr;
+
+		return this->meshTrackerMap[name];
 	}
 
 	Mesh* AssetManager::getMesh(std::string name)
 	{
-		for (auto& m : this->meshes)
-			if (m.getName() == name)
-				return &m;
+		if (!this->meshTrackerMap.contains(name))
+			App::get().logger.die(("AssetManager::getMesh(): Attempting to get mesh that does not exist: " + name));
 
-		App::get().logger.die("AssetManager::getMeshes(): CANNOT GET MESH FOR NON EXISTING MESH NAME");
+		return this->meshTrackerMap[name]->ptr;	
 	}
 
-	const plf::colony<Mesh>& AssetManager::getMeshes() const
+	bool AssetManager::meshIsGpuLoaded(std::string name)
 	{
-		return this->meshes;
+		return this->meshTrackerMap[name]->gpuLoaded;
 	}
 
 	/* Textures
 	--------------------------------------------------*/
-	TextureTracker* AssetManager::loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips)
+	std::string AssetManager::loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips)
 	{
-		for(auto& t : this->textureTrackers)
+		if (this->textureTrackerMap.contains(name))
 		{
-			if(t.ptr->name == name)
-			{
-				t.usageCount++;
-				return &t;
-			}
+			this->textureTrackerMap[name]->usageCount++;
+			return name;
 		}
 		
 		Texture texture;
@@ -186,33 +196,33 @@ namespace vel
 		auto tmpTracker = &(*it2);
 
 		this->texturesThatNeedGpuLoad.push_back(tmpTracker);
-		this->checkForGpuLoads = true;
 
-		return tmpTracker;
+		this->textureTrackerMap[name] = tmpTracker;
 
-		//App::get().getGPU()->loadTexture(texture);
+		return name;
 	}
 
-	Texture* AssetManager::getTexture(std::string textureName)
+	Texture* AssetManager::getTexture(std::string name)
 	{
-		for (auto& t : this->textures)
-			if (t.name == textureName)
-				return &t;
+		if (!this->textureTrackerMap.contains(name))
+			App::get().logger.die(("AssetManager::getTexture(): Attempting to get texture that does not exist: " + name));
 
-		App::get().logger.die("AssetManager::getTexture(): CANNOT GET TEXTURE FOR NON EXISTING TEXTURE NAME");
+		return this->textureTrackerMap[name]->ptr;		
+	}
+
+	bool AssetManager::textureIsGpuLoaded(std::string name)
+	{
+		return this->textureTrackerMap[name]->gpuLoaded;
 	}
 
 	/* Materials
 	--------------------------------------------------*/
-	MaterialTracker* AssetManager::addMaterial(Material m)
+	std::string AssetManager::addMaterial(Material m)
 	{
-		for(auto& t : this->materialTrackers)
+		if (this->materialTrackerMap.contains(m.name))
 		{
-			if(t.ptr->name == m.name)
-			{
-				t.usageCount++;
-				return &t;
-			}
+			this->materialTrackerMap[m.name]->usageCount++;
+			return m.name;
 		}
 
 		auto it = this->materials.insert(m);
@@ -222,16 +232,18 @@ namespace vel
 		t.usageCount++;
 		
 		auto it2 = this->materialTrackers.insert(t);
-		return &(*it2);
+
+		this->materialTrackerMap[m.name] = &(*it2);
+
+		return m.name;
 	}
 
-	Material* AssetManager::getMaterial(std::string materialName)
+	Material* AssetManager::getMaterial(std::string name)
 	{
-		for (auto& m : this->materials)
-			if (m.name == materialName)
-				return &m;
+		if (!this->materialTrackerMap.contains(name))
+			App::get().logger.die(("AssetManager::getMaterial(): Attempting to get material that does not exist: " + name));
 
-		App::get().logger.die("AssetManager::getMaterial(): CANNOT GET MATERIAL FOR NON EXISTING MATERIAL NAME");
+		return this->materialTrackerMap[name]->ptr;		
 	}
 
 	/* Animations
@@ -244,15 +256,12 @@ namespace vel
 
 	/* Renderables
 	--------------------------------------------------*/
-	RenderableTracker* AssetManager::addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material)
+	std::string AssetManager::addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material)
 	{
-		for(auto& t : this->renderableTrackers)
+		if (this->renderableTrackerMap.contains(name))
 		{
-			if(t.ptr->getName() == name)
-			{
-				t.usageCount++;
-				return &t;
-			}
+			this->renderableTrackerMap[name]->usageCount++;
+			return name;
 		}
 
 		auto it = this->renderables.insert(Renderable(name, shader, mesh, material));
@@ -262,27 +271,28 @@ namespace vel
 		t.usageCount++;
 		
 		auto it2 = this->renderableTrackers.insert(t);
-		return &(*it2);
+
+		this->renderableTrackerMap[name] = &(*it2);
+
+		return name;
 	}
 
 	Renderable AssetManager::getRenderable(std::string name)
 	{
-		for (auto& r : this->renderables)
-			if (r.getName() == name)
-				return r;
+		if (!this->renderableTrackerMap.contains(name))
+			App::get().logger.die(("AssetManager::getRenderable(): Attempting to get renderable that does not exist: " + name));
 
-		App::get().logger.die("AssetManager::getRenderable(): CANNOT GET RENDERABLE FOR NON EXISTING RENDERABLE NAME");
+		return *this->renderableTrackerMap[name]->ptr;		
 	}
 
 	/* Armatures
 	--------------------------------------------------*/
 	ArmatureTracker* AssetManager::getArmatureTracker(std::string name)
 	{
-		for (auto& a : this->armatureTrackers)
-			if (a.ptr->getName() == name)
-				return &a;
-			
-		return nullptr;
+		if (!this->armatureTrackerMap.contains(name))
+			return nullptr;
+
+		return this->armatureTrackerMap[name];
 	}
 	
 	ArmatureTracker* AssetManager::addArmature(Armature a)
@@ -294,16 +304,18 @@ namespace vel
 		t.usageCount++;
 		
 		auto it2 = this->armatureTrackers.insert(t);
+
+		this->armatureTrackerMap[a.getName()] = &(*it2);
+
 		return &(*it2);
 	}
 
 	Armature AssetManager::getArmature(std::string name)
 	{
-		for (auto& a : this->armatures)
-			if (a.getName() == name)
-				return a;
+		if (!this->armatureTrackerMap.contains(name))
+			App::get().logger.die(("AssetManager::getArmature(): Attempting to get armature that does not exist: " + name));
 
-		App::get().logger.die("AssetManager::getArmature(): Attempting to get armature by name that does not exist");
+		return *this->armatureTrackerMap[name]->ptr;		
 	}
 
 

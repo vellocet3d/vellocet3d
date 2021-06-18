@@ -3,6 +3,7 @@
 #include <string>
 
 #include "dep/plf_colony.h"
+#include "dep/robin_hood.h"
 
 
 #include "vel/assets/Shader.h"
@@ -23,23 +24,29 @@ namespace vel
 		plf::colony<Shader>				shaders;
 		plf::colony<ShaderTracker>		shaderTrackers;
 		std::deque<ShaderTracker*>		shadersThatNeedGpuLoad;
+		robin_hood::unordered_node_map<std::string, ShaderTracker*> shaderTrackerMap;
 		
 		plf::colony<Mesh>				meshes;
 		plf::colony<MeshTracker>		meshTrackers;
 		std::deque<MeshTracker*>		meshesThatNeedGpuLoad;
+		robin_hood::unordered_node_map<std::string, MeshTracker*> meshTrackerMap;
 		
 		plf::colony<Texture>			textures;
 		plf::colony<TextureTracker> 	textureTrackers;
 		std::deque<TextureTracker*>		texturesThatNeedGpuLoad;
+		robin_hood::unordered_node_map<std::string, TextureTracker*> textureTrackerMap;
 		
 		plf::colony<Material>			materials;
 		plf::colony<MaterialTracker> 	materialTrackers;
+		robin_hood::unordered_node_map<std::string, MaterialTracker*> materialTrackerMap;
 		
 		plf::colony<Renderable>			renderables;
 		plf::colony<RenderableTracker> 	renderableTrackers;
+		robin_hood::unordered_node_map<std::string, RenderableTracker*> renderableTrackerMap;
 		
 		plf::colony<Armature>			armatures;
 		plf::colony<ArmatureTracker>	armatureTrackers;
+		robin_hood::unordered_node_map<std::string, ArmatureTracker*> armatureTrackerMap;
 		
 		plf::colony<Animation>			animations;
 		// since animations are tracked within an Armature, and they are only associated with a single armatureTrackers
@@ -51,27 +58,29 @@ namespace vel
 		AssetManager();
 		~AssetManager();
 
-		bool						collectGarbage = false;
-		bool						checkForGpuLoads = false;
+
 		void						sendToGpu();
 
-		ShaderTracker*				loadShader(std::string name, std::string vertFile, std::string fragFile);
+		std::string					loadShader(std::string name, std::string vertFile, std::string fragFile);
 		Shader*						getShader(std::string name);
+		bool						shaderIsGpuLoaded(std::string name);
+		void						removeShader(std::string name);
 
-		std::pair<std::vector<MeshTracker*>, ArmatureTracker*> loadMesh(std::string path);
+		std::pair<std::vector<std::string>, std::string> loadMesh(std::string path);
 		MeshTracker*				addMesh(Mesh m);
-		const plf::colony<Mesh>&	getMeshes() const;
 		Mesh*						getMesh(std::string name);
+		bool						meshIsGpuLoaded(std::string name);
 
-		TextureTracker*				loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
-		Texture*					getTexture(std::string textureName);
+		std::string					loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
+		Texture*					getTexture(std::string name);
+		bool						textureIsGpuLoaded(std::string name);
 
-		MaterialTracker*			addMaterial(Material m);
-		Material*					getMaterial(std::string materialName);
+		std::string					addMaterial(Material m);
+		Material*					getMaterial(std::string name);
 
 		Animation*					addAnimation(Animation a);
 
-		RenderableTracker*			addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material);
+		std::string					addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material);
 		Renderable					getRenderable(std::string name);
 
 		ArmatureTracker*			addArmature(Armature a);
@@ -79,8 +88,6 @@ namespace vel
 
 		MeshTracker*				getMeshTracker(std::string name);
 		ArmatureTracker*			getArmatureTracker(std::string name);
-
-		void						runGarbageCollector();
 
 	};
 

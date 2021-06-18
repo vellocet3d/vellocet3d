@@ -54,11 +54,14 @@ namespace vel
 		void								drawGpuMesh();
 		void								clearDepthBuffer();
 
-		void								wipe(std::vector<Shader>& shaders, std::vector<Mesh>& meshes, std::vector<Texture>& textures);
 		void								finish();
 		void								enableBlend();
 
 		void								debugDrawCollisionWorld(CollisionDebugDrawer* cdd);
+
+		void								clearShader(Shader* s);
+		void								clearMesh(Mesh* m);
+		void								clearTexture(Texture* t);
 
 	};
 }

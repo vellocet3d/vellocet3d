@@ -29,6 +29,12 @@ namespace vel
 	Scene::~Scene()
 	{
 		//App::get().getGPU()->wipe(this->shaders, this->meshes, this->textures);
+		this->freeAssets();
+	}
+
+	void Scene::freeAssets()
+	{
+
 	}
 
 	/* Json Scene Loader
@@ -181,26 +187,24 @@ namespace vel
 		// }
 	// }
 
-	void Scene::freeAssets()
-	{
-		// loop through all asset trackers and decrement their usageCount value by 1
-	}
-
 	bool Scene::isFullyLoaded()
 	{
 		if (!this->mainMemoryloaded)
 			return false;
 
-		for (auto& t : this->shaderTrackers)
-			if (!t->gpuLoaded)
+		// there is for sure a better way to handle this, but for the time being
+		// it is what it is until I at least get a working build again
+
+		for (auto& s : this->shadersInUse)
+			if (!App::get().getAssetManager().shaderIsGpuLoaded(s))
+				return false;
+		
+		for (auto& m : this->meshesInUse)
+			if (!App::get().getAssetManager().meshIsGpuLoaded(m))
 				return false;
 
-		for (auto& t : this->meshTrackers)
-			if (!t->gpuLoaded)
-				return false;
-
-		for (auto& t : this->textureTrackers)
-			if (!t->gpuLoaded)
+		for (auto& t : this->texturesInUse)
+			if (!App::get().getAssetManager().textureIsGpuLoaded(t))
 				return false;
 
 		return true;
@@ -208,86 +212,62 @@ namespace vel
 
 	void Scene::loadShader(std::string name, std::string vertFile, std::string fragFile)
 	{
-		this->shaderTrackers.push_back(App::get().getAssetManager().loadShader(name, vertFile, fragFile));
+		this->shadersInUse.push_back(App::get().getAssetManager().loadShader(name, vertFile, fragFile));
 	}
 	
 	void Scene::loadMesh(std::string path)
 	{
 		auto tts = App::get().getAssetManager().loadMesh(path);
 		for(auto& t : tts.first)
-			this->meshTrackers.push_back(t);
+			this->meshesInUse.push_back(t);
 		
-		if(tts.second != nullptr)
-			this->armatureTrackers.push_back(tts.second);
+		if(tts.second != "")
+			this->armaturesInUse.push_back(tts.second);
 	}
 	
 	void Scene::loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips)
 	{
-		this->textureTrackers.push_back(App::get().getAssetManager().loadTexture(name, type, path, mips));
+		this->texturesInUse.push_back(App::get().getAssetManager().loadTexture(name, type, path, mips));
 	}
 	
 	void Scene::addMaterial(Material m)
 	{
-		this->materialTrackers.push_back(App::get().getAssetManager().addMaterial(m));
+		this->materialsInUse.push_back(App::get().getAssetManager().addMaterial(m));
 	}
 	
 	void Scene::addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material)
 	{
-		this->renderableTrackers.push_back(App::get().getAssetManager().addRenderable(name, shader, mesh, material));
+		this->renderablesInUse.push_back(App::get().getAssetManager().addRenderable(name, shader, mesh, material));
 	}
 
 	Shader* Scene::getShader(std::string name)
 	{
-		for (auto& t : this->shaderTrackers)
-			if (t->ptr->name == name)
-				return t->ptr;
-
-		App::get().logger.die(("Scene::getShader(): Attempting to get shader that does not exist: " + name));
+		return App::get().getAssetManager().getShader(name);
 	}
 
 	Mesh* Scene::getMesh(std::string name)
 	{
-		for (auto& t : this->meshTrackers)
-			if (t->ptr->getName() == name)
-				return t->ptr;
-
-		App::get().logger.die(("Scene::getMesh(): Attempting to get mesh that does not exist: " + name));
+		return App::get().getAssetManager().getMesh(name);
 	}
 
 	Texture* Scene::getTexture(std::string name)
 	{
-		for (auto& t : this->textureTrackers)
-			if (t->ptr->name == name)
-				return t->ptr;
-
-		App::get().logger.die(("Scene::getTexture(): Attempting to get texture that does not exist: " + name));
+		return App::get().getAssetManager().getTexture(name);
 	}
 
 	Material* Scene::getMaterial(std::string name)
 	{
-		for (auto& t : this->materialTrackers)
-			if (t->ptr->name == name)
-				return t->ptr;
-
-		App::get().logger.die(("Scene::getMaterial(): Attempting to get material that does not exist: " + name));
+		return App::get().getAssetManager().getMaterial(name);
 	}
 
 	Renderable Scene::getRenderable(std::string name)
 	{
-		for (auto& t : this->renderableTrackers)
-			if (t->ptr->getName() == name)
-				return *t->ptr;
-
-		App::get().logger.die(("Scene::getRenderable(): Attempting to get renderable that does not exist: " + name));
+		return App::get().getAssetManager().getRenderable(name);
 	}
 
 	Armature Scene::getArmature(std::string name)
 	{
-		for (auto& t : this->armatureTrackers)
-			if (t->ptr->getName() == name)
-				return *t->ptr;
-
-		App::get().logger.die(("Scene::getArmature(): Attempting to get armature that does not exist: " + name));
+		return App::get().getAssetManager().getArmature(name);
 	}
 
 	/* Stages

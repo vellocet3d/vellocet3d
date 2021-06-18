@@ -48,7 +48,6 @@ namespace vel
 		void								processMesh(aiMesh* aiMesh);
 		bool								isRootArmatureNode(aiNode* node);
 		glm::mat4							aiMatrix4x4ToGlm(const aiMatrix4x4 &from);
-		std::optional<Animation*>			getExistingAnimation(std::string animationName);
 		aiMatrix4x4							glmToAssImpMat4(glm::mat4 mat);
 		bool								nodeHasBeenProcessed(aiNode* in);
 

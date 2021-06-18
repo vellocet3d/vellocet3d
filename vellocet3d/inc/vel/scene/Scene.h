@@ -24,13 +24,14 @@ namespace vel
 		double								animationTime;
 
 
-		std::vector<ShaderTracker*>			shaderTrackers;
-		std::vector<MeshTracker*>			meshTrackers;
-		std::vector<TextureTracker*> 		textureTrackers;
-		std::vector<MaterialTracker*> 		materialTrackers;
-		std::vector<RenderableTracker*> 	renderableTrackers;
-		std::vector<ArmatureTracker*>		armatureTrackers;
+		std::vector<std::string>			shadersInUse;
+		std::vector<std::string>			meshesInUse;
+		std::vector<std::string> 			texturesInUse;
+		std::vector<std::string> 			materialsInUse;
+		std::vector<std::string> 			renderablesInUse;
+		std::vector<std::string>			armaturesInUse;
 		
+		void								freeAssets();
 
 	protected:
 		std::string							name = "default";
@@ -67,7 +68,7 @@ namespace vel
 		bool								swapWhenLoaded;
 		std::string							getName();
 		bool								isFullyLoaded();
-		void								freeAssets();
+		
 
 
 		void								updateAnimations(double runTime);

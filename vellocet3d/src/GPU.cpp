@@ -29,24 +29,24 @@ namespace vel
 
 	}
 
-	// TODO: this definately needs revised
-	void GPU::wipe(std::vector<Shader>& shaders, std::vector<Mesh>& meshes, std::vector<Texture>& textures)
+	void GPU::clearShader(Shader* s)
 	{
-		for (auto& s : shaders)
-			glDeleteProgram(s.id);
+		glDeleteProgram(s->id);
+	}
 
-		for (auto& m : meshes)
+	void GPU::clearMesh(Mesh* m)
+	{
+		if (m->getGpuMesh())
 		{
-			if (m.getGpuMesh())
-			{
-				glDeleteVertexArrays(1, &m.getGpuMesh().value().VAO);
-				glDeleteBuffers(1, &m.getGpuMesh().value().VBO);
-				glDeleteBuffers(1, &m.getGpuMesh().value().EBO);
-			}
+			glDeleteVertexArrays(1, &m->getGpuMesh().value().VAO);
+			glDeleteBuffers(1, &m->getGpuMesh().value().VBO);
+			glDeleteBuffers(1, &m->getGpuMesh().value().EBO);
 		}
+	}
 
-		for (auto& t : textures)
-			glDeleteTextures(1, &t.id);
+	void GPU::clearTexture(Texture* t)
+	{
+		glDeleteTextures(1, &t->id);
 	}
 
 	void GPU::loadShader(Shader* s)

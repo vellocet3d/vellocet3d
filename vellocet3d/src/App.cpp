@@ -212,12 +212,9 @@ namespace vel
 
 			
 
-			// if the assetmanager has checkForGpuLoads flag set to true, then load a single gpu asset
-			// for this loop cycle
-			if (this->assetManager.checkForGpuLoads)
-			{
-				this->assetManager.sendToGpu();
-			}
+			// load a single gpu asset for this loop cycle if needed
+			this->assetManager.sendToGpu();
+			
 
 			if (this->sceneLoadingQueue.size() > 0)
 			{
