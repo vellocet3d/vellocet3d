@@ -28,13 +28,12 @@ namespace vel
 	
 	Scene::~Scene()
 	{
-		//App::get().getGPU()->wipe(this->shaders, this->meshes, this->textures);
 		this->freeAssets();
 	}
 
 	void Scene::freeAssets()
 	{
-
+		//TODO: YO
 	}
 
 	/* Json Scene Loader

@@ -52,7 +52,6 @@ namespace vel
 		// since animations are tracked within an Armature, and they are only associated with a single armatureTrackers
 		// we shouldn't need to track them, just account for them when adding/removing an armature
 		//plf::colony<AnimationTracker>	animationTrackers;
-		
 
 	public:
 		AssetManager();

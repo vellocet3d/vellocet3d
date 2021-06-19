@@ -86,6 +86,7 @@ namespace vel
 		return this->window->getImguiFont(key);
 	}
 
+	//TODO: revise
 	void App::removeScene(std::string name)
 	{
 		size_t i = 0;

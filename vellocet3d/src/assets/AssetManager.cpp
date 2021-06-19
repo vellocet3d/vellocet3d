@@ -11,6 +11,7 @@ namespace vel
 	AssetManager::AssetManager(){}
 	AssetManager::~AssetManager() {}
 
+
 	void AssetManager::sendToGpu()
 	{
 		if (this->shadersThatNeedGpuLoad.size() > 0)
@@ -45,15 +46,16 @@ namespace vel
 	--------------------------------------------------*/
 	std::string AssetManager::loadShader(std::string name, std::string vertFile, std::string fragFile)
 	{
-		// first check if shader name already exists
-		// if so, return the ShaderTracker* to that element
-		if (this->shaderTrackerMap.contains(name))
+		// if usage count is not greater than zero then the asset is being deleted on the main thread
+		// so we will need to re-create it. This could still potentially be a race condition, although
+		// I would think it would be unlikely, putting a TODO here until we thoroughly test some 
+		// real world use cases to verify
+		if (this->shaderTrackerMap.contains(name) && this->shaderTrackerMap[name]->usageCount > 0) 
 		{
 			this->shaderTrackerMap[name]->usageCount++;
 			return name;
 		}
 		
-		// else, create the shader and ShaderTracker then return ShaderTracker*
 		
 		Shader s;
 		s.name = name;
@@ -97,14 +99,20 @@ namespace vel
 		if (!this->shaderTrackerMap.contains(name))
 			App::get().logger.die(("AssetManager::removeShader(): Attempting to remove shader that does not exist: " + name));
 
-		//TODO: This wouldn't be thread safe would it, since the thread that loads scenes into main memory could potentially see a value
-		// as valid, right before we remove it here
-
 		auto t = this->shaderTrackerMap[name];
 		t->usageCount--;
 		if (t->usageCount == 0)
 		{
-
+			if (!t->gpuLoaded)
+				for (size_t i = 0; i < this->shadersThatNeedGpuLoad.size(); i++)
+					if (this->shadersThatNeedGpuLoad.at(i) == t)
+						this->shadersThatNeedGpuLoad.erase(this->shadersThatNeedGpuLoad.begin() + i);
+			else
+				App::get().getGPU()->clearShader(t->ptr);
+			
+			this->shaders.erase(this->shaders.get_iterator(t->ptr));
+			this->shaderTrackers.erase(this->shaderTrackers.get_iterator(t));
+			this->shaderTrackerMap.erase(name);
 		}
 	}
 
