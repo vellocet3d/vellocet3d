@@ -33,7 +33,23 @@ namespace vel
 
 	void Scene::freeAssets()
 	{
-		//TODO: YO
+		for(auto& name : this->armaturesInUse)
+			App::get().getAssetManager().removeArmature(name);
+		
+		for(auto& name : this->renderablesInUse)
+			App::get().getAssetManager().removeRenderable(name);
+		
+		for(auto& name : this->materialsInUse)
+			App::get().getAssetManager().removeMaterial(name);
+		
+		for(auto& name : this->texturesInUse)
+			App::get().getAssetManager().removeTexture(name);
+		
+		for(auto& name : this->meshesInUse)
+			App::get().getAssetManager().removeMesh(name);
+		
+		for(auto& name : this->shadersInUse)
+			App::get().getAssetManager().removeShader(name);
 	}
 
 	/* Json Scene Loader

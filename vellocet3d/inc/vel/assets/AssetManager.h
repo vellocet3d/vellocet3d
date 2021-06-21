@@ -58,7 +58,8 @@ namespace vel
 		~AssetManager();
 
 
-		void						sendToGpu();
+		void						sendNextToGpu();
+		void						sendAllToGpu();
 
 		std::string					loadShader(std::string name, std::string vertFile, std::string fragFile);
 		Shader*						getShader(std::string name);
@@ -69,21 +70,26 @@ namespace vel
 		MeshTracker*				addMesh(Mesh m);
 		Mesh*						getMesh(std::string name);
 		bool						meshIsGpuLoaded(std::string name);
+		void						removeMesh(std::string name);
 
 		std::string					loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
 		Texture*					getTexture(std::string name);
 		bool						textureIsGpuLoaded(std::string name);
+		void						removeTexture(std::string name);
 
 		std::string					addMaterial(Material m);
 		Material*					getMaterial(std::string name);
+		void						removeMaterial(std::string name);
 
 		Animation*					addAnimation(Animation a);
 
 		std::string					addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material);
 		Renderable					getRenderable(std::string name);
+		void						removeRenderable(std::string name);
 
 		ArmatureTracker*			addArmature(Armature a);
 		Armature					getArmature(std::string name);
+		void						removeArmature(std::string name);
 
 		MeshTracker*				getMeshTracker(std::string name);
 		ArmatureTracker*			getArmatureTracker(std::string name);

@@ -86,21 +86,26 @@ namespace vel
 		return this->window->getImguiFont(key);
 	}
 
-	//TODO: revise
+	//TODO: scene desctructor should be called when we erase element from this->scenes...please verify
 	void App::removeScene(std::string name)
 	{
 		size_t i = 0;
 		for (auto& s : this->scenes)
 		{
 			if (s->getName() == name)
-			{
-				s->freeAssets();
 				break;
-			}
+			
 			i++;
 		}
 
 		this->scenes.erase(this->scenes.begin() + i);
+	}
+	
+	void App::swapScene(std::string name)
+	{
+		for (auto& s : this->scenes)
+			if (s->getName() == name)
+				this->activeScene = s.get();
 	}
 
     void App::addScene(Scene* scene, bool swapWhenLoaded)
@@ -214,7 +219,7 @@ namespace vel
 			
 
 			// load a single gpu asset for this loop cycle if needed
-			this->assetManager.sendToGpu();
+			this->assetManager.sendNextToGpu();
 			
 
 			if (this->sceneLoadingQueue.size() > 0)

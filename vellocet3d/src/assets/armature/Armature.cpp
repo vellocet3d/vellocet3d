@@ -20,6 +20,11 @@ namespace vel
 		previousRunTime(0.0)
 	{}
 
+	const std::vector<std::pair<std::string, Animation*>>&	Armature::getAnimations()
+	{
+		return this->animations;
+	}
+
 	glm::vec3 Armature::calcTranslation(const float& time, size_t currentKeyIndex, Channel* channel)
 	{
 		size_t nextKeyIndex = currentKeyIndex + 1;

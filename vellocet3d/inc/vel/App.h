@@ -86,6 +86,7 @@ namespace vel
 		Scene*											getNextSceneToLoad();
 
 		void											removeScene(std::string name);
+		void											swapScene(std::string name);
 
     };
 };

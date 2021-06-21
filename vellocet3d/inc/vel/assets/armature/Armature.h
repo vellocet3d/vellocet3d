@@ -58,6 +58,7 @@ namespace vel
 		size_t												getBoneIndex(std::string boneName);
 		void												updateAnimation(double runTime, std::optional<glm::mat4> parentMatrix);
 		Animation*											getAnimation(std::string animationName);
+		const std::vector<std::pair<std::string, Animation*>>&	getAnimations();
 
 		std::string											getCurrentAnimationName();
 		unsigned int										getCurrentAnimationCycle();

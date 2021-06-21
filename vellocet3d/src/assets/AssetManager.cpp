@@ -1,9 +1,11 @@
-
+#include <thread> 
+#include <chrono>
 
 #include "vel/assets/AssetManager.h"
 #include "vel/assets/AssetLoaderV2.h"
 #include "vel/App.h"
 
+using namespace std::chrono_literals;
 
 namespace vel
 {
@@ -12,7 +14,31 @@ namespace vel
 	AssetManager::~AssetManager() {}
 
 
-	void AssetManager::sendToGpu()
+	void AssetManager::sendAllToGpu()
+	{
+		for(auto& s : this->shadersThatNeedGpuLoad)
+		{
+			App::get().getGPU()->loadShader(s->ptr);
+			s->gpuLoaded = true;
+			this->shadersThatNeedGpuLoad.pop_front();
+		}
+		
+		for(auto& m : this->meshesThatNeedGpuLoad)
+		{
+			App::get().getGPU()->loadMesh(m->ptr);
+			m->gpuLoaded = true;
+			this->meshesThatNeedGpuLoad.pop_front();
+		}
+		
+		for(auto& t : this->texturesThatNeedGpuLoad)
+		{
+			App::get().getGPU()->loadTexture(t->ptr);
+			t->gpuLoaded = true;
+			this->texturesThatNeedGpuLoad.pop_front();
+		}
+	}
+
+	void AssetManager::sendNextToGpu()
 	{
 		if (this->shadersThatNeedGpuLoad.size() > 0)
 		{
@@ -46,14 +72,25 @@ namespace vel
 	--------------------------------------------------*/
 	std::string AssetManager::loadShader(std::string name, std::string vertFile, std::string fragFile)
 	{
-		// if usage count is not greater than zero then the asset is being deleted on the main thread
-		// so we will need to re-create it. This could still potentially be a race condition, although
-		// I would think it would be unlikely, putting a TODO here until we thoroughly test some 
-		// real world use cases to verify
-		if (this->shaderTrackerMap.contains(name) && this->shaderTrackerMap[name]->usageCount > 0) 
+		if (this->shaderTrackerMap.contains(name)) 
 		{
-			this->shaderTrackerMap[name]->usageCount++;
-			return name;
+			// if usage count is not greater than zero then the asset is being deleted on the main thread
+			// so we will need to re-create it. This could still potentially be a race condition, although
+			// I would think it would be unlikely, putting a TODO here until we thoroughly test some 
+			// real world use cases to verify
+			if(this->shaderTrackerMap[name]->usageCount > 0)
+			{
+				this->shaderTrackerMap[name]->usageCount++;
+				return name;
+			}
+			// if name exists in map, AND usage count IS EQUAL TO 0, then we must have called this method
+			// from a thread other than the main thread. Therefore, let us poll until the name no longer 
+			// exists within the map so we do not recreate the asset while it's being deleted
+			else
+			{
+				std::this_thread::sleep_for(100ms);
+				return this->loadShader(name, vertFile, fragFile);
+			}			
 		}
 		
 		
@@ -158,10 +195,29 @@ namespace vel
 
 	MeshTracker* AssetManager::getMeshTracker(std::string name)
 	{
-		if (!this->meshTrackerMap.contains(name))
-			return nullptr;
+		if(this->meshTrackerMap.contains(name))
+		{
+			auto t = this->meshTrackerMap[name];
+			if(t->usageCount > 0)
+			{
+				t->usageCount++;
+				return t;
+			}
+			else
+			{
+				std::this_thread::sleep_for(100ms);
+				return this->getMeshTracker(name);
+			}
+		}
+		
+		return nullptr;
+		
+		//////////////////////
+		
+		//if (!this->meshTrackerMap.contains(name) || this->meshTrackerMap[name]->usageCount == 0)
+			//return nullptr;
 
-		return this->meshTrackerMap[name];
+		//return this->meshTrackerMap[name];
 	}
 
 	Mesh* AssetManager::getMesh(std::string name)
@@ -176,15 +232,47 @@ namespace vel
 	{
 		return this->meshTrackerMap[name]->gpuLoaded;
 	}
+	
+	void AssetManager::removeMesh(std::string name)
+	{
+		if (!this->meshTrackerMap.contains(name))
+			App::get().logger.die(("AssetManager::removeMesh(): Attempting to remove mesh that does not exist: " + name));
+		
+		auto t = this->meshTrackerMap[name];
+		t->usageCount--;
+		if(t->usageCount == 0)
+		{
+			if(!t->gpuLoaded)
+				for (size_t i = 0; i < this->meshesThatNeedGpuLoad.size(); i++)
+					if (this->meshesThatNeedGpuLoad.at(i) == t)
+						this->meshesThatNeedGpuLoad.erase(this->meshesThatNeedGpuLoad.begin() + i);
+			else
+				App::get().getGPU()->clearMesh(t->ptr);
+			
+			this->meshes.erase(this->meshes.get_iterator(t->ptr));
+			this->meshTrackers.erase(this->meshTrackers.get_iterator(t));
+			this->meshTrackerMap.erase(name);
+		}
+		
+	}
 
 	/* Textures
 	--------------------------------------------------*/
 	std::string AssetManager::loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips)
-	{
-		if (this->textureTrackerMap.contains(name))
+	{	
+		if (this->textureTrackerMap.contains(name)) 
 		{
-			this->textureTrackerMap[name]->usageCount++;
-			return name;
+			auto t = this->textureTrackerMap[name];
+			if(t->usageCount > 0)
+			{
+				t->usageCount++;
+				return name;
+			}
+			else
+			{
+				std::this_thread::sleep_for(100ms);
+				return this->loadTexture(name, type, path, mips);
+			}			
 		}
 		
 		Texture texture;
@@ -222,16 +310,48 @@ namespace vel
 	{
 		return this->textureTrackerMap[name]->gpuLoaded;
 	}
+	
+	void AssetManager::removeTexture(std::string name)
+	{
+		if (!this->textureTrackerMap.contains(name))
+			App::get().logger.die(("AssetManager::removeTexture(): Attempting to remove texture that does not exist: " + name));
+
+		auto t = this->textureTrackerMap[name];
+		t->usageCount--;
+		if (t->usageCount == 0)
+		{
+			if (!t->gpuLoaded)
+				for (size_t i = 0; i < this->texturesThatNeedGpuLoad.size(); i++)
+					if (this->texturesThatNeedGpuLoad.at(i) == t)
+						this->texturesThatNeedGpuLoad.erase(this->texturesThatNeedGpuLoad.begin() + i);
+			else
+				App::get().getGPU()->clearTexture(t->ptr);
+			
+			this->textures.erase(this->textures.get_iterator(t->ptr));
+			this->textureTrackers.erase(this->textureTrackers.get_iterator(t));
+			this->textureTrackerMap.erase(name);
+		}
+	}
 
 	/* Materials
 	--------------------------------------------------*/
 	std::string AssetManager::addMaterial(Material m)
 	{
-		if (this->materialTrackerMap.contains(m.name))
+		if (this->materialTrackerMap.contains(m.name)) 
 		{
-			this->materialTrackerMap[m.name]->usageCount++;
-			return m.name;
+			auto t = this->materialTrackerMap[m.name];
+			if(t->usageCount > 0)
+			{
+				t->usageCount++;
+				return m.name;
+			}
+			else
+			{
+				std::this_thread::sleep_for(100ms);
+				return this->addMaterial(m);
+			}			
 		}
+		
 
 		auto it = this->materials.insert(m);
 		
@@ -253,6 +373,21 @@ namespace vel
 
 		return this->materialTrackerMap[name]->ptr;		
 	}
+	
+	void AssetManager::removeMaterial(std::string name)
+	{
+		if (!this->materialTrackerMap.contains(name))
+			App::get().logger.die(("AssetManager::removeMaterial(): Attempting to remove material that does not exist: " + name));
+		
+		auto t = this->materialTrackerMap[name];
+		t->usageCount--;
+		if (t->usageCount == 0)
+		{			
+			this->materials.erase(this->materials.get_iterator(t->ptr));
+			this->materialTrackers.erase(this->materialTrackers.get_iterator(t));
+			this->materialTrackerMap.erase(name);
+		}
+	}
 
 	/* Animations
 	--------------------------------------------------*/	
@@ -266,11 +401,21 @@ namespace vel
 	--------------------------------------------------*/
 	std::string AssetManager::addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material)
 	{
-		if (this->renderableTrackerMap.contains(name))
+		if (this->renderableTrackerMap.contains(name)) 
 		{
-			this->renderableTrackerMap[name]->usageCount++;
-			return name;
+			auto t = this->renderableTrackerMap[name];
+			if(t->usageCount > 0)
+			{
+				t->usageCount++;
+				return name;
+			}
+			else
+			{
+				std::this_thread::sleep_for(100ms);
+				return this->addRenderable(name, shader, mesh, material);
+			}			
 		}
+
 
 		auto it = this->renderables.insert(Renderable(name, shader, mesh, material));
 		
@@ -292,15 +437,42 @@ namespace vel
 
 		return *this->renderableTrackerMap[name]->ptr;		
 	}
+	
+	void AssetManager::removeRenderable(std::string name)
+	{
+		if (!this->renderableTrackerMap.contains(name))
+			App::get().logger.die(("AssetManager::removeRenderable(): Attempting to remove renderable that does not exist: " + name));
+		
+		auto t = this->renderableTrackerMap[name];
+		t->usageCount--;
+		if (t->usageCount == 0)
+		{			
+			this->renderables.erase(this->renderables.get_iterator(t->ptr));
+			this->renderableTrackers.erase(this->renderableTrackers.get_iterator(t));
+			this->renderableTrackerMap.erase(name);
+		}
+	}
 
 	/* Armatures
 	--------------------------------------------------*/
 	ArmatureTracker* AssetManager::getArmatureTracker(std::string name)
 	{
-		if (!this->armatureTrackerMap.contains(name))
-			return nullptr;
-
-		return this->armatureTrackerMap[name];
+		if(this->armatureTrackerMap.contains(name))
+		{
+			auto t = this->armatureTrackerMap[name];
+			if(t->usageCount > 0)
+			{
+				t->usageCount++;
+				return t;
+			}
+			else
+			{
+				std::this_thread::sleep_for(100ms);
+				return this->getArmatureTracker(name);
+			}
+		}
+		
+		return nullptr;
 	}
 	
 	ArmatureTracker* AssetManager::addArmature(Armature a)
@@ -326,5 +498,26 @@ namespace vel
 		return *this->armatureTrackerMap[name]->ptr;		
 	}
 
+	void AssetManager::removeArmature(std::string name)
+	{
+		if (!this->armatureTrackerMap.contains(name))
+			App::get().logger.die(("AssetManager::removeArmature(): Attempting to remove armature that does not exist: " + name));
+		
+		auto t = this->armatureTrackerMap[name];
+		t->usageCount--;
+		if(t->usageCount == 0)
+		{
+			// remove all animations used by this armature
+			for(auto& animArmPair : t->ptr->getAnimations())
+				for(auto& animOG : this->animations)
+					if(animArmPair.second == &animOG)
+						this->animations.erase(this->animations.get_iterator(animArmPair.second));
+			
+			// remove armature
+			this->armatures.erase(this->armatures.get_iterator(t->ptr));
+			this->armatureTrackers.erase(this->armatureTrackers.get_iterator(t));
+			this->armatureTrackerMap.erase(name);
+		}
+	}
 
 }
