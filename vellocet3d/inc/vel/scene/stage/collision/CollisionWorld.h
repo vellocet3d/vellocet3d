@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 
+#include "dep/plf_colony.h"
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 
@@ -34,7 +35,7 @@ namespace vel
 		btSequentialImpulseConstraintSolver*	solver;
 		btDiscreteDynamicsWorld*				dynamicsWorld;
 		std::map<std::string, btCollisionShape*> collisionShapes;
-		std::vector<std::unique_ptr<Sensor>>	sensors;
+		plf::colony<Sensor>						sensors;
 		std::optional<CollisionDebugDrawer> 	collisionDebugDrawer;
 
 
@@ -51,7 +52,8 @@ namespace vel
 		void									addStaticCollisionBodies(std::vector<Actor*> actors);
 		void									removeRigidBody(btRigidBody* rb);
 		void									removeGhostObject(btPairCachingGhostObject* go);
-		void									addSensor(Sensor* ct);
+		Sensor*									addSensor(Sensor s);
+		void									removeSensor(Sensor* s);
 		void									processSensors();
 
 

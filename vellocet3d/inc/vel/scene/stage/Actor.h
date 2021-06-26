@@ -18,6 +18,7 @@
 namespace vel
 {
 	class Stage;
+	class Sensor;
 
 	class Actor
 	{
@@ -37,14 +38,16 @@ namespace vel
 																				
 
 		std::optional<Renderable>						tempRenderable;
-		std::optional<size_t>							parentRenderableIndex;
-		std::optional<size_t>							containerIndex;
+		std::optional<Renderable*>						stageRenderable;
 
 		Mesh*											mesh; // pointer to mesh used by this Actor independant of renderable. required for headless mode since there will be no renderable instance
 
 		btRigidBody*									rigidBody;
 		btPairCachingGhostObject*						ghostObject;
 		bool											manualTransform;
+		
+		std::vector<Sensor*>							contactSensors;
+		
 
 
 
@@ -61,11 +64,10 @@ namespace vel
 		void											addRenderable(Renderable r);
 		std::optional<Renderable>&						getTempRenderable();
 		void											clearTempRenderable();
-		void											setRenderableIndex(size_t ri);
-		const size_t&									getRenderableIndex() const;
+		void											setStageRenderable(Renderable* r);
+		std::optional<Renderable*>						getStageRenderable();
 
-		void											setContainerIndex(size_t ci);
-		const size_t&									getContainerIndex() const;
+
 
 		void											setDeleted(bool d);
 		const bool										isDeleted() const;
@@ -106,8 +108,10 @@ namespace vel
 		void											removeChildActor(Actor* a, bool calledFromRemoveParentActor = false);
 
 		Mesh*											getMesh();
-		void											setMesh(Mesh* m);
-
+		
+		void											addContactSensor(Sensor* s);
+		void											clearContactSensors();
+		std::vector<Sensor*>& 							getContactSensors();
 
 
 	};

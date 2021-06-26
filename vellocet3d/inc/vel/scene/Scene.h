@@ -6,6 +6,7 @@
 #include <optional>
 
 #include "dep/plf_colony.h"
+#include "sac.h"
 
 #include "vel/assets/mesh/Mesh.h"
 #include "vel/scene/stage/Stage.h"
@@ -20,7 +21,7 @@ namespace vel
 	class Scene
 	{
 	private:
-		std::vector<Stage>					stages;
+		sac<Stage>							stages;
 		double								animationTime;
 
 
@@ -44,16 +45,16 @@ namespace vel
 
 		void								addMaterial(Material m);
 		void								addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material);
-		Stage&								addStage();
+		Stage*								addStage(std::string name);
 
 		Shader*								getShader(std::string n);
 		Mesh*								getMesh(std::string n);
 		Texture*							getTexture(std::string n);
 		Material*							getMaterial(std::string n);
-
 		Renderable							getRenderable(std::string name);
 		Armature							getArmature(std::string name);
-		Stage&								getStage(size_t index);
+		
+		Stage*								getStage(std::string name);
 
 
 	public:
@@ -64,8 +65,11 @@ namespace vel
 		virtual void						outerLoop(float frameTime, float renderLerpInterval) = 0;
 		virtual void						postPhysics(float deltaTime);
 
+		// TODO: why are these public?
 		bool								mainMemoryloaded;
 		bool								swapWhenLoaded;
+		//////////////
+		
 		std::string							getName();
 		bool								isFullyLoaded();
 		

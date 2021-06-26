@@ -16,8 +16,7 @@ namespace vel
 		dispatcher(new btCollisionDispatcher(collisionConfiguration)),
 		overlappingPairCache(new btDbvtBroadphase()),
 		solver(new btSequentialImpulseConstraintSolver),
-		dynamicsWorld(new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration)),
-		sensors(std::vector<std::unique_ptr<Sensor>>())
+		dynamicsWorld(new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration))
 	{
 		btVector3 gravityVec(0.0f, gravity, 0.0f);
 		this->dynamicsWorld->setGravity(gravityVec);
@@ -64,6 +63,9 @@ namespace vel
 		this->collisionShapes.clear();
 	}
 
+	//TODO feels terrible to be looping through every sensor for every contact manifold, there might
+	// be some way to hook into the collisions when they happen within the bullet api???? which in turn
+	// would be substantially quicker, but will require a complete reworking of our current "Sensors" paradigm
 	void CollisionWorld::processSensors()
 	{
 		for (int i = 0; i < this->dispatcher->getNumManifolds(); i++)
@@ -73,10 +75,10 @@ namespace vel
 			{
 				for (auto& sen : this->sensors)
 				{
-					if (!sen->matchingManifold(contactManifold->getBody0(), contactManifold->getBody1()))
+					if (!sen.matchingManifold(contactManifold->getBody0(), contactManifold->getBody1()))
 						continue;
 
-					sen->onContactDiscovered(contactManifold, sen->contactPair);
+					sen.onContactDiscovered(contactManifold, sen.contactPair);
 				}
 			}
 		}
@@ -100,34 +102,25 @@ namespace vel
 			return nullptr;
 	}
 
-	void CollisionWorld::addSensor(Sensor* ct)
+	Sensor* CollisionWorld::addSensor(Sensor s)
 	{
-		this->sensors.push_back(std::move(std::unique_ptr<Sensor>(ct)));
+		auto it = this->sensors.insert(s);
+		return &(*it);
 	}
 
-	void CollisionWorld::removeSensorsUsingCollisionObject(btCollisionObject* co)
+	void CollisionWorld::removeSensor(Sensor* s)
 	{
-		size_t index = 0;
-		for (auto& s : this->sensors)
-		{
-			if (s->contactPair.first == co || s->contactPair.second == co)
-				this->sensors.erase(this->sensors.begin() + index);
-
-			index++;
-		}
+		this->sensors.erase(this->sensors.get_iterator(s));
 	}
 
 	void CollisionWorld::removeGhostObject(btPairCachingGhostObject* go)
 	{
-		this->removeSensorsUsingCollisionObject(go);
 		this->dynamicsWorld->removeCollisionObject(go);
 		delete go;
 	}
 
 	void CollisionWorld::removeRigidBody(btRigidBody* rb)
 	{
-		this->removeSensorsUsingCollisionObject(rb);
-
 		if (rb->getMotionState())
 			delete rb->getMotionState();
 

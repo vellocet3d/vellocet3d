@@ -20,6 +20,21 @@ namespace vel
 		manualTransform(true) //TODO: tf is the point of this?
 	{}
 
+	void Actor::addContactSensor(Sensor* s)
+	{
+		this->contactSensors.push_back(s);
+	}
+	
+	void Actor::clearContactSensors()
+	{
+		this->contactSensors.clear();
+	}
+
+	std::vector<Sensor*>& Actor::getContactSensors()
+	{
+		return this->contactSensors;
+	}
+
 	void Actor::processTransform()
 	{
 		this->updatePreviousTransform();
@@ -38,6 +53,7 @@ namespace vel
 
 	void Actor::removeChildActor(Actor* aIn, bool calledFromRemoveParentActor)
 	{
+		//TODO revise this to use a sac
 		for (size_t i = 0; i < this->childActors.size(); i++)
 		{
 			if (this->childActors.at(i) == aIn)
@@ -78,6 +94,8 @@ namespace vel
 
 	Actor Actor::cleanCopy(std::string newName)
 	{
+		// TODO: revise this to account for all changes that have happened in MassiveRefactor
+
 		auto newActor = *this;
 		newActor.setName(newName);
 
@@ -107,11 +125,6 @@ namespace vel
 	{
 		this->tempRenderable = r;
 		this->mesh = r.getMesh();
-	}
-
-	void Actor::setMesh(Mesh* m)
-	{
-		this->mesh = m;
 	}
 
 	Mesh* Actor::getMesh()
@@ -296,37 +309,14 @@ namespace vel
 		return this->name;
 	}
 
-	const size_t& Actor::getContainerIndex() const
+	std::optional<Renderable*> Actor::getStageRenderable()
 	{
-		if (!this->containerIndex)
-		{
-			std::cout << "Attempting to get actor container index before it has been set\n";
-			std::cin.get();
-			exit(EXIT_FAILURE);
-		}
-
-		return this->containerIndex.value();
+		return this->stageRenderable;
 	}
 
-	void Actor::setContainerIndex(size_t ci)
+	void Actor::setStageRenderable(Renderable* r)
 	{
-		this->containerIndex = ci;
-	}
-
-	const size_t& Actor::getRenderableIndex() const
-	{
-		if (!this->parentRenderableIndex)
-		{
-			std::cout << "Attempting to get actor parentRenderableIndex before it has been set\n";
-			std::cin.get();
-			exit(EXIT_FAILURE);
-		}
-		return this->parentRenderableIndex.value();
-	}
-
-	void Actor::setRenderableIndex(size_t ri)
-	{
-		this->parentRenderableIndex = ri;
+		this->stageRenderable = r;
 	}
 
 	const bool Actor::isAnimated() const

@@ -11,8 +11,7 @@
 #include "vel/assets/mesh/Vertex.h"
 #include "vel/assets/material/Texture.h"
 #include "vel/assets/AssetLoaderV2.h"
-
-#include "dep/json.hpp"
+#include "vel/dep/json.hpp"
 
 using json = nlohmann::json;
 
@@ -287,19 +286,14 @@ namespace vel
 
 	/* Stages
 	--------------------------------------------------*/
-	Stage& Scene::addStage()
+	Stage* Scene::addStage(std::string name)
 	{
-		if (this->stages.size() == this->stages.capacity())
-			App::get().logger.die("Scene::addStage(): Attempting to add stage after stages capacity has been reached");
-
-		this->stages.push_back(Stage());
-
-		return this->getStage(this->stages.size() - 1);
+		return this->stages.insert(name, Stage(name));
 	}
 
-	Stage& Scene::getStage(size_t index)
+	Stage* Scene::getStage(std::string name)
 	{
-		return this->stages.at(index);
+		return this->stages.get(name);
 	}
 
 
@@ -308,7 +302,7 @@ namespace vel
 	void Scene::updateAnimations(double delta)
 	{
 		this->animationTime += delta;
-		for (auto& s : this->stages)
+		for (auto& s : this->stages.getAll())
 			s.updateActorAnimations(this->animationTime);
 	}
 	
@@ -319,7 +313,7 @@ namespace vel
 
 	void Scene::stepPhysics(float delta)
 	{
-		for (auto& s : this->stages)
+		for (auto& s : this->stages.getAll())
 			s.stepPhysics(delta);
 	}
 
@@ -327,26 +321,31 @@ namespace vel
 
 	void Scene::applyTransformations()
 	{
-		for (auto& s : this->stages)
+		for (auto& s : this->stages.getAll())
 			s.applyTransformations();
 	}
 
 	void Scene::processSensors()
 	{
-		for (auto& s : this->stages)
+		for (auto& s : this->stages.getAll())
 			if (s.getCollisionWorld())
 				s.getCollisionWorld()->processSensors();
 	}
 
 	void Scene::draw(float alpha)
 	{
+		//TODO: left off right here. **random thought: if we are not sorting renderables, we will need some way of
+		// pushing renderables with transparent materials to the last rendered elements. Might do this in the draw loop,
+		// when renderable changes, check if it has transparent property, and if so, push it to a separate queue to be
+		// rendered after everything else.
+		
 		//std::cout << "new draw iteration---------------------------------------\n";
 
 		GPU* gpu = App::get().getGPU(); // for convenience
 
 		gpu->enableBlend();
 
-		for (auto& s : this->stages)
+		for (auto& s : this->stages.getAll())
 		{
 			if (!s.isVisible())
 				continue;
@@ -368,23 +367,24 @@ namespace vel
 				gpu->useShader(s.getCollisionWorld()->getDebugDrawer()->getShaderProgram());
 				gpu->setShaderMat4("vp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix());
 				gpu->debugDrawCollisionWorld(s.getCollisionWorld()->getDebugDrawer()); // draw all loaded vertices with a single call and clear
-
-				//std::cout << "debug draw\n";
 			}
 
 
 			//s.printRenderables();            
-
 			//std::cout << "----------------------------------\n";
-
 			//std::cout << "gpu active before rco loop:" << gpu.getActiveShader() << "," << gpu.getActiveGpuMeshIndex() << "," << gpu.getActiveMaterialIndex() << "\n";
 
 
+			for(auto& r : s.getRenderables())
+			{
+				
+			}
+
+
+			/////////////////////////////////////////////////////////////////////////////
 			for (auto& rco : s.getRenderablesOrder())
 			{
 				Renderable& rc = s.getRenderable(rco);
-
-				//std::cout << "rc:" << rc.getShaderIndex() << "," << rc.getMeshIndex() << "," << rc.getTextureIndex() << "\n";
 
 				if (rc.getShader() != gpu->getActiveShader())
 					gpu->useShader(rc.getShader());
@@ -400,17 +400,9 @@ namespace vel
 				{
 					Actor* a = s.getActor(ai);
 
-					//std::cout << a->getName() << ":" << rc.getShaderIndex() << "-" << rc.getMeshIndex() << "-" << rc.getTextureIndex() << "\n";
-					//std::cout << a->getName() << ":" << gpu->getActiveShader() << "-" << gpu->getActiveGpuMeshIndex() << "-" << gpu->getActiveMaterialIndex() << "\n";
-					//std::cout << "--------------------------------\n";
-
-					//std::cout << a->getName() << "\n";
-
 					if (!a->isDeleted() && a->isVisible())
 					{
 						gpu->setShaderMat4("mvp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix() * a->getWorldRenderMatrix(alpha));
-
-						//std::cout << a->getName() << "\n";
 
 						// If this actor is animated, send the bone transforms of it's armature to the shader
 						if (a->isAnimated())
@@ -418,32 +410,21 @@ namespace vel
 							auto mesh = s.getRenderable(a->getRenderableIndex()).getMesh();
 							auto armature = a->getArmature();
 
-							//std::cout << a->getName() << "\n";
-							//for(auto& b : armature->getBones())
-							//	std::cout << b.name << "\n";
-
-
 							size_t boneIndex = 0;
 							for (auto& activeBone : a->getActiveBones())
 							{
 								glm::mat4 meshBoneTransform = mesh->getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrix(alpha) * mesh->getBone(boneIndex).offsetMatrix;
-
-								//std::cout << glm::to_string(meshBoneTransform) << "\n";
-								//std::cout << activeBone.second << ":" << armature->getBone(activeBone.first).name << "\n";
-
 								gpu->setShaderMat4(activeBone.second, meshBoneTransform);
-
 								boneIndex++;
 							}
 						}
 
-
-
 						gpu->drawGpuMesh();
 					}
 				}
-
 			}
+			/////////////////////////////////////////////////////////////////////////////
+			
 
 		}
 

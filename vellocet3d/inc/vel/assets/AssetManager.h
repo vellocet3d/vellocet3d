@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include "dep/plf_colony.h"
-#include "dep/robin_hood.h"
+#include "vel/dep/plf_colony.h"
+#include "vel/dep/robin_hood.h"
 
 
 #include "vel/assets/Shader.h"
@@ -49,9 +49,8 @@ namespace vel
 		robin_hood::unordered_node_map<std::string, ArmatureTracker*> armatureTrackerMap;
 		
 		plf::colony<Animation>			animations;
-		// since animations are tracked within an Armature, and they are only associated with a single armatureTrackers
+		// since animations are tracked within an Armature, and they are only associated with a single armatureTracker
 		// we shouldn't need to track them, just account for them when adding/removing an armature
-		//plf::colony<AnimationTracker>	animationTrackers;
 
 	public:
 		AssetManager();

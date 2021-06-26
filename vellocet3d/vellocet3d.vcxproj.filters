@@ -230,9 +230,6 @@
     <ClInclude Include="inc\vel\GPU.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\dep\json.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\vel\assets\animation\Animation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -296,13 +293,19 @@
     <ClInclude Include="inc\vel\assets\AssetManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\dep\plf_colony.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\vel\assets\AssetTrackers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\dep\robin_hood.h">
+    <ClInclude Include="inc\vel\dep\json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\vel\dep\plf_colony.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\vel\dep\robin_hood.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\vel\dep\sac.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
