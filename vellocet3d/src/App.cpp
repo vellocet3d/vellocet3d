@@ -101,6 +101,15 @@ namespace vel
 		this->scenes.erase(this->scenes.begin() + i);
 	}
 	
+	bool App::sceneExists(std::string name)
+	{
+		for (auto& s : this->scenes)
+			if (s->getName() == name)
+				return true;
+
+		return false;
+	}
+
 	void App::swapScene(std::string name)
 	{
 		for (auto& s : this->scenes)
@@ -119,8 +128,11 @@ namespace vel
 		std::cout << swapWhenLoaded << std::endl;
 
 		scene->swapWhenLoaded = swapWhenLoaded;
-		scene->setName(typeid(*scene).name());
-		std::cout << scene->getName() << std::endl; // TODO: name is "class Test" when we need just "Test", so trim off "class "
+
+		std::string className = typeid(*scene).name();// name is "class Test" when we need just "Test", so trim off "class "
+		className.erase(0, 6);
+		scene->setName(className);
+		std::cout << scene->getName() << std::endl; 
 		this->sceneLoadingQueue.push_back(std::move(std::unique_ptr<Scene>(scene)));
 
 		//std::cout << this->sceneLoadingQueue.at(0)->swapWhenLoaded << std::endl;

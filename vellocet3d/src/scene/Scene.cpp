@@ -365,7 +365,8 @@ namespace vel
 
 
 			// if debug drawer set, do debug draw
-			if (s.getCollisionWorld()->getDebugDrawer() != nullptr)
+			//if (s.getCollisionWorld()->getDebugDrawer() != nullptr)
+			if (s.getCollisionWorld() && s.getCollisionWorld()->getDebugDrawer())
 			{
 				s.getCollisionWorld()->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
 				gpu->useShader(s.getCollisionWorld()->getDebugDrawer()->getShaderProgram());
