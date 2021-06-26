@@ -3,8 +3,8 @@
 #include <sstream>
 #include <iostream>
 
-#include "plf_colony.h"
-#include "robin_hood.h"
+#include "vel/dep/plf_colony.h"
+#include "vel/dep/robin_hood.h"
 
 template<typename T>
 class sac

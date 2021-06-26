@@ -6,7 +6,7 @@
 #include <map>
 #include <string>
 
-#include "dep/plf_colony.h"
+#include "vel/dep/plf_colony.h"
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 
@@ -34,7 +34,7 @@ namespace vel
 		btBroadphaseInterface*					overlappingPairCache;
 		btSequentialImpulseConstraintSolver*	solver;
 		btDiscreteDynamicsWorld*				dynamicsWorld;
-		std::map<std::string, btCollisionShape*> collisionShapes;
+		std::map<std::string, btCollisionShape*> collisionShapes; // TODO: this can be a faster container like robin_hood map
 		plf::colony<Sensor>						sensors;
 		std::optional<CollisionDebugDrawer> 	collisionDebugDrawer;
 

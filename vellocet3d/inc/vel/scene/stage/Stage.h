@@ -31,7 +31,7 @@ namespace vel
 		sac<Actor>										actors;
 		sac<Armature>									armatures;
 		sac<Renderable>									renderables;
-		std::optional<std::unique_ptr<CollisionWorld>>	collisionWorld; // TODO: why on earth is this unique_ptr optional?
+		std::optional<CollisionWorld*>					collisionWorld;
 		bool											clearDepthBuffer;
 		std::string										name;
 

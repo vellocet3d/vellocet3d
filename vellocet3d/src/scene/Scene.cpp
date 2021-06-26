@@ -25,6 +25,11 @@ namespace vel
 
 	}
 	
+	void Scene::setName(std::string n)
+	{
+		this->name = n;
+	}
+
 	Scene::~Scene()
 	{
 		this->freeAssets();
@@ -377,37 +382,30 @@ namespace vel
 
 			for(auto& r : s.getRenderables())
 			{
-				
-			}
+				// Only do state switches if we need to. We used to sort renderables when they were added,
+				// but after the massive refactor we removed this feature as everytime a renderable was added
+				// we had to sort on every renderable, which if you have 1000s of renderables would be a significant
+				// performance hit. So now gpu state switches are hit or missed. All actors that use a specific renderable
+				// do not require any state change, but when switching between renderables, if the next renderable in the
+				// queue uses a different mesh than the current renderable, the gpu state would be switched, then if the renderable
+				// after that used the mesh from the first renderable it would have to switch back again, instead of these renderables
+				// being sorted so that everything is hit in order minimizing state switches.
+				if (r.getShader() != gpu->getActiveShader())
+					gpu->useShader(r.getShader());
+				if (r.getMesh() != gpu->getActiveMesh())
+					gpu->useMesh(r.getMesh());
+				if (r.getMaterial() != gpu->getActiveMaterial())
+					gpu->useMaterial(r.getMaterial());
 
-
-			/////////////////////////////////////////////////////////////////////////////
-			for (auto& rco : s.getRenderablesOrder())
-			{
-				Renderable& rc = s.getRenderable(rco);
-
-				if (rc.getShader() != gpu->getActiveShader())
-					gpu->useShader(rc.getShader());
-
-				if (rc.getMesh() != gpu->getActiveMesh())
-					gpu->useMesh(rc.getMesh());
-
-				if (rc.getMaterial() != gpu->getActiveMaterial())
-					gpu->useMaterial(rc.getMaterial());
-
-				// gpu state has been set, now draw all actors which use this gpu state
-				for (auto& ai : rc.getActorIndexes())
+				for (auto& a : r.actors.getAll())
 				{
-					Actor* a = s.getActor(ai);
-
-					if (!a->isDeleted() && a->isVisible())
+					if (a->isVisible()) // shouldn't need to check a->isDeleted() since using colony
 					{
 						gpu->setShaderMat4("mvp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix() * a->getWorldRenderMatrix(alpha));
 
-						// If this actor is animated, send the bone transforms of it's armature to the shader
-						if (a->isAnimated())
+						if (a->isAnimated())// If this actor is animated, send the bone transforms of it's armature to the shader
 						{
-							auto mesh = s.getRenderable(a->getRenderableIndex()).getMesh();
+							auto mesh = a->getMesh();
 							auto armature = a->getArmature();
 
 							size_t boneIndex = 0;
@@ -423,12 +421,6 @@ namespace vel
 					}
 				}
 			}
-			/////////////////////////////////////////////////////////////////////////////
-			
-
 		}
-
-
 	}
-
 }

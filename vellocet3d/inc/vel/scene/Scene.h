@@ -5,8 +5,8 @@
 #include <string>
 #include <optional>
 
-#include "dep/plf_colony.h"
-#include "sac.h"
+#include "vel/dep/plf_colony.h"
+#include "vel/dep/sac.h"
 
 #include "vel/assets/mesh/Mesh.h"
 #include "vel/scene/stage/Stage.h"
@@ -34,8 +34,10 @@ namespace vel
 		
 		void								freeAssets();
 
+		std::string							name = "";
+
 	protected:
-		std::string							name = "default";
+		
 		
 
 		void								loadShader(std::string name, std::string vertFile, std::string fragFile);
@@ -70,6 +72,7 @@ namespace vel
 		bool								swapWhenLoaded;
 		//////////////
 		
+		void								setName(std::string n);
 		std::string							getName();
 		bool								isFullyLoaded();
 		

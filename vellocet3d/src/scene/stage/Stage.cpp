@@ -62,7 +62,7 @@ namespace vel
 	void Stage::stepPhysics(float delta)
 	{
 		if (this->collisionWorld)
-			this->collisionWorld.value()->getDynamicsWorld()->stepSimulation(delta, 0);
+			this->collisionWorld.value().getDynamicsWorld()->stepSimulation(delta, 0);
 	}
 
 	CollisionWorld* Stage::getCollisionWorld()
@@ -70,12 +70,12 @@ namespace vel
 		if (!this->collisionWorld)
 			return nullptr;
 
-		return this->collisionWorld.value().get();
+		return &this->collisionWorld.value();
 	}
 
 	void Stage::setCollisionWorld(float gravity)
 	{
-		this->collisionWorld = std::make_unique<CollisionWorld>(gravity);
+		this->collisionWorld = new CollisionWorld(gravity);
 	}
 
 	plf::colony<Actor>& Stage::getActors()
@@ -187,7 +187,7 @@ namespace vel
 
 		// remove all sensors associated with this actor
 		for(auto& s : a->getContactSensors())
-			this->collisionWorld.value()->removeSensor(s);
+			this->collisionWorld.value().removeSensor(s);
 		
 		a->clearContactSensors();
 		
@@ -195,14 +195,14 @@ namespace vel
 		auto arb = a->getRigidBody();
 		if (arb != nullptr)
 		{
-			this->collisionWorld.value()->removeRigidBody(arb);
+			this->collisionWorld.value().removeRigidBody(arb);
 			a->setRigidBody(nullptr);
 		}
 
 		auto ago = a->getGhostObject();
 		if (ago != nullptr)
 		{
-			this->collisionWorld.value()->removeGhostObject(ago);
+			this->collisionWorld.value().removeGhostObject(ago);
 			a->setGhostObject(nullptr);
 		}
 

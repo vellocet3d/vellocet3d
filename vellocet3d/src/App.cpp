@@ -115,6 +115,8 @@ namespace vel
 
         //this->scene = std::move(std::move(std::unique_ptr<Scene>(scene)));
 
+		scene->setName(typeid(*scene).name());
+		std::cout << scene->getName() << std::endl; // TODO: name is "class Test" when we need just "Test", so trim off "class "
 		this->sceneLoadingQueue.push_back(std::move(std::unique_ptr<Scene>(scene)));
     }
 

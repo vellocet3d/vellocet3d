@@ -17,8 +17,8 @@
 
 namespace vel
 {
-	class Stage;
-	class Sensor;
+	class	Stage;
+	struct	Sensor;
 
 	class Actor
 	{
