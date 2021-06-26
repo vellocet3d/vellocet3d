@@ -31,13 +31,14 @@ namespace vel
 		sac<Actor>										actors;
 		sac<Armature>									armatures;
 		sac<Renderable>									renderables;
-		std::optional<CollisionWorld*>					collisionWorld;
+		CollisionWorld*									collisionWorld;
 		bool											clearDepthBuffer;
 		std::string										name;
 
 
 	public:
 														Stage(std::string name);
+														~Stage();
 		void											updateActorAnimations(double runTime);
 		Actor*											addActor(Actor a);
 		void											removeActor(std::string name);

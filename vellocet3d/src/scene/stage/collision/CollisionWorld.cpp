@@ -24,6 +24,10 @@ namespace vel
 
 	CollisionWorld::~CollisionWorld()
 	{
+		// remove debug drawer
+		if (this->collisionDebugDrawer)
+			delete this->collisionDebugDrawer;
+
 		//remove the rigidbodies from the dynamics world and delete them
 		for (int i = this->dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
 		{
@@ -87,19 +91,16 @@ namespace vel
 
 	void CollisionWorld::useDebugDrawer(Shader* s, int debugMode)
 	{
-		this->collisionDebugDrawer = CollisionDebugDrawer();
+		this->collisionDebugDrawer = new CollisionDebugDrawer();
 		this->collisionDebugDrawer->setDebugMode(debugMode);
 		this->collisionDebugDrawer->setShaderProgram(s);
 
-		this->dynamicsWorld->setDebugDrawer(&this->collisionDebugDrawer.value());
+		this->dynamicsWorld->setDebugDrawer(this->collisionDebugDrawer);
 	}
 
 	CollisionDebugDrawer* CollisionWorld::getDebugDrawer() //TODO should this really return nullptr OOORrrrrrrr??????
 	{
-		if (this->collisionDebugDrawer)
-			return &this->collisionDebugDrawer.value();
-		else
-			return nullptr;
+		return this->collisionDebugDrawer;
 	}
 
 	Sensor* CollisionWorld::addSensor(Sensor s)

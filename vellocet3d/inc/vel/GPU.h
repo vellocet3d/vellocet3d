@@ -36,6 +36,7 @@ namespace vel
 		const Shader* const					getActiveShader() const;
 		const Mesh*	const					getActiveMesh() const;
 		const Material*	const				getActiveMaterial() const;
+		void								resetActives();
 
 		void								loadShader(Shader* s);
 		void								loadMesh(Mesh* m);

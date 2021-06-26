@@ -368,10 +368,10 @@ namespace vel
 			if (s.getCollisionWorld()->getDebugDrawer() != nullptr)
 			{
 				s.getCollisionWorld()->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
-
 				gpu->useShader(s.getCollisionWorld()->getDebugDrawer()->getShaderProgram());
 				gpu->setShaderMat4("vp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix());
 				gpu->debugDrawCollisionWorld(s.getCollisionWorld()->getDebugDrawer()); // draw all loaded vertices with a single call and clear
+				gpu->resetActives(); // force reset active gpu objects since debug draw binds it's own VAO
 			}
 
 
@@ -379,7 +379,7 @@ namespace vel
 			//std::cout << "----------------------------------\n";
 			//std::cout << "gpu active before rco loop:" << gpu.getActiveShader() << "," << gpu.getActiveGpuMeshIndex() << "," << gpu.getActiveMaterialIndex() << "\n";
 
-
+			
 			for(auto& r : s.getRenderables())
 			{
 				// Only do state switches if we need to. We used to sort renderables when they were added,

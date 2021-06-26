@@ -36,7 +36,7 @@ namespace vel
 		btDiscreteDynamicsWorld*				dynamicsWorld;
 		std::map<std::string, btCollisionShape*> collisionShapes; // TODO: this can be a faster container like robin_hood map
 		plf::colony<Sensor>						sensors;
-		std::optional<CollisionDebugDrawer> 	collisionDebugDrawer;
+		CollisionDebugDrawer* 					collisionDebugDrawer;
 
 
 		void									removeSensorsUsingCollisionObject(btCollisionObject* co);

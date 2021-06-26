@@ -29,6 +29,13 @@ namespace vel
 
 	}
 
+	void GPU::resetActives()
+	{
+		this->activeShader = nullptr;
+		this->activeMesh = nullptr;
+		this->activeMaterial = nullptr;
+	}
+
 	void GPU::clearShader(Shader* s)
 	{
 		glDeleteProgram(s->id);

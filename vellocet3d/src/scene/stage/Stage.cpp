@@ -17,8 +17,14 @@ namespace vel
 
 	Stage::Stage(std::string name) :
 		visible(true),
+		collisionWorld(nullptr),
 		clearDepthBuffer(false),
 		name(name){}
+
+	Stage::~Stage()
+	{
+		delete this->collisionWorld;
+	}
 
 	const std::string& Stage::getName() const
 	{
@@ -62,20 +68,19 @@ namespace vel
 	void Stage::stepPhysics(float delta)
 	{
 		if (this->collisionWorld)
-			this->collisionWorld.value().getDynamicsWorld()->stepSimulation(delta, 0);
+			this->collisionWorld->getDynamicsWorld()->stepSimulation(delta, 0);
 	}
 
 	CollisionWorld* Stage::getCollisionWorld()
 	{
-		if (!this->collisionWorld)
-			return nullptr;
-
-		return &this->collisionWorld.value();
+		return this->collisionWorld;
 	}
 
 	void Stage::setCollisionWorld(float gravity)
 	{
-		this->collisionWorld = new CollisionWorld(gravity);
+		// for some reason this has to be a pointer or bullet has read access violation issues
+		// delete in destructor
+		this->collisionWorld = new CollisionWorld(gravity); 
 	}
 
 	plf::colony<Actor>& Stage::getActors()
@@ -187,7 +192,7 @@ namespace vel
 
 		// remove all sensors associated with this actor
 		for(auto& s : a->getContactSensors())
-			this->collisionWorld.value().removeSensor(s);
+			this->collisionWorld->removeSensor(s);
 		
 		a->clearContactSensors();
 		
@@ -195,14 +200,14 @@ namespace vel
 		auto arb = a->getRigidBody();
 		if (arb != nullptr)
 		{
-			this->collisionWorld.value().removeRigidBody(arb);
+			this->collisionWorld->removeRigidBody(arb);
 			a->setRigidBody(nullptr);
 		}
 
 		auto ago = a->getGhostObject();
 		if (ago != nullptr)
 		{
-			this->collisionWorld.value().removeGhostObject(ago);
+			this->collisionWorld->removeGhostObject(ago);
 			a->setGhostObject(nullptr);
 		}
 

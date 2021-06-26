@@ -115,9 +115,15 @@ namespace vel
 
         //this->scene = std::move(std::move(std::unique_ptr<Scene>(scene)));
 
+		std::cout << "yeet001\n";
+		std::cout << swapWhenLoaded << std::endl;
+
+		scene->swapWhenLoaded = swapWhenLoaded;
 		scene->setName(typeid(*scene).name());
 		std::cout << scene->getName() << std::endl; // TODO: name is "class Test" when we need just "Test", so trim off "class "
 		this->sceneLoadingQueue.push_back(std::move(std::unique_ptr<Scene>(scene)));
+
+		//std::cout << this->sceneLoadingQueue.at(0)->swapWhenLoaded << std::endl;
     }
 
     void App::close()
@@ -232,8 +238,15 @@ namespace vel
 
 				if (this->sceneLoadingQueue.at(0)->isFullyLoaded())
 				{
+					std::cout << "yeet002\n";
+					std::cout << this->sceneLoadingQueue.at(0)->swapWhenLoaded << std::endl;
+
 					if (this->sceneLoadingQueue.at(0)->swapWhenLoaded)
+					{
 						this->activeScene = this->sceneLoadingQueue.at(0).get();
+						std::cout << "yeet004\n";
+					}
+						
 
 					this->scenes.push_back(std::move(this->sceneLoadingQueue.at(0)));
 
@@ -256,6 +269,7 @@ namespace vel
             this->newTime = this->time();
             this->frameTime = this->newTime - this->currentTime;
 
+			//std::cout << "yeet003\n";
 
             if (this->frameTime >= (1 / this->config.MAX_RENDER_FPS)) // cap max fps
             {
@@ -324,6 +338,8 @@ namespace vel
 
 				//std::cout << "call draw:" << this->currentTime << "\n";
                 this->activeScene->draw(renderLerpInterval);
+
+				//std::cout << "yeet005" << std::endl;
 
 				this->window->renderGui();
                 
