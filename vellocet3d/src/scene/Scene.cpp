@@ -345,12 +345,10 @@ namespace vel
 
 	void Scene::draw(float alpha)
 	{
-		//TODO: left off right here. **random thought: if we are not sorting renderables, we will need some way of
+		//TODO: random thought: if we are not sorting renderables, we will need some way of
 		// pushing renderables with transparent materials to the last rendered elements. Might do this in the draw loop,
 		// when renderable changes, check if it has transparent property, and if so, push it to a separate queue to be
 		// rendered after everything else.
-		
-		//std::cout << "new draw iteration---------------------------------------\n";
 
 		GPU* gpu = App::get().getGPU(); // for convenience
 
@@ -371,21 +369,20 @@ namespace vel
 
 
 			// if debug drawer set, do debug draw
-			//if (s.getCollisionWorld()->getDebugDrawer() != nullptr)
 			if (s.getCollisionWorld() && s.getCollisionWorld()->getDebugDrawer())
 			{
+				//std::cout << "yeet001\n";
 				s.getCollisionWorld()->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
 				gpu->useShader(s.getCollisionWorld()->getDebugDrawer()->getShaderProgram());
 				gpu->setShaderMat4("vp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix());
 				gpu->debugDrawCollisionWorld(s.getCollisionWorld()->getDebugDrawer()); // draw all loaded vertices with a single call and clear
-				gpu->resetActives(); // force reset active gpu objects since debug draw binds it's own VAO
+				//gpu->resetActives(); // force reset active gpu objects since debug draw binds it's own VAO
 			}
 
-
-			//s.printRenderables();            
-			//std::cout << "----------------------------------\n";
-			//std::cout << "gpu active before rco loop:" << gpu.getActiveShader() << "," << gpu.getActiveGpuMeshIndex() << "," << gpu.getActiveMaterialIndex() << "\n";
-
+			gpu->resetActives(); // moving this here so that we reset gpu actives every tick fixes runtime bug, BUT WHY? If I remember correctly, the only reason
+								// we were doing this was because of the debugdrawer??? For some reason, loading another scene into the gpu while one is loaded,
+								// jacks with this. WAIT...probably because when we gpu load things, we're altering the state in order to load those elements...duh,
+								// so we WOULD need to reset actives so that the gpu knows to reset state to what we're suppose to be drawing
 			
 			for(auto& r : s.getRenderables())
 			{

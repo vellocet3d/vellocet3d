@@ -387,6 +387,7 @@ namespace vel
 	{
 		// The naive approach. But after researching how to optimize this for 3 days I decided to leave it alone
 		// until there's an actual reason to (DRASTICALLY) complicate things.
+		//std::cout << this->activeMesh->getName() << ":" << this->activeMesh->getGpuMesh()->indiceCount << "\n";
 		glDrawElements(GL_TRIANGLES, this->activeMesh->getGpuMesh()->indiceCount, GL_UNSIGNED_INT, 0);
 	}
 
