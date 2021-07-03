@@ -125,7 +125,7 @@ namespace vel
 	Shader* AssetManager::getShader(std::string name)
 	{
 		if(!this->shaderTrackerMap.contains(name))
-			App::get().logger.die(("AssetManager::getShader(): Attempting to get shader that does not exist: " + name));
+			App::get().logger.log(("AssetManager::getShader(): Attempting to get shader that does not exist: " + name));
 
 		return this->shaderTrackerMap[name]->ptr;
 	}
@@ -133,7 +133,7 @@ namespace vel
 	bool AssetManager::shaderIsGpuLoaded(std::string name)
 	{
 		if (!this->shaderTrackerMap.contains(name))
-			App::get().logger.die(("AssetManager::shaderIsGpuLoaded(): Attempting to get shader that does not exist: " + name));
+			App::get().logger.log(("AssetManager::shaderIsGpuLoaded(): Attempting to get shader that does not exist: " + name));
 
 		return this->shaderTrackerMap[name]->gpuLoaded;
 	}
@@ -141,7 +141,7 @@ namespace vel
 	void AssetManager::removeShader(std::string name)
 	{
 		if (!this->shaderTrackerMap.contains(name))
-			App::get().logger.die(("AssetManager::removeShader(): Attempting to remove shader that does not exist: " + name));
+			App::get().logger.log(("AssetManager::removeShader(): Attempting to remove shader that does not exist: " + name));
 		
 
 		auto t = this->shaderTrackerMap[name];
@@ -237,7 +237,7 @@ namespace vel
 	Mesh* AssetManager::getMesh(std::string name)
 	{
 		if (!this->meshTrackerMap.contains(name))
-			App::get().logger.die(("AssetManager::getMesh(): Attempting to get mesh that does not exist: " + name));
+			App::get().logger.log(("AssetManager::getMesh(): Attempting to get mesh that does not exist: " + name));
 
 		return this->meshTrackerMap[name]->ptr;	
 	}
@@ -250,7 +250,7 @@ namespace vel
 	void AssetManager::removeMesh(std::string name)
 	{
 		if (!this->meshTrackerMap.contains(name))
-			App::get().logger.die(("AssetManager::removeMesh(): Attempting to remove mesh that does not exist: " + name));
+			App::get().logger.log(("AssetManager::removeMesh(): Attempting to remove mesh that does not exist: " + name));
 		
 		auto t = this->meshTrackerMap[name];
 		t->usageCount--;
@@ -331,7 +331,7 @@ namespace vel
 	Texture* AssetManager::getTexture(std::string name)
 	{
 		if (!this->textureTrackerMap.contains(name))
-			App::get().logger.die(("AssetManager::getTexture(): Attempting to get texture that does not exist: " + name));
+			App::get().logger.log(("AssetManager::getTexture(): Attempting to get texture that does not exist: " + name));
 
 		return this->textureTrackerMap[name]->ptr;		
 	}
@@ -344,7 +344,7 @@ namespace vel
 	void AssetManager::removeTexture(std::string name)
 	{
 		if (!this->textureTrackerMap.contains(name))
-			App::get().logger.die(("AssetManager::removeTexture(): Attempting to remove texture that does not exist: " + name));
+			App::get().logger.log(("AssetManager::removeTexture(): Attempting to remove texture that does not exist: " + name));
 
 		auto t = this->textureTrackerMap[name];
 		t->usageCount--;
@@ -414,7 +414,7 @@ namespace vel
 	Material* AssetManager::getMaterial(std::string name)
 	{
 		if (!this->materialTrackerMap.contains(name))
-			App::get().logger.die(("AssetManager::getMaterial(): Attempting to get material that does not exist: " + name));
+			App::get().logger.log(("AssetManager::getMaterial(): Attempting to get material that does not exist: " + name));
 
 		return this->materialTrackerMap[name]->ptr;		
 	}
@@ -422,7 +422,7 @@ namespace vel
 	void AssetManager::removeMaterial(std::string name)
 	{
 		if (!this->materialTrackerMap.contains(name))
-			App::get().logger.die(("AssetManager::removeMaterial(): Attempting to remove material that does not exist: " + name));
+			App::get().logger.log(("AssetManager::removeMaterial(): Attempting to remove material that does not exist: " + name));
 		
 		auto t = this->materialTrackerMap[name];
 		t->usageCount--;
@@ -493,7 +493,7 @@ namespace vel
 	Renderable AssetManager::getRenderable(std::string name)
 	{
 		if (!this->renderableTrackerMap.contains(name))
-			App::get().logger.die(("AssetManager::getRenderable(): Attempting to get renderable that does not exist: " + name));
+			App::get().logger.log(("AssetManager::getRenderable(): Attempting to get renderable that does not exist: " + name));
 
 		return *this->renderableTrackerMap[name]->ptr;		
 	}
@@ -501,7 +501,7 @@ namespace vel
 	void AssetManager::removeRenderable(std::string name)
 	{
 		if (!this->renderableTrackerMap.contains(name))
-			App::get().logger.die(("AssetManager::removeRenderable(): Attempting to remove renderable that does not exist: " + name));
+			App::get().logger.log(("AssetManager::removeRenderable(): Attempting to remove renderable that does not exist: " + name));
 		
 		auto t = this->renderableTrackerMap[name];
 		t->usageCount--;
@@ -562,7 +562,7 @@ namespace vel
 	Armature AssetManager::getArmature(std::string name)
 	{
 		if (!this->armatureTrackerMap.contains(name))
-			App::get().logger.die(("AssetManager::getArmature(): Attempting to get armature that does not exist: " + name));
+			App::get().logger.log(("AssetManager::getArmature(): Attempting to get armature that does not exist: " + name));
 
 		return *this->armatureTrackerMap[name]->ptr;		
 	}
@@ -570,7 +570,7 @@ namespace vel
 	void AssetManager::removeArmature(std::string name)
 	{
 		if (!this->armatureTrackerMap.contains(name))
-			App::get().logger.die(("AssetManager::removeArmature(): Attempting to remove armature that does not exist: " + name));
+			App::get().logger.log(("AssetManager::removeArmature(): Attempting to remove armature that does not exist: " + name));
 		
 		auto t = this->armatureTrackerMap[name];
 		t->usageCount--;

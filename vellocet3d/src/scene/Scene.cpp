@@ -126,7 +126,7 @@ namespace vel
 			else if (s["camera"]["type"] == "orthographic")
 				stage->addOrthographicCamera(s["camera"]["near"], s["camera"]["far"], s["camera"]["scale"]);
 			else
-				App::get().logger.die("Scene::loadSceneConfig(): config contains a camera type other than 'perspective' or 'orthographic'");
+				App::get().logger.log("Scene::loadSceneConfig(): config contains a camera type other than 'perspective' or 'orthographic'");
 
 			stage->getCamera()->setPosition(glm::vec3(
 				(float)s["camera"]["position"][0],
@@ -183,7 +183,7 @@ namespace vel
 						}
 						else
 						{
-							App::get().logger.die("Scene::loadSceneConfig(): config contains an actor transform rotation type other than 'euler' or 'quaternion'");
+							App::get().logger.log("Scene::loadSceneConfig(): config contains an actor transform rotation type other than 'euler' or 'quaternion'");
 						}
 					}
 

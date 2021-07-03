@@ -295,7 +295,7 @@ namespace vel
 			if (p.first == animationName)
 				return p.second;
 
-		App::get().logger.die(("Armature::getAnimation(): Attempting to get animation pointer of non-existing animation name: " + animationName));
+		App::get().logger.log(("Armature::getAnimation(): Attempting to get animation pointer of non-existing animation name: " + animationName));
 	}
 
 	size_t Armature::getBoneIndex(std::string boneName)
@@ -304,7 +304,7 @@ namespace vel
 			if (this->bones.at(i).name == boneName)
 				return i;
 
-		App::get().logger.die(("Armature::getBoneIndex(): Attempting to get index of non-existing bone name: " + boneName));
+		App::get().logger.log(("Armature::getBoneIndex(): Attempting to get index of non-existing bone name: " + boneName));
 	}
 
 }

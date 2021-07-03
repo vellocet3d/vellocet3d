@@ -12,14 +12,10 @@ namespace vel
         bool                enabled;
         std::string         path;
 		bool				useConsole;
-		bool				shouldDie;
-
 
     public:
                             Logger(bool enabled, std::string path, bool useConsole);
         void                log(std::string entry);
-		void				die(std::string entry);
-		bool				getShouldDie();
     };
 
 }
