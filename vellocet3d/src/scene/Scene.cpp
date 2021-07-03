@@ -37,6 +37,9 @@ namespace vel
 
 	void Scene::freeAssets()
 	{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Freeing assets for scene: " << this->name << std::endl;
+#endif
 		for(auto& name : this->armaturesInUse)
 			App::get().getAssetManager().removeArmature(name);
 		
@@ -58,153 +61,156 @@ namespace vel
 
 	/* Json Scene Loader
 	--------------------------------------------------*/
-	// void Scene::loadSceneConfig(std::string path)
-	// {
-		// std::ifstream i(path);
-		// json j;
-		// i >> j;
+	void Scene::loadSceneConfig(std::string path)
+	{
+		std::ifstream i(path);
+		json j;
+		i >> j;
+		
+		// just a usage example
+		//std::cout << j["scene"]["materials"][0]["ao"] << "\n";
+		//for (auto& el : j.items())
+		//	std::cout << el.key() << " : " << el.value() << "\n";
 
-		////std::cout << j["scene"]["materials"][0]["ao"] << "\n";
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Loading Scene via configuration file: " << path << std::endl;
+#endif
 
-		////for (auto& el : j.items())
-		////{
-		////	std::cout << el.key() << " : " << el.value() << "\n";
-		////}
+		//load elements into scene
+		for (auto& s : j["scene"]["shaders"])
+			this->loadShader(s["name"], s["vert_path"], s["frag_path"]);
 
-		// load elements into scene
-		// for (auto& s : j["scene"]["shaders"])
-			// this->loadShader(s["name"], s["vert_path"], s["frag_path"]);
+		for (auto& m : j["scene"]["meshes"])
+			this->loadMesh(m);
 
-		// for (auto& m : j["scene"]["meshes"])
-			// this->loadMesh(m);
+		for (auto& t : j["scene"]["textures"])
+			this->loadTexture(t["name"], t["type"], t["path"]);
+		// TODO: need mipmap logic here
 
-		// for (auto& t : j["scene"]["textures"])
-			// this->loadTexture(t["name"], t["type"], t["path"]);
+		for (auto& m : j["scene"]["materials"])
+		{
+			Material mat;
+			mat.name = m["name"];
 
-		// for (auto& m : j["scene"]["materials"])
-		// {
-			// Material mat;
-			// mat.name = m["name"];
+			if (!m["albedo"].is_null())
+				mat.albedo = this->getTexture(m["albedo"]);
+			if (!m["normal"].is_null())
+				mat.normal = this->getTexture(m["normal"]);
+			if (!m["metallic"].is_null())
+				mat.metalness = this->getTexture(m["metallic"]);
+			if (!m["roughness"].is_null())
+				mat.roughness = this->getTexture(m["roughness"]);
+			if (!m["ao"].is_null())
+				mat.ao = this->getTexture(m["ao"]);
 
-			// if (!m["albedo"].is_null())
-				// mat.albedo = this->getTextureIndex(m["albedo"]);
-			// if (!m["normal"].is_null())
-				// mat.normal = this->getTextureIndex(m["normal"]);
-			// if (!m["metallic"].is_null())
-				// mat.metalness = this->getTextureIndex(m["metallic"]);
-			// if (!m["roughness"].is_null())
-				// mat.roughness = this->getTextureIndex(m["roughness"]);
-			// if (!m["ao"].is_null())
-				// mat.ao = this->getTextureIndex(m["ao"]);
+			this->addMaterial(mat);
+		}
 
-			// this->addMaterial(mat);
-		// }
+		for (auto& r : j["scene"]["renderables"])
+		{
+			this->addRenderable(
+				r["name"],
+				this->getShader(r["shader"]),
+				this->getMesh(r["mesh"]),
+				this->getMaterial(r["material"])
+			);
+		}
 
-		// for (auto& r : j["scene"]["renderables"])
-		// {
-			// this->addRenderable(
-				// r["name"],
-				// this->getShaderIndex(r["shader"]),
-				// this->getMeshIndex(r["mesh"]),
-				// this->getMaterialIndex(r["material"])
-			// );
-		// }
+		//load stages into scene
+		for (auto& s : j["stages"])
+		{
+			auto stage = this->addStage(s["name"]);
 
-		// load stages into scene
-		// for (auto& s : j["stages"])
-		// {
-			// auto& stage = this->addStage();
+			if (s["camera"]["type"] == "perspective")
+				stage->addPerspectiveCamera(s["camera"]["near"], s["camera"]["far"], s["camera"]["fov"]);
+			else if (s["camera"]["type"] == "orthographic")
+				stage->addOrthographicCamera(s["camera"]["near"], s["camera"]["far"], s["camera"]["scale"]);
+			else
+				App::get().logger.die("Scene::loadSceneConfig(): config contains a camera type other than 'perspective' or 'orthographic'");
 
-			// if (s["camera"]["type"] == "perspective")
-				// stage.addPerspectiveCamera(s["camera"]["near"], s["camera"]["far"], s["camera"]["fov"]);
-			// else if (s["camera"]["type"] == "orthographic")
-				// stage.addOrthographicCamera(s["camera"]["near"], s["camera"]["far"], s["camera"]["scale"]);
-			// else
-				// App::get().logger.die("Scene::loadSceneConfig(): config contains a camera type other than 'perspective' or 'orthographic'");
+			stage->getCamera()->setPosition(glm::vec3(
+				(float)s["camera"]["position"][0],
+				(float)s["camera"]["position"][1],
+				(float)s["camera"]["position"][2]
+			));
 
-			// stage.getCamera()->setPosition(glm::vec3(
-				// (float)s["camera"]["position"][0],
-				// (float)s["camera"]["position"][1],
-				// (float)s["camera"]["position"][2]
-			// ));
+			stage->getCamera()->setLookAt(glm::vec3(
+				(float)s["camera"]["lookat"][0],
+				(float)s["camera"]["lookat"][1],
+				(float)s["camera"]["lookat"][2]
+			));
 
-			// stage.getCamera()->setLookAt(glm::vec3(
-				// (float)s["camera"]["lookat"][0],
-				// (float)s["camera"]["lookat"][1],
-				// (float)s["camera"]["lookat"][2]
-			// ));
+			for (auto& a : s["actors"])
+			{
+				auto act = Actor(a["name"]);
+				act.setDynamic(a["dynamic"]);
+				act.setVisible(a["visible"]);
+				act.addRenderable(this->getRenderable(a["renderable"]));
 
-			// for (auto& a : s["actors"])
-			// {
-				// auto act = Actor(a["name"]);
-				// act.setDynamic(a["dynamic"]);
-				// act.setVisible(a["visible"]);
-				// act.addRenderable(this->getRenderable(a["renderable"]));
+				if (!a["transform"].is_null())
+				{
+					auto trans = a["transform"]["translation"];
+					auto rot = a["transform"]["rotation"];
+					auto scale = a["transform"]["scale"];
 
-				// if (!a["transform"].is_null())
-				// {
-					// auto trans = a["transform"]["translation"];
-					// auto rot = a["transform"]["rotation"];
-					// auto scale = a["transform"]["scale"];
+					if (!trans.is_null())
+					{
+						act.getTransform().setTranslation(glm::vec3(
+							(float)trans[0],
+							(float)trans[1],
+							(float)trans[2]
+						));
+					}
 
-					// if (!trans.is_null())
-					// {
-						// act.getTransform().setTranslation(glm::vec3(
-							// (float)trans[0],
-							// (float)trans[1],
-							// (float)trans[2]
-						// ));
-					// }
+					if (!rot.is_null())
+					{
+						if (rot["type"] == "euler")
+						{
+							act.getTransform().setRotation((float)rot["val"]["angle"], glm::vec3(
+								(float)rot["val"]["axis"][0],
+								(float)rot["val"]["axis"][1],
+								(float)rot["val"]["axis"][2]
+							));
+						}
+						else if (rot["type"] == "quaternion")
+						{
+							act.getTransform().setRotation(glm::quat(
+								(float)rot["val"][3],
+								(float)rot["val"][0],
+								(float)rot["val"][1],
+								(float)rot["val"][2]
+							));
+						}
+						else
+						{
+							App::get().logger.die("Scene::loadSceneConfig(): config contains an actor transform rotation type other than 'euler' or 'quaternion'");
+						}
+					}
 
-					// if (!rot.is_null())
-					// {
-						// if (rot["type"] == "euler")
-						// {
-							// act.getTransform().setRotation((float)rot["val"]["angle"], glm::vec3(
-								// (float)rot["val"]["axis"][0],
-								// (float)rot["val"]["axis"][1],
-								// (float)rot["val"]["axis"][2]
-							// ));
-						// }
-						// else if (rot["type"] == "quaternion")
-						// {
-							// act.getTransform().setRotation(glm::quat(
-								// (float)rot["val"][3],
-								// (float)rot["val"][0],
-								// (float)rot["val"][1],
-								// (float)rot["val"][2]
-							// ));
-						// }
-						// else
-						// {
-							// App::get().logger.die("Scene::loadSceneConfig(): config contains an actor transform rotation type other than 'euler' or 'quaternion'");
-						// }
-					// }
+					if (!scale.is_null())
+					{
+						act.getTransform().setScale(glm::vec3(
+							(float)scale[0],
+							(float)scale[1],
+							(float)scale[2]
+						));
+					}
+				}
 
-					// if (!scale.is_null())
-					// {
-						// act.getTransform().setScale(glm::vec3(
-							// (float)scale[0],
-							// (float)scale[1],
-							// (float)scale[2]
-						// ));
-					// }
-				// }
+				stage->addActor(act);
+			}
 
-				// stage.addActor(act);
-			// }
+			for (auto& a : s["armatures"])
+			{
+				std::vector<std::string> actorNames;
 
-			// for (auto& a : s["armatures"])
-			// {
-				// std::vector<std::string> actorNames;
+				for (auto& actName : a["actors"])
+					actorNames.push_back(actName);
 
-				// for (auto& actName : a["actors"])
-					// actorNames.push_back(actName);
-
-				// stage.addArmature(this->getArmature(a["base"]), a["defaultAnimation"], actorNames);
-			// }
-		// }
-	// }
+				stage->addArmature(this->getArmature(a["base"]), a["defaultAnimation"], actorNames);
+			}
+		}
+	}
 
 	bool Scene::isFullyLoaded()
 	{

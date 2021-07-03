@@ -122,13 +122,19 @@ namespace vel
 				auto armTracker = this->assetManager->getArmatureTracker(boneName);
 				if(armTracker != nullptr)
 				{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Existing Armature, bypass reload: " << nodeName << std::endl;
+#endif
 					armTracker->usageCount++;
 					this->armatureTracker = armTracker;
 					this->existingArmature = true;
 					this->currentArmature = armTracker->ptr;
 				}
 				else
-				{					
+				{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Loading new Armature: " << nodeName << std::endl;
+#endif	
 					this->armatureTracker = this->assetManager->addArmature(Armature(boneName));
 					this->currentArmature = this->armatureTracker->ptr;
 				}
@@ -216,12 +222,17 @@ namespace vel
 		auto meshTracker = this->assetManager->getMeshTracker(mesh.getName());
 		if(meshTracker != nullptr)
 		{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Existing Mesh, bypass reload: " << mesh.getName() << std::endl;
+#endif
 			meshTracker->usageCount++;
 			this->meshTrackers.push_back(meshTracker);
 			return;
 		}
 
-		//std::cout << mesh.getName() << "\n";
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Loading new Mesh: " << mesh.getName() << std::endl;
+#endif
 
 		// walk through each of the mesh's vertices
 		std::vector<Vertex> vertices;

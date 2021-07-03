@@ -74,6 +74,10 @@ namespace vel
 	{
 		if (this->shaderTrackerMap.contains(name)) 
 		{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Existing Shader, bypass reload: " << name << std::endl;
+#endif
+			
 			// if usage count is not greater than zero then the asset is being deleted on the main thread
 			// so we will need to re-create it. This could still potentially be a race condition, although
 			// I would think it would be unlikely, putting a TODO here until we thoroughly test some 
@@ -93,7 +97,10 @@ namespace vel
 			}			
 		}
 		
-		
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Loading new Shader: " << name << std::endl;
+#endif		
+
 		Shader s;
 		s.name = name;
 		s.vertFile = vertFile;
@@ -135,11 +142,17 @@ namespace vel
 	{
 		if (!this->shaderTrackerMap.contains(name))
 			App::get().logger.die(("AssetManager::removeShader(): Attempting to remove shader that does not exist: " + name));
+		
 
 		auto t = this->shaderTrackerMap[name];
 		t->usageCount--;
 		if (t->usageCount == 0)
 		{
+			
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Full remove Shader: " << name << std::endl;
+#endif	
+			
 			if (!t->gpuLoaded)
 				for (size_t i = 0; i < this->shadersThatNeedGpuLoad.size(); i++)
 					if (this->shadersThatNeedGpuLoad.at(i) == t)
@@ -149,8 +162,16 @@ namespace vel
 			
 			this->shaders.erase(this->shaders.get_iterator(t->ptr));
 			this->shaderTrackers.erase(this->shaderTrackers.get_iterator(t));
-			this->shaderTrackerMap.erase(name);
+			this->shaderTrackerMap.erase(name);			
 		}
+		
+#ifdef DEBUG_ASSET_MANAGEMENT
+	else
+	{
+		std::cout << "Decrement Shader usageCount, retain: " << name << std::endl;
+	}
+#endif	
+		
 	}
 
 	/* Meshes
@@ -211,13 +232,6 @@ namespace vel
 		}
 		
 		return nullptr;
-		
-		//////////////////////
-		
-		//if (!this->meshTrackerMap.contains(name) || this->meshTrackerMap[name]->usageCount == 0)
-			//return nullptr;
-
-		//return this->meshTrackerMap[name];
 	}
 
 	Mesh* AssetManager::getMesh(std::string name)
@@ -242,6 +256,9 @@ namespace vel
 		t->usageCount--;
 		if(t->usageCount == 0)
 		{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Full remove Mesh: " << name << std::endl;
+#endif
 			if(!t->gpuLoaded)
 				for (size_t i = 0; i < this->meshesThatNeedGpuLoad.size(); i++)
 					if (this->meshesThatNeedGpuLoad.at(i) == t)
@@ -253,6 +270,12 @@ namespace vel
 			this->meshTrackers.erase(this->meshTrackers.get_iterator(t));
 			this->meshTrackerMap.erase(name);
 		}
+#ifdef DEBUG_ASSET_MANAGEMENT
+	else
+	{
+		std::cout << "Decrement Mesh usageCount, retain: " << name << std::endl;
+	}
+#endif
 		
 	}
 
@@ -262,6 +285,9 @@ namespace vel
 	{	
 		if (this->textureTrackerMap.contains(name)) 
 		{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Existing Texture, bypass reload: " << name << std::endl;
+#endif
 			auto t = this->textureTrackerMap[name];
 			if(t->usageCount > 0)
 			{
@@ -274,7 +300,11 @@ namespace vel
 				return this->loadTexture(name, type, path, mips);
 			}			
 		}
-		
+
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Load new Texture: " << name << std::endl;
+#endif
+
 		Texture texture;
 		texture.name = name;
 		texture.type = type;
@@ -320,6 +350,9 @@ namespace vel
 		t->usageCount--;
 		if (t->usageCount == 0)
 		{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Full remove Texture: " << name << std::endl;
+#endif
 			if (!t->gpuLoaded)
 				for (size_t i = 0; i < this->texturesThatNeedGpuLoad.size(); i++)
 					if (this->texturesThatNeedGpuLoad.at(i) == t)
@@ -331,6 +364,12 @@ namespace vel
 			this->textureTrackers.erase(this->textureTrackers.get_iterator(t));
 			this->textureTrackerMap.erase(name);
 		}
+#ifdef DEBUG_ASSET_MANAGEMENT
+	else
+	{
+		std::cout << "Decrement Texture usageCount, retain: " << name << std::endl;
+	}
+#endif	
 	}
 
 	/* Materials
@@ -339,6 +378,9 @@ namespace vel
 	{
 		if (this->materialTrackerMap.contains(m.name)) 
 		{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Existing Material, bypass reload: " << m.name << std::endl;
+#endif
 			auto t = this->materialTrackerMap[m.name];
 			if(t->usageCount > 0)
 			{
@@ -351,7 +393,10 @@ namespace vel
 				return this->addMaterial(m);
 			}			
 		}
-		
+
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Loading new Material: " << m.name << std::endl;
+#endif		
 
 		auto it = this->materials.insert(m);
 		
@@ -382,11 +427,20 @@ namespace vel
 		auto t = this->materialTrackerMap[name];
 		t->usageCount--;
 		if (t->usageCount == 0)
-		{			
+		{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Full remove Material: " << name << std::endl;
+#endif
 			this->materials.erase(this->materials.get_iterator(t->ptr));
 			this->materialTrackers.erase(this->materialTrackers.get_iterator(t));
 			this->materialTrackerMap.erase(name);
 		}
+#ifdef DEBUG_ASSET_MANAGEMENT
+	else
+	{
+		std::cout << "Decrement Material usageCount, retain: " << name << std::endl;
+	}
+#endif	
 	}
 
 	/* Animations
@@ -403,6 +457,9 @@ namespace vel
 	{
 		if (this->renderableTrackerMap.contains(name)) 
 		{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Existing Renderable, bypass reload: " << name << std::endl;
+#endif
 			auto t = this->renderableTrackerMap[name];
 			if(t->usageCount > 0)
 			{
@@ -416,6 +473,9 @@ namespace vel
 			}			
 		}
 
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Loading new Renderable: " << name << std::endl;
+#endif	
 
 		auto it = this->renderables.insert(Renderable(name, shader, mesh, material));
 		
@@ -446,11 +506,20 @@ namespace vel
 		auto t = this->renderableTrackerMap[name];
 		t->usageCount--;
 		if (t->usageCount == 0)
-		{			
+		{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Full remove Renderable: " << name << std::endl;
+#endif
 			this->renderables.erase(this->renderables.get_iterator(t->ptr));
 			this->renderableTrackers.erase(this->renderableTrackers.get_iterator(t));
 			this->renderableTrackerMap.erase(name);
 		}
+#ifdef DEBUG_ASSET_MANAGEMENT
+	else
+	{
+		std::cout << "Decrement Renderable usageCount, retain: " << name << std::endl;
+	}
+#endif	
 	}
 
 	/* Armatures
@@ -507,6 +576,9 @@ namespace vel
 		t->usageCount--;
 		if(t->usageCount == 0)
 		{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Full remove Armature: " << name << std::endl;
+#endif
 			// remove all animations used by this armature
 			for(auto& animArmPair : t->ptr->getAnimations())
 				for(auto& animOG : this->animations)
@@ -518,6 +590,12 @@ namespace vel
 			this->armatureTrackers.erase(this->armatureTrackers.get_iterator(t));
 			this->armatureTrackerMap.erase(name);
 		}
+#ifdef DEBUG_ASSET_MANAGEMENT
+	else
+	{
+		std::cout << "Decrement Armature usageCount, retain: " << name << std::endl;
+	}
+#endif	
 	}
 
 }

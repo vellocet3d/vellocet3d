@@ -86,9 +86,11 @@ namespace vel
 		return this->window->getImguiFont(key);
 	}
 
-	//TODO: scene desctructor should be called when we erase element from this->scenes...please verify
 	void App::removeScene(std::string name)
 	{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Removing Scene: " << name << std::endl;
+#endif
 		size_t i = 0;
 		for (auto& s : this->scenes)
 		{
@@ -112,6 +114,9 @@ namespace vel
 
 	void App::swapScene(std::string name)
 	{
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Swapping to Scene: " << name << std::endl;
+#endif
 		for (auto& s : this->scenes)
 			if (s->getName() == name)
 				this->activeScene = s.get();
@@ -119,23 +124,22 @@ namespace vel
 
     void App::addScene(Scene* scene, bool swapWhenLoaded)
     {
+		// TODO: this was required before to get imgui to work correctly, but that was when we could only ever load
+		// one scene at a time. Need to figure out how to integrate imgui into the new api
 		//if(this->window->getImguiFrameOpen())
 		//	this->forceImguiRender();
-
         //this->scene = std::move(std::move(std::unique_ptr<Scene>(scene)));
-
-		std::cout << "yeet001\n";
-		std::cout << swapWhenLoaded << std::endl;
-
-		scene->swapWhenLoaded = swapWhenLoaded;
 
 		std::string className = typeid(*scene).name();// name is "class Test" when we need just "Test", so trim off "class "
 		className.erase(0, 6);
 		scene->setName(className);
-		std::cout << scene->getName() << std::endl; 
-		this->sceneLoadingQueue.push_back(std::move(std::unique_ptr<Scene>(scene)));
+		scene->swapWhenLoaded = swapWhenLoaded;
+		
+#ifdef DEBUG_ASSET_MANAGEMENT
+	std::cout << "Adding Scene: " << className << std::endl;
+#endif
 
-		//std::cout << this->sceneLoadingQueue.at(0)->swapWhenLoaded << std::endl;
+		this->sceneLoadingQueue.push_back(std::move(std::unique_ptr<Scene>(scene)));
     }
 
     void App::close()
@@ -236,7 +240,6 @@ namespace vel
             if (this->shouldClose || this->window->shouldClose()) 
                 break;
 
-			
 
 			// load a single gpu asset for this loop cycle if needed
 			this->assetManager.sendNextToGpu();
@@ -250,15 +253,8 @@ namespace vel
 
 				if (this->sceneLoadingQueue.at(0)->isFullyLoaded())
 				{
-					std::cout << "yeet002\n";
-					std::cout << this->sceneLoadingQueue.at(0)->swapWhenLoaded << std::endl;
-
 					if (this->sceneLoadingQueue.at(0)->swapWhenLoaded)
-					{
 						this->activeScene = this->sceneLoadingQueue.at(0).get();
-						std::cout << "yeet004\n";
-					}
-						
 
 					this->scenes.push_back(std::move(this->sceneLoadingQueue.at(0)));
 
@@ -281,7 +277,6 @@ namespace vel
             this->newTime = this->time();
             this->frameTime = this->newTime - this->currentTime;
 
-			//std::cout << "yeet003\n";
 
             if (this->frameTime >= (1 / this->config.MAX_RENDER_FPS)) // cap max fps
             {

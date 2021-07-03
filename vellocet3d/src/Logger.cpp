@@ -8,7 +8,9 @@ namespace vel
     Logger::Logger(bool enabled, std::string path, bool useConsole) :
         enabled(enabled),
         path(path),
-		useConsole(useConsole){};
+		useConsole(useConsole),
+		shouldDie(false)
+	{};
 
     void Logger::log(std::string message)
     {
@@ -30,7 +32,13 @@ namespace vel
 	void Logger::die(std::string message)
 	{
 		this->log(message);
+		this->shouldDie = true;
 		exit(EXIT_FAILURE);
+	}
+
+	bool Logger::getShouldDie() // useful for checking if logger exited on a separate thread
+	{
+		return this->shouldDie;
 	}
 
 }
