@@ -84,8 +84,13 @@ namespace vel
 			this->loadMesh(m);
 
 		for (auto& t : j["scene"]["textures"])
-			this->loadTexture(t["name"], t["type"], t["path"]);
-		// TODO: need mipmap logic here
+		{
+			std::vector<std::string> mips;
+			for (auto& mip : t["mips"])
+				mips.push_back(mip);
+
+			this->loadTexture(t["name"], t["type"], t["path"], mips);
+		}
 
 		for (auto& m : j["scene"]["materials"])
 		{
