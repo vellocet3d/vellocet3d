@@ -214,102 +214,62 @@ namespace vel
 	void GPU::loadTexture(Texture* t)
 	{
 		glGenTextures(1, &t->id);
+		glBindTexture(GL_TEXTURE_2D, t->id);
+		glTexImage2D(
+			GL_TEXTURE_2D, 
+			0, 
+			t->primaryImageData.format, 
+			t->primaryImageData.width, 
+			t->primaryImageData.height, 
+			0, 
+			t->primaryImageData.format, 
+			GL_UNSIGNED_BYTE,
+			t->primaryImageData.data
+		);
 
-		int width, height, nrComponents;
-		unsigned char*	data = stbi_load(t->path.c_str(), &width, &height, &nrComponents, 0);
-		if (data)
+		if (t->mips.size() == 0)
 		{
-			GLenum format;
-			if (nrComponents == 1)
-			{
-				t->alphaChannel = false;
-				format = GL_RED;
-			}
-			else if (nrComponents == 3)
-			{
-				t->alphaChannel = false;
-				format = GL_RGB;
-			}
-			else if (nrComponents == 4)
-			{
-				t->alphaChannel = true;
-				format = GL_RGBA;
-			}
-
-			//std::cout << texture.filename << ":" << texture.alphaChannel << "\n";
-
-			glBindTexture(GL_TEXTURE_2D, t->id);
-
-			// load the base level texture
-			glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-
-			if (t->mips.size() == 0)
-			{
 #ifdef DEBUG_ASSET_MANAGEMENT
 	std::cout << "Generating mipmaps" << std::endl;
 #endif
-				glGenerateMipmap(GL_TEXTURE_2D);
-			}
-				
-			// set texture parameters
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+		
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-			if (t->mips.size() > 0)
-			{
+		if (t->mips.size() > 0)
+		{
 #ifdef DEBUG_ASSET_MANAGEMENT
 	std::cout << "Loading pre-computed mipmaps" << std::endl;
 #endif
 
-				int mipcount = (int)(t->mips.size() - 1);
+			int mipcount = (int)t->mips.size();
 
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipcount);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipcount);
 
-				while (mipcount >= 0)
-				{
-					int mip_width, mip_height, mip_nrComponents;
-					unsigned char*	mip_data = stbi_load(t->mips.at(mipcount).c_str(), &mip_width, &mip_height, &mip_nrComponents, 0);
+			while (mipcount > 0)
+			{
+				glTexImage2D(
+					GL_TEXTURE_2D, 
+					mipcount, 
+					t->mips.at((mipcount - 1)).format, 
+					t->mips.at((mipcount - 1)).width, 
+					t->mips.at((mipcount - 1)).height, 
+					0, 
+					t->mips.at((mipcount - 1)).format, 
+					GL_UNSIGNED_BYTE, 
+					t->mips.at((mipcount - 1)).data
+				);
 
-					if (mip_data)
-					{
-						GLenum mip_format;
-						if (mip_nrComponents == 1)
-							mip_format = GL_RED;
-						else if (mip_nrComponents == 3)
-							mip_format = GL_RGB;
-						else if (mip_nrComponents == 4)
-							mip_format = GL_RGBA;
-
-						//std::cout << full_mip_file_path << ":" << mip_nrComponents << "\n";
-
-						glTexImage2D(GL_TEXTURE_2D, mipcount, mip_format, mip_width, mip_height, 0, mip_format, GL_UNSIGNED_BYTE, mip_data);
-
-						stbi_image_free(mip_data);
-
-						mipcount--;
-					}
-					else
-					{
-						stbi_image_free(mip_data);
-						std::cout << "Texture failed to load at path: " << t->mips.at(mipcount) << "\n";
-						std::cin.get();
-						exit(EXIT_FAILURE);
-					}
-				}
-
+				stbi_image_free(t->mips.at((mipcount - 1)).data);
+				mipcount--;
 			}
-
-			stbi_image_free(data);
 		}
-		else
-		{
-			stbi_image_free(data);
-			std::cout << "Texture failed to load at path: " << t->path << "\n";
-			std::cin.get();
-			exit(EXIT_FAILURE);
-		}
+			
+		stbi_image_free(t->primaryImageData.data);
 	}
 
 	const Shader* const GPU::getActiveShader() const

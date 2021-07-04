@@ -308,5 +308,8 @@
     <ClInclude Include="inc\vel\dep\sac.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\vel\assets\material\ImageData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

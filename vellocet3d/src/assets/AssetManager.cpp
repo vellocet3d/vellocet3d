@@ -1,6 +1,9 @@
 #include <thread> 
 #include <chrono>
 
+#include "STB_IMAGE/stb_image.h"
+#include "glad/glad.h"
+
 #include "vel/assets/AssetManager.h"
 #include "vel/assets/AssetLoaderV2.h"
 #include "vel/App.h"
@@ -308,8 +311,60 @@ namespace vel
 		Texture texture;
 		texture.name = name;
 		texture.type = type;
-		texture.path = path;
-		texture.mips = mips;
+		texture.primaryImageData.data = stbi_load(
+			path.c_str(), 
+			&texture.primaryImageData.width, 
+			&texture.primaryImageData.height, 
+			&texture.primaryImageData.nrComponents, 
+			0
+		);
+
+		if (!texture.primaryImageData.data)
+		{
+			App::get().logger.log(("AssetManager::loadTexture(): Unable to load texture at path: " + path));
+		}
+		else
+		{
+			if (texture.primaryImageData.nrComponents == 1)
+			{
+				texture.alphaChannel = false;
+				texture.primaryImageData.format = GL_RED;
+			}
+			else if (texture.primaryImageData.nrComponents == 3)
+			{
+				texture.alphaChannel = false;
+				texture.primaryImageData.format = GL_RGB;
+			}
+			else if (texture.primaryImageData.nrComponents == 4)
+			{
+				texture.alphaChannel = true;
+				texture.primaryImageData.format = GL_RGBA;
+			}
+
+			for (auto& m : mips)
+			{
+				ImageData id;
+				id.data = stbi_load(m.c_str(), &id.width, &id.height, &id.nrComponents, 0);
+
+				if (!id.data)
+				{
+					App::get().logger.log(("AssetManager::loadTexture(): Unable to load texture at path: " + m));
+				}
+				else
+				{
+					if (id.nrComponents == 1)
+						id.format = GL_RED;
+					else if (id.nrComponents == 3)
+						id.format = GL_RGB;
+					else if (id.nrComponents == 4)
+						id.format = GL_RGBA;
+
+					texture.mips.push_back(id);
+				}
+			}
+		}
+
+		/////////////////////////////////////////
 
 		auto it = this->textures.insert(texture);
 		

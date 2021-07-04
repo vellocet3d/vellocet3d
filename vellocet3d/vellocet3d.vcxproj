@@ -219,6 +219,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\App.h" />
+    <ClInclude Include="inc\vel\assets\material\ImageData.h" />
     <ClInclude Include="inc\vel\dep\json.hpp" />
     <ClInclude Include="inc\vel\dep\plf_colony.h" />
     <ClInclude Include="inc\vel\dep\robin_hood.h" />
