@@ -28,7 +28,7 @@ namespace vel
 	{
 	private:
 		Assimp::Importer					aiImporter;
-		const aiScene*						aiScene;
+		const aiScene*						impScene;
 		AssetManager*						assetManager;
 		
 		std::vector<MeshTracker*>			meshTrackers;		

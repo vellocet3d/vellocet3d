@@ -350,6 +350,7 @@ namespace vel
             {
 				this->calculateAverageFrameTime();
 				this->displayAverageFrameTime();
+				
 
                 this->currentTime = this->newTime;				
 

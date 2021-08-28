@@ -25,9 +25,9 @@ namespace vel
 		currentArmature(nullptr),
 		existingArmature(false)
 	{
-		this->aiScene = this->aiImporter.ReadFile(this->currentAssetFile, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
+		this->impScene = this->aiImporter.ReadFile(this->currentAssetFile, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
 
-		if (!this->aiScene || !this->aiScene->mRootNode)
+		if (!this->impScene || !this->impScene->mRootNode)
 		{
 			std::string errorMessage = this->aiImporter.GetErrorString();
 			std::cout << "ERROR::ASSIMP::" << errorMessage << "\n";
@@ -38,7 +38,7 @@ namespace vel
 
 	void AssetLoaderV2::load()
 	{
-		this->processNode(this->aiScene->mRootNode);
+		this->processNode(this->impScene->mRootNode);
 	}
 
 	std::pair<std::vector<MeshTracker*>, ArmatureTracker*> AssetLoaderV2::getTrackers()
@@ -48,52 +48,52 @@ namespace vel
 
 	void AssetLoaderV2::processAnimations()
 	{
-		for (unsigned int i = 0; i < this->aiScene->mNumAnimations; i++)
+		for (unsigned int i = 0; i < this->impScene->mNumAnimations; i++)
 		{
-			std::string animationName = this->aiScene->mAnimations[i]->mName.C_Str();
+			std::string animationName = this->impScene->mAnimations[i]->mName.C_Str();
 
 			// create a new animation
 			auto a = Animation();
-			a.name = this->aiScene->mAnimations[i]->mName.C_Str();
-			a.duration = this->aiScene->mAnimations[i]->mDuration;
-			//a.tps = this->aiScene->mAnimations[i]->mTicksPerSecond;
-			a.tps = this->aiScene->mAnimations[i]->mTicksPerSecond * 33.3333333; // account for the weird assimp/fbx "update" that multiplies duration by 33.3333333
+			a.name = this->impScene->mAnimations[i]->mName.C_Str();
+			a.duration = this->impScene->mAnimations[i]->mDuration;
+			//a.tps = this->impScene->mAnimations[i]->mTicksPerSecond;
+			a.tps = this->impScene->mAnimations[i]->mTicksPerSecond * 33.3333333; // account for the weird assimp/fbx "update" that multiplies duration by 33.3333333
 
 			// add all channels to animation
 
-			for (unsigned int j = 0; j < this->aiScene->mAnimations[i]->mNumChannels; j++)
+			for (unsigned int j = 0; j < this->impScene->mAnimations[i]->mNumChannels; j++)
 			{
 				auto c = Channel();
 
 				// positions
-				for (unsigned int k = 0; k < this->aiScene->mAnimations[i]->mChannels[j]->mNumPositionKeys; k++)
+				for (unsigned int k = 0; k < this->impScene->mAnimations[i]->mChannels[j]->mNumPositionKeys; k++)
 				{
-					auto position = this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mValue;
-					auto time = (float)this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
+					auto position = this->impScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mValue;
+					auto time = (float)this->impScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
 					c.positionKeyTimes.push_back(time);
 					c.positionKeyValues.push_back(glm::vec3(position.x, position.y, position.z));
 				}
 
 				// rotations
-				for (unsigned int k = 0; k < this->aiScene->mAnimations[i]->mChannels[j]->mNumRotationKeys; k++)
+				for (unsigned int k = 0; k < this->impScene->mAnimations[i]->mChannels[j]->mNumRotationKeys; k++)
 				{
-					auto rotation = this->aiScene->mAnimations[i]->mChannels[j]->mRotationKeys[k].mValue;
-					auto time = (float)this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
+					auto rotation = this->impScene->mAnimations[i]->mChannels[j]->mRotationKeys[k].mValue;
+					auto time = (float)this->impScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
 					c.rotationKeyTimes.push_back(time);
 					c.rotationKeyValues.push_back(glm::quat(rotation.w, rotation.x, rotation.y, rotation.z));
 				}
 
 				// scalings
-				for (unsigned int k = 0; k < this->aiScene->mAnimations[i]->mChannels[j]->mNumScalingKeys; k++)
+				for (unsigned int k = 0; k < this->impScene->mAnimations[i]->mChannels[j]->mNumScalingKeys; k++)
 				{
-					auto scale = this->aiScene->mAnimations[i]->mChannels[j]->mScalingKeys[k].mValue;
-					auto time = (float)this->aiScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
+					auto scale = this->impScene->mAnimations[i]->mChannels[j]->mScalingKeys[k].mValue;
+					auto time = (float)this->impScene->mAnimations[i]->mChannels[j]->mPositionKeys[k].mTime;
 					c.scalingKeyTimes.push_back(time);
 					c.scalingKeyValues.push_back(glm::vec3(scale.x, scale.y, scale.z));
 				}
 
 				// add channel to animation
-				a.channels[this->aiScene->mAnimations[i]->mChannels[j]->mNodeName.C_Str()] = c;
+				a.channels[this->impScene->mAnimations[i]->mChannels[j]->mNodeName.C_Str()] = c;
 			}
 
 			// add animation to scene's animations container, retrieving index
@@ -208,7 +208,7 @@ namespace vel
 				auto meshCount = node->mNumMeshes;
 				while (meshCount > 0)
 				{
-					this->processMesh(this->aiScene->mMeshes[node->mMeshes[(meshCount - 1)]]);
+					this->processMesh(this->impScene->mMeshes[node->mMeshes[(meshCount - 1)]]);
 					meshCount--;
 				}
 			}
