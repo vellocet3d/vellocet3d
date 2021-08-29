@@ -21,6 +21,9 @@ do
 	CMD="${CMD} ${var}"
 done
 
+if [ -f "$1" ] ; then
+    rm "$1"
+fi
 
 eval $CMD
 echo -e "create ${1}\naddlib ${1}\nsave\nend" | ar -M

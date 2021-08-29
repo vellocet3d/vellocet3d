@@ -38,9 +38,7 @@ namespace vel
 		assetManager(AssetManager(this->gpu.get())),
 		activeScene(nullptr),
         startTime(std::chrono::high_resolution_clock::now())
-    {
-		Log::toCli("JUST A TEST MESSAGE...DON'T MIND ME");
-        
+    {        
         // load default shaders
         this->assetManager.loadShader("defaultEquirectangularToCubemap", 
         "data/shaders/cubemap.vert", "data/shaders/equirectangular_to_cubemap.frag");
