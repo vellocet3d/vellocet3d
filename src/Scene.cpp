@@ -614,7 +614,11 @@ namespace vel
 					this->drawActor(a, alpha);
 			}
 
-			/*
+
+			// Draw cubemap skybox 
+			gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, s.getActiveHdr()->envCubemap);
+			gpu->resetActives();
+
 
 			// DRAW TRANSPARENTS
 
@@ -652,11 +656,10 @@ namespace vel
 				this->drawActor(it->second, alpha);
 			}
 
-			*/
-
+			
+			
             
-            // Draw cubemap skybox 
-            gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, s.getActiveHdr()->envCubemap);
+            
 		}
 
 	}
