@@ -128,7 +128,10 @@ namespace vel
 
 		bone.matrix = parentMatrix * bone.matrix;
 		glm::decompose(bone.matrix, bone.scale, bone.rotation, bone.translation, bone.skew, bone.perspective);
-		bone.rotation = glm::conjugate(bone.rotation);
+
+		// this used to be necessary, but apparently it changed somewhere along the lines between glm versions???
+		// took me a week to figure out this is what was causing a bug with skinned meshes
+		//bone.rotation = glm::conjugate(bone.rotation);
 	}
 
 	void Armature::updateAnimation(double runTime, std::optional<glm::mat4> parentMatrix)

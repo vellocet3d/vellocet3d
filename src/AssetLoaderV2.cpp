@@ -56,8 +56,9 @@ namespace vel
 			auto a = Animation();
 			a.name = this->impScene->mAnimations[i]->mName.C_Str();
 			a.duration = this->impScene->mAnimations[i]->mDuration;
-			//a.tps = this->impScene->mAnimations[i]->mTicksPerSecond;
-			a.tps = this->impScene->mAnimations[i]->mTicksPerSecond * 33.3333333; // account for the weird assimp/fbx "update" that multiplies duration by 33.3333333
+			a.tps = this->impScene->mAnimations[i]->mTicksPerSecond;
+			// ok apparently this was reverted at some point...sweet, will leave below here just incase 
+			//a.tps = this->impScene->mAnimations[i]->mTicksPerSecond * 33.3333333; // account for the weird assimp/fbx "update" that multiplies duration by 33.3333333
 
 			// add all channels to animation
 
