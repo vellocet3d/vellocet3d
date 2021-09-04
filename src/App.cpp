@@ -88,7 +88,7 @@ namespace vel
         
         
         // load default textures
-        this->assetManager.loadTexture("defaultAlbedo", "albedo", "data/default_textures/albedo.jpg");
+		this->assetManager.loadTexture("defaultAlbedo", "albedo", "data/default_textures/albedo.jpg");
 		this->assetManager.loadTexture("defaultAO", "ao", "data/default_textures/ao.jpg");
 		this->assetManager.loadTexture("defaultMetallic", "metallic", "data/default_textures/metallic.jpg");
 		this->assetManager.loadTexture("defaultRoughness", "roughness", "data/default_textures/roughness.jpg");
@@ -96,7 +96,7 @@ namespace vel
 		this->assetManager.sendAllToGpu();
 
 
-		// create separate thread that will poll scenes and load them into system memory asynchronously
+		//create separate thread that will poll scenes and load them into system memory asynchronously
 		std::thread t([this] {
 
 			while (true)

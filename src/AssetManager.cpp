@@ -9,6 +9,7 @@
 #include "vel/AssetManager.h"
 #include "vel/AssetLoaderV2.h"
 #include "vel/Log.h"
+#include "vel/functions.h"
 
 using namespace std::chrono_literals;
 
@@ -380,10 +381,11 @@ if (!this->meshTrackerMap.contains(name))
 
 #ifdef DEBUG_LOG
 if (!texture.primaryImageData.data)
-{
-    std::string msg = std::string("AssetManager::loadTexture(): Unable to load texture at path: ") + path;
-    Log::crash(msg);
-}
+    Log::crash("AssetManager::loadTexture(): Unable to load texture at path: " + path);
+if (texture.primaryImageData.width != texture.primaryImageData.height)
+	Log::crash("AssetManager::loadTexture(): Texture not square: " + name);
+if (!isPowerOfTwo(texture.primaryImageData.width))
+	Log::crash("AssetManager::loadTexture(): Texture not power of two: " + name);
 #endif
 
         if (texture.primaryImageData.nrComponents == 1)

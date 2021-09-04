@@ -9,6 +9,14 @@
 namespace vel
 {
 
+	bool isPowerOfTwo(int n)
+	{
+		if (n == 0)
+			return false;
+
+		return (ceil(log2(n)) == floor(log2(n)));
+	}
+
 	std::string str_replace(const std::string& from, const std::string& to, std::string str)
 	{
 		if (from.empty())
