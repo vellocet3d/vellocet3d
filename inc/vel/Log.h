@@ -33,6 +33,7 @@ namespace vel
 
         static void			toFile(std::string msg);
         static void			toCli(std::string msg);
+		static void			toCliAndFile(std::string msg);
         static void			crash(std::string msg);
 
     };

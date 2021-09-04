@@ -266,9 +266,7 @@ namespace vel
 		if (t->mips.size() == 0)
 		{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Generating mipmaps");
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Generating mipmaps");
 #endif
 			glGenerateMipmap(GL_TEXTURE_2D);
 		}
@@ -281,9 +279,7 @@ namespace vel
 		if (t->mips.size() > 0)
 		{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Loading pre-computed mipmaps");
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Loading pre-computed mipmaps");
 #endif
 
 			int mipcount = (int)t->mips.size();
@@ -313,10 +309,7 @@ namespace vel
 	}
 
     void GPU::loadHdr(HDR* h)
-    {
-		//std::cout << "yeet001" << std::endl;
-		//std::cout << this << std::endl;
-		
+    {		
         // pbr: reset framebuffers
         // ------------------------
         glBindFramebuffer(GL_FRAMEBUFFER, this->pbrCaptureFBO);

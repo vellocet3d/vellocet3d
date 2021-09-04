@@ -148,9 +148,7 @@ namespace vel
 	void App::removeScene(std::string name)
 	{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Removing Scene: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Removing Scene: " + name);
 #endif
 		size_t i = 0;
 		for (auto& s : this->scenes)
@@ -176,9 +174,7 @@ namespace vel
 	void App::swapScene(std::string name)
 	{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Swapping to Scene: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Swapping to Scene: " + name);
 #endif
 		for (auto& s : this->scenes)
 			if (s->getName() == name)
@@ -199,9 +195,7 @@ namespace vel
 		scene->swapWhenLoaded = swapWhenLoaded;
 		
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Adding Scene: ") + className;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Adding Scene: " + className);
 #endif
 
 		this->sceneLoadingQueue.push_back(std::move(std::unique_ptr<Scene>(scene)));
@@ -416,16 +410,12 @@ namespace vel
 
 
 				this->window->renderGui();
-                
-				
+
 
 				if (!this->pauseBufferClearAndSwap)
-				{
 					this->window->swapBuffers();
-					//this->gpu->finish();
-				}
-					
                 
+
             }
 
         }

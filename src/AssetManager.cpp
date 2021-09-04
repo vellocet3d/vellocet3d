@@ -99,9 +99,7 @@ namespace vel
 		if (this->shaderTrackerMap.contains(name)) 
 		{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Existing Shader, bypass reload: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Existing Shader, bypass reload: " + name);
 #endif
 			
 			// if usage count is not greater than zero then the asset is being deleted on the main thread
@@ -124,9 +122,7 @@ namespace vel
 		}
 		
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Loading new Shader: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Loading new Shader: " + name);
 #endif		
 
 		Shader s;
@@ -154,10 +150,7 @@ namespace vel
 	{
 #ifdef DEBUG_LOG
 if (!this->shaderTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::getShader(): Attempting to get shader that does not exist: ") + name;
-    Log::crash(msg);
-}
+    Log::crash("AssetManager::getShader(): Attempting to get shader that does not exist: " + name);
 #endif
 
 		return this->shaderTrackerMap[name]->ptr;
@@ -166,11 +159,8 @@ if (!this->shaderTrackerMap.contains(name))
 	bool AssetManager::shaderIsGpuLoaded(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->shaderTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::shaderIsGpuLoaded(): Attempting to get shader that does not exist: ") + name;
-    Log::crash(msg);
-}
+	if (!this->shaderTrackerMap.contains(name))
+		Log::crash("AssetManager::shaderIsGpuLoaded(): Attempting to get shader that does not exist: " + name);
 #endif
 
 		return this->shaderTrackerMap[name]->gpuLoaded;
@@ -180,10 +170,7 @@ if (!this->shaderTrackerMap.contains(name))
 	{
 #ifdef DEBUG_LOG
 if (!this->shaderTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::removeShader(): Attempting to remove shader that does not exist: ") + name;
-    Log::crash(msg);
-}
+    Log::crash("AssetManager::removeShader(): Attempting to remove shader that does not exist: " + name);
 #endif
 
 		auto t = this->shaderTrackerMap[name];
@@ -192,9 +179,7 @@ if (!this->shaderTrackerMap.contains(name))
 		{
 			
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Full remove Shader: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Full remove Shader: " + name);
 #endif	
 			
 			if (!t->gpuLoaded)
@@ -208,14 +193,9 @@ if (!this->shaderTrackerMap.contains(name))
 			this->shaderTrackers.erase(this->shaderTrackers.get_iterator(t));
 			this->shaderTrackerMap.erase(name);			
 		}
-		
 #ifdef DEBUG_LOG
 	else
-	{
-        std::string msg = std::string("Decrement Shader usageCount, retain: ") + name;
-        Log::toCli(msg);
-        Log::toFile(msg);
-	}
+		Log::toCliAndFile("Decrement Shader usageCount, retain: " + name);
 #endif	
 		
 	}
@@ -284,10 +264,7 @@ if (!this->shaderTrackerMap.contains(name))
 	{
 #ifdef DEBUG_LOG
 if (!this->meshTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::getMesh(): Attempting to get mesh that does not exist: ") + name;
-    Log::crash(msg);
-}
+    Log::crash("AssetManager::getMesh(): Attempting to get mesh that does not exist: " + name);
 #endif
 		return this->meshTrackerMap[name]->ptr;	
 	}
@@ -300,11 +277,8 @@ if (!this->meshTrackerMap.contains(name))
 	void AssetManager::removeMesh(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->meshTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::removeMesh(): Attempting to remove mesh that does not exist: ") + name;
-    Log::crash(msg);
-}
+	if (!this->meshTrackerMap.contains(name))
+		Log::crash("AssetManager::removeMesh(): Attempting to remove mesh that does not exist: " + name);
 #endif
 
 		auto t = this->meshTrackerMap[name];
@@ -312,9 +286,7 @@ if (!this->meshTrackerMap.contains(name))
 		if(t->usageCount == 0)
 		{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Full remove Mesh: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Full remove Mesh: " + name);
 #endif
 			if(!t->gpuLoaded)
 				for (size_t i = 0; i < this->meshesThatNeedGpuLoad.size(); i++)
@@ -329,11 +301,7 @@ if (!this->meshTrackerMap.contains(name))
 		}
 #ifdef DEBUG_LOG
 	else
-	{
-        std::string msg = std::string("Decrement Mesh usageCount, retain: ") + name;
-        Log::toCli(msg);
-        Log::toFile(msg);
-	}
+		Log::toCliAndFile("Decrement Mesh usageCount, retain: " + name);
 #endif
 		
 	}
@@ -345,9 +313,7 @@ if (!this->meshTrackerMap.contains(name))
 		if (this->textureTrackerMap.contains(name)) 
 		{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Existing Texture, bypass reload: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Existing Texture, bypass reload: " + name);
 #endif
 			auto t = this->textureTrackerMap[name];
 			if(t->usageCount > 0)
@@ -363,9 +329,7 @@ if (!this->meshTrackerMap.contains(name))
 		}
 
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Load new Texture: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Load new Texture: " + name);
 #endif
 
 		Texture texture;
@@ -380,12 +344,12 @@ if (!this->meshTrackerMap.contains(name))
 		);
 
 #ifdef DEBUG_LOG
-if (!texture.primaryImageData.data)
-    Log::crash("AssetManager::loadTexture(): Unable to load texture at path: " + path);
-if (texture.primaryImageData.width != texture.primaryImageData.height)
-	Log::crash("AssetManager::loadTexture(): Texture not square: " + name);
-if (!isPowerOfTwo(texture.primaryImageData.width))
-	Log::crash("AssetManager::loadTexture(): Texture not power of two: " + name);
+	if (!texture.primaryImageData.data)
+		Log::crash("AssetManager::loadTexture(): Unable to load texture at path: " + path);
+	if (texture.primaryImageData.width != texture.primaryImageData.height)
+		Log::crash("AssetManager::loadTexture(): Texture not square: " + name);
+	if (!isPowerOfTwo(texture.primaryImageData.width))
+		Log::crash("AssetManager::loadTexture(): Texture not power of two: " + name);
 #endif
 
         if (texture.primaryImageData.nrComponents == 1)
@@ -410,11 +374,8 @@ if (!isPowerOfTwo(texture.primaryImageData.width))
             id.data = stbi_load(m.c_str(), &id.width, &id.height, &id.nrComponents, 0);
 
 #ifdef DEBUG_LOG
-if (!id.data)
-{
-    std::string msg = std::string("AssetManager::loadTexture(): Unable to load texture at path: ") + m;
-    Log::crash(msg);
-}
+	if (!id.data)
+		Log::crash("AssetManager::loadTexture(): Unable to load texture at path: " + m);
 #endif
 
             if (id.nrComponents == 1)
@@ -451,11 +412,8 @@ if (!id.data)
 	Texture* AssetManager::getTexture(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->textureTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::getTexture(): Attempting to get texture that does not exist: ") + name;
-    Log::crash(msg);
-}
+	if (!this->textureTrackerMap.contains(name))
+		Log::crash("AssetManager::getTexture(): Attempting to get texture that does not exist: " + name);
 #endif
 
 		return this->textureTrackerMap[name]->ptr;		
@@ -469,11 +427,8 @@ if (!this->textureTrackerMap.contains(name))
 	void AssetManager::removeTexture(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->textureTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::removeTexture(): Attempting to remove texture that does not exist: ") + name;
-    Log::crash(msg);
-}
+	if (!this->textureTrackerMap.contains(name))
+		Log::crash("AssetManager::removeTexture(): Attempting to remove texture that does not exist: " + name);
 #endif
 
 		auto t = this->textureTrackerMap[name];
@@ -481,9 +436,7 @@ if (!this->textureTrackerMap.contains(name))
 		if (t->usageCount == 0)
 		{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Full remove Texture: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Full remove Texture: " + name);
 #endif
 			if (!t->gpuLoaded)
 				for (size_t i = 0; i < this->texturesThatNeedGpuLoad.size(); i++)
@@ -498,11 +451,7 @@ if (!this->textureTrackerMap.contains(name))
 		}
 #ifdef DEBUG_LOG
 	else
-	{
-        std::string msg = std::string("Decrement Texture usageCount, retain: ") + name;
-        Log::toCli(msg);
-        Log::toFile(msg);
-	}
+		Log::toCliAndFile("Decrement Texture usageCount, retain: " + name);
 #endif	
 	}
 
@@ -513,9 +462,7 @@ if (!this->textureTrackerMap.contains(name))
         if (this->hdrTrackerMap.contains(name)) 
 		{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Existing HDR, bypass reload: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Existing HDR, bypass reload: " + name);
 #endif
 			auto h = this->hdrTrackerMap[name];
 			if(h->usageCount > 0)
@@ -531,9 +478,7 @@ if (!this->textureTrackerMap.contains(name))
 		}
         
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Load new HDR: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Load new HDR: " + name);
 #endif
 
         HDR hdr;
@@ -550,11 +495,8 @@ if (!this->textureTrackerMap.contains(name))
         
         
 #ifdef DEBUG_LOG
-if (!hdr.primaryImageData.dataf)
-{
-    std::string msg = std::string("AssetManager::loadHdr(): Unable to load hdr at path: ") + path;
-    Log::crash(msg);
-}
+	if (!hdr.primaryImageData.dataf)
+		Log::crash("AssetManager::loadHdr(): Unable to load hdr at path: " + path);
 #endif
 
         if (hdr.primaryImageData.nrComponents == 1)
@@ -585,11 +527,8 @@ if (!hdr.primaryImageData.dataf)
     HDR* AssetManager::getHdr(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->hdrTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::getHdr(): Attempting to get HDR that does not exist: ") + name;
-    Log::crash(msg);
-}
+	if (!this->hdrTrackerMap.contains(name))
+		Log::crash("AssetManager::getHdr(): Attempting to get HDR that does not exist: " + name);
 #endif
 
 		return this->hdrTrackerMap[name]->ptr;		
@@ -603,11 +542,8 @@ if (!this->hdrTrackerMap.contains(name))
     void AssetManager::removeHdr(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->hdrTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::removeHdr(): Attempting to remove HDR that does not exist: ") + name;
-    Log::crash(msg);
-}
+	if (!this->hdrTrackerMap.contains(name))
+		Log::crash("AssetManager::removeHdr(): Attempting to remove HDR that does not exist: " + name);
 #endif
 
 		auto h = this->hdrTrackerMap[name];
@@ -615,9 +551,7 @@ if (!this->hdrTrackerMap.contains(name))
 		if (h->usageCount == 0)
 		{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Full remove HDR: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Full remove HDR: " + name);
 #endif
 			if (!h->gpuLoaded)
 				for (size_t i = 0; i < this->hdrsThatNeedGpuLoad.size(); i++)
@@ -632,11 +566,7 @@ if (!this->hdrTrackerMap.contains(name))
 		}
 #ifdef DEBUG_LOG
 	else
-	{
-        std::string msg = std::string("Decrement HDR usageCount, retain: ") + name;
-        Log::toCli(msg);
-        Log::toFile(msg);
-	}
+		Log::toCliAndFile("Decrement HDR usageCount, retain: " + name);
 #endif
 
     }
@@ -648,9 +578,7 @@ if (!this->hdrTrackerMap.contains(name))
 		if (this->materialTrackerMap.contains(m.name)) 
 		{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Existing Material, bypass reload: ") + m.name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Existing Material, bypass reload: " + m.name);
 #endif
 			auto t = this->materialTrackerMap[m.name];
 			if(t->usageCount > 0)
@@ -666,9 +594,7 @@ if (!this->hdrTrackerMap.contains(name))
 		}
 
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Loading new Material: ") + m.name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Loading new Material: " + m.name);
 #endif		
 
         // add default textures to material for those which are not provided
@@ -700,11 +626,8 @@ if (!this->hdrTrackerMap.contains(name))
 	Material* AssetManager::getMaterial(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->materialTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::getMaterial(): Attempting to get material that does not exist: ") + name;
-    Log::crash(msg);
-}
+	if (!this->materialTrackerMap.contains(name))
+		Log::crash("AssetManager::getMaterial(): Attempting to get material that does not exist: " + name);
 #endif
 
 		return this->materialTrackerMap[name]->ptr;		
@@ -713,11 +636,8 @@ if (!this->materialTrackerMap.contains(name))
 	void AssetManager::removeMaterial(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->materialTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::removeMaterial(): Attempting to remove material that does not exist: ") + name;
-    Log::crash(msg);
-}
+	if (!this->materialTrackerMap.contains(name))
+		Log::crash("AssetManager::removeMaterial(): Attempting to remove material that does not exist: " + name);
 #endif
 
 		auto t = this->materialTrackerMap[name];
@@ -725,9 +645,7 @@ if (!this->materialTrackerMap.contains(name))
 		if (t->usageCount == 0)
 		{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Full remove Material: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Full remove Material: " + name);
 #endif
 			this->materials.erase(this->materials.get_iterator(t->ptr));
 			this->materialTrackers.erase(this->materialTrackers.get_iterator(t));
@@ -735,11 +653,7 @@ if (!this->materialTrackerMap.contains(name))
 		}
 #ifdef DEBUG_LOG
 	else
-	{
-        std::string msg = std::string("Decrement Material usageCount, retain: ") + name;
-        Log::toCli(msg);
-        Log::toFile(msg);
-	}
+		Log::toCliAndFile("Decrement Material usageCount, retain: " + name);
 #endif	
 	}
 
@@ -758,9 +672,7 @@ if (!this->materialTrackerMap.contains(name))
 		if (this->renderableTrackerMap.contains(name)) 
 		{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Existing Renderable, bypass reload: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Existing Renderable, bypass reload: " + name);
 #endif
 			auto t = this->renderableTrackerMap[name];
 			if(t->usageCount > 0)
@@ -776,9 +688,7 @@ if (!this->materialTrackerMap.contains(name))
 		}
 
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Loading new Renderable: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Loading new Renderable: " + name);
 #endif	
 
 		auto it = this->renderables.insert(Renderable(name, shader, mesh, material));
@@ -797,11 +707,8 @@ if (!this->materialTrackerMap.contains(name))
 	Renderable AssetManager::getRenderable(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->renderableTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::getRenderable(): Attempting to get renderable that does not exist: ") + name;
-    Log::crash(msg);
-}
+	if (!this->renderableTrackerMap.contains(name))
+		Log::crash("AssetManager::getRenderable(): Attempting to get renderable that does not exist: " + name);
 #endif
 
 		return *this->renderableTrackerMap[name]->ptr;		
@@ -810,11 +717,8 @@ if (!this->renderableTrackerMap.contains(name))
 	void AssetManager::removeRenderable(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->renderableTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::removeRenderable(): Attempting to remove renderable that does not exist: ") + name;
-    Log::crash(msg);
-}
+	if (!this->renderableTrackerMap.contains(name))
+		Log::crash("AssetManager::removeRenderable(): Attempting to remove renderable that does not exist: " + name);
 #endif
         
 		auto t = this->renderableTrackerMap[name];
@@ -822,9 +726,7 @@ if (!this->renderableTrackerMap.contains(name))
 		if (t->usageCount == 0)
 		{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Full remove Renderable: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Full remove Renderable: " + name);
 #endif
 			this->renderables.erase(this->renderables.get_iterator(t->ptr));
 			this->renderableTrackers.erase(this->renderableTrackers.get_iterator(t));
@@ -832,11 +734,7 @@ if (!this->renderableTrackerMap.contains(name))
 		}
 #ifdef DEBUG_LOG
 	else
-	{
-        std::string msg = std::string("Decrement Renderable usageCount, retain: ") + name;
-        Log::toCli(msg);
-        Log::toFile(msg);
-	}
+		Log::toCliAndFile("Decrement Renderable usageCount, retain: " + name);
 #endif	
 	}
 
@@ -880,11 +778,8 @@ if (!this->renderableTrackerMap.contains(name))
 	Armature AssetManager::getArmature(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->armatureTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::getArmature(): Attempting to get armature that does not exist: ") + name;
-    Log::crash(msg);
-}
+	if (!this->armatureTrackerMap.contains(name))
+		Log::crash("AssetManager::getArmature(): Attempting to get armature that does not exist: " + name);
 #endif
 
 		return *this->armatureTrackerMap[name]->ptr;		
@@ -893,11 +788,8 @@ if (!this->armatureTrackerMap.contains(name))
 	void AssetManager::removeArmature(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->armatureTrackerMap.contains(name))
-{
-    std::string msg = std::string("AssetManager::removeArmature(): Attempting to remove armature that does not exist: ") + name;
-    Log::crash(msg);
-}
+	if (!this->armatureTrackerMap.contains(name))
+		Log::crash("AssetManager::removeArmature(): Attempting to remove armature that does not exist: " + name);
 #endif
         
 		auto t = this->armatureTrackerMap[name];
@@ -905,9 +797,7 @@ if (!this->armatureTrackerMap.contains(name))
 		if(t->usageCount == 0)
 		{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Full remove Armature: ") + name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Full remove Armature: " + name);
 #endif
 			// remove all animations used by this armature
 			for(auto& animArmPair : t->ptr->getAnimations())
@@ -922,11 +812,7 @@ if (!this->armatureTrackerMap.contains(name))
 		}
 #ifdef DEBUG_LOG
 	else
-	{
-        std::string msg = std::string("Decrement Armature usageCount, retain: ") + name;
-        Log::toCli(msg);
-        Log::toFile(msg);
-	}
+		Log::toCliAndFile("Decrement Armature usageCount, retain: " + name);
 #endif	
 	}
 

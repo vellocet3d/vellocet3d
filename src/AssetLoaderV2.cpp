@@ -125,9 +125,7 @@ namespace vel
 				if(armTracker != nullptr)
 				{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Existing Armature, bypass reload: ") + nodeName;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Existing Armature, bypass reload: " + nodeName);
 #endif
 					armTracker->usageCount++;
 					this->armatureTracker = armTracker;
@@ -137,9 +135,7 @@ namespace vel
 				else
 				{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Loading new Armature: ") + nodeName;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Loading new Armature: " + nodeName);
 #endif	
 					this->armatureTracker = this->assetManager->addArmature(Armature(boneName));
 					this->currentArmature = this->armatureTracker->ptr;
@@ -229,9 +225,7 @@ namespace vel
 		if(meshTracker != nullptr)
 		{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Existing Mesh, bypass reload: ") + mesh.getName();
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Existing Mesh, bypass reload: " + mesh.getName());
 #endif
 			meshTracker->usageCount++;
 			this->meshTrackers.push_back(meshTracker);
@@ -239,9 +233,7 @@ namespace vel
 		}
 
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Loading new Mesh: ") + mesh.getName();
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Loading new Mesh: " + mesh.getName());
 #endif
 
 		// walk through each of the mesh's vertices

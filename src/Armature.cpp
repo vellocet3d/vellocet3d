@@ -299,8 +299,7 @@ namespace vel
 				return p.second;
             
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Armature::getAnimation(): Attempting to get animation pointer of non-existing animation name: ") + animationName;
-    Log::crash(msg);
+    Log::crash("Armature::getAnimation(): Attempting to get animation pointer of non-existing animation name: " + animationName);
 #endif
     
     }
@@ -312,8 +311,7 @@ namespace vel
 				return i;
         
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Armature::getBoneIndex(): Attempting to get index of non-existing bone name: ") + boneName;
-    Log::crash(msg);
+    Log::crash("Armature::getBoneIndex(): Attempting to get index of non-existing bone name: " + boneName);
 #endif
         
 	}

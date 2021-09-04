@@ -53,6 +53,12 @@ namespace vel
         std::cout << msg << std::endl;
     }
 
+	void Log::toCliAndFile(std::string msg)
+	{
+		Log::toCli(msg);
+		Log::toFile(msg);
+	}
+
     void Log::crash(std::string msg)
     {
         Log::toFile(msg);

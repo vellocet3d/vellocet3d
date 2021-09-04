@@ -41,9 +41,7 @@ namespace vel
 	void Scene::freeAssets()
 	{
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Freeing assets for scene: ") + this->name;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Freeing assets for scene: " + this->name);
 #endif
 		for(auto& name : this->armaturesInUse)
 			App::get().getAssetManager().removeArmature(name);
@@ -81,9 +79,7 @@ namespace vel
 		//	std::cout << el.key() << " : " << el.value() << "\n";
 
 #ifdef DEBUG_LOG
-    std::string msg = std::string("Loading Scene via configuration file: ") + path;
-    Log::toCli(msg);
-    Log::toFile(msg);
+	Log::toCliAndFile("Loading Scene via configuration file: " + path);
 #endif
 
 		//load elements into scene
@@ -224,7 +220,7 @@ namespace vel
 				act.setDynamic(a["dynamic"]);
 				act.setVisible(a["visible"]);
 				act.setAutoTransform(a["autoTransform"]);
-				act.addRenderable(this->getRenderable(a["renderable"]));//TODO: what about if headless?
+				act.addRenderable(this->getRenderable(a["renderable"]));//TODO: what if headless?
 				
 				if (!a["transform"].is_null())
 				{
@@ -527,9 +523,9 @@ namespace vel
 
 	void Scene::draw(float alpha)
 	{
-		//std::cout << "---------------------------------------" << std::endl;
-		//std::cout << "NEW RENDER PASS" << std::endl;
-		//std::cout << "---------------------------------------" << std::endl;
+		//Log::toCli("----------------------------------------------------");
+		//Log::toCli("NEW RENDER PASS");
+		//Log::toCli("----------------------------------------------------");
 
 		auto gpu = App::get().getGPU(); // for convenience	
 		
@@ -595,34 +591,21 @@ namespace vel
 				if (r.getMesh() != gpu->getActiveMesh())
 					gpu->useMesh(r.getMesh());
 				if (r.getMaterial() != gpu->getActiveMaterial())
-					gpu->useMaterial(r.getMaterial());
-
-				
-
-
-				//std::cout << "Renderable: " << r.getName() << std::endl;
-				//std::cout << "Material: " << r.getMaterial()->name << std::endl;
-				//std::cout << "ActiveMaterial: " << gpu->getActiveMaterial()->name << std::endl;
-				//std::cout << "Albedo: " << r.getMaterial()->albedo->name << std::endl;
-				//std::cout << "Normal: " << r.getMaterial()->normal->name << std::endl;
-				//std::cout << "Metallic: " << r.getMaterial()->metallic->name << std::endl;
-				//std::cout << "Roughness: " << r.getMaterial()->roughness->name << std::endl;
-				//std::cout << "AO: " << r.getMaterial()->ao->name << std::endl;
-				//std::cout << "---------------------------------------" << std::endl;
+					gpu->useMaterial(r.getMaterial());			
 
 				for (auto& a : r.actors.getAll())
 					this->drawActor(a, alpha);
 			}
 
 
-			// Draw cubemap skybox 
+			// Draw cubemap skybox (must be done before transparents)
 			gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, s.getActiveHdr()->envCubemap);
 			gpu->resetActives();
 
 
 			// DRAW TRANSPARENTS
 
-			//TODO: not proud of this, but it get's the job done for the time being (can't use map since there's a chance keys could be the same,
+			// TODO: not proud of this, but it get's the job done for the time being (can't use map since there's a chance keys could be the same,
 			// not that using map would make this anymore acceptable for a performance crucial application)
             gpu->enableBlend();
 			this->sortedTransparentActors.clear();
@@ -651,14 +634,8 @@ namespace vel
 				if (r->getMaterial() != gpu->getActiveMaterial())
 					gpu->useMaterial(r->getMaterial());
 
-				//std::cout << r->getName() << std::endl;
-
 				this->drawActor(it->second, alpha);
 			}
-
-			
-			
-            
             
 		}
 
@@ -675,7 +652,8 @@ namespace vel
             gpu->setShaderMat4("view", this->cameraViewMatrix);
             gpu->setShaderMat4("model", a->getWorldRenderMatrix(alphaTime));
 
-			if (a->isAnimated())// If this actor is animated, send the bone transforms of it's armature to the shader
+			// If this actor is animated, send the bone transforms of it's armature to the shader
+			if (a->isAnimated())
 			{
 				auto mesh = a->getMesh();
 				auto armature = a->getArmature();
