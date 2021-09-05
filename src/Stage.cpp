@@ -20,7 +20,8 @@ namespace vel
 		collisionWorld(nullptr),
 		clearDepthBuffer(false),
 		name(name),
-        activeHdr(nullptr){}
+        activeHdr(nullptr),
+		drawHdr(true){}
 
 	Stage::~Stage()
 	{
@@ -41,6 +42,16 @@ namespace vel
     {
         return this->activeHdr;
     }
+
+	void Stage::setDrawHdr(bool b)
+	{
+		this->drawHdr = b;
+	}
+
+	bool Stage::getDrawHdr()
+	{
+		return this->drawHdr;
+	}
 
 	Armature* Stage::addArmature(Armature a, std::string defaultAnimation, std::vector<std::string> actorsIn)
 	{

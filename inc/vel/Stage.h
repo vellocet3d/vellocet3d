@@ -36,6 +36,7 @@ namespace vel
 		bool											clearDepthBuffer;
 		std::string										name;
         HDR*                                            activeHdr;
+		bool											drawHdr;
 
 
 	public:
@@ -67,6 +68,8 @@ namespace vel
 		
 		void 											setActiveHdr(HDR* h);
 		HDR* 											getActiveHdr();
+		void											setDrawHdr(bool b);
+		bool											getDrawHdr();
 
 		
 

@@ -51,7 +51,7 @@ namespace vel
 		void								loadMesh(std::string path);
 		void								loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
 		void                                loadHdr(std::string name, std::string path);
-        void								loadSceneConfig(std::string path);
+        void								loadStageConfig(std::string path);
 
 		void								addMaterial(Material m);
 		void								addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material);
