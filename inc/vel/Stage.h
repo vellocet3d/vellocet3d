@@ -38,6 +38,12 @@ namespace vel
         HDR*                                            activeHdr;
 		bool											drawHdr;
 
+		// Need this to apply correct IBL to first person stage that
+		// logically does not have a view matrix (fixed to screen). With this member
+		// we can obtain what the correct IBL would be if the objects in this stage where
+		// using the camera pointed to by IBLCamera.
+		Camera*											IBLCamera;
+
 
 	public:
 														Stage(std::string name);
@@ -70,6 +76,9 @@ namespace vel
 		HDR* 											getActiveHdr();
 		void											setDrawHdr(bool b);
 		bool											getDrawHdr();
+
+		void											setIBLCamera(Camera* c);
+		Camera*											getIBLCamera();
 
 		
 

@@ -557,6 +557,12 @@ namespace vel
 			this->cameraProjectionMatrix = s.getCamera()->getProjectionMatrix();
 			this->cameraViewMatrix = s.getCamera()->getViewMatrix();
 
+			this->IBLCameraPosition = s.getIBLCamera() == nullptr ? this->cameraPosition : s.getIBLCamera()->getPosition();
+			//this->IBLCameraPosition = this->cameraPosition;
+			this->IBLOffsetMatrix = s.getIBLCamera() == nullptr ? glm::mat4(1.0f) : glm::inverse(s.getIBLCamera()->getViewMatrix());
+			//this->IBLOffsetMatrix = s.getIBLCamera() == nullptr ? glm::mat4(1.0f) : s.getIBLCamera()->getViewMatrix();
+			//this->IBLOffsetMatrix = glm::mat4(1.0f);
+
 
 			// if debug drawer set, do debug draw
 			if (s.getCollisionWorld() != nullptr && s.getCollisionWorld()->getDebugDrawer() != nullptr)
@@ -661,7 +667,10 @@ namespace vel
 
 		if (a->isVisible())
 		{
-			gpu->setShaderVec3("camPos", this->cameraPosition);
+			//gpu->setShaderVec3("camPos", this->cameraPosition);
+			gpu->setShaderVec3("camPos", this->IBLCameraPosition);
+			gpu->setShaderMat4("iblOffset", this->IBLOffsetMatrix);
+
             gpu->setShaderMat4("projection", this->cameraProjectionMatrix);
             gpu->setShaderMat4("view", this->cameraViewMatrix);
             gpu->setShaderMat4("model", a->getWorldRenderMatrix(alphaTime));

@@ -41,6 +41,9 @@ namespace vel
 		glm::mat4							cameraProjectionMatrix;
 		glm::mat4							cameraViewMatrix;
 
+		glm::vec3							IBLCameraPosition;
+		glm::mat4							IBLOffsetMatrix;
+
 		std::string							name = "";
 
 	protected:

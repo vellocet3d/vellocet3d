@@ -21,7 +21,9 @@ namespace vel
 		clearDepthBuffer(false),
 		name(name),
         activeHdr(nullptr),
-		drawHdr(true){}
+		drawHdr(true),
+		IBLCamera(nullptr)
+	{}
 
 	Stage::~Stage()
 	{
@@ -32,7 +34,17 @@ namespace vel
 	{
 		return this->name;
 	}
-    
+
+	void Stage::setIBLCamera(Camera* c)
+	{
+		this->IBLCamera = c;
+	}
+
+	Camera* Stage::getIBLCamera()
+	{
+		return this->IBLCamera;
+	}
+
     void Stage::setActiveHdr(HDR* h)
     {
         this->activeHdr = h;
