@@ -89,8 +89,10 @@ namespace vel
         for (auto& h : j["hdrs"])
 			this->loadHdr(h["name"], h["path"]);
 
-		for (auto& m : j["meshes"])
-			this->loadMesh(m);
+		//for (auto& m : j["meshes"])
+		//	this->loadMesh(m);
+
+		this->loadMesh(j["meshes"]);
 
 		for (auto& t : j["textures"])
 		{

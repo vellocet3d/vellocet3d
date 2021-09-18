@@ -218,7 +218,15 @@ namespace vel
 
 	void AssetLoaderV2::processMesh(aiMesh* aiMesh)
 	{
-		auto mesh = Mesh(aiMesh->mName.C_Str());
+		// there is a bug within blender or the blender fbx exporter that seemingly randomly adds
+		// .001/.002/etc to the end of mesh names EVEN though from within the .blend file their
+		// names do not include the postfixes, therefore the below is a gross hack to account for
+		// this, just note that any mesh loaded with a `.something_else` in it's name will have that
+		// `.something_else` stripped
+		std::string cleanName = explode_string(aiMesh->mName.C_Str(), '.')[0];
+
+		//auto mesh = Mesh(aiMesh->mName.C_Str());
+		auto mesh = Mesh(cleanName);
 		
 		// if mesh already exists in AssetManager, do not load again
 		auto meshTracker = this->assetManager->getMeshTracker(mesh.getName());
