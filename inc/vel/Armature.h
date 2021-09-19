@@ -56,7 +56,7 @@ namespace vel
 		const std::string&									getName() const;
 		const std::vector<std::pair<std::string, Animation*>>&		getAnimations() const;
 		size_t												getBoneIndex(std::string boneName);
-		void												updateAnimation(double runTime, std::optional<glm::mat4> parentMatrix);
+		void												updateAnimation(double runTime);
 		Animation*											getAnimation(std::string animationName);
 		const std::vector<std::pair<std::string, Animation*>>&	getAnimations();
 

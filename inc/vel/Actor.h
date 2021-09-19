@@ -87,7 +87,6 @@ namespace vel
 		std::optional<Transform>&						getPreviousTransform();
 		void											updatePreviousTransform();
 		void											clearPreviousTransform();
-		std::optional<glm::mat4>						getParentMatrix();
 		glm::mat4										getWorldMatrix();
 		glm::mat4										getWorldRenderMatrix(float alpha); // contains logic for interpolation
 		glm::vec3										getInterpolatedTranslation(float alpha);

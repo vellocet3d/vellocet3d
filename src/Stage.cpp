@@ -180,7 +180,7 @@ namespace vel
 	{
 		for (auto& a : this->actors.getAll())
 			if (!a.isDeleted() && a.isAnimated())
-				a.getArmature()->updateAnimation(runTime, a.getParentMatrix());
+				a.getArmature()->updateAnimation(runTime);
 	}
 
 	void Stage::applyTransformations()

@@ -53,7 +53,7 @@ namespace vel
 
 	void Actor::removeChildActor(Actor* aIn, bool calledFromRemoveParentActor)
 	{
-		//TODO revise this to use a sac
+		//TODO revise this to use a sac?
 		for (size_t i = 0; i < this->childActors.size(); i++)
 		{
 			if (this->childActors.at(i) == aIn)
@@ -142,17 +142,6 @@ namespace vel
 		this->tempRenderable.reset();
 	}
 
-	std::optional<glm::mat4> Actor::getParentMatrix()
-	{
-		if (this->parentActor == nullptr)
-			return std::nullopt;
-
-		if (this->parentActorBone == nullptr)
-			return this->parentActor->getTransform().getMatrix();
-
-		return this->parentActor->getTransform().getMatrix() * this->parentActorBone->matrix;
-	}
-
 	glm::mat4 Actor::getWorldMatrix()
 	{
 		// if this actor has no parent, simply return the matrix of it's transform
@@ -161,14 +150,19 @@ namespace vel
 
 		// if this actor is parented to another actor (and not a bone of that actor)
 		if (this->parentActorBone == nullptr)
-			return this->parentActor->getTransform().getMatrix() * this->transform.getMatrix();
+			return this->parentActor->getWorldMatrix() * this->transform.getMatrix();
 
-		return this->parentActor->getTransform().getMatrix() * this->parentActorBone->matrix * this->transform.getMatrix();
+		// TODO: this might be broken now?
+		return this->parentActor->getWorldMatrix() * this->parentActorBone->matrix * this->transform.getMatrix();
 	}
 
 	glm::mat4 Actor::getWorldRenderMatrix(float alpha)
 	{
 		// actor is not dynamic (does not move) so interpolation is not required, simply return it's world matrix
+		// TODO: but what if at some point it is parented to a dynamic actor? Well, the easiest solution would just be
+		// to assume that only dynamic actors can ever be parented to other dynamic actors...which in a way makes sense
+		// as really any actor that is not dynamic would be objects such as non-interactive map geometry. Moving forward
+		// with this approach (at least for the time being)
 		if (!this->isDynamic() || !this->previousTransform)
 			return this->getWorldMatrix();
 
@@ -178,16 +172,13 @@ namespace vel
 		if (this->parentActor == nullptr)
 			return actorMatrix;
 
-		auto parentActorMatrix = Transform::interpolateTransforms(this->parentActor->getPreviousTransform().value(), this->parentActor->getTransform(), alpha);
-
 		// if this actor is parented to another actor (and not a bone of that actor)
 		if (this->parentActorBone == nullptr)
-			return parentActorMatrix * actorMatrix;
+			return this->parentActor->getWorldRenderMatrix(alpha) * actorMatrix;
 
+		// TODO: this might be broken now?
 		auto boneMatrix = this->parentActorBone->getRenderMatrix(alpha);
-
-		return parentActorMatrix * boneMatrix * actorMatrix;
-
+		return this->parentActor->getWorldRenderMatrix(alpha) * boneMatrix * actorMatrix;
 	}
 
 	glm::vec3 Actor::getInterpolatedTranslation(float alpha)

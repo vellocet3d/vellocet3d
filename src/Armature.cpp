@@ -134,7 +134,7 @@ namespace vel
 		//bone.rotation = glm::conjugate(bone.rotation);
 	}
 
-	void Armature::updateAnimation(double runTime, std::optional<glm::mat4> parentMatrix)
+	void Armature::updateAnimation(double runTime)
 	{
 		this->previousRunTime = this->runTime;
 		this->runTime = runTime;

@@ -539,8 +539,8 @@ namespace vel
 		//Log::toCli("NEW RENDER PASS");
 		//Log::toCli("----------------------------------------------------");
 
-		auto gpu = App::get().getGPU(); // for convenience	
-		
+		auto gpu = App::get().getGPU(); // for convenience
+
         gpu->disableBlend(); // disable blending for opaque objects for performance (was fine before, but this should be even better)
 
 		for (auto& s : this->stages.getAll())
@@ -560,10 +560,8 @@ namespace vel
 			this->cameraViewMatrix = s.getCamera()->getViewMatrix();
 
 			this->IBLCameraPosition = s.getIBLCamera() == nullptr ? this->cameraPosition : s.getIBLCamera()->getPosition();
-			//this->IBLCameraPosition = this->cameraPosition;
 			this->IBLOffsetMatrix = s.getIBLCamera() == nullptr ? glm::mat4(1.0f) : glm::inverse(s.getIBLCamera()->getViewMatrix());
-			//this->IBLOffsetMatrix = s.getIBLCamera() == nullptr ? glm::mat4(1.0f) : s.getIBLCamera()->getViewMatrix();
-			//this->IBLOffsetMatrix = glm::mat4(1.0f);
+
 
 
 			// if debug drawer set, do debug draw
@@ -578,7 +576,7 @@ namespace vel
 
 			// when we gpu load things, we're altering the state in order to load those elements,
 			// so we need to reset actives so that the gpu knows to reset state to what we're suppose to be drawing
-			gpu->resetActives(); 
+			//gpu->resetActives(); 
 			
 			auto& stageRenderables = s.getRenderables();
 			plf::colony<plf::colony<Renderable>::iterator> transparentRenderables;
@@ -593,24 +591,13 @@ namespace vel
 
 				// DRAW OPAQUES
 
-				// Only do state switches if we need to. We used to sort renderables when they were added,
-				// but after the massive refactor we removed this feature as everytime a renderable was added
-				// we had to sort on every renderable, which if you have 1000s of renderables would be a significant
-				// performance hit. So now gpu state switches are hit or miss. All actors that use a specific renderable
-				// do not require any state change, but when switching between renderables, if the next renderable in the
-				// queue uses a different mesh than the current renderable, the gpu state would be switched, then if the renderable
-				// after that used the mesh from the first renderable it would have to switch back again, instead of these renderables
-				// being sorted so that everything is hit in order minimizing state switches.
+				// Reset gpu state for this renderable
 				auto r = *it;
-				if (r.getShader() != gpu->getActiveShader())
-					gpu->useShader(r.getShader());
-				if (s.getActiveHdr() != gpu->getActiveHdr())
-					gpu->useHdr(s.getActiveHdr());
-				if (r.getMesh() != gpu->getActiveMesh())
-					gpu->useMesh(r.getMesh());
-				if (r.getMaterial() != gpu->getActiveMaterial())
-					gpu->useMaterial(r.getMaterial());			
-
+				gpu->useShader(r.getShader());
+				gpu->useHdr(s.getActiveHdr());
+				gpu->useMesh(r.getMesh());
+				gpu->useMaterial(r.getMaterial());
+					
 				for (auto& a : r.actors.getAll())
 					this->drawActor(a, alpha);
 			}
@@ -618,10 +605,8 @@ namespace vel
 
 			// Draw cubemap skybox (must be done before transparents)
 			if (s.getDrawHdr())
-			{
 				gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, s.getActiveHdr()->envCubemap);
-				gpu->resetActives();
-			}
+			
 			
 
 
@@ -646,15 +631,13 @@ namespace vel
 
 			for (std::vector<std::pair<float, Actor*>>::reverse_iterator it = sortedTransparentActors.rbegin(); it != sortedTransparentActors.rend(); ++it)
 			{
+				// Reset gpu state for this ACTOR and draw
 				auto r = it->second->getStageRenderable().value();
-				if (r->getShader() != gpu->getActiveShader())
-					gpu->useShader(r->getShader());
-                if (s.getActiveHdr() != gpu->getActiveHdr())
-					gpu->useHdr(s.getActiveHdr());
-				if (r->getMesh() != gpu->getActiveMesh())
-					gpu->useMesh(r->getMesh());
-				if (r->getMaterial() != gpu->getActiveMaterial())
-					gpu->useMaterial(r->getMaterial());
+
+				gpu->useShader(r->getShader());
+				gpu->useHdr(s.getActiveHdr());
+				gpu->useMesh(r->getMesh());
+				gpu->useMaterial(r->getMaterial());
 
 				this->drawActor(it->second, alpha);
 			}
