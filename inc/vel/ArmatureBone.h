@@ -8,8 +8,12 @@
 #include "glm/gtc/quaternion.hpp"
 
 
+
+
 namespace vel
 {
+	class Actor;
+
 	struct ArmatureBone
 	{
 		std::string		name;
@@ -31,5 +35,14 @@ namespace vel
 		glm::vec3		previousScale;
 
 		glm::mat4		getRenderMatrix(float alpha);
+		
+		// list of actors that are parented to this bone, useful
+		// if for example we have an armature that has objects parented to it,
+		// such as a character object with weapon actors parented at various
+		// locations, and then that that character object gets deleted, but the
+		// weapon objects still hold pointers to this bone, we need to know that
+		// we need to clear those ArmatureBone pointers on the weapon objects so they
+		// are no longer parented to the armature which no longer exists
+		std::vector<Actor*> childActors;
 	};
 }

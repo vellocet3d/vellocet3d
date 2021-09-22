@@ -13,7 +13,7 @@ namespace vel
 		dynamic(false),
 		transform(Transform()),
 		parentActor(nullptr),
-		parentActorBone(nullptr),
+		parentArmatureBone(nullptr),
 		rigidBody(nullptr),
 		armature(nullptr),
 		mesh(nullptr),
@@ -53,7 +53,6 @@ namespace vel
 
 	void Actor::removeChildActor(Actor* aIn, bool calledFromRemoveParentActor)
 	{
-		//TODO revise this to use a sac?
 		for (size_t i = 0; i < this->childActors.size(); i++)
 		{
 			if (this->childActors.at(i) == aIn)
@@ -61,7 +60,7 @@ namespace vel
 				if (!calledFromRemoveParentActor)
 					aIn->removeParentActor(true);
 
-				this->childActors.erase(this->childActors.begin() + i); //TODO this will shift memory, possibly revise in future
+				this->childActors.erase(this->childActors.begin() + i);
 			}
 		}
 	}
@@ -101,7 +100,7 @@ namespace vel
 
 		// Clear parents and children
 		newActor.parentActor = nullptr;
-		newActor.parentActorBone = nullptr;
+		newActor.parentArmatureBone = nullptr;
 		newActor.childActors.clear();
 
 		// Clear rigidbody pointer, ghost pointer, and transform flag
@@ -145,15 +144,15 @@ namespace vel
 	glm::mat4 Actor::getWorldMatrix()
 	{
 		// if this actor has no parent, simply return the matrix of it's transform
-		if (this->parentActor == nullptr)
+		if (this->parentActor == nullptr && this->parentArmatureBone == nullptr)
 			return this->transform.getMatrix();
 
-		// if this actor is parented to another actor (and not a bone of that actor)
-		if (this->parentActorBone == nullptr)
+		// if this actor is parented to another actor (parenting to actor will override bone parenting)
+		if (this->parentArmatureBone == nullptr)
 			return this->parentActor->getWorldMatrix() * this->transform.getMatrix();
 
-		// TODO: this might be broken now?
-		return this->parentActor->getWorldMatrix() * this->parentActorBone->matrix * this->transform.getMatrix();
+		//return this->parentActor->getWorldMatrix() * this->parentArmatureBone->matrix * this->transform.getMatrix();
+		return this->parentArmatureBone->matrix * this->transform.getMatrix();
 	}
 
 	glm::mat4 Actor::getWorldRenderMatrix(float alpha)
@@ -169,16 +168,17 @@ namespace vel
 		auto actorMatrix = Transform::interpolateTransforms(this->previousTransform.value(), this->transform, alpha);
 
 		// if this actor has no parent, simply return the matrix of it's transform
-		if (this->parentActor == nullptr)
+		if (this->parentActor == nullptr && this->parentArmatureBone == nullptr)
 			return actorMatrix;
 
-		// if this actor is parented to another actor (and not a bone of that actor)
-		if (this->parentActorBone == nullptr)
+		// if this actor is parented to another actor (parenting to actor will override bone parenting)
+		if (this->parentArmatureBone == nullptr)
 			return this->parentActor->getWorldRenderMatrix(alpha) * actorMatrix;
 
-		// TODO: this might be broken now?
-		auto boneMatrix = this->parentActorBone->getRenderMatrix(alpha);
-		return this->parentActor->getWorldRenderMatrix(alpha) * boneMatrix * actorMatrix;
+		//auto boneMatrix = this->parentArmatureBone->getRenderMatrix(alpha);
+		//return this->parentActor->getWorldRenderMatrix(alpha) * boneMatrix * actorMatrix;
+		
+		return this->parentArmatureBone->getRenderMatrix(alpha) * actorMatrix;
 	}
 
 	glm::vec3 Actor::getInterpolatedTranslation(float alpha)
@@ -218,13 +218,40 @@ namespace vel
 
 	void Actor::setParentActor(Actor* a)
 	{
-		this->parentActor = a;
-		a->addChildActor(this);
+		// set the parent relationship
+		if(a != nullptr)
+		{
+			this->parentActor = a;
+			a->addChildActor(this);
+		}
+		// remove the parent relationship
+		else
+		{
+			this->removeParentActor();
+		}		
 	}
 
-	void Actor::setParentActorBone(ArmatureBone* b)
+	void Actor::setParentArmatureBone(ArmatureBone* b)
 	{
-		this->parentActorBone = b;
+		// set the parent relationship
+		if(b != nullptr)
+		{
+			this->parentArmatureBone = b;
+			b->childActors.push_back(this);
+		}
+		// remove the parent relationship
+		else
+		{
+			size_t i = 0;
+			for(auto& a : this->parentArmatureBone->childActors)
+			{
+				if(a == this)
+					this->parentArmatureBone->childActors.erase(this->parentArmatureBone->childActors.begin() + i);
+				
+				i++;
+			}
+			this->parentArmatureBone = nullptr;
+		}
 	}
 
 	void Actor::addChildActor(Actor* a)

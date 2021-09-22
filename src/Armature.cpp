@@ -17,8 +17,14 @@ namespace vel
 	Armature::Armature(std::string name) :
 		name(name),
 		runTime(0.0),
-		previousRunTime(0.0)
+		previousRunTime(0.0),
+		transform(Transform())
 	{}
+
+	Transform& Armature::getTransform()
+	{
+		return this->transform;
+	}
 
 	const std::vector<std::pair<std::string, Animation*>>&	Armature::getAnimations()
 	{
@@ -94,7 +100,7 @@ namespace vel
 				// no need to lerp last element
 				if (i + 1 < activeAnimationsTRS.size())
 				{
-					// if this is the first element, prime lerpTRS using by lerping with first element
+					// if this is the first element, prime lerpTRS by lerping with first element
 					if (i == 0)
 					{
 						lerpTRS.translation = glm::lerp(activeAnimationsTRS[i].translation, activeAnimationsTRS[i + 1].translation, this->activeAnimations[i + 1].blendPercentage);
@@ -194,9 +200,14 @@ namespace vel
 				for (size_t i = 0; i < this->bones.size(); i++)
 				{
 					if (i == 0)
-						this->updateBone(0, glm::mat4(1.0f));
+					{
+						//this->updateBone(0, glm::mat4(1.0f));
+						this->updateBone(0, this->transform.getMatrix());
+					}
 					else
+					{
 						this->updateBone(i, this->bones[this->bones[i].parent].matrix);
+					}
 				}
 
 				activeAnimation.animationTime += stepTime;

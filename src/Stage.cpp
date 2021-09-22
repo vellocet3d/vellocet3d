@@ -35,6 +35,11 @@ namespace vel
 		return this->name;
 	}
 
+	Armature* Stage::getArmature(std::string armatureName)
+	{
+		return this->armatures.get(armatureName);
+	}
+
 	void Stage::setIBLCamera(Camera* c)
 	{
 		this->IBLCamera = c;
@@ -120,25 +125,6 @@ namespace vel
 	plf::colony<Actor>& Stage::getActors()
 	{
 		return this->actors.getAll();
-	}
-
-	void Stage::parentActorToActorBone(std::string childName, std::string parentName, std::string parentBoneName)
-	{
-		auto childActor = this->actors.get(childName);
-		auto parentActor = this->actors.get(parentName);
-
-		childActor->setParentActor(parentActor);
-		childActor->setParentActorBone(parentActor->getArmature()->getBone(parentBoneName));
-		parentActor->addChildActor(childActor);
-	}
-
-	void Stage::parentActorToActor(std::string childName, std::string parentName)
-	{
-		auto childActor = this->actors.get(childName);
-		auto parentActor = this->actors.get(parentName);
-
-		childActor->setParentActor(parentActor);
-		parentActor->addChildActor(childActor);
 	}
 
 	const bool Stage::isVisible()
@@ -248,28 +234,6 @@ namespace vel
 		// mark actor as deleted (since it's value will persist in memory) and "remove" from sac
 		a->setDeleted(true);
 		this->actors.erase(a->getName());
-	}
-
-	void Stage::printRenderables() const
-	{
-		//std::cout << "Renderables\n";
-		//std::cout << "----------------------------------\n";
-		//for (auto& rc : this->renderables)
-		//{
-		//	std::cout << "shaderIndex:" << rc.getShaderIndex() << " meshIndex:" << rc.getMeshIndex() << " materialIndex:" << rc.getMaterialIndex() << "\n";
-		//	std::cout << "actors:";
-
-		//	for (auto& a : rc.getActorIndexes())
-		//		if (a != -1)
-		//			std::cout << this->actors.at(a).getName() << ",";
-
-		//	std::cout << "\norder:";
-
-		//	for (auto& o : this->renderablesOrder)
-		//		std::cout << o << ",";
-
-		//	std::cout << "\n------------------------------\n";
-		//}
 	}
 
 	plf::colony<Renderable>& Stage::getRenderables()

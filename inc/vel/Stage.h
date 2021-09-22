@@ -53,7 +53,6 @@ namespace vel
 		void											removeActor(std::string name);
 		Actor*											getActor(std::string name);
 		plf::colony<Actor>&								getActors();
-		void											printRenderables() const;
 		plf::colony<Renderable>& 						getRenderables();
 		std::optional<Camera>&							getCamera();
 		void											show();
@@ -61,8 +60,6 @@ namespace vel
 		void											addPerspectiveCamera(float nearPlane, float farPlane, float fov);
 		void											addOrthographicCamera(float nearPlane, float farPlane, float scale);
 		const bool										isVisible();
-		void											parentActorToActor(std::string childName, std::string parentName);
-		void											parentActorToActorBone(std::string childName, std::string parentName, std::string parentBoneName);
 		void											setClearDepthBuffer(bool b);
 		bool											getClearDepthBuffer();
 		void											applyTransformations();
@@ -79,6 +76,8 @@ namespace vel
 
 		void											setIBLCamera(Camera* c);
 		Camera*											getIBLCamera();
+		
+		Armature*										getArmature(std::string armatureName);
 
 		
 

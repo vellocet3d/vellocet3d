@@ -42,6 +42,8 @@ namespace vel
 		glm::vec3											calcTranslation(const float& time, size_t currentKeyIndex, Channel* channel);
 		glm::quat											calcRotation(const float& time, size_t currentKeyIndex, Channel* channel);
 		glm::vec3											calcScale(const float& time, size_t currentKeyIndex, Channel* channel);
+		
+		Transform											transform;
 
 
 	public:
@@ -66,6 +68,7 @@ namespace vel
 
 		void												playAnimation(std::string animationName, bool repeat = true, int blendTime = 0);
 
+		Transform&											getTransform();
 
 	};
 }

@@ -370,7 +370,10 @@ namespace vel
 					//// step physics simulation
 					//this->scene->stepPhysics((float)this->fixedLogicTime);
 
-					// applyTransforms() ? incorporating current savePreviousTransforms() logic
+					// TODO: at some point we will probably want to break dynamic actors out into
+					// their own container so we're not looping over and checking static actors,
+					// which there could be many of and would never need to have their transforms
+					// updated
 					this->activeScene->applyTransformations();
 
 					// execute all contact triggers

@@ -30,7 +30,7 @@ namespace vel
 		Transform										transform;
 		std::optional<Transform>						previousTransform;
 		Actor*											parentActor;
-		ArmatureBone*									parentActorBone;
+		ArmatureBone*									parentArmatureBone;
 		std::vector<Actor*>								childActors;
 		Armature*										armature;
 		std::vector<std::pair<size_t, std::string>>		activeBones; // the bones from the armature that are actually used by the mesh, 
@@ -81,7 +81,7 @@ namespace vel
 		const std::vector<std::pair<size_t, std::string>>& getActiveBones() const;
 		void											setActiveBones(std::vector<std::pair<size_t, std::string>> activeBones);
 		void											setParentActor(Actor* a);
-		void											setParentActorBone(ArmatureBone* b);
+		void											setParentArmatureBone(ArmatureBone* b);
 		void											addChildActor(Actor* a);
 		Transform&										getTransform();
 		std::optional<Transform>&						getPreviousTransform();

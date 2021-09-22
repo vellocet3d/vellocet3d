@@ -369,7 +369,58 @@ namespace vel
 			for (auto& actName : a["actors"])
 				actorNames.push_back(actName);
 
-			stage->addArmature(this->getArmature(a["base"]), a["defaultAnimation"], actorNames);
+			auto arm = stage->addArmature(this->getArmature(a["base"]), a["defaultAnimation"], actorNames);
+			
+			if (!a["transform"].is_null())
+			{
+				auto trans = a["transform"]["translation"];
+				auto rot = a["transform"]["rotation"];
+				auto scale = a["transform"]["scale"];
+
+				if (!trans.is_null())
+				{
+					arm->getTransform().setTranslation(glm::vec3(
+						(float)trans[0],
+						(float)trans[1],
+						(float)trans[2]
+					));
+				}
+
+				if (!rot.is_null())
+				{
+					if (rot["type"] == "euler")
+					{
+						arm->getTransform().setRotation((float)rot["val"]["angle"], glm::vec3(
+							(float)rot["val"]["axis"][0],
+							(float)rot["val"]["axis"][1],
+							(float)rot["val"]["axis"][2]
+						));
+					}
+					else if (rot["type"] == "quaternion")
+					{
+						arm->getTransform().setRotation(glm::quat(
+							(float)rot["val"][3],
+							(float)rot["val"][0],
+							(float)rot["val"][1],
+							(float)rot["val"][2]
+						));
+					}
+#ifdef DEBUG_LOG
+	else
+		Log::crash("Scene::loadSceneConfig(): config contains an armature transform rotation type other than 'euler' or 'quaternion'");
+#endif
+
+				}
+
+				if (!scale.is_null())
+				{
+					arm->getTransform().setScale(glm::vec3(
+						(float)scale[0],
+						(float)scale[1],
+						(float)scale[2]
+					));
+				}
+			}
 		}
 
 		for (auto& p : j["parenting"])
