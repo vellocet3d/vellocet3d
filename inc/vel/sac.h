@@ -65,8 +65,18 @@ void sac<T>::erase(std::string name)
 		exit(EXIT_FAILURE);
 	}
 
-	this->slots.erase(this->slots.get_iterator(this->tracker[name]));
-	this->tracker.erase(name);
+	// this->slots.erase(this->slots.get_iterator(this->tracker[name]));
+	// this->tracker.erase(name);
+	
+	auto slotPtr = this->tracker[name];
+	
+	std::ostringstream address;
+	address << (void const *)slotPtr;
+	std::string ptrAsString = address.str();
+	
+	this->tracker.erase(this->ptracker[ptrAsString]);
+	this->ptracker.erase(ptrAsString);
+	this->slots.erase(this->slots.get_iterator(slotPtr));
 }
 
 template <typename T>

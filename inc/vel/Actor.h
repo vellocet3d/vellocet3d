@@ -53,7 +53,6 @@ namespace vel
 
 
 	public:
-		//Actor(std::string name, Transform t, Stage* parentStage);
 		Actor(std::string name);
 		Actor											cleanCopy(std::string newName);
 		void											setDynamic(bool dynamic);
@@ -65,7 +64,7 @@ namespace vel
 		std::optional<Renderable>&						getTempRenderable();
 		void											clearTempRenderable();
 		void											setStageRenderable(Renderable* r);
-		std::optional<Renderable*>						getStageRenderable();
+		std::optional<Renderable*>						getStageRenderable(); //TODO: tf is this an optional pointer for???
 
 
 

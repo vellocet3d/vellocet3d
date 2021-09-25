@@ -39,6 +39,10 @@ namespace vel
 	{
 		this->updatePreviousTransform();
 
+		// TODO: this can be avoided by deriving our own motionstate class from btMotionState, 
+		// but will need to put thought into how that will affect our current interpolation process
+		// for framerate independent logic
+		// https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=1205
 		if (this->autoTransform && this->rigidBody != nullptr)
 		{
 			this->transform.setTranslation(bulletToGlmVec3(this->rigidBody->getWorldTransform().getOrigin()));
@@ -93,20 +97,21 @@ namespace vel
 
 	Actor Actor::cleanCopy(std::string newName)
 	{
-		// TODO: revise this to account for all changes that have happened in MassiveRefactor
+		// TODO: this might need some more work
 
 		auto newActor = *this;
 		newActor.setName(newName);
 
 		// Clear parents and children
-		newActor.parentActor = nullptr;
-		newActor.parentArmatureBone = nullptr;
-		newActor.childActors.clear();
+		newActor.setParentActor(nullptr);
+		newActor.setParentArmatureBone(nullptr);
 
 		// Clear rigidbody pointer, ghost pointer, and transform flag
 		newActor.setRigidBody(nullptr);
 		newActor.setGhostObject(nullptr);
 		newActor.setAutoTransform(true);
+		newActor.setArmature(nullptr);
+		newActor.clearContactSensors();
 
 		// TODO: In the future we may need to implement methods for:
 		// > automatically duplicating an entire actor hierarchy including all of it's children
@@ -240,7 +245,7 @@ namespace vel
 			b->childActors.push_back(this);
 		}
 		// remove the parent relationship
-		else
+		else if(this->parentArmatureBone != nullptr)
 		{
 			size_t i = 0;
 			for(auto& a : this->parentArmatureBone->childActors)

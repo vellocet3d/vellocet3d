@@ -43,6 +43,8 @@ namespace vel
 		// we can obtain what the correct IBL would be if the objects in this stage where
 		// using the camera pointed to by IBLCamera.
 		Camera*											IBLCamera;
+		
+		void											_removeActor(Actor* a);
 
 
 	public:
@@ -51,6 +53,7 @@ namespace vel
 		void											updateActorAnimations(double runTime);
 		Actor*											addActor(Actor a);
 		void											removeActor(std::string name);
+		void											removeActor(Actor* a);
 		Actor*											getActor(std::string name);
 		plf::colony<Actor>&								getActors();
 		plf::colony<Renderable>& 						getRenderables();

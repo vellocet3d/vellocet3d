@@ -193,6 +193,13 @@ namespace vel
 			
 			actorStageRenderable->actors.insert(actor->getName(), actor);
 		}
+		// if adding an actor that does not have a tempRenderable pointer, BUT DOES have a 
+		// stageRenderable value, then we assume that this actor was derived from an existing
+		// actor, and we simply need to add it to that existing stageRenderable.
+		else if(!actor->getTempRenderable().has_value() && actor->getStageRenderable().has_value())
+		{
+			actor->getStageRenderable().value()->actors.insert(actor->getName(), actor);
+		}
 
 		return actor;
 	}
@@ -202,10 +209,8 @@ namespace vel
 		return this->actors.get(name);
 	}
 
-	void Stage::removeActor(std::string name)
+	void Stage::_removeActor(Actor* a)
 	{
-		Actor* a = this->actors.get(name);		
-
 		// free actor slot in renderable
 		if(a->getStageRenderable())
 			a->getStageRenderable().value()->actors.erase(a->getName());
@@ -234,6 +239,16 @@ namespace vel
 		// mark actor as deleted (since it's value will persist in memory) and "remove" from sac
 		a->setDeleted(true);
 		this->actors.erase(a->getName());
+	}
+
+	void Stage::removeActor(Actor* a)
+	{
+		this->_removeActor(a);
+	}
+
+	void Stage::removeActor(std::string name)
+	{
+		this->_removeActor(this->actors.get(name));
 	}
 
 	plf::colony<Renderable>& Stage::getRenderables()
