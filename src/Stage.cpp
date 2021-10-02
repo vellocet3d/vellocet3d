@@ -122,7 +122,7 @@ namespace vel
 		this->collisionWorld = new CollisionWorld(gravity); 
 	}
 
-	plf::colony<Actor>& Stage::getActors()
+	std::vector<Actor*>& Stage::getActors()
 	{
 		return this->actors.getAll();
 	}
@@ -164,31 +164,34 @@ namespace vel
 
 	void Stage::updateActorAnimations(double runTime)
 	{
-		for (auto& a : this->actors.getAll())
-			if (!a.isDeleted() && a.isAnimated())
-				a.getArmature()->updateAnimation(runTime);
+		// TODO: This needs to update Armatures regardless of actors since if
+		// 30 actors use the same armature, this will update the armature 30 times
+		for (auto a : this->actors.getAll())
+			if (!a->isDeleted() && a->isAnimated())
+				a->getArmature()->updateAnimation(runTime);
 	}
 
 	void Stage::applyTransformations()
 	{
-		for (auto& a : this->actors.getAll())
-			a.processTransform();
+		for (auto a : this->actors.getAll())
+			a->processTransform();
 	}
 
 	Actor* Stage::addActor(Actor a)
 	{
 		auto actor = this->actors.insert(a.getName(), a);
-
+		
 		if (actor->getTempRenderable())
 		{
 			auto& tempRenderable = actor->getTempRenderable().value();
 
-			if(!this->renderables.exists(tempRenderable.getName()))
+			if (!this->renderables.exists(tempRenderable.getName()))
 				this->renderables.insert(tempRenderable.getName(), tempRenderable);
-
+				
 			auto actorStageRenderable = this->renderables.get(tempRenderable.getName());
 
 			actor->setStageRenderable(actorStageRenderable);
+			
 			actor->clearTempRenderable();
 			
 			actorStageRenderable->actors.insert(actor->getName(), actor);
@@ -216,7 +219,7 @@ namespace vel
 			a->getStageRenderable().value()->actors.erase(a->getName());
 
 		// remove all sensors associated with this actor
-		for(auto& s : a->getContactSensors())
+		for(auto s : a->getContactSensors())
 			this->collisionWorld->removeSensor(s);
 		
 		a->clearContactSensors();
@@ -251,7 +254,7 @@ namespace vel
 		this->_removeActor(this->actors.get(name));
 	}
 
-	plf::colony<Renderable>& Stage::getRenderables()
+	std::vector<Renderable*>& Stage::getRenderables()
 	{
 		return this->renderables.getAll();
 	}

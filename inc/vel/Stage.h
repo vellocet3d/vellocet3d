@@ -55,8 +55,8 @@ namespace vel
 		void											removeActor(std::string name);
 		void											removeActor(Actor* a);
 		Actor*											getActor(std::string name);
-		plf::colony<Actor>&								getActors();
-		plf::colony<Renderable>& 						getRenderables();
+		std::vector<Actor*>&							getActors();
+		std::vector<Renderable*>& 						getRenderables();
 		std::optional<Camera>&							getCamera();
 		void											show();
 		void											hide();

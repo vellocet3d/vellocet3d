@@ -555,7 +555,7 @@ namespace vel
 	{
 		this->animationTime += delta;
 		for (auto& s : this->stages.getAll())
-			s.updateActorAnimations(this->animationTime);
+			s->updateActorAnimations(this->animationTime);
 	}
 	
 	std::string Scene::getName()
@@ -566,7 +566,7 @@ namespace vel
 	void Scene::stepPhysics(float delta)
 	{
 		for (auto& s : this->stages.getAll())
-			s.stepPhysics(delta);
+			s->stepPhysics(delta);
 	}
 
 	void Scene::postPhysics(float delta) {}
@@ -574,14 +574,14 @@ namespace vel
 	void Scene::applyTransformations()
 	{
 		for (auto& s : this->stages.getAll())
-			s.applyTransformations();
+			s->applyTransformations();
 	}
 
 	void Scene::processSensors()
 	{
 		for (auto& s : this->stages.getAll())
-			if (s.getCollisionWorld())
-				s.getCollisionWorld()->processSensors();
+			if (s->getCollisionWorld())
+				s->getCollisionWorld()->processSensors();
 	}
 
 	void Scene::draw(float alpha)
@@ -594,34 +594,34 @@ namespace vel
 
         gpu->disableBlend(); // disable blending for opaque objects for performance (was fine before, but this should be even better)
 
-		for (auto& s : this->stages.getAll())
+		for (auto s : this->stages.getAll())
 		{
-			if (!s.isVisible())
+			if (!s->isVisible())
 				continue;
 
 			// clear depth buffer if flag set in stage
-			if (s.getClearDepthBuffer())
+			if (s->getClearDepthBuffer())
 				gpu->clearDepthBuffer();
 
 
 			// should always have a camera if we've made it this far
-			s.getCamera()->update();
-			this->cameraPosition = s.getCamera()->getPosition();
-			this->cameraProjectionMatrix = s.getCamera()->getProjectionMatrix();
-			this->cameraViewMatrix = s.getCamera()->getViewMatrix();
+			s->getCamera()->update();
+			this->cameraPosition = s->getCamera()->getPosition();
+			this->cameraProjectionMatrix = s->getCamera()->getProjectionMatrix();
+			this->cameraViewMatrix = s->getCamera()->getViewMatrix();
 
-			this->IBLCameraPosition = s.getIBLCamera() == nullptr ? this->cameraPosition : s.getIBLCamera()->getPosition();
-			this->IBLOffsetMatrix = s.getIBLCamera() == nullptr ? glm::mat4(1.0f) : glm::inverse(s.getIBLCamera()->getViewMatrix());
+			this->IBLCameraPosition = s->getIBLCamera() == nullptr ? this->cameraPosition : s->getIBLCamera()->getPosition();
+			this->IBLOffsetMatrix = s->getIBLCamera() == nullptr ? glm::mat4(1.0f) : glm::inverse(s->getIBLCamera()->getViewMatrix());
 
 
 
 			// if debug drawer set, do debug draw
-			if (s.getCollisionWorld() != nullptr && s.getCollisionWorld()->getDebugDrawer() != nullptr)
+			if (s->getCollisionWorld() != nullptr && s->getCollisionWorld()->getDebugDrawer() != nullptr)
 			{
-				s.getCollisionWorld()->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
-				gpu->useShader(s.getCollisionWorld()->getDebugDrawer()->getShaderProgram());
-				gpu->setShaderMat4("vp", s.getCamera()->getProjectionMatrix() * s.getCamera()->getViewMatrix());
-				gpu->debugDrawCollisionWorld(s.getCollisionWorld()->getDebugDrawer()); // draw all loaded vertices with a single call and clear
+				s->getCollisionWorld()->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
+				gpu->useShader(s->getCollisionWorld()->getDebugDrawer()->getShaderProgram());
+				gpu->setShaderMat4("vp", s->getCamera()->getProjectionMatrix() * s->getCamera()->getViewMatrix());
+				gpu->debugDrawCollisionWorld(s->getCollisionWorld()->getDebugDrawer()); // draw all loaded vertices with a single call and clear
 			}
 
 
@@ -629,34 +629,34 @@ namespace vel
 			// so we need to reset actives so that the gpu knows to reset state to what we're suppose to be drawing
 			//gpu->resetActives(); 
 			
-			auto& stageRenderables = s.getRenderables();
-			plf::colony<plf::colony<Renderable>::iterator> transparentRenderables;
+			//auto& stageRenderables = s->getRenderables();
+			std::vector<Renderable*> transparentRenderables;
 			
-			for (plf::colony<Renderable>::iterator it = stageRenderables.begin(); it != stageRenderables.end(); ++it)
+			//for (plf::colony<Renderable>::iterator it = stageRenderables.begin(); it != stageRenderables.end(); ++it)
+			for(auto r : s->getRenderables())
 			{
-				if (it->getMaterialHasAlpha())
+				if (r->getMaterialHasAlpha())
 				{
-					transparentRenderables.insert(it);
+					transparentRenderables.push_back(r); //TODO this reallocates every insert
 					continue;
 				}
 
 				// DRAW OPAQUES
 
 				// Reset gpu state for this renderable
-				auto r = *it;
-				gpu->useShader(r.getShader());
-				gpu->useHdr(s.getActiveHdr());
-				gpu->useMesh(r.getMesh());
-				gpu->useMaterial(r.getMaterial());
+				gpu->useShader(r->getShader());
+				gpu->useHdr(s->getActiveHdr());
+				gpu->useMesh(r->getMesh());
+				gpu->useMaterial(r->getMaterial());
 					
-				for (auto& a : r.actors.getAll())
+				for (auto a : r->actors.getAll())
 					this->drawActor(a, alpha);
 			}
 
 
 			// Draw cubemap skybox (must be done before transparents)
-			if (s.getDrawHdr())
-				gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, s.getActiveHdr()->envCubemap);
+			if (s->getDrawHdr())
+				gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, s->getActiveHdr()->envCubemap);
 			
 			
 
@@ -686,7 +686,7 @@ namespace vel
 				auto r = it->second->getStageRenderable().value();
 
 				gpu->useShader(r->getShader());
-				gpu->useHdr(s.getActiveHdr());
+				gpu->useHdr(s->getActiveHdr());
 				gpu->useMesh(r->getMesh());
 				gpu->useMaterial(r->getMaterial());
 

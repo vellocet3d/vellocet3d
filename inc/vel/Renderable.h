@@ -7,7 +7,7 @@
 #include "vel/Mesh.h"
 #include "vel/Material.h"
 
-#include "vel/sac.h"
+#include "vel/ptrsac.h"
 
 namespace vel
 {
@@ -30,7 +30,7 @@ namespace vel
 		Material*					getMaterial();
 		Mesh*						getMesh();
 
-		sac<Actor*>					actors;
+		ptrsac<Actor*>				actors;
 
     };
 }
