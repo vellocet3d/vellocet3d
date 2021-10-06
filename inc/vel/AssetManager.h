@@ -1,10 +1,12 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
-#include "plf_colony/plf_colony.h"
-#include "robin_hood/robin_hood.h"
+//#include "plf_colony/plf_colony.h"
+//#include "robin_hood/robin_hood.h"
 
+#include "sac.h"
 
 #include "vel/Shader.h"
 #include "vel/Mesh.h"
@@ -24,41 +26,34 @@ namespace vel
 	class AssetManager
 	{
 	private:
-		GPU*							gpu;
+		GPU*												gpu;
 
-		plf::colony<Shader>				shaders;
-		plf::colony<ShaderTracker>		shaderTrackers;
-		std::deque<ShaderTracker*>		shadersThatNeedGpuLoad;
-		robin_hood::unordered_node_map<std::string, ShaderTracker*> shaderTrackerMap;
+		sac<Shader>											shaders;
+		sac<ShaderTracker>									shaderTrackers;
+		std::deque<ShaderTracker*>							shadersThatNeedGpuLoad;
 		
-		plf::colony<Mesh>				meshes;
-		plf::colony<MeshTracker>		meshTrackers;
-		std::deque<MeshTracker*>		meshesThatNeedGpuLoad;
-		robin_hood::unordered_node_map<std::string, MeshTracker*> meshTrackerMap;
-		
-		plf::colony<Texture>			textures;
-		plf::colony<TextureTracker> 	textureTrackers;
-		std::deque<TextureTracker*>		texturesThatNeedGpuLoad;
-		robin_hood::unordered_node_map<std::string, TextureTracker*> textureTrackerMap;
-        
-        plf::colony<HDR>			    hdrs;
-		plf::colony<HDRTracker> 	    hdrTrackers;
-		std::deque<HDRTracker*>		    hdrsThatNeedGpuLoad;
-		robin_hood::unordered_node_map<std::string, HDRTracker*> hdrTrackerMap;
-		
-		plf::colony<Material>			materials;
-		plf::colony<MaterialTracker> 	materialTrackers;
-		robin_hood::unordered_node_map<std::string, MaterialTracker*> materialTrackerMap;
-		
-		plf::colony<Renderable>			renderables;
-		plf::colony<RenderableTracker> 	renderableTrackers;
-		robin_hood::unordered_node_map<std::string, RenderableTracker*> renderableTrackerMap;
-		
-		plf::colony<Armature>			armatures;
-		plf::colony<ArmatureTracker>	armatureTrackers;
-		robin_hood::unordered_node_map<std::string, ArmatureTracker*> armatureTrackerMap;
-		
-		plf::colony<Animation>			animations;
+		sac<Mesh>											meshes;
+		sac<MeshTracker>									meshTrackers;
+		std::deque<MeshTracker*>							meshesThatNeedGpuLoad;
+
+		sac<Texture>										textures;
+		sac<TextureTracker> 								textureTrackers;
+		std::deque<TextureTracker*>							texturesThatNeedGpuLoad;
+
+        sac<HDR>											hdrs;
+		sac<HDRTracker> 									hdrTrackers;
+		std::deque<HDRTracker*>								hdrsThatNeedGpuLoad;
+
+		sac<Material>										materials;
+		sac<MaterialTracker> 								materialTrackers;
+
+		sac<Renderable>										renderables;
+		sac<RenderableTracker> 								renderableTrackers;
+
+		sac<Armature>										armatures;
+		sac<ArmatureTracker>								armatureTrackers;
+
+		sac<Animation>										animations;
 		// since animations are tracked within an Armature, and they are only associated with a single armatureTracker
 		// we shouldn't need to track them, just account for them when adding/removing an armature
 

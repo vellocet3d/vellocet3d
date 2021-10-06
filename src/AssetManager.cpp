@@ -96,7 +96,7 @@ namespace vel
 	--------------------------------------------------*/
 	std::string AssetManager::loadShader(std::string name, std::string vertFile, std::string fragFile)
 	{
-		if (this->shaderTrackerMap.contains(name)) 
+		if (this->shaderTrackers.exists(name))
 		{
 #ifdef DEBUG_LOG
 	Log::toCliAndFile("Existing Shader, bypass reload: " + name);
@@ -106,9 +106,9 @@ namespace vel
 			// so we will need to re-create it. This could still potentially be a race condition, although
 			// I would think it would be unlikely, putting a TODO here until we thoroughly test some 
 			// real world use cases to verify
-			if(this->shaderTrackerMap[name]->usageCount > 0)
+			if(this->shaderTrackers.get(name)->usageCount > 0)
 			{
-				this->shaderTrackerMap[name]->usageCount++;
+				this->shaderTrackers.get(name)->usageCount++;
 				return name;
 			}
 			// if name exists in map, AND usage count IS EQUAL TO 0, then we must have called this method
@@ -130,18 +130,13 @@ namespace vel
 		s.vertFile = vertFile;
 		s.fragFile = fragFile;
 
-		auto it = this->shaders.insert(s);
+		auto shaderPtr = this->shaders.insert(name, s);
 		
 		ShaderTracker t;
-		t.ptr = &(*it);
+		t.ptr = shaderPtr;
 		t.usageCount++;
-		
-		auto it2 = this->shaderTrackers.insert(t);
-		auto tmpTracker = &(*it2);
-
-		this->shadersThatNeedGpuLoad.push_back(tmpTracker);
-
-		this->shaderTrackerMap[name] = tmpTracker;
+	
+		this->shadersThatNeedGpuLoad.push_back(this->shaderTrackers.insert(name, t));
 
 		return name;
 	}
@@ -149,31 +144,31 @@ namespace vel
 	Shader* AssetManager::getShader(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->shaderTrackerMap.contains(name))
+if (!this->shaderTrackers.exists(name))
     Log::crash("AssetManager::getShader(): Attempting to get shader that does not exist: " + name);
 #endif
 
-		return this->shaderTrackerMap[name]->ptr;
+		return this->shaderTrackers.get(name)->ptr;
 	}
 
 	bool AssetManager::shaderIsGpuLoaded(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->shaderTrackerMap.contains(name))
+	if (!this->shaderTrackers.exists(name))
 		Log::crash("AssetManager::shaderIsGpuLoaded(): Attempting to get shader that does not exist: " + name);
 #endif
 
-		return this->shaderTrackerMap[name]->gpuLoaded;
+		return this->shaderTrackers.get(name)->gpuLoaded;
 	}
 
 	void AssetManager::removeShader(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->shaderTrackerMap.contains(name))
+if (!this->shaderTrackers.exists(name))
     Log::crash("AssetManager::removeShader(): Attempting to remove shader that does not exist: " + name);
 #endif
 
-		auto t = this->shaderTrackerMap[name];
+		auto t = this->shaderTrackers.get(name);
 		t->usageCount--;
 		if (t->usageCount == 0)
 		{
@@ -189,9 +184,8 @@ if (!this->shaderTrackerMap.contains(name))
 			else
 				this->gpu->clearShader(t->ptr);
 			
-			this->shaders.erase(this->shaders.get_iterator(t->ptr));
-			this->shaderTrackers.erase(this->shaderTrackers.get_iterator(t));
-			this->shaderTrackerMap.erase(name);			
+			this->shaders.erase(name);
+			this->shaderTrackers.erase(name);
 		}
 #ifdef DEBUG_LOG
 	else
@@ -223,28 +217,24 @@ if (!this->shaderTrackerMap.contains(name))
 		// AssetLoader checks for existing mesh by name, therefore if we have
 		// made it this far, assume that m is a new Mesh
 		
-		auto it = this->meshes.insert(m);
+		auto meshPtr = this->meshes.insert(m.getName(), m);
 		
 		MeshTracker t;
-		t.ptr = &(*it);
+		t.ptr = meshPtr;
 		t.usageCount++;
 		
-		auto it2 = this->meshTrackers.insert(t);
+		auto meshTrackerPtr = this->meshTrackers.insert(m.getName(), t);
 
-		auto tmpTracker = &(*it2);
+		this->meshesThatNeedGpuLoad.push_back(meshTrackerPtr);
 
-		this->meshesThatNeedGpuLoad.push_back(tmpTracker);
-
-		this->meshTrackerMap[m.getName()] = tmpTracker;
-
-		return tmpTracker;
+		return meshTrackerPtr;
 	}
 
 	MeshTracker* AssetManager::getMeshTracker(std::string name)
 	{
-		if(this->meshTrackerMap.contains(name))
+		if(this->meshTrackers.exists(name))
 		{
-			auto t = this->meshTrackerMap[name];
+			auto t = this->meshTrackers.get(name);
 			if(t->usageCount > 0)
 			{
 				t->usageCount++;
@@ -252,7 +242,7 @@ if (!this->shaderTrackerMap.contains(name))
 			}
 			else
 			{
-				std::this_thread::sleep_for(100ms);
+				std::this_thread::sleep_for(100ms); //tf? Guessing I did this as some form of ghetto thread-safety?
 				return this->getMeshTracker(name);
 			}
 		}
@@ -263,25 +253,25 @@ if (!this->shaderTrackerMap.contains(name))
 	Mesh* AssetManager::getMesh(std::string name)
 	{
 #ifdef DEBUG_LOG
-if (!this->meshTrackerMap.contains(name))
+if (!this->meshTrackers.exists(name))
     Log::crash("AssetManager::getMesh(): Attempting to get mesh that does not exist: " + name);
 #endif
-		return this->meshTrackerMap[name]->ptr;	
+		return this->meshTrackers.get(name)->ptr;	
 	}
 
 	bool AssetManager::meshIsGpuLoaded(std::string name)
 	{
-		return this->meshTrackerMap[name]->gpuLoaded;
+		return this->meshTrackers.get(name)->gpuLoaded;
 	}
 	
 	void AssetManager::removeMesh(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->meshTrackerMap.contains(name))
+	if (!this->meshTrackers.exists(name))
 		Log::crash("AssetManager::removeMesh(): Attempting to remove mesh that does not exist: " + name);
 #endif
 
-		auto t = this->meshTrackerMap[name];
+		auto t = this->meshTrackers.get(name);
 		t->usageCount--;
 		if(t->usageCount == 0)
 		{
@@ -295,9 +285,8 @@ if (!this->meshTrackerMap.contains(name))
 			else
 				this->gpu->clearMesh(t->ptr);
 			
-			this->meshes.erase(this->meshes.get_iterator(t->ptr));
-			this->meshTrackers.erase(this->meshTrackers.get_iterator(t));
-			this->meshTrackerMap.erase(name);
+			this->meshes.erase(name);
+			this->meshTrackers.erase(name);
 		}
 #ifdef DEBUG_LOG
 	else
@@ -310,12 +299,12 @@ if (!this->meshTrackerMap.contains(name))
 	--------------------------------------------------*/
 	std::string AssetManager::loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips)
 	{	
-		if (this->textureTrackerMap.contains(name)) 
+		if (this->textureTrackers.exists(name))
 		{
 #ifdef DEBUG_LOG
 	Log::toCliAndFile("Existing Texture, bypass reload: " + name);
 #endif
-			auto t = this->textureTrackerMap[name];
+			auto t = this->textureTrackers.get(name);
 			if(t->usageCount > 0)
 			{
 				t->usageCount++;
@@ -392,19 +381,13 @@ if (!this->meshTrackerMap.contains(name))
 
 		/////////////////////////////////////////
 
-		auto it = this->textures.insert(texture);
+		auto texturePtr = this->textures.insert(texture.name, texture);
 		
 		TextureTracker t;
-		t.ptr = &(*it);
+		t.ptr = texturePtr;
 		t.usageCount++;
-		
-		auto it2 = this->textureTrackers.insert(t);
 
-		auto tmpTracker = &(*it2);
-
-		this->texturesThatNeedGpuLoad.push_back(tmpTracker);
-
-		this->textureTrackerMap[name] = tmpTracker;
+		this->texturesThatNeedGpuLoad.push_back(this->textureTrackers.insert(texture.name, t));
 
 		return name;
 	}
@@ -412,26 +395,26 @@ if (!this->meshTrackerMap.contains(name))
 	Texture* AssetManager::getTexture(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->textureTrackerMap.contains(name))
+	if (!this->textureTrackers.exists(name))
 		Log::crash("AssetManager::getTexture(): Attempting to get texture that does not exist: " + name);
 #endif
 
-		return this->textureTrackerMap[name]->ptr;		
+		return this->textureTrackers.get(name)->ptr;		
 	}
 
 	bool AssetManager::textureIsGpuLoaded(std::string name)
 	{
-		return this->textureTrackerMap[name]->gpuLoaded;
+		return this->textureTrackers.get(name)->gpuLoaded;
 	}
 	
 	void AssetManager::removeTexture(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->textureTrackerMap.contains(name))
+	if (!this->textureTrackers.exists(name))
 		Log::crash("AssetManager::removeTexture(): Attempting to remove texture that does not exist: " + name);
 #endif
 
-		auto t = this->textureTrackerMap[name];
+		auto t = this->textureTrackers.get(name);
 		t->usageCount--;
 		if (t->usageCount == 0)
 		{
@@ -445,9 +428,8 @@ if (!this->meshTrackerMap.contains(name))
 			else
 				this->gpu->clearTexture(t->ptr);
 			
-			this->textures.erase(this->textures.get_iterator(t->ptr));
-			this->textureTrackers.erase(this->textureTrackers.get_iterator(t));
-			this->textureTrackerMap.erase(name);
+			this->textures.erase(name);
+			this->textureTrackers.erase(name);
 		}
 #ifdef DEBUG_LOG
 	else
@@ -459,12 +441,12 @@ if (!this->meshTrackerMap.contains(name))
 	--------------------------------------------------*/
     std::string AssetManager::loadHdr(std::string name, std::string path)
     {
-        if (this->hdrTrackerMap.contains(name)) 
+        if (this->hdrTrackers.exists(name))
 		{
 #ifdef DEBUG_LOG
 	Log::toCliAndFile("Existing HDR, bypass reload: " + name);
 #endif
-			auto h = this->hdrTrackerMap[name];
+			auto h = this->hdrTrackers.get(name);
 			if(h->usageCount > 0)
 			{
 				h->usageCount++;
@@ -507,19 +489,13 @@ if (!this->meshTrackerMap.contains(name))
             hdr.primaryImageData.format = GL_RGBA;
         
         
-        auto it = this->hdrs.insert(hdr);
+        auto hdrPtr = this->hdrs.insert(hdr.name, hdr);
         
         HDRTracker t;
-        t.ptr = &(*it);
+        t.ptr = hdrPtr;
 		t.usageCount++;
         
-        auto it2 = this->hdrTrackers.insert(t);
-
-		auto tmpTracker = &(*it2);
-
-		this->hdrsThatNeedGpuLoad.push_back(tmpTracker);
-
-		this->hdrTrackerMap[name] = tmpTracker;
+		this->hdrsThatNeedGpuLoad.push_back(this->hdrTrackers.insert(hdr.name, t));
 
 		return name;
     }
@@ -527,26 +503,26 @@ if (!this->meshTrackerMap.contains(name))
     HDR* AssetManager::getHdr(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->hdrTrackerMap.contains(name))
+	if (!this->hdrTrackers.exists(name))
 		Log::crash("AssetManager::getHdr(): Attempting to get HDR that does not exist: " + name);
 #endif
 
-		return this->hdrTrackerMap[name]->ptr;		
+		return this->hdrTrackers.get(name)->ptr;		
 	}
 
 	bool AssetManager::hdrIsGpuLoaded(std::string name)
 	{
-		return this->hdrTrackerMap[name]->gpuLoaded;
+		return this->hdrTrackers.get(name)->gpuLoaded;
 	}
     
     void AssetManager::removeHdr(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->hdrTrackerMap.contains(name))
+	if (!this->hdrTrackers.exists(name))
 		Log::crash("AssetManager::removeHdr(): Attempting to remove HDR that does not exist: " + name);
 #endif
 
-		auto h = this->hdrTrackerMap[name];
+		auto h = this->hdrTrackers.get(name);
 		h->usageCount--;
 		if (h->usageCount == 0)
 		{
@@ -560,9 +536,8 @@ if (!this->meshTrackerMap.contains(name))
 			else
 				this->gpu->clearHdr(h->ptr);
 			
-			this->hdrs.erase(this->hdrs.get_iterator(h->ptr));
-			this->hdrTrackers.erase(this->hdrTrackers.get_iterator(h));
-			this->hdrTrackerMap.erase(name);
+			this->hdrs.erase(name);
+			this->hdrTrackers.erase(name);
 		}
 #ifdef DEBUG_LOG
 	else
@@ -575,12 +550,12 @@ if (!this->meshTrackerMap.contains(name))
 	--------------------------------------------------*/
 	std::string AssetManager::addMaterial(Material m)
 	{
-		if (this->materialTrackerMap.contains(m.name)) 
+		if (this->materialTrackers.exists(m.name))
 		{
 #ifdef DEBUG_LOG
 	Log::toCliAndFile("Existing Material, bypass reload: " + m.name);
 #endif
-			auto t = this->materialTrackerMap[m.name];
+			auto t = this->materialTrackers.get(m.name);
 			if(t->usageCount > 0)
 			{
 				t->usageCount++;
@@ -610,15 +585,13 @@ if (!this->meshTrackerMap.contains(name))
             m.ao = this->getTexture("defaultAO");
         
 
-		auto it = this->materials.insert(m);
+		auto materialPtr = this->materials.insert(m.name, m);
 		
 		MaterialTracker t;
-		t.ptr = &(*it);
+		t.ptr = materialPtr;
 		t.usageCount++;
-		
-		auto it2 = this->materialTrackers.insert(t);
 
-		this->materialTrackerMap[m.name] = &(*it2);
+		this->materialTrackers.insert(m.name, t);
 
 		return m.name;
 	}
@@ -626,30 +599,29 @@ if (!this->meshTrackerMap.contains(name))
 	Material* AssetManager::getMaterial(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->materialTrackerMap.contains(name))
+	if (!this->materialTrackers.exists(name))
 		Log::crash("AssetManager::getMaterial(): Attempting to get material that does not exist: " + name);
 #endif
 
-		return this->materialTrackerMap[name]->ptr;		
+		return this->materialTrackers.get(name)->ptr;
 	}
 	
 	void AssetManager::removeMaterial(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->materialTrackerMap.contains(name))
+	if (!this->materialTrackers.exists(name))
 		Log::crash("AssetManager::removeMaterial(): Attempting to remove material that does not exist: " + name);
 #endif
 
-		auto t = this->materialTrackerMap[name];
+		auto t = this->materialTrackers.get(name);
 		t->usageCount--;
 		if (t->usageCount == 0)
 		{
 #ifdef DEBUG_LOG
 	Log::toCliAndFile("Full remove Material: " + name);
 #endif
-			this->materials.erase(this->materials.get_iterator(t->ptr));
-			this->materialTrackers.erase(this->materialTrackers.get_iterator(t));
-			this->materialTrackerMap.erase(name);
+			this->materials.erase(name);
+			this->materialTrackers.erase(name);
 		}
 #ifdef DEBUG_LOG
 	else
@@ -661,20 +633,19 @@ if (!this->meshTrackerMap.contains(name))
 	--------------------------------------------------*/	
 	Animation* AssetManager::addAnimation(Animation a)
 	{
-		auto it = this->animations.insert(a);
-		return &(*it);
+		return this->animations.insert(a.name, a);
 	}
 
 	/* Renderables
 	--------------------------------------------------*/
 	std::string AssetManager::addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material)
 	{
-		if (this->renderableTrackerMap.contains(name)) 
+		if (this->renderableTrackers.exists(name))
 		{
 #ifdef DEBUG_LOG
 	Log::toCliAndFile("Existing Renderable, bypass reload: " + name);
 #endif
-			auto t = this->renderableTrackerMap[name];
+			auto t = this->renderableTrackers.get(name);
 			if(t->usageCount > 0)
 			{
 				t->usageCount++;
@@ -691,15 +662,13 @@ if (!this->meshTrackerMap.contains(name))
 	Log::toCliAndFile("Loading new Renderable: " + name);
 #endif	
 
-		auto it = this->renderables.insert(Renderable(name, shader, mesh, material));
+		auto renderablePtr = this->renderables.insert(name, Renderable(name, shader, mesh, material));
 		
 		RenderableTracker t;
-		t.ptr = &(*it);
+		t.ptr = renderablePtr;
 		t.usageCount++;
 		
-		auto it2 = this->renderableTrackers.insert(t);
-
-		this->renderableTrackerMap[name] = &(*it2);
+		this->renderableTrackers.insert(name, t);
 
 		return name;
 	}
@@ -707,30 +676,29 @@ if (!this->meshTrackerMap.contains(name))
 	Renderable AssetManager::getRenderable(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->renderableTrackerMap.contains(name))
+	if (!this->renderableTrackers.exists(name))
 		Log::crash("AssetManager::getRenderable(): Attempting to get renderable that does not exist: " + name);
 #endif
 
-		return *this->renderableTrackerMap[name]->ptr;		
+		return *this->renderableTrackers.get(name)->ptr;
 	}
 	
 	void AssetManager::removeRenderable(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->renderableTrackerMap.contains(name))
+	if (!this->renderableTrackers.exists(name))
 		Log::crash("AssetManager::removeRenderable(): Attempting to remove renderable that does not exist: " + name);
 #endif
         
-		auto t = this->renderableTrackerMap[name];
+		auto t = this->renderableTrackers.get(name);
 		t->usageCount--;
 		if (t->usageCount == 0)
 		{
 #ifdef DEBUG_LOG
 	Log::toCliAndFile("Full remove Renderable: " + name);
 #endif
-			this->renderables.erase(this->renderables.get_iterator(t->ptr));
-			this->renderableTrackers.erase(this->renderableTrackers.get_iterator(t));
-			this->renderableTrackerMap.erase(name);
+			this->renderables.erase(name);
+			this->renderableTrackers.erase(name);
 		}
 #ifdef DEBUG_LOG
 	else
@@ -742,9 +710,9 @@ if (!this->meshTrackerMap.contains(name))
 	--------------------------------------------------*/
 	ArmatureTracker* AssetManager::getArmatureTracker(std::string name)
 	{
-		if(this->armatureTrackerMap.contains(name))
+		if(this->armatureTrackers.exists(name))
 		{
-			auto t = this->armatureTrackerMap[name];
+			auto t = this->armatureTrackers.get(name);
 			if(t->usageCount > 0)
 			{
 				t->usageCount++;
@@ -762,53 +730,64 @@ if (!this->meshTrackerMap.contains(name))
 	
 	ArmatureTracker* AssetManager::addArmature(Armature a)
 	{
-		auto it = this->armatures.insert(a);
+		auto armaturePtr = this->armatures.insert(a.getName(), a);
 		
 		ArmatureTracker t;
-		t.ptr = &(*it);
+		t.ptr = armaturePtr;
 		t.usageCount++;
 		
-		auto it2 = this->armatureTrackers.insert(t);
-
-		this->armatureTrackerMap[a.getName()] = &(*it2);
-
-		return &(*it2);
+		return this->armatureTrackers.insert(a.getName(), t);
 	}
 
 	Armature AssetManager::getArmature(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->armatureTrackerMap.contains(name))
+	if (!this->armatureTrackers.exists(name))
 		Log::crash("AssetManager::getArmature(): Attempting to get armature that does not exist: " + name);
 #endif
 
-		return *this->armatureTrackerMap[name]->ptr;		
+		return *this->armatureTrackers.get(name)->ptr;		
 	}
 
 	void AssetManager::removeArmature(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->armatureTrackerMap.contains(name))
+	if (!this->armatureTrackers.exists(name))
 		Log::crash("AssetManager::removeArmature(): Attempting to remove armature that does not exist: " + name);
 #endif
         
-		auto t = this->armatureTrackerMap[name];
+		auto t = this->armatureTrackers.get(name);
 		t->usageCount--;
 		if(t->usageCount == 0)
 		{
 #ifdef DEBUG_LOG
 	Log::toCliAndFile("Full remove Armature: " + name);
 #endif
+
 			// remove all animations used by this armature
-			for(auto& animArmPair : t->ptr->getAnimations())
-				for(auto& animOG : this->animations)
-					if(animArmPair.second == &animOG)
-						this->animations.erase(this->animations.get_iterator(animArmPair.second));
+			for (auto& animArmPair : t->ptr->getAnimations())
+			{
+				//for (auto& animOG : this->animations)
+				for (auto iter = this->animations.getAll().begin(); iter != this->animations.getAll().end();)
+				{
+					auto animOG = *iter;
+
+					if (animArmPair.second == animOG)
+					{
+						this->animations.erase(animOG);
+						continue;
+					}
+					else
+					{
+						++iter;
+					}
+				}
+			}
+				
 			
 			// remove armature
-			this->armatures.erase(this->armatures.get_iterator(t->ptr));
-			this->armatureTrackers.erase(this->armatureTrackers.get_iterator(t));
-			this->armatureTrackerMap.erase(name);
+			this->armatures.erase(name);
+			this->armatureTrackers.erase(name);
 		}
 #ifdef DEBUG_LOG
 	else
