@@ -3,10 +3,9 @@
 #include <functional>
 #include <optional>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <string>
 
-#include "plf_colony/plf_colony.h"
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 
@@ -14,7 +13,7 @@
 #include "BulletCollision/NarrowPhaseCollision/btGjkPairDetector.h"
 #include "BulletCollision/NarrowPhaseCollision/btPointCollector.h"
 
-
+#include "sac.h"
 #include "vel/Actor.h"
 #include "vel/Sensor.h"
 #include "vel/RaycastResult.h"
@@ -35,13 +34,13 @@ namespace vel
 		btBroadphaseInterface*					overlappingPairCache;
 		btSequentialImpulseConstraintSolver*	solver;
 		btDiscreteDynamicsWorld*				dynamicsWorld;
-		std::map<std::string, btCollisionShape*> collisionShapes; // TODO: this can be a faster container like robin_hood map
-		plf::colony<Sensor>						sensors;
+		std::unordered_map<std::string, btCollisionShape*> collisionShapes;
+		sac<Sensor>								sensors;
 		CollisionDebugDrawer* 					collisionDebugDrawer;
-		std::map<std::string, CollisionObjectTemplate> collisionObjectTemplates;
+		std::unordered_map<std::string, CollisionObjectTemplate> collisionObjectTemplates;
 
 
-		void									removeSensorsUsingCollisionObject(btCollisionObject* co);
+		//void									removeSensorsUsingCollisionObject(btCollisionObject* co);
 
 	public:
 		static bool								contactAddedCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1);

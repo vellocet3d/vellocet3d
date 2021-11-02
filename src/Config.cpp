@@ -14,7 +14,8 @@ namespace vel
         SCREEN_HEIGHT(userConfigParams.count("screenHeight") != 0 ? std::stoi(this->userConfigParams["screenHeight"]) : 720),
         FULLSCREEN(userConfigParams.count("fullScreen") != 0 ? (this->userConfigParams["fullScreen"] == "0" ? false : true) : false),
         MAX_RENDER_FPS(userConfigParams.count("maxFps") != 0 ? std::stod(this->userConfigParams["maxFps"]) : 240),
-		MOUSE_SENSITIVITY(userConfigParams.count("mouseSensitivity") != 0 ? std::stof(this->userConfigParams["mouseSensitivity"]) : 0.08f)
+		MOUSE_SENSITIVITY(userConfigParams.count("mouseSensitivity") != 0 ? std::stof(this->userConfigParams["mouseSensitivity"]) : 0.08f),
+		VSYNC(userConfigParams.count("vsync") != 0 ? (this->userConfigParams["vsync"] == "0" ? false : true) : false)
 	{};
 
 	void Config::updateConfigFile()
@@ -26,6 +27,7 @@ namespace vel
 		outStream << "fullScreen=" << (this->FULLSCREEN ? "1" : "0") << std::endl;
 		outStream << "maxFps=" << this->MAX_RENDER_FPS << std::endl;
 		outStream << "mouseSensitivity=" << this->MOUSE_SENSITIVITY << std::endl;
+		outStream << "vsync=" << this->VSYNC << std::endl;
 
 		outStream.close();
 

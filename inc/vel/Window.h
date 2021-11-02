@@ -27,6 +27,7 @@ namespace vel
         bool				fullScreen;
 		bool				cursorHidden;
 		bool				useImGui;
+		bool				vsync;
         InputState			inputState;
         GLFWwindow*			glfwWindow;
         double				scrollX = 0.0;
@@ -47,6 +48,7 @@ namespace vel
         bool				shouldClose();
         void				setToClose();
         void				update();
+		void				updateInputState();
         const InputState&	getInputState() const;
         const glm::ivec2&	getScreenSize() const;
         void				swapBuffers();

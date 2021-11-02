@@ -29,18 +29,20 @@ namespace vel
 		bool								USE_IMGUI = true;
         const std::string					LOG_PATH = "data/log.txt";
         bool                                OPENGL_DEBUG_CONTEXT = true;
+		std::string							APP_EXE_NAME = "MyApp.exe";
+		std::string							APP_NAME = "MyApp";
+		
 
 		std::vector<ImGuiFont>				imguiFonts;
         
 
         // User defined via config.ini
-		std::string							APP_EXE_NAME = "MyApp.exe";
-		std::string							APP_NAME = "MyApp";
         int									SCREEN_WIDTH;
         int									SCREEN_HEIGHT;
         bool								FULLSCREEN;
         double								MAX_RENDER_FPS;
 		float								MOUSE_SENSITIVITY;
+		bool								VSYNC;
 
 		void								updateConfigFile();
 

@@ -296,13 +296,14 @@ namespace vel
 
         while (true)
         {
-            if (this->shouldClose || this->window->shouldClose()) 
-                break;
+
+			if (this->shouldClose || this->window->shouldClose())
+				break;
 
 
 			// load a single gpu asset for this loop cycle if needed
 			this->assetManager.sendNextToGpu();
-			
+
 
 			if (this->sceneLoadingQueue.size() > 0)
 			{
@@ -326,17 +327,18 @@ namespace vel
 			if (this->activeScene == nullptr)
 				continue;
 
-    //        if (this->scene != nullptr && !this->scene->loaded)
-    //        {
-    //            this->scene->load();
-    //            this->scene->loaded = true;
-				//this->setPauseBufferClearAndSwap(false);
-    //        }
+			//        if (this->scene != nullptr && !this->scene->loaded)
+			//        {
+			//            this->scene->load();
+			//            this->scene->loaded = true;
+						//this->setPauseBufferClearAndSwap(false);
+			//        }
+
 
             this->newTime = this->time();
             this->frameTime = this->newTime - this->currentTime;
 			
-
+			this->window->updateInputState();
 
             if (this->frameTime >= (1 / this->config.MAX_RENDER_FPS)) // cap max fps
             {
@@ -356,14 +358,16 @@ namespace vel
                 this->accumulator += this->frameTime;
 
 
+
+
 				// update window, which includes capturing input state
+				//this->window->updateInputState();
 				this->window->update();
 				
-
+				
                 // process update logic
                 while (this->accumulator >= this->fixedLogicTime)
-                {                    
-
+                {
 					//// update animations
 					//this->scene->updateAnimations(this->fixedLogicTime);
 
@@ -395,7 +399,7 @@ namespace vel
                     // decrement accumulator
                     this->accumulator -= this->fixedLogicTime;
                 }
-
+				
                 
 
 				float renderLerpInterval = (float)(this->accumulator / this->fixedLogicTime);

@@ -7,8 +7,9 @@
 namespace vel
 {
 
-	Sensor::Sensor(std::function<void(btPersistentManifold* contactManifold, std::pair<btCollisionObject*, btCollisionObject*>	contactPair)> onContactDiscovered, 
+	Sensor::Sensor(std::string name, std::function<void(btPersistentManifold* contactManifold, std::pair<btCollisionObject*, btCollisionObject*>	contactPair)> onContactDiscovered, 
 		btCollisionObject* ob1, btCollisionObject* ob2, std::vector<btCollisionObject*> blackList) :
+		name(name),
 		onContactDiscovered(onContactDiscovered),
 		contactPair(std::pair<btCollisionObject*, btCollisionObject*>(ob1, ob2)),
 		blackList(blackList)

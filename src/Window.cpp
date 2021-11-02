@@ -72,6 +72,7 @@ namespace vel
         fullScreen(c.FULLSCREEN),
 		cursorHidden(c.CURSOR_HIDDEN),
 		useImGui(c.USE_IMGUI),
+		vsync(c.VSYNC),
 		imguiFrameOpen(false)
     {
 		// should we include nvidia api so we can set application profile?
@@ -118,7 +119,11 @@ namespace vel
         {
 
             glfwMakeContextCurrent(this->glfwWindow);
-			glfwSwapInterval(0); // 0 = no vsync 1 = vsync
+
+			if(this->vsync)
+				glfwSwapInterval(1); // 0 = no vsync 1 = vsync
+			else
+				glfwSwapInterval(0);
 
 			
 
@@ -292,12 +297,17 @@ namespace vel
 		}
 	}
 
+	void Window::updateInputState()
+	{
+		glfwPollEvents();
+		setKeys();
+		setMouse();
+		setScroll();
+	}
+
     void Window::update() 
     {
-        glfwPollEvents();
-        setKeys();
-        setMouse();
-        setScroll();
+        
 
 		if (this->useImGui)
 		{

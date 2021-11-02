@@ -35,6 +35,7 @@ namespace vel
 		Armature*										armature;
 		std::vector<std::pair<size_t, std::string>>		activeBones; // the bones from the armature that are actually used by the mesh, 
 																	// the glue between an armature and a mesh (index is mesh bone index, value is armature bone index)
+																	// TODO: could this be part of Renderable instead...?
 																				
 
 		std::optional<Renderable>						tempRenderable;

@@ -535,7 +535,7 @@ namespace vel
 
 	void GPU::setShaderBool(const std::string& name, bool value) const
 	{
-		if (!this->activeShader->uniformLocations.contains(name))
+		if (!this->activeShader->uniformLocations.count(name) == 1)
 			this->activeShader->uniformLocations[name] = glGetUniformLocation(this->activeShader->id, name.c_str());
 
 		glUniform1i(this->activeShader->uniformLocations[name], (int)value);
@@ -543,7 +543,7 @@ namespace vel
 
 	void GPU::setShaderInt(const std::string& name, int value) const
 	{
-		if (!this->activeShader->uniformLocations.contains(name))
+		if (!this->activeShader->uniformLocations.count(name) == 1)
 			this->activeShader->uniformLocations[name] = glGetUniformLocation(this->activeShader->id, name.c_str());
 
 		glUniform1i(this->activeShader->uniformLocations[name], value);
@@ -551,7 +551,7 @@ namespace vel
 
 	void GPU::setShaderFloat(const std::string& name, float value) const
 	{
-		if (!this->activeShader->uniformLocations.contains(name))
+		if (!this->activeShader->uniformLocations.count(name) == 1)
 			this->activeShader->uniformLocations[name] = glGetUniformLocation(this->activeShader->id, name.c_str());
 
 		glUniform1f(this->activeShader->uniformLocations[name], value);
@@ -559,7 +559,7 @@ namespace vel
 
 	void GPU::setShaderMat4(const std::string& name, glm::mat4 value) const
 	{
-		if (!this->activeShader->uniformLocations.contains(name))
+		if (!this->activeShader->uniformLocations.count(name) == 1)
 			this->activeShader->uniformLocations[name] = glGetUniformLocation(this->activeShader->id, name.c_str());
 
 		glUniformMatrix4fv(this->activeShader->uniformLocations[name], 1, GL_FALSE, glm::value_ptr(value));
@@ -567,7 +567,7 @@ namespace vel
 
 	void GPU::setShaderVec3(const std::string &name, glm::vec3 value) const
 	{
-		if (!this->activeShader->uniformLocations.contains(name))
+		if (!this->activeShader->uniformLocations.count(name) == 1)
 			this->activeShader->uniformLocations[name] = glGetUniformLocation(this->activeShader->id, name.c_str());
 
 		glUniform3fv(this->activeShader->uniformLocations[name], 1, &value[0]);

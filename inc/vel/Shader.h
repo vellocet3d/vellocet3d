@@ -2,9 +2,10 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "glm/glm.hpp"
-#include "robin_hood/robin_hood.h"
+
 
 typedef int GLint;
 
@@ -16,6 +17,6 @@ namespace vel
 		std::string name;
 		std::string vertFile;
 		std::string fragFile;
-		robin_hood::unordered_node_map<std::string, GLint> uniformLocations;
+		std::unordered_map<std::string, GLint> uniformLocations;
 	};
 }
