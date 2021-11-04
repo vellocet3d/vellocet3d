@@ -92,8 +92,11 @@ namespace vel
 		//for (auto& m : j["meshes"])
 		//	this->loadMesh(m);
 
-		this->loadMesh(j["meshes"]);
-
+		if (j.contains("meshes") && j["meshes"] != "" && !j["meshes"].is_null())
+		{
+			this->loadMesh(j["meshes"]);
+		}
+		
 		for (auto& t : j["textures"])
 		{
 			std::vector<std::string> mips;
@@ -610,6 +613,8 @@ namespace vel
 			this->cameraProjectionMatrix = s->getCamera()->getProjectionMatrix();
 			this->cameraViewMatrix = s->getCamera()->getViewMatrix();
 
+			// these are for applying lighting to objects that are in screen space as if they were in world space, for example
+			// first person arms / weapons
 			this->IBLCameraPosition = s->getIBLCamera() == nullptr ? this->cameraPosition : s->getIBLCamera()->getPosition();
 			this->IBLOffsetMatrix = s->getIBLCamera() == nullptr ? glm::mat4(1.0f) : glm::inverse(s->getIBLCamera()->getViewMatrix());
 
