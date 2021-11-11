@@ -122,6 +122,18 @@ namespace vel
 			if (m.contains("ao") && m["ao"] != "" && !m["ao"].is_null())
 				mat.ao = this->getTexture(m["ao"]);
 
+			if (m.contains("color") && m["color"] != "" && !m["color"].is_null())
+			{
+				mat.color = glm::vec4(
+					(float)m["color"][0],
+					(float)m["color"][1],
+					(float)m["color"][2],
+					(float)m["color"][3]
+				);
+			}
+				
+
+
 			this->addMaterial(mat);
 		}
 
@@ -485,17 +497,6 @@ namespace vel
 	
 	void Scene::addMaterial(Material m)
 	{
-		if (!m.hasAlphaChannel && m.albedo && m.albedo->alphaChannel)
-			m.hasAlphaChannel = true;
-		if (!m.hasAlphaChannel && m.normal && m.normal->alphaChannel)
-			m.hasAlphaChannel = true;
-		if (!m.hasAlphaChannel && m.metallic && m.metallic->alphaChannel)
-			m.hasAlphaChannel = true;
-		if (!m.hasAlphaChannel && m.roughness && m.roughness->alphaChannel)
-			m.hasAlphaChannel = true;
-		if (!m.hasAlphaChannel && m.ao && m.ao->alphaChannel)
-			m.hasAlphaChannel = true;
-
 		this->materialsInUse.push_back(App::get().getAssetManager().addMaterial(m));
 	}
 	
@@ -711,6 +712,7 @@ namespace vel
 			//gpu->setShaderVec3("camPos", this->cameraPosition);
 			gpu->setShaderVec3("camPos", this->IBLCameraPosition);
 			gpu->setShaderMat4("iblOffset", this->IBLOffsetMatrix);
+			
 
             gpu->setShaderMat4("projection", this->cameraProjectionMatrix);
             gpu->setShaderMat4("view", this->cameraViewMatrix);

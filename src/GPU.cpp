@@ -8,6 +8,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include <glm/gtx/string_cast.hpp>
 #include "stb_image/stb_image.h"
 
 #include "vel/GPU.h"
@@ -573,6 +574,14 @@ namespace vel
 		glUniform3fv(this->activeShader->uniformLocations[name], 1, &value[0]);
 	}
 
+	void GPU::setShaderVec4(const std::string &name, glm::vec4 value) const
+	{
+		if (!this->activeShader->uniformLocations.count(name) == 1)
+			this->activeShader->uniformLocations[name] = glGetUniformLocation(this->activeShader->id, name.c_str());
+
+		glUniform4fv(this->activeShader->uniformLocations[name], 1, &value[0]);
+	}
+
 
 	void GPU::useMesh(Mesh* m)
 	{
@@ -601,6 +610,10 @@ namespace vel
 	void GPU::useMaterial(Material* m)
 	{
 		this->activeMaterial = m;
+
+		this->setShaderVec4("color", m->color);
+
+		//std::cout << glm::to_string(m->color) << std::endl;
 
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, m->albedo->id);

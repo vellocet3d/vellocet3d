@@ -253,8 +253,10 @@ namespace vel
             // get this from window
             void* data = glfwGetWindowUserPointer(window);
             Window* w = static_cast<Window*>(data);
-            w->scrollX = xoffset;
-            w->scrollY = yoffset;
+            w->scrollX += xoffset;
+            w->scrollY += yoffset;
+
+			//std::cout << std::to_string(w->scrollY) << std::endl;
 
         });
 
@@ -567,10 +569,10 @@ namespace vel
 
     void Window::setScroll() 
     {
-        this->inputState.scrollX = (float)scrollX;
-        this->inputState.scrollY = (float)scrollY;
-        scrollX = 0;
-        scrollY = 0;
+        this->inputState.scrollX = (float)this->scrollX;
+        this->inputState.scrollY = (float)this->scrollY;
+        //this->scrollX = 0;
+        //this->scrollY = 0;
     }
 
     void Window::setToClose() 

@@ -572,6 +572,24 @@ if (!this->meshTrackers.exists(name))
 	Log::toCliAndFile("Loading new Material: " + m.name);
 #endif		
 
+		if (m.color.w < 1.0f)
+		{
+			m.hasAlphaChannel = true;
+		}
+		else
+		{
+			if (!m.hasAlphaChannel && m.albedo && m.albedo->alphaChannel)
+				m.hasAlphaChannel = true;
+			if (!m.hasAlphaChannel && m.normal && m.normal->alphaChannel)
+				m.hasAlphaChannel = true;
+			if (!m.hasAlphaChannel && m.metallic && m.metallic->alphaChannel)
+				m.hasAlphaChannel = true;
+			if (!m.hasAlphaChannel && m.roughness && m.roughness->alphaChannel)
+				m.hasAlphaChannel = true;
+			if (!m.hasAlphaChannel && m.ao && m.ao->alphaChannel)
+				m.hasAlphaChannel = true;
+		}
+
         // add default textures to material for those which are not provided
         if(m.albedo == nullptr)
             m.albedo = this->getTexture("defaultAlbedo");
