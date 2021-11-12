@@ -196,11 +196,17 @@ namespace vel
 
 					// create fonts
 					for (auto& f : c.imguiFonts)
+					{
 						this->imguiFonts[f.key] = io.Fonts->AddFontFromFileTTF(f.path.c_str(), f.pixels);
+						//std::cout << this->imguiFonts[f.key] << std::endl;
+					}
+						
 
 					// Setup Dear ImGui style
 					ImGui::StyleColorsDark();
 					//ImGui::StyleColorsClassic();
+
+					
 
 					// Setup Platform/Renderer bindings
 					ImGui_ImplGlfw_InitForOpenGL(this->glfwWindow, true);

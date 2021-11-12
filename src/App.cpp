@@ -188,8 +188,8 @@ namespace vel
     {
 		// TODO: this was required before to get imgui to work correctly, but that was when we could only ever load
 		// one scene at a time. Need to figure out how to integrate imgui into the new api
-		//if(this->window->getImguiFrameOpen())
-		//	this->forceImguiRender();
+		if(this->window->getImguiFrameOpen())
+			this->forceImguiRender();
         //this->scene = std::move(std::move(std::unique_ptr<Scene>(scene)));
 
 		std::string className = typeid(*scene).name();// name is "class Test" when we need just "Test", so trim off "class "
@@ -342,6 +342,7 @@ namespace vel
             this->frameTime = this->newTime - this->currentTime;
 			
 			this->window->updateInputState();
+			//this->window->update();
 
             if (this->frameTime >= (1 / this->config.MAX_RENDER_FPS)) // cap max fps
             {
