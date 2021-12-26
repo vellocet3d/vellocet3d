@@ -144,13 +144,13 @@ namespace vel
                 // to use a callback)
                 this->setCallbacks();
 
-				glfwSetInputMode(this->glfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+				//glfwSetInputMode(this->glfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
                 // Set window input mode
 				if (this->cursorHidden)
 				{
 					glfwSetInputMode(this->glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-					//glfwSetInputMode(this->glfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+					glfwSetInputMode(this->glfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 				}
 
 
@@ -567,7 +567,7 @@ namespace vel
 
         glfwGetCursorPos(this->glfwWindow, &mXPos, &mYPos);
 
-		//std::cout << mXPos << "\n";
+		//std::cout << "setMouse: " << mXPos << "\n";
 
 		this->inputState.mouseXPos = (float)mXPos;
 		this->inputState.mouseYPos = (float)mYPos;
