@@ -27,7 +27,14 @@ namespace vel
 		bool					foundPause;
 		bool					firstCycleStarted;
 		
+		bool					shouldPlayForward;
+		glm::vec3				playForward(float dt);
+		glm::vec3				playBackward(float dt);
+
 		bool					useClosestPausePoint;
+		bool					isClosestPausePointForward();
+
+		int						currentTweenIndex;
 
 	public:
 		MultiTweener(std::vector<glm::vec3> vecs, float speed, bool repeat = false);
