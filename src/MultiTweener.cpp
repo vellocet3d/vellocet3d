@@ -1,5 +1,5 @@
 
-
+#include <iostream>
 #include "vel/MultiTweener.h"
 
 
@@ -104,7 +104,7 @@ namespace vel
 					return this->currentVec;
 				}
 			}
-
+			//TODO something needs to happen here
 			return this->currentVec;
 		}
 
@@ -128,7 +128,54 @@ namespace vel
 
 	glm::vec3 MultiTweener::playBackward(float dt)
 	{
+		int endIndex = this->tweens.size() - 1;
 
+		if ((this->shouldPause && this->foundPause) || (this->shouldPause && !this->firstCycleStarted))
+			return this->currentVec;
+
+		for (; this->currentTweenIndex >= 0; this->currentTweenIndex--)
+		{
+			this->firstCycleStarted = true;
+
+			if (this->shouldPause && this->currentTweenIndex == endIndex && this->pausePointExists(endIndex + 1) && this->cycleComplete)
+			{
+				this->foundPause = true;
+				this->currentVec = this->vecs[endIndex + 1];
+				return this->currentVec;
+			}
+
+			this->cycleComplete = false;
+
+			if (this->shouldPause && this->useClosestPausePoint)
+				if (this->isClosestPausePointForward())
+					return this->playForward(dt);
+
+			this->currentVec = this->tweens[this->currentTweenIndex].updateBackward(dt);
+
+			if (this->tweens[this->currentTweenIndex].isBackwardComplete())
+			{
+				if (this->shouldPause && this->pausePointExists(this->currentTweenIndex))
+				{
+					this->foundPause = true;
+					return this->currentVec;
+				}
+			}
+
+			return this->currentVec;
+		}
+
+
+		this->cycleComplete = true;
+
+		if (!this->repeat)
+			return this->currentVec;
+
+		for (auto& t : this->tweens)
+			t.reset();
+
+		this->currentTweenIndex = endIndex;
+
+		return this->update(dt);
 	}
 
 	glm::vec3 MultiTweener::update(float dt)
@@ -150,7 +197,7 @@ namespace vel
 
 	bool MultiTweener::isClosestPausePointForward()
 	{
-
+		return true;
 	}
 
 }
