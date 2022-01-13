@@ -376,7 +376,7 @@ namespace vel
 					//this->scene->updateAnimations(this->fixedLogicTime);
 
 					//// step physics simulation
-					//this->scene->stepPhysics((float)this->fixedLogicTime);
+					this->activeScene->stepPhysics((float)this->fixedLogicTime);
 
 					// TODO: at some point we will probably want to break dynamic actors out into
 					// their own container so we're not looping over and checking static actors,
@@ -394,7 +394,7 @@ namespace vel
 					this->activeScene->updateAnimations(this->fixedLogicTime);
 
 					// step physics simulation
-					this->activeScene->stepPhysics((float)this->fixedLogicTime);
+					//this->activeScene->stepPhysics((float)this->fixedLogicTime);
 
 					// call postPhysics method to allow correction of any issues caused by collision solver
 					this->activeScene->postPhysics((float)this->fixedLogicTime);

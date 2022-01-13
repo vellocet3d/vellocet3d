@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include "vel/MultiTweener.h"
-
+#include "glm/gtx/string_cast.hpp"
 
 
 
@@ -19,7 +19,10 @@ namespace vel
 		cycleComplete(false),
 		foundPause(false),
 		firstCycleStarted(false),
+		pauseAtPausePoint(true),
 		useClosestPausePoint(false),
+		closestPausePointForward(true),
+		closestPausePointFound(false),
 		shouldPlayForward(true),
 		currentTweenIndex(0)
 	{
@@ -39,9 +42,10 @@ namespace vel
 		this->pausePoints = in;
 	}
 
-	void MultiTweener::pause(bool useClosestPausePoint)
+	void MultiTweener::pause(bool pauseAtPausePoint, bool useClosestPausePoint)
 	{
 		this->shouldPause = true;
+		this->pauseAtPausePoint = true;
 		this->useClosestPausePoint = useClosestPausePoint;
 	}
 
@@ -49,141 +53,169 @@ namespace vel
 	{
 		this->shouldPause = false;
 		this->foundPause = false;
+		this->closestPausePointFound = false;
 	}
 
-	// TODO LEFT OFF AROUND HERE>>>NEED TO START ON playBackward METHOD
+
 	glm::vec3 MultiTweener::playForward(float dt)
 	{
-		// if we should pause, and pause point has been found, OR if we should pause, but have not yet begun
-		// tweening, then return the current vector as there is nothing else to process
 		if ((this->shouldPause && this->foundPause) || (this->shouldPause && !this->firstCycleStarted))
 			return this->currentVec;
 
-		// Loop through each tween that was created during initialization
 		for (; this->currentTweenIndex < this->tweens.size(); this->currentTweenIndex++)
 		{
-			this->firstCycleStarted = true; // we have begun processing tweens
-
-			// If this tween has completed it's forward cycle, continue onto the next tween
-			// THERE SHOULD BE NO NEED FOR THIS SINCE WE TRACK CURRENT TWEEN NOW
-			//if (this->tweens[this->currentTweenIndex].isForwardComplete())
-			//	continue;
-
-			// If we should pause and we are processing the first tween, and the first tween's from vector is a pause point,
-			// and the multitween's cycle has completed then flip foundPause flag and set currentVec to the
-			// initial vector passed during initialization (the "from" vector of the first tween) and return this value
-			if (this->shouldPause && this->currentTweenIndex == 0 && this->pausePointExists(0) && this->cycleComplete)
-			{
-				this->foundPause = true;
-				this->currentVec = this->vecs[0];
-				return this->currentVec;
-			}
-
-			// If we have made it this far, then we know we are not currently paused (although we could be
-			// flagged to pause at the next pause point) and we should continue processing the current tween
+			this->firstCycleStarted = true;
 			this->cycleComplete = false;
 
-			// If we should pause AND use the closest pause point, AND that pause point is not forward,
-			// then pass control to playBackward
 			if (this->shouldPause && this->useClosestPausePoint)
-				if(!this->isClosestPausePointForward())
-					return this->playBackward(dt);
+			{
+				//std::cout << "YEET001" << std::endl;
+				if (!this->closestPausePointFound)
+				{
+					//std::cout << "YEET002" << std::endl;
+					this->findClosestPausePointDirection();
+				}
+					
+				//std::cout << "YEET003" << std::endl;
 
-			// Update forward on currentTween
+				if (!this->closestPausePointForward)
+				{
+					//std::cout << "YEET004" << std::endl;
+					this->currentVec = this->tweens[this->currentTweenIndex].updateBackward(dt);
+
+					if (this->tweens[this->currentTweenIndex].isBackwardComplete())
+					{
+						//std::cout << "YEET005" << std::endl;
+						if (this->shouldPause && this->pausePointExists(this->currentTweenIndex))
+						{
+							//std::cout << "YEET006" << std::endl;
+							this->foundPause = true;
+							return this->currentVec;
+						}
+						else
+						{
+							//std::cout << "YEET006b" << std::endl;
+							this->currentTweenIndex--;
+							return this->currentVec;
+						}
+					}
+					else
+					{
+						//std::cout << "YEET007" << std::endl;
+						return this->currentVec;
+					}
+				}
+			}
+
+			//std::cout << "YEET008" << std::endl;
+
 			this->currentVec = this->tweens[this->currentTweenIndex].updateForward(dt);
 
-			// If this tween has completed it's forward cycle, then check to see if pause flag has been set,
-			// AND if so then check to see if the "to" vector of the current tween is a pause point (this is
-			// done by passing the current tween index plus 1 to pausePointExists as the to vector within a tween
-			// will always be the tween index plus 1), if so then set foundPause to true and return currentVec
 			if (this->tweens[this->currentTweenIndex].isForwardComplete())
 			{
+				//std::cout << "YEET009" << std::endl;
 				if (this->shouldPause && this->pausePointExists(this->currentTweenIndex + 1))
 				{
+					//std::cout << "YEET010" << std::endl;
 					this->foundPause = true;
 					return this->currentVec;
 				}
 			}
-			//TODO something needs to happen here
-			return this->currentVec;
-		}
-
-		// If we have made it this far without returning a value, then the MultiTween has reached it's end AND is not paused
-		this->cycleComplete = true;
-
-		// If repeat is not set, then return currentVec as the multitween has completed and we should not execute it again
-		if (!this->repeat)
-			return this->currentVec;
-
-		// Reset all tweens to their defaults so that they are ready to be processed again if repeat is set
-		for (auto& t : this->tweens)
-			t.reset();
-
-		// Reset currentTweenIndex to zero since this is the playForward method and we would be starting at the 0th index
-		this->currentTweenIndex = 0;
-
-		// If we have made it this far, then do recursive call to restart the process as we need to repeat the multitween
-		return this->update(dt);
-	}
-
-	glm::vec3 MultiTweener::playBackward(float dt)
-	{
-		int endIndex = this->tweens.size() - 1;
-
-		if ((this->shouldPause && this->foundPause) || (this->shouldPause && !this->firstCycleStarted))
-			return this->currentVec;
-
-		for (; this->currentTweenIndex >= 0; this->currentTweenIndex--)
-		{
-			this->firstCycleStarted = true;
-
-			if (this->shouldPause && this->currentTweenIndex == endIndex && this->pausePointExists(endIndex + 1) && this->cycleComplete)
+			else
 			{
-				this->foundPause = true;
-				this->currentVec = this->vecs[endIndex + 1];
+				//std::cout << "YEET011" << std::endl;
 				return this->currentVec;
 			}
-
-			this->cycleComplete = false;
-
-			if (this->shouldPause && this->useClosestPausePoint)
-				if (this->isClosestPausePointForward())
-					return this->playForward(dt);
-
-			this->currentVec = this->tweens[this->currentTweenIndex].updateBackward(dt);
-
-			if (this->tweens[this->currentTweenIndex].isBackwardComplete())
-			{
-				if (this->shouldPause && this->pausePointExists(this->currentTweenIndex))
-				{
-					this->foundPause = true;
-					return this->currentVec;
-				}
-			}
-
-			return this->currentVec;
 		}
 
+		//std::cout << "YEET012" << std::endl;
 
 		this->cycleComplete = true;
 
 		if (!this->repeat)
+		{
+			//std::cout << "YEET013" << std::endl;
 			return this->currentVec;
+		}
+			
 
 		for (auto& t : this->tweens)
 			t.reset();
 
-		this->currentTweenIndex = endIndex;
+		this->currentTweenIndex = 0;
+
+		//std::cout << "YEET014" << std::endl;
 
 		return this->update(dt);
 	}
+
+	//glm::vec3 MultiTweener::playBackward(float dt)
+	//{
+	//	int endIndex = this->tweens.size() - 1;
+
+	//	if ((this->shouldPause && this->foundPause) || (this->shouldPause && !this->firstCycleStarted))
+	//		return this->currentVec;
+
+	//	for (; this->currentTweenIndex >= 0; this->currentTweenIndex--)
+	//	{
+	//		this->firstCycleStarted = true;
+	//		this->cycleComplete = false;
+
+	//		if (this->shouldPause && this->useClosestPausePoint && !this->closestPausePointFound)
+	//		{
+	//			std::cout << "YEET003" << std::endl;
+	//			if (this->isClosestPausePointForward())
+	//			{
+	//				std::cout << "YEET004" << std::endl;
+	//				return this->playForward(dt);
+	//			}
+	//				
+	//		}
+	//			
+	//		std::cout << "YEET005" << std::endl;
+
+	//		this->currentVec = this->tweens[this->currentTweenIndex].updateBackward(dt);
+
+	//		if (this->tweens[this->currentTweenIndex].isBackwardComplete())
+	//		{
+	//			std::cout << "YEET006" << std::endl;
+	//			if (this->shouldPause && this->pausePointExists(this->currentTweenIndex))
+	//			{
+	//				std::cout << "YEET007" << std::endl;
+	//				this->foundPause = true;
+	//				return this->currentVec;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			std::cout << "YEET008" << std::endl;
+	//			return this->currentVec;
+	//		}
+	//	}
+
+	//	std::cout << "YEET009" << std::endl;
+
+	//	this->cycleComplete = true;
+
+	//	if (!this->repeat)
+	//		return this->currentVec;
+
+	//	for (auto& t : this->tweens)
+	//		t.reset();
+
+	//	this->currentTweenIndex = endIndex;
+
+	//	return this->update(dt);
+	//}
 
 	glm::vec3 MultiTweener::update(float dt)
 	{
+		//std::cout << this->currentTweenIndex << std::endl;
+
 		if (this->shouldPlayForward)
 			return this->playForward(dt);
 		
-		return this->playBackward(dt);
+		//return this->playBackward(dt);
 	}
 
 	bool MultiTweener::pausePointExists(size_t in)
@@ -195,9 +227,100 @@ namespace vel
 		return false;
 	}
 
-	bool MultiTweener::isClosestPausePointForward()
+	void MultiTweener::findClosestPausePointDirection()
 	{
-		return true;
+		//std::cout << "isClosestPausePointForward()----------------------------------" << std::endl;
+		//std::cout << "All vecs---------------------------" << std::endl;
+		//for (auto& v : this->vecs)
+		//	std::cout << glm::to_string(v) << std::endl;
+		//std::cout << "-----------------------------------" << std::endl;
+		//std::cout << "currentVec: " << glm::to_string(this->currentVec) << std::endl;
+
+		// Forward
+		bool foundForwardPausePoint = false;
+		float distToClosestForwardPausePoint = 0.0f;
+		auto lastVec = this->currentVec;
+		int i = this->currentTweenIndex;
+		//std::cout << "forward loop----------------------------" << std::endl;
+		while (i < (this->vecs.size() - 1) && !foundForwardPausePoint)
+		{
+			auto nextVec = this->vecs[i + 1];
+
+			//std::cout << "------" << std::endl;
+			//std::cout << "nextVec: " << glm::to_string(nextVec) << std::endl;
+			//std::cout << "lastVec: " << glm::to_string(lastVec) << std::endl;
+			//std::cout << "dist: " << glm::distance(lastVec, nextVec) << std::endl;
+
+
+			distToClosestForwardPausePoint += glm::distance(lastVec, nextVec);
+
+			//std::cout << "accdist: " << distToClosestForwardPausePoint << std::endl;
+			//std::cout << "------" << std::endl;
+
+
+			lastVec = nextVec;
+
+			if (this->pausePointExists(i + 1))
+				foundForwardPausePoint = true;
+
+			i++;
+		}
+		//std::cout << "-----------------------------------" << std::endl;
+
+		// Backward
+		bool foundBackwardPausePoint = false;
+		float distToClosestBackwardPausePoint = 0.0f;
+		lastVec = this->currentVec;
+		i = this->currentTweenIndex;
+		//std::cout << "backward loop----------------------------" << std::endl;
+		while (i >= 0 && !foundBackwardPausePoint)
+		{
+			auto nextVec = this->vecs[i];
+
+			//std::cout << "------" << std::endl;
+			//std::cout << "nextVec: " << glm::to_string(nextVec) << std::endl;
+			//std::cout << "lastVec: " << glm::to_string(lastVec) << std::endl;
+			//std::cout << "dist: " << glm::distance(lastVec, nextVec) << std::endl;
+
+			distToClosestBackwardPausePoint += glm::distance(lastVec, nextVec);
+
+			//std::cout << "accdist: " << distToClosestBackwardPausePoint << std::endl;
+			//std::cout << "------" << std::endl;
+
+			lastVec = nextVec;
+
+			//if (this->pausePointExists(i - 1))
+			if (this->pausePointExists(i))
+				foundBackwardPausePoint = true;
+
+			i--;
+		}
+		//std::cout << "-----------------------------------" << std::endl;
+
+		this->closestPausePointFound = true;
+
+		//std::cout << "fd:" << distToClosestForwardPausePoint << " bd:" << distToClosestBackwardPausePoint;
+		if (distToClosestBackwardPausePoint < distToClosestForwardPausePoint) 
+		{
+			//std::cout << " - backward closest" << std::endl;
+			//return false;
+			this->closestPausePointForward = false;
+		}
+		else // if forward distance is closest or equal to backward distance
+		{
+			//std::cout << " - forward closest" << std::endl;
+			//return true;
+			this->closestPausePointForward = true;
+		}
+			
+		//std::cout << "----------------------------------" << std::endl;
+		
+
+
+		//if (distToClosestForwardPausePoint < distToClosestBackwardPausePoint)
+		//	return true;
+
+		//return false;
 	}
 
 }
