@@ -218,6 +218,11 @@ namespace vel
 		return this->currentVec;
 	}
 
+	glm::vec3 Tweener::getCurrentVec()
+	{
+		return this->currentVec;
+	}
+
 	void Tweener::setDirections()
 	{
 		// set forward directions

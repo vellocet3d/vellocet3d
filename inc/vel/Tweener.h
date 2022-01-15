@@ -34,6 +34,7 @@ namespace vel
 		
 		glm::vec3	updateForward(float dt);
 		glm::vec3	updateBackward(float dt);
+		glm::vec3	getCurrentVec();
 
 		bool		isForwardComplete();
 		bool		isBackwardComplete();
