@@ -147,4 +147,10 @@ namespace vel
 		return btTransform(glmMat3ToBulletMat3(m3), glmToBulletVec3(glm::vec3(m[3][0], m[3][1], m[3][2])));
 	}
 
+	//https://stackoverflow.com/questions/4353525/floating-point-linear-interpolation
+	float lerpf(float a, float b, float f)
+	{
+		return (a * (1.0 - f)) + (b * f);
+	}
+
 }

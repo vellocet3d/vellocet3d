@@ -31,4 +31,5 @@ namespace vel
 	btMatrix3x3 glmMat3ToBulletMat3(const glm::mat3& m);
 	btTransform glmMat4ToBulletTransform(const glm::mat4& m);
 	bool isPowerOfTwo(int n);
+	float lerpf(float a, float b, float f);
 }
