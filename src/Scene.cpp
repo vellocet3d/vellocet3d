@@ -724,6 +724,13 @@ namespace vel
 				auto mesh = a->getMesh();
 				auto armature = a->getArmature();
 
+				// TODO: add property to armature "shouldInterpolate" since if the armature is not logicaly bound (ie
+				// the positions of the bones must be updated at a specific rate to insure gameplay consistency
+				// (think of using bone positions for hitboxes of limbs)) there is no need to interpolate every
+				// bone transformation. Example, the arms/weapon armature in a first person stage that updates it's
+				// transformation immediately (in screen time not logic time because it merely exists for asthetics)
+				// would need to NOT interpolate all bone transforms
+
 				size_t boneIndex = 0;
 				for (auto& activeBone : a->getActiveBones())
 				{
