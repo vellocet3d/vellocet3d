@@ -364,7 +364,7 @@ namespace vel
 
 
 
-				// update window, which includes capturing input state
+				// update window
 				//this->window->updateInputState();
 				this->window->update();
 				
