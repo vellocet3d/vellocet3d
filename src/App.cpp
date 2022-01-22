@@ -341,7 +341,7 @@ namespace vel
             this->newTime = this->time();
             this->frameTime = this->newTime - this->currentTime;
 			
-			this->window->updateInputState();
+			//this->window->updateInputState(); // not sure there's a reason for doing this here as opposed to in capped fps loop since it would never be sampled until then anyway
 			//this->window->update();
 
             if (this->frameTime >= (1 / this->config.MAX_RENDER_FPS)) // cap max fps
@@ -365,7 +365,7 @@ namespace vel
 
 
 				// update window
-				//this->window->updateInputState();
+				this->window->updateInputState();
 				this->window->update();
 				
 				
