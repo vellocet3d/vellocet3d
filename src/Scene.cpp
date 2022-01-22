@@ -23,7 +23,8 @@ namespace vel
 	Scene::Scene() :
 		mainMemoryloaded(false),
 		swapWhenLoaded(false),
-		animationTime(0.0)
+		animationTime(0.0),
+		fixedAnimationTime(0.0)
 	{
 		this->sortedTransparentActors.reserve(1000); // reserve space for 1000 transparent actors (won't reallocate until that limit reached)
 	}
@@ -385,6 +386,10 @@ namespace vel
 				actorNames.push_back(actName);
 
 			auto arm = stage->addArmature(this->getArmature(a["base"]), a["defaultAnimation"], actorNames);
+
+			if (a.contains("shouldInterpolate") && !a["shouldInterpolate"].is_null())
+				arm->setShouldInterpolate(a["shouldInterpolate"]);
+			
 			
 			if (!a["transform"].is_null())
 			{
@@ -555,11 +560,18 @@ namespace vel
 
 	/* Misc
 	--------------------------------------------------*/
+	void Scene::updateFixedAnimations(double delta)
+	{
+		this->fixedAnimationTime += delta;
+		for (auto& s : this->stages.getAll())
+			s->updateFixedArmatureAnimations(this->fixedAnimationTime);
+	}
+
 	void Scene::updateAnimations(double delta)
 	{
 		this->animationTime += delta;
 		for (auto& s : this->stages.getAll())
-			s->updateActorAnimations(this->animationTime);
+			s->updateArmatureAnimations(this->animationTime);
 	}
 	
 	std::string Scene::getName()
@@ -724,20 +736,29 @@ namespace vel
 				auto mesh = a->getMesh();
 				auto armature = a->getArmature();
 
-				// TODO: add property to armature "shouldInterpolate" since if the armature is not logicaly bound (ie
-				// the positions of the bones must be updated at a specific rate to insure gameplay consistency
-				// (think of using bone positions for hitboxes of limbs)) there is no need to interpolate every
-				// bone transformation. Example, the arms/weapon armature in a first person stage that updates it's
-				// transformation immediately (in screen time not logic time because it merely exists for asthetics)
-				// would need to NOT interpolate all bone transforms
-
 				size_t boneIndex = 0;
-				for (auto& activeBone : a->getActiveBones())
+				if (armature->getShouldInterpolate())
 				{
-					glm::mat4 meshBoneTransform = mesh->getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrix(alphaTime) * mesh->getBone(boneIndex).offsetMatrix;
-					gpu->setShaderMat4(activeBone.second, meshBoneTransform);
-					boneIndex++;
+					//std::cout << "yeet001" << std::endl;
+					for (auto& activeBone : a->getActiveBones())
+					{
+						glm::mat4 meshBoneTransform = mesh->getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrixInterpolated(alphaTime) * mesh->getBone(boneIndex).offsetMatrix;
+						gpu->setShaderMat4(activeBone.second, meshBoneTransform);
+						boneIndex++;
+					}
 				}
+				else
+				{
+					//std::cout << "yeet002" << std::endl;
+					for (auto& activeBone : a->getActiveBones())
+					{
+						glm::mat4 meshBoneTransform = mesh->getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrix() * mesh->getBone(boneIndex).offsetMatrix;
+						gpu->setShaderMat4(activeBone.second, meshBoneTransform);
+						boneIndex++;
+					}
+				}
+
+				
 			}
 
 			gpu->drawGpuMesh();

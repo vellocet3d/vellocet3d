@@ -183,7 +183,10 @@ namespace vel
 		//auto boneMatrix = this->parentArmatureBone->getRenderMatrix(alpha);
 		//return this->parentActor->getWorldRenderMatrix(alpha) * boneMatrix * actorMatrix;
 		
-		return this->parentArmatureBone->getRenderMatrix(alpha) * actorMatrix;
+		if (this->parentArmatureBone->parentArmature->getShouldInterpolate())
+			return this->parentArmatureBone->getRenderMatrixInterpolated(alpha) * actorMatrix;
+		
+		return this->parentArmatureBone->getRenderMatrix() * actorMatrix;
 	}
 
 	glm::vec3 Actor::getInterpolatedTranslation(float alpha)

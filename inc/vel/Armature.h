@@ -32,6 +32,7 @@ namespace vel
 	{
 	private:
 		std::string											name;
+		bool												shouldInterpolate;
 		std::vector<ArmatureBone>							bones;
 		std::vector<std::pair<std::string, Animation*>>		animations;
 		std::deque<ActiveAnimation>							activeAnimations;
@@ -48,6 +49,8 @@ namespace vel
 
 	public:
 		Armature(std::string name);
+		void												setShouldInterpolate(bool val);
+		bool												getShouldInterpolate();
 		void												addBone(ArmatureBone b);
 		void												addAnimation(std::string name, Animation* anim);
 		ArmatureBone&										getRootBone();

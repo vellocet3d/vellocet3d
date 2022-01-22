@@ -13,6 +13,7 @@
 namespace vel
 {
 	class Actor;
+	class Armature;
 
 	struct ArmatureBone
 	{
@@ -34,7 +35,8 @@ namespace vel
 		glm::quat		previousRotation;
 		glm::vec3		previousScale;
 
-		glm::mat4		getRenderMatrix(float alpha);
+		glm::mat4		getRenderMatrix();
+		glm::mat4		getRenderMatrixInterpolated(float alpha);
 		
 		// list of actors that are parented to this bone, useful
 		// if for example we have an armature that has objects parented to it,
@@ -44,5 +46,7 @@ namespace vel
 		// we need to clear those ArmatureBone pointers on the weapon objects so they
 		// are no longer parented to the armature which no longer exists
 		std::vector<Actor*> childActors;
+
+		Armature*	parentArmature;
 	};
 }

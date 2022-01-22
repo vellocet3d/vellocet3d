@@ -391,7 +391,7 @@ namespace vel
 					this->activeScene->innerLoop((float)this->fixedLogicTime);
 
 					// update animations
-					this->activeScene->updateAnimations(this->fixedLogicTime);
+					this->activeScene->updateFixedAnimations(this->fixedLogicTime);
 
 					// step physics simulation
 					//this->activeScene->stepPhysics((float)this->fixedLogicTime);
@@ -404,9 +404,12 @@ namespace vel
                     this->accumulator -= this->fixedLogicTime;
                 }
 				
-                
+
+				//this->activeScene->updateAnimations(this->frameTime);
+
 
 				float renderLerpInterval = (float)(this->accumulator / this->fixedLogicTime);
+
 
 				// execute outer loop (immediate) logic
 				this->activeScene->outerLoop((float)this->frameTime, renderLerpInterval);
@@ -420,7 +423,6 @@ namespace vel
 				}
 					
 
-
                 this->activeScene->draw(renderLerpInterval);
 
 
@@ -429,8 +431,6 @@ namespace vel
 
 				if (!this->pauseBufferClearAndSwap)
 					this->window->swapBuffers();
-                
-
             }
 
         }

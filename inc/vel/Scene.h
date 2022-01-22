@@ -22,6 +22,7 @@ namespace vel
 	{
 	private:
 		sac<Stage>							stages;
+		double								fixedAnimationTime;
 		double								animationTime;
 
 
@@ -90,7 +91,8 @@ namespace vel
 		
 
 
-		void								updateAnimations(double runTime);
+		void								updateFixedAnimations(double runTime);
+		void								updateAnimations(double frameTime);
 		void								draw(float alpha);
 		void								stepPhysics(float delta);
 		void								applyTransformations();

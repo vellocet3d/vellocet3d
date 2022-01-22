@@ -147,6 +147,7 @@ namespace vel
 				ArmatureBone bone;
 				bone.name = boneName;
 				bone.parentName = nodeParentName == "RootNode" ? boneName : node->mParent->mName.C_Str();
+				bone.parentArmature = this->currentArmature;
 
 				this->currentArmature->addBone(bone);
 			}

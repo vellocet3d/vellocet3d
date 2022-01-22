@@ -162,13 +162,24 @@ namespace vel
 		);
 	}
 
-	void Stage::updateActorAnimations(double runTime)
+	void Stage::updateFixedArmatureAnimations(double runTime)
 	{
 		// TODO: This needs to update Armatures regardless of actors since if
 		// 30 actors use the same armature, this will update the armature 30 times
-		for (auto a : this->actors.getAll())
-			if (!a->isDeleted() && a->isAnimated())
-				a->getArmature()->updateAnimation(runTime);
+		//for (auto a : this->actors.getAll())
+		//	if (!a->isDeleted() && a->isAnimated())
+		//		a->getArmature()->updateAnimation(runTime);
+
+		for (auto a : this->armatures.getAll())
+			if(a->getShouldInterpolate())
+				a->updateAnimation(runTime);
+	}
+
+	void Stage::updateArmatureAnimations(double runTime)
+	{
+		for (auto a : this->armatures.getAll())
+			if (!a->getShouldInterpolate())
+				a->updateAnimation(runTime);
 	}
 
 	void Stage::applyTransformations()

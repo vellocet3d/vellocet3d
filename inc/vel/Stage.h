@@ -50,7 +50,8 @@ namespace vel
 	public:
 														Stage(std::string name);
 														~Stage();
-		void											updateActorAnimations(double runTime);
+		void											updateFixedArmatureAnimations(double runTime);
+		void											updateArmatureAnimations(double runTime);
 		Actor*											addActor(Actor a);
 		void											removeActor(std::string name);
 		void											removeActor(Actor* a);

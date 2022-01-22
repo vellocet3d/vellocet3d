@@ -16,10 +16,21 @@ namespace vel
 {
 	Armature::Armature(std::string name) :
 		name(name),
+		shouldInterpolate(true),
 		runTime(0.0),
 		previousRunTime(0.0),
 		transform(Transform())
 	{}
+
+	void Armature::setShouldInterpolate(bool val)
+	{
+		this->shouldInterpolate = val;
+	}
+
+	bool Armature::getShouldInterpolate()
+	{
+		return this->shouldInterpolate;
+	}
 
 	Transform& Armature::getTransform()
 	{
