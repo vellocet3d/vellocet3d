@@ -37,6 +37,17 @@ namespace vel
 		this->currentVec = this->vecs[0];
 	};
 
+
+
+	void MultiTweener::updateSpeed(float newSpeed)
+	{
+		this->speed = newSpeed;
+		this->speedPerVec = this->speed * (float)vecs.size();
+
+		for (auto& t : this->tweens)
+			t.updateSpeed(this->speedPerVec);
+	}
+
 	void MultiTweener::setPausePoints(std::vector<size_t> in)
 	{
 		this->pausePoints = in;

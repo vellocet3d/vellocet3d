@@ -310,4 +310,10 @@ namespace vel
 		}
 	}
 
+	void Tweener::updateSpeed(float newSpeed)
+	{
+		this->speed = newSpeed;
+		this->setSpeeds();
+	}
+
 }

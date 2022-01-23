@@ -39,5 +39,7 @@ namespace vel
 		bool		isForwardComplete();
 		bool		isBackwardComplete();
 		void		reset();
+
+		void		updateSpeed(float newSpeed);
 	};
 }

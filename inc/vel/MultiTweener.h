@@ -47,6 +47,8 @@ namespace vel
 		void		unpause();
 		void		setPausePoints(std::vector<size_t> in);
 
+		void		updateSpeed(float newSpeed);
+
 
 	};
 }
