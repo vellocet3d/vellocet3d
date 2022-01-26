@@ -62,9 +62,18 @@ namespace vel
         
         this->assetManager.loadShader("defaultRenderable", 
         "data/shaders/default_renderable.vert", "data/shaders/default_renderable.frag");
+
+		this->assetManager.loadShader("defaultSkinnedRenderable",
+			"data/shaders/default_skinned_renderable.vert", "data/shaders/default_renderable.frag");
+
+
+		this->assetManager.loadShader("defaultRenderableStaticDiffuse",
+			"data/shaders/default_renderable.vert", "data/shaders/default_renderable_static_diffuse.frag");
+
+		this->assetManager.loadShader("defaultSkinnedRenderableStaticDiffuse",
+			"data/shaders/default_skinned_renderable.vert", "data/shaders/default_renderable_static_diffuse.frag");
         
-        this->assetManager.loadShader("defaultSkinnedRenderable", 
-        "data/shaders/default_skinned_renderable.vert", "data/shaders/default_renderable.frag");
+        
 
 		this->assetManager.loadShader("defaultRenderableRGBA",
 			"data/shaders/default_renderable.vert", "data/shaders/default_renderable_rgba.frag");
