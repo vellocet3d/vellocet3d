@@ -6,6 +6,7 @@
 #include "vel/CollisionWorld.h"
 #include "vel/functions.h"
 #include "vel/RaycastCallback.h"
+#include "vel/ConvexCastCallback.h"
 
 
 
@@ -238,6 +239,7 @@ namespace vel
 		if (!raycast.hasHit() || !raycast.m_collisionObject)
 			return {};
 
+		//TODO: why not just return the RaycastCallback instead?
 		RaycastResult r;
 		r.collisionObject = raycast.m_collisionObject;
 		r.hitpoint = raycast.m_hitPointWorld;
@@ -245,6 +247,29 @@ namespace vel
 		r.distance = btVector3(from - r.hitpoint).length();
 
 		return r;
+	}
+
+	std::optional<ConvexCastResult> CollisionWorld::convexSweepTest(btConvexShape* castShape, btVector3 from, btVector3 to, std::vector<btCollisionObject*> blackList)
+	{
+		btTransform convexFromWorld;
+		convexFromWorld.setIdentity();
+		convexFromWorld.setOrigin(from);
+
+		btTransform convexToWorld;
+		convexToWorld.setIdentity();
+		convexToWorld.setOrigin(to);
+
+		ConvexCastCallback convexCast(from, to, blackList);
+
+		this->dynamicsWorld->convexSweepTest(castShape, convexFromWorld, convexToWorld, convexCast);
+
+		ConvexCastResult ccr;
+		ccr.collisionObject = convexCast.m_hitCollisionObject;
+		ccr.hitpoint = convexCast.m_hitPointWorld;
+		ccr.normal = convexCast.m_hitNormalWorld.normalized();
+		ccr.distance = btVector3(from - ccr.hitpoint).length();
+
+		return ccr;
 	}
 
 }

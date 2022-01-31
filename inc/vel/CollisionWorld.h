@@ -19,7 +19,7 @@
 #include "vel/RaycastResult.h"
 #include "vel/CollisionDebugDrawer.h"
 #include "vel/CollisionObjectTemplate.h"
-
+#include "vel/ConvexCastResult.h"
 
 
 namespace vel
@@ -61,6 +61,7 @@ namespace vel
 
 
 		std::optional<RaycastResult>			rayTest(btVector3 from, btVector3 to, std::vector<btCollisionObject*> blackList = {});
+		std::optional<ConvexCastResult>			convexSweepTest(btConvexShape* castShape, btVector3 from, btVector3 to, std::vector<btCollisionObject*> blackList = {});
 
 		void									useDebugDrawer(Shader* s, int debugMode = 1);
 		CollisionDebugDrawer* 					getDebugDrawer();
