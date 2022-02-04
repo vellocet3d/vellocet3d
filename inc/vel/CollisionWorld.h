@@ -65,6 +65,7 @@ namespace vel
 
 		void									useDebugDrawer(Shader* s, int debugMode = 1);
 		CollisionDebugDrawer* 					getDebugDrawer();
+		bool									getDebugEnabled();
         
         btCollisionShape*                       getCollisionShape(std::string name);
 		void									addCollisionObjectTemplate(std::string name, CollisionObjectTemplate cot);

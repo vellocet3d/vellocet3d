@@ -118,6 +118,11 @@ namespace vel
 		return this->collisionDebugDrawer;
 	}
 
+	bool CollisionWorld::getDebugEnabled()
+	{
+		return this->collisionDebugDrawer != nullptr;
+	}
+
 	Sensor* CollisionWorld::addSensor(Sensor s)
 	{
 		return this->sensors.insert(s.name, s);
