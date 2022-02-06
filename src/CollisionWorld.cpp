@@ -273,6 +273,7 @@ namespace vel
 		ccr.hitpoint = convexCast.m_hitPointWorld;
 		ccr.normal = convexCast.m_hitNormalWorld.normalized();
 		ccr.distance = btVector3(from - ccr.hitpoint).length();
+		ccr.normalUpDot = ccr.normal.dot(btVector3(0, 1, 0));
 
 		return ccr;
 	}

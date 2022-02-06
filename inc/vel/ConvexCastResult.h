@@ -14,5 +14,6 @@ namespace vel
 		btVector3					hitpoint;
 		btVector3					normal;
 		float						distance;
+		float						normalUpDot;
 	};
 }
