@@ -13,7 +13,6 @@ namespace vel
 		const btCollisionObject*	collisionObject;
 		btVector3					hitpoint;
 		btVector3					normal;
-		float						distance;
 		float						normalUpDot;
 	};
 }
