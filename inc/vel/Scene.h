@@ -5,7 +5,6 @@
 #include <string>
 #include <optional>
 
-#include "plf_colony/plf_colony.h"
 #include "vel/sac.h"
 
 #include "vel/Mesh.h"

@@ -63,6 +63,7 @@ CMAKE_ARGS      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/_deps/in
 				-DGLFW_BUILD_EXAMPLES:BOOL=OFF
 				-DGLFW_BUILD_TESTS:BOOL=OFF
 				-DUSE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF
+				-DGLFW_USE_HYBRID_HPG:BOOL=ON
 )
 
 set(GLFW_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libGLFW})
@@ -76,7 +77,7 @@ set(libGLAD glad)
 ExternalProject_Add(${libGLAD}
 PREFIX			${CMAKE_CURRENT_BINARY_DIR}/_deps/${libGLAD}
 GIT_REPOSITORY  https://github.com/Dav1dde/glad.git
-GIT_TAG         origin/master
+GIT_TAG         v0.1.36
 GIT_SHALLOW     ON
 UPDATE_COMMAND 	""
 CMAKE_ARGS      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libGLAD}
@@ -91,7 +92,7 @@ add_library(GLAD_LIBRARY STATIC IMPORTED)
 set_target_properties(GLAD_LIBRARY PROPERTIES IMPORTED_LOCATION ${GLAD_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glad${CMAKE_STATIC_LIBRARY_SUFFIX})
 
 
-# SETUP GLM
+# SETUP GLM, need to add a GIT_TAG when they do the next latest release as we have to use master branch for the updated cmake file, but we need to insure stability which can only happen with a concrete release, since code in master can change at any point
 set(libGLM glm)
 ExternalProject_Add(${libGLM}
 PREFIX			${CMAKE_CURRENT_BINARY_DIR}/_deps/${libGLM}
@@ -245,37 +246,14 @@ endif()
 
 
 
-# SETUP ROBIN_HOOD
-set(libRobinHood robin_hood)
-FetchContent_Declare(${libRobinHood}
-	GIT_REPOSITORY https://github.com/martinus/robin-hood-hashing.git
-	GIT_TAG origin/master
-	CONFIGURE_COMMAND ""
-	BUILD_COMMAND ""
-)
 
-FetchContent_GetProperties(${libRobinHood})
-if(NOT ${libRobinHood})
-  FetchContent_Populate(${libRobinHood})
-endif()
-
-add_library(${libRobinHood} INTERFACE)
-
-file(
-COPY
-	${${libRobinHood}_SOURCE_DIR}/src/include/robin_hood.h
-DESTINATION
-	${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libRobinHood}/include/${libRobinHood}
-)
-
-set(ROBINHOOD_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libRobinHood})
 
 
 # SETUP JSON
 set(libJson json)
 FetchContent_Declare(${libJson}
 	GIT_REPOSITORY https://github.com/nlohmann/json.git
-	GIT_TAG origin/master
+	GIT_TAG v3.10.5
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND ""
 )
@@ -297,7 +275,7 @@ DESTINATION
 set(JSON_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libJson})
 
 
-# SETUP STB_IMAGE
+# SETUP STB_IMAGE, doesn't look like they do releases, but using master for this shouldn't be an issue
 set(libStbImage stb_image)
 FetchContent_Declare(${libStbImage}
 	GIT_REPOSITORY https://github.com/nothings/stb.git
@@ -321,33 +299,6 @@ DESTINATION
 )
 
 set(STBIMAGE_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libStbImage})
-
-
-# SETUP PLF_COLONY
-set(libPlfColony plf_colony)
-FetchContent_Declare(${libPlfColony}
-	GIT_REPOSITORY https://github.com/mattreecebentley/plf_colony.git
-	GIT_TAG origin/master
-	CONFIGURE_COMMAND ""
-	BUILD_COMMAND ""
-)
-
-FetchContent_GetProperties(${libPlfColony})
-if(NOT ${libPlfColony})
-  FetchContent_Populate(${libPlfColony})
-endif()
-
-add_library(${libPlfColony} INTERFACE)
-
-file(
-COPY
-	${${libPlfColony}_SOURCE_DIR}/plf_colony.h
-DESTINATION
-	${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libPlfColony}/include/${libPlfColony}
-)
-
-set(PLFCOLONY_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libPlfColony})
-
 
 
 
@@ -411,7 +362,7 @@ target_include_directories(IMGUI_LIBRARY
 # SETUP NVAPI IF ON WINDOWS AND PATH GIVEN
 if(MSVC)
 	if(NVIDIA_API_LIB_PATH STREQUAL "" OR NVIDIA_API_INCLUDE_PATH STREQUAL "")
-		#message("Skipping Nvidia api inclusion...you're going to see random intermittent stuttering if unless you turn off Threaded Optimization globally")
+		#message("Skipping Nvidia api inclusion...you're going to see random intermittent stuttering unless you turn off Threaded Optimization globally")
 	else()
 		add_library(NVAPI_LIBRARY STATIC IMPORTED)
 		set_target_properties(NVAPI_LIBRARY PROPERTIES IMPORTED_LOCATION ${NVIDIA_API_LIB_PATH})
@@ -424,7 +375,7 @@ file(GLOB_RECURSE headers CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/inc/*.h
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_library(${PROJECT_NAME} STATIC ${headers} ${sources})
-add_dependencies(${PROJECT_NAME} ${libGLFW} ${libGLAD} ${libGLM} ${libAssimp} ${libBullet} ${libRobinHood} ${libJson} ${libStbImage} ${libPlfColony} IMGUI_LIBRARY)
+add_dependencies(${PROJECT_NAME} ${libGLFW} ${libGLAD} ${libGLM} ${libAssimp} ${libBullet} ${libJson} ${libStbImage} IMGUI_LIBRARY)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 
@@ -442,9 +393,7 @@ target_include_directories(${PROJECT_NAME}
 	PUBLIC ${ASSIMP_INSTALL_DIR}/include
 	PUBLIC ${BULLET_INSTALL_DIR}/include/bullet
 	PUBLIC ${JSON_INSTALL_DIR}/include 
-	PUBLIC ${ROBINHOOD_INSTALL_DIR}/include
 	PUBLIC ${STBIMAGE_INSTALL_DIR}/include
-	PUBLIC ${PLFCOLONY_INSTALL_DIR}/include
 	PUBLIC ${IMGUI_INSTALL_DIR}/include
 )
 
@@ -500,9 +449,7 @@ if(MSVC)
 			COMMAND xcopy /E /I /Y \"${IMGUI_INSTALL_DIR}/include\" \"${CMAKE_CURRENT_BINARY_DIR}/export/include\"
 			COMMAND xcopy /E /I /Y \"${NVIDIA_API_INCLUDE_PATH}\" \"${CMAKE_CURRENT_BINARY_DIR}/export/include\"
 			COMMAND xcopy /E /I /Y \"${BULLET_INSTALL_DIR}/include\" \"${CMAKE_CURRENT_BINARY_DIR}/export/include\"
-			COMMAND xcopy /E /I /Y \"${ROBINHOOD_INSTALL_DIR}/include\" \"${CMAKE_CURRENT_BINARY_DIR}/export/include\"
 			COMMAND xcopy /E /I /Y \"${JSON_INSTALL_DIR}/include\" \"${CMAKE_CURRENT_BINARY_DIR}/export/include\"
-			COMMAND xcopy /E /I /Y \"${PLFCOLONY_INSTALL_DIR}/include\" \"${CMAKE_CURRENT_BINARY_DIR}/export/include\"
 			DEPENDS GLFW_LIBRARY GLAD_LIBRARY ASSIMP_LIBRARY BULLET_COLLISION_LIBRARY BULLET_DYNAMICS_LIBRARY BULLET_INVERSE_DYNAMICS_LIBRARY BULLET_SOFT_BODY_LIBRARY LINEAR_MATH_LIBRARY IMGUI_LIBRARY ${PROJECT_NAME} NVAPI_LIBRARY
 			COMMENT "Exporting ${PROJECT_NAME}..."
 		)
@@ -514,9 +461,7 @@ if(MSVC)
 			COMMAND xcopy /E /I /Y \"${GLM_INSTALL_DIR}/include\" \"${CMAKE_CURRENT_BINARY_DIR}/export/include\"
 			COMMAND xcopy /E /I /Y \"${IMGUI_INSTALL_DIR}/include\" \"${CMAKE_CURRENT_BINARY_DIR}/export/include\"
 			COMMAND xcopy /E /I /Y \"${BULLET_INSTALL_DIR}/include\" \"${CMAKE_CURRENT_BINARY_DIR}/export/include\"
-			COMMAND xcopy /E /I /Y \"${ROBINHOOD_INSTALL_DIR}/include\" \"${CMAKE_CURRENT_BINARY_DIR}/export/include\"
 			COMMAND xcopy /E /I /Y \"${JSON_INSTALL_DIR}/include\" \"${CMAKE_CURRENT_BINARY_DIR}/export/include\"
-			COMMAND xcopy /E /I /Y \"${PLFCOLONY_INSTALL_DIR}/include\" \"${CMAKE_CURRENT_BINARY_DIR}/export/include\"
 			DEPENDS GLFW_LIBRARY GLAD_LIBRARY ASSIMP_LIBRARY BULLET_COLLISION_LIBRARY BULLET_DYNAMICS_LIBRARY BULLET_INVERSE_DYNAMICS_LIBRARY BULLET_SOFT_BODY_LIBRARY LINEAR_MATH_LIBRARY IMGUI_LIBRARY ${PROJECT_NAME}
 			COMMENT "Exporting ${PROJECT_NAME}..."
 		)
@@ -525,7 +470,7 @@ elseif(UNIX)
 	add_custom_command(
 		OUTPUT ${LIBNAME}
 		COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/export_lib.sh ${LIBNAME} $<TARGET_FILE:${PROJECT_NAME}> $<TARGET_FILE:GLFW_LIBRARY> $<TARGET_FILE:GLAD_LIBRARY> $<TARGET_FILE:ASSIMP_LIBRARY> $<TARGET_FILE:IRRXML_LIBRARY> $<TARGET_FILE:ZLIB_LIBRARY> $<TARGET_FILE:BULLET_COLLISION_LIBRARY> $<TARGET_FILE:BULLET_DYNAMICS_LIBRARY> $<TARGET_FILE:BULLET_INVERSE_DYNAMICS_LIBRARY> $<TARGET_FILE:BULLET_SOFT_BODY_LIBRARY> $<TARGET_FILE:LINEAR_MATH_LIBRARY> $<TARGET_FILE:IMGUI_LIBRARY>
-		COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/export_include.sh ${CMAKE_CURRENT_BINARY_DIR}/export/include ${GLM_INSTALL_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/inc ${BULLET_INSTALL_DIR}/include ${IMGUI_INSTALL_DIR}/include ${BULLET_INSTALL_DIR}/include ${ROBINHOOD_INSTALL_DIR}/include ${JSON_INSTALL_DIR}/include ${PLFCOLONY_INSTALL_DIR}/include
+		COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/export_include.sh ${CMAKE_CURRENT_BINARY_DIR}/export/include ${GLM_INSTALL_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/inc ${BULLET_INSTALL_DIR}/include ${IMGUI_INSTALL_DIR}/include ${BULLET_INSTALL_DIR}/include ${JSON_INSTALL_DIR}/include
 		DEPENDS GLFW_LIBRARY GLAD_LIBRARY ASSIMP_LIBRARY BULLET_COLLISION_LIBRARY BULLET_DYNAMICS_LIBRARY BULLET_INVERSE_DYNAMICS_LIBRARY BULLET_SOFT_BODY_LIBRARY LINEAR_MATH_LIBRARY IMGUI_LIBRARY ${PROJECT_NAME}
 		COMMENT "Exporting ${PROJECT_NAME}..."
 	)
