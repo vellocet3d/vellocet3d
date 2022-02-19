@@ -244,7 +244,6 @@ namespace vel
 		if (!raycast.hasHit() || !raycast.m_collisionObject)
 			return {};
 
-		//TODO: why not just return the RaycastCallback instead?
 		RaycastResult r;
 		r.collisionObject = raycast.m_collisionObject;
 		r.hitpoint = raycast.m_hitPointWorld;
@@ -268,12 +267,15 @@ namespace vel
 
 		this->dynamicsWorld->convexSweepTest(castShape, convexFromWorld, convexToWorld, convexCast);
 
+		if (!convexCast.hasHit() || !convexCast.m_hitCollisionObject)
+			return {};
+
 		ConvexCastResult ccr;
 		ccr.collisionObject = convexCast.m_hitCollisionObject;
 		ccr.hitpoint = convexCast.m_hitPointWorld;
 		ccr.normal = convexCast.m_hitNormalWorld.normalized();
 		ccr.normalUpDot = ccr.normal.dot(btVector3(0, 1, 0));
-
+		
 		return ccr;
 	}
 
