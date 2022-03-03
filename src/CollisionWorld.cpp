@@ -249,6 +249,7 @@ namespace vel
 		r.hitpoint = raycast.m_hitPointWorld;
 		r.normal = raycast.m_hitNormalWorld.normalized();
 		r.distance = btVector3(from - r.hitpoint).length();
+		r.normalUpDot = r.normal.dot(btVector3(0, 1, 0));
 
 		return r;
 	}
