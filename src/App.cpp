@@ -39,7 +39,12 @@ namespace vel
 		activeScene(nullptr),
         startTime(std::chrono::high_resolution_clock::now())
     {        
-        // load default shaders
+        /* load default shaders
+		***************************************************************/
+
+
+		// shaders required for generating a cubemap from an HDR image and pre-calculating
+		// IBL data required for image based lighting
         this->assetManager.loadShader("defaultEquirectangularToCubemap", 
         "data/shaders/cubemap.vert", "data/shaders/equirectangular_to_cubemap.frag");
         
@@ -56,10 +61,12 @@ namespace vel
         "data/shaders/background.vert", "data/shaders/background.frag");
         
         
-        
+        // used for bullet debug drawer
         this->assetManager.loadShader("defaultDebug", 
         "data/shaders/default_debug.vert", "data/shaders/default_debug.frag");
         
+
+		// default PBR pipeline shader
         this->assetManager.loadShader("defaultRenderable", 
         "data/shaders/default_renderable.vert", "data/shaders/default_renderable.frag");
 
@@ -67,14 +74,15 @@ namespace vel
 			"data/shaders/default_skinned_renderable.vert", "data/shaders/default_renderable.frag");
 
 
+		// shader for static diffuse color, a basic texture unaffected by light sources
 		this->assetManager.loadShader("defaultRenderableStaticDiffuse",
 			"data/shaders/default_renderable.vert", "data/shaders/default_renderable_static_diffuse.frag");
 
 		this->assetManager.loadShader("defaultSkinnedRenderableStaticDiffuse",
 			"data/shaders/default_skinned_renderable.vert", "data/shaders/default_renderable_static_diffuse.frag");
         
-        
 
+        // shader for giving a loaded mesh an RGBA value, with no texture data, that is unaffected by light sources
 		this->assetManager.loadShader("defaultRenderableRGBA",
 			"data/shaders/default_renderable.vert", "data/shaders/default_renderable_rgba.frag");
         

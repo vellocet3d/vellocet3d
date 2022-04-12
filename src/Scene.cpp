@@ -681,7 +681,7 @@ namespace vel
 
 			// DRAW TRANSPARENTS
 
-			// TODO: not proud of this, but it get's the job done for the time being (can't use map since there's a chance keys could be the same,
+			// TODO: not proud of this, but it gets the job done for the time being (can't use map since there's a chance keys could be the same,
 			// not that using map would make this anymore acceptable for a performance crucial application)
             gpu->enableBlend();
 			this->sortedTransparentActors.clear();
