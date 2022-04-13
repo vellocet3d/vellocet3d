@@ -647,7 +647,12 @@ namespace vel
 			// so we need to reset actives so that the gpu knows to reset state to what we're suppose to be drawing
 			//gpu->resetActives(); 
 			
-			//auto& stageRenderables = s->getRenderables();
+
+			// Draw cubemap skybox
+			if (s->getDrawHdr())
+				gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, s->getActiveHdr()->envCubemap);
+
+
 			std::vector<Renderable*> transparentRenderables;
 			
 			//for (plf::colony<Renderable>::iterator it = stageRenderables.begin(); it != stageRenderables.end(); ++it)
@@ -670,13 +675,6 @@ namespace vel
 				for (auto a : r->actors.getAll())
 					this->drawActor(a, alpha);
 			}
-
-
-			// Draw cubemap skybox (must be done before transparents)
-			if (s->getDrawHdr())
-				gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, s->getActiveHdr()->envCubemap);
-			
-			
 
 
 			// DRAW TRANSPARENTS
