@@ -608,7 +608,7 @@ namespace vel
 
 		auto gpu = App::get().getGPU(); // for convenience
 
-        gpu->disableBlend(); // disable blending for opaque objects for performance (was fine before, but this should be even better)
+        gpu->disableBlend(); // disable blending for opaque objects
 
 		for (auto s : this->stages.getAll())
 		{
@@ -655,7 +655,6 @@ namespace vel
 
 			std::vector<Renderable*> transparentRenderables;
 			
-			//for (plf::colony<Renderable>::iterator it = stageRenderables.begin(); it != stageRenderables.end(); ++it)
 			for(auto r : s->getRenderables())
 			{
 				if (r->getMaterialHasAlpha())
