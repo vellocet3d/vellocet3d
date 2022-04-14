@@ -87,11 +87,13 @@ namespace vel
 		for (auto& s : j["shaders"])
 			this->loadShader(s["name"], s["vert_path"], s["frag_path"]);
 
-        for (auto& h : j["hdrs"])
+		int hdrCount = 0;
+		for (auto& h : j["hdrs"])
+		{
 			this->loadHdr(h["name"], h["path"]);
-
-		//for (auto& m : j["meshes"])
-		//	this->loadMesh(m);
+			hdrCount++;
+		}
+			
 
 		if (j.contains("meshes") && j["meshes"] != "" && !j["meshes"].is_null())
 		{
@@ -112,17 +114,6 @@ namespace vel
 			Material mat;
 			mat.name = m["name"];
 
-			if (m.contains("albedo") && m["albedo"] != "" && !m["albedo"].is_null())
-				mat.albedo = this->getTexture(m["albedo"]);
-			if (m.contains("normal") && m["normal"] != "" && !m["normal"].is_null())
-				mat.normal = this->getTexture(m["normal"]);	
-			if (m.contains("metallic") && m["metallic"] != "" && !m["metallic"].is_null())
-				mat.metallic = this->getTexture(m["metallic"]);
-			if (m.contains("roughness") && m["roughness"] != "" && !m["roughness"].is_null())
-				mat.roughness = this->getTexture(m["roughness"]);
-			if (m.contains("ao") && m["ao"] != "" && !m["ao"].is_null())
-				mat.ao = this->getTexture(m["ao"]);
-
 			if (m.contains("color") && m["color"] != "" && !m["color"].is_null())
 			{
 				mat.color = glm::vec4(
@@ -132,8 +123,24 @@ namespace vel
 					(float)m["color"][3]
 				);
 			}
-				
 
+			if (m.contains("diffuse") && m["diffuse"] != "" && !m["diffuse"].is_null())
+				mat.diffuse = this->getTexture(m["diffuse"]);
+
+			if (m.contains("albedo") && m["albedo"] != "" && !m["albedo"].is_null())
+				mat.albedo = this->getTexture(m["albedo"]);
+
+			if (m.contains("normal") && m["normal"] != "" && !m["normal"].is_null())
+				mat.normal = this->getTexture(m["normal"]);	
+
+			if (m.contains("metallic") && m["metallic"] != "" && !m["metallic"].is_null())
+				mat.metallic = this->getTexture(m["metallic"]);
+
+			if (m.contains("roughness") && m["roughness"] != "" && !m["roughness"].is_null())
+				mat.roughness = this->getTexture(m["roughness"]);
+
+			if (m.contains("ao") && m["ao"] != "" && !m["ao"].is_null())
+				mat.ao = this->getTexture(m["ao"]);
 
 			this->addMaterial(mat);
 		}
@@ -152,13 +159,24 @@ namespace vel
 
 		auto stage = this->addStage(j["name"]);
 
+		if (j.contains("renderMode"))
+		{
+			if (j["renderMode"] == "RGBA")
+				stage->setRenderMode(RenderMode::RGBA);
+			else if (j["renderMode"] == "STATIC_DIFFUSE")
+				stage->setRenderMode(RenderMode::STATIC_DIFFUSE);
+			else if (j["renderMode"] == "PBR")
+				stage->setRenderMode(RenderMode::PBR);
+			else if (j["renderMode"] == "PBR_IBL")
+				stage->setRenderMode(RenderMode::PBR_IBL);
+		}
+			
+			
 		if (j.contains("clearDepthBuffer") && !j["clearDepthBuffer"].is_null() && j["clearDepthBuffer"] != "" && j["clearDepthBuffer"])
 			stage->setClearDepthBuffer(true);
 
         if (j.contains("activeHdr") && !j["activeHdr"].is_null() && j["activeHdr"] != "")
             stage->setActiveHdr(this->getHdr(j["activeHdr"]));
-        else
-			stage->setActiveHdr(this->getHdr("defaultHdr"));
 
 		if (j.contains("drawSkybox") && j["drawSkybox"] != "" && !j["drawSkybox"].is_null())
 			stage->setDrawSkybox(j["drawSkybox"]);
@@ -615,6 +633,9 @@ namespace vel
 			if (!s->isVisible())
 				continue;
 
+			// send render mode used for this stage to gpu
+			gpu->setCurrentRenderMode(s->getRenderMode());
+
 			// clear depth buffer if flag set in stage
 			if (s->getClearDepthBuffer())
 				gpu->clearDepthBuffer();
@@ -627,9 +648,9 @@ namespace vel
 			this->cameraViewMatrix = s->getCamera()->getViewMatrix();
 
 			// these are for applying lighting to objects that are in screen space as if they were in world space, for example
-			// first person arms / weapons
-			this->IBLCameraPosition = s->getIBLCamera() == nullptr ? this->cameraPosition : s->getIBLCamera()->getPosition();
-			this->IBLOffsetMatrix = s->getIBLCamera() == nullptr ? glm::mat4(1.0f) : glm::inverse(s->getIBLCamera()->getViewMatrix());
+			// first person arms / weapons (allows us to use the view matrix of one camera only for lighting)
+			this->RenderCameraPosition = s->getIBLCamera() == nullptr ? this->cameraPosition : s->getIBLCamera()->getPosition();
+			this->RenderCameraOffset = s->getIBLCamera() == nullptr ? glm::mat4(1.0f) : glm::inverse(s->getIBLCamera()->getViewMatrix());
 
 
 
@@ -649,7 +670,7 @@ namespace vel
 			
 
 			// Draw cubemap skybox
-			if (s->getDrawSkybox())
+			if (s->getDrawSkybox() && s->getActiveHdr() != nullptr)
 				gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, s->getActiveHdr()->envCubemap);
 
 
@@ -659,7 +680,7 @@ namespace vel
 			{
 				if (r->getMaterialHasAlpha())
 				{
-					transparentRenderables.push_back(r); //TODO this reallocates every insert
+					transparentRenderables.push_back(r); //TODO this reallocates on every insert
 					continue;
 				}
 
@@ -667,7 +688,10 @@ namespace vel
 
 				// Reset gpu state for this renderable
 				gpu->useShader(r->getShader());
-				gpu->useHdr(s->getActiveHdr());
+
+				if(s->getRenderMode() == RenderMode::PBR_IBL)
+					gpu->useIBL(s->getActiveHdr());
+
 				gpu->useMesh(r->getMesh());
 				gpu->useMaterial(r->getMaterial());
 					
@@ -701,7 +725,10 @@ namespace vel
 				auto r = it->second->getStageRenderable().value();
 
 				gpu->useShader(r->getShader());
-				gpu->useHdr(s->getActiveHdr());
+
+				if (s->getRenderMode() == RenderMode::PBR_IBL)
+					gpu->useIBL(s->getActiveHdr());
+
 				gpu->useMesh(r->getMesh());
 				gpu->useMaterial(r->getMaterial());
 
@@ -718,10 +745,8 @@ namespace vel
 
 		if (a->isVisible())
 		{
-			//gpu->setShaderVec3("camPos", this->cameraPosition);
-			gpu->setShaderVec3("camPos", this->IBLCameraPosition);
-			gpu->setShaderMat4("iblOffset", this->IBLOffsetMatrix);
-			
+			gpu->setShaderVec3("camPos", this->RenderCameraPosition);
+			gpu->setShaderMat4("camOffset", this->RenderCameraOffset);
 
             gpu->setShaderMat4("projection", this->cameraProjectionMatrix);
             gpu->setShaderMat4("view", this->cameraViewMatrix);

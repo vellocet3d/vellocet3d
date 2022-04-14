@@ -14,7 +14,7 @@
 #include "vel/Material.h"
 #include "vel/CollisionDebugDrawer.h"
 #include "vel/HDR.h"
-
+#include "vel/RenderMode.h"
 
 
 namespace vel
@@ -51,6 +51,8 @@ namespace vel
         
         unsigned int                        pbrCaptureFBO;
         unsigned int                        pbrCaptureRBO;
+
+		RenderMode							currentRenderMode;
         
 
 	public:
@@ -75,7 +77,7 @@ namespace vel
 
 
 		void								useShader(Shader* s);
-        void                                useHdr(HDR* h);
+        void                                useIBL(HDR* h);
 		void								useMaterial(Material* m);
 		void								useMesh(Mesh* m);
 
@@ -102,6 +104,8 @@ namespace vel
 		void								clearTexture(Texture* t);
 
 		void                                drawSkybox(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, unsigned int cm);
+
+		void								setCurrentRenderMode(RenderMode rm);
 
 	};
 }

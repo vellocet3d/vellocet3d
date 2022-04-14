@@ -29,7 +29,8 @@ namespace vel
         irradianceShader(nullptr),
         prefilterShader(nullptr),
         brdfShader(nullptr),
-        backgroundShader(nullptr)
+        backgroundShader(nullptr),
+		currentRenderMode(RenderMode::STATIC_DIFFUSE)
 	{
         this->enableDepthTest();
         this->enableCubeMapTextures();       
@@ -42,6 +43,11 @@ namespace vel
 	}
 
 	GPU::~GPU(){}
+
+	void GPU::setCurrentRenderMode(RenderMode rm)
+	{
+		this->currentRenderMode = rm;
+	}
 
 	void GPU::resetActives()
 	{
@@ -589,7 +595,7 @@ namespace vel
 		glBindVertexArray(m->getGpuMesh()->VAO);
 	}
 
-    void GPU::useHdr(HDR* h)
+    void GPU::useIBL(HDR* h)
     {
         this->activeHdr = h;
         
@@ -611,29 +617,60 @@ namespace vel
 	{
 		this->activeMaterial = m;
 
-		this->setShaderVec4("color", m->color);
+		if (this->currentRenderMode == RenderMode::RGBA)
+		{
+			this->setShaderVec4("color", m->color);
+		}
+		else if (this->currentRenderMode == RenderMode::STATIC_DIFFUSE)
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, m->diffuse->id);
+			this->setShaderInt("diffuseMap", 0);
+		}
+		else if (this->currentRenderMode == RenderMode::PBR)
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, m->albedo->id);
+			this->setShaderInt("albedoMap", 0);
 
-		//std::cout << glm::to_string(m->color) << std::endl;
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, m->normal->id);
+			this->setShaderInt("normalMap", 1);
 
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, m->albedo->id);
-		this->setShaderInt("albedoMap", 3);
-        
-        glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D, m->normal->id);
-		this->setShaderInt("normalMap", 4);
-        
-        glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, m->metallic->id);
-		this->setShaderInt("metallicMap", 5);
-        
-        glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_2D, m->roughness->id);
-		this->setShaderInt("roughnessMap", 6);
-        
-        glActiveTexture(GL_TEXTURE7);
-		glBindTexture(GL_TEXTURE_2D, m->ao->id);
-		this->setShaderInt("aoMap", 7);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, m->metallic->id);
+			this->setShaderInt("metallicMap", 2);
+
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, m->roughness->id);
+			this->setShaderInt("roughnessMap", 3);
+
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_2D, m->ao->id);
+			this->setShaderInt("aoMap", 4);
+		}
+		else if (this->currentRenderMode == RenderMode::PBR_IBL)
+		{
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, m->albedo->id);
+			this->setShaderInt("albedoMap", 3);
+
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_2D, m->normal->id);
+			this->setShaderInt("normalMap", 4);
+
+			glActiveTexture(GL_TEXTURE5);
+			glBindTexture(GL_TEXTURE_2D, m->metallic->id);
+			this->setShaderInt("metallicMap", 5);
+
+			glActiveTexture(GL_TEXTURE6);
+			glBindTexture(GL_TEXTURE_2D, m->roughness->id);
+			this->setShaderInt("roughnessMap", 6);
+
+			glActiveTexture(GL_TEXTURE7);
+			glBindTexture(GL_TEXTURE_2D, m->ao->id);
+			this->setShaderInt("aoMap", 7);
+		}
 	}
 
 	void GPU::drawGpuMesh()

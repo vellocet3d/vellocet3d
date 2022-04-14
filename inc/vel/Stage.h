@@ -16,11 +16,14 @@
 #include "vel/Sensor.h"
 #include "vel/GPU.h"
 #include "vel/HDR.h"
+#include "vel/RenderMode.h"
 
 
 namespace vel
 {
 	class Scene;
+	
+
 
 	class Stage
 	{
@@ -34,6 +37,7 @@ namespace vel
 		CollisionWorld*									collisionWorld;
 		bool											clearDepthBuffer;
 		std::string										name;
+		RenderMode										renderMode;
         HDR*                                            activeHdr;
 		bool											drawSkybox;
 
@@ -81,6 +85,9 @@ namespace vel
 		Camera*											getIBLCamera();
 		
 		Armature*										getArmature(std::string armatureName);
+
+		RenderMode										getRenderMode();
+		void											setRenderMode(RenderMode rm);
 
 		
 

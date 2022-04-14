@@ -16,6 +16,7 @@ namespace vel
 {
 
 	Stage::Stage(std::string name) :
+		renderMode(RenderMode::STATIC_DIFFUSE),
 		visible(true),
 		collisionWorld(nullptr),
 		clearDepthBuffer(false),
@@ -28,6 +29,16 @@ namespace vel
 	Stage::~Stage()
 	{
 		delete this->collisionWorld;
+	}
+
+	void Stage::setRenderMode(RenderMode rm)
+	{
+		this->renderMode = rm;
+	}
+
+	RenderMode Stage::getRenderMode()
+	{
+		return this->renderMode;
 	}
 
 	const std::string& Stage::getName() const

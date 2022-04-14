@@ -16,7 +16,7 @@ namespace vel
     class Renderable
     {
     private:
-		std::string					name;		
+		std::string					name;
 		Shader*						shader;
 		Mesh*						mesh;
 		Material*					material;
