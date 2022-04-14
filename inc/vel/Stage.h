@@ -35,7 +35,7 @@ namespace vel
 		bool											clearDepthBuffer;
 		std::string										name;
         HDR*                                            activeHdr;
-		bool											drawHdr;
+		bool											drawSkybox;
 
 		// Need this to apply correct IBL to first person stage that
 		// logically does not have a view matrix (fixed to screen). With this member
@@ -74,8 +74,8 @@ namespace vel
 		
 		void 											setActiveHdr(HDR* h);
 		HDR* 											getActiveHdr();
-		void											setDrawHdr(bool b);
-		bool											getDrawHdr();
+		void											setDrawSkybox(bool b);
+		bool											getDrawSkybox();
 
 		void											setIBLCamera(Camera* c);
 		Camera*											getIBLCamera();

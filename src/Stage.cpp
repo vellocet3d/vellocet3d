@@ -21,7 +21,7 @@ namespace vel
 		clearDepthBuffer(false),
 		name(name),
         activeHdr(nullptr),
-		drawHdr(true),
+		drawSkybox(false),
 		IBLCamera(nullptr)
 	{}
 
@@ -60,14 +60,14 @@ namespace vel
         return this->activeHdr;
     }
 
-	void Stage::setDrawHdr(bool b)
+	void Stage::setDrawSkybox(bool b)
 	{
-		this->drawHdr = b;
+		this->drawSkybox = b;
 	}
 
-	bool Stage::getDrawHdr()
+	bool Stage::getDrawSkybox()
 	{
-		return this->drawHdr;
+		return this->drawSkybox;
 	}
 
 	Armature* Stage::addArmature(Armature a, std::string defaultAnimation, std::vector<std::string> actorsIn)

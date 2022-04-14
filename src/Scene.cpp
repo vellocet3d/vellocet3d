@@ -160,8 +160,8 @@ namespace vel
         else
 			stage->setActiveHdr(this->getHdr("defaultHdr"));
 
-		if (j.contains("drawHdr") && j["drawHdr"] != "" && !j["drawHdr"].is_null())
-			stage->setDrawHdr(j["drawHdr"]);
+		if (j.contains("drawSkybox") && j["drawSkybox"] != "" && !j["drawSkybox"].is_null())
+			stage->setDrawSkybox(j["drawSkybox"]);
 
 		if (j["camera"]["type"] == "perspective")
 			stage->addPerspectiveCamera(j["camera"]["near"], j["camera"]["far"], j["camera"]["fov"]);
@@ -649,7 +649,7 @@ namespace vel
 			
 
 			// Draw cubemap skybox
-			if (s->getDrawHdr())
+			if (s->getDrawSkybox())
 				gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, s->getActiveHdr()->envCubemap);
 
 
