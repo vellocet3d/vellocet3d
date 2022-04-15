@@ -578,6 +578,8 @@ if (!this->meshTrackers.exists(name))
 		}
 		else
 		{
+			if (!m.hasAlphaChannel && m.diffuse && m.diffuse->alphaChannel)
+				m.hasAlphaChannel = true;
 			if (!m.hasAlphaChannel && m.albedo && m.albedo->alphaChannel)
 				m.hasAlphaChannel = true;
 			if (!m.hasAlphaChannel && m.normal && m.normal->alphaChannel)
@@ -591,16 +593,19 @@ if (!this->meshTrackers.exists(name))
 		}
 
         // add default textures to material for those which are not provided
-        if(m.albedo == nullptr)
-            m.albedo = this->getTexture("defaultAlbedo");
-        if(m.normal == nullptr)
-            m.normal = this->getTexture("defaultNormal");
-        if(m.metallic == nullptr)
-            m.metallic = this->getTexture("defaultMetallic");
-        if(m.roughness == nullptr)
-            m.roughness = this->getTexture("defaultRoughness");
-        if(m.ao == nullptr)
-            m.ao = this->getTexture("defaultAO");
+		// removed when we added renderModes, it's expected to provide a texture for every
+		// element in a material by user, if they don't have one, they must specify that they
+		// want to use default**
+        //if(m.albedo == nullptr)
+        //    m.albedo = this->getTexture("defaultAlbedo");
+        //if(m.normal == nullptr)
+        //    m.normal = this->getTexture("defaultNormal");
+        //if(m.metallic == nullptr)
+        //    m.metallic = this->getTexture("defaultMetallic");
+        //if(m.roughness == nullptr)
+        //    m.roughness = this->getTexture("defaultRoughness");
+        //if(m.ao == nullptr)
+        //    m.ao = this->getTexture("defaultAO");
         
 
 		auto materialPtr = this->materials.insert(m.name, m);

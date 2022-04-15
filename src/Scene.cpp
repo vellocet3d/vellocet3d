@@ -649,8 +649,8 @@ namespace vel
 
 			// these are for applying lighting to objects that are in screen space as if they were in world space, for example
 			// first person arms / weapons (allows us to use the view matrix of one camera only for lighting)
-			this->RenderCameraPosition = s->getIBLCamera() == nullptr ? this->cameraPosition : s->getIBLCamera()->getPosition();
-			this->RenderCameraOffset = s->getIBLCamera() == nullptr ? glm::mat4(1.0f) : glm::inverse(s->getIBLCamera()->getViewMatrix());
+			this->renderCameraPosition = s->getIBLCamera() == nullptr ? this->cameraPosition : s->getIBLCamera()->getPosition();
+			this->renderCameraOffset = s->getIBLCamera() == nullptr ? glm::mat4(1.0f) : glm::inverse(s->getIBLCamera()->getViewMatrix());
 
 
 
@@ -745,8 +745,8 @@ namespace vel
 
 		if (a->isVisible())
 		{
-			gpu->setShaderVec3("camPos", this->RenderCameraPosition);
-			gpu->setShaderMat4("camOffset", this->RenderCameraOffset);
+			gpu->setShaderVec3("camPos", this->renderCameraPosition);
+			gpu->setShaderMat4("camOffset", this->renderCameraOffset);
 
             gpu->setShaderMat4("projection", this->cameraProjectionMatrix);
             gpu->setShaderMat4("view", this->cameraViewMatrix);

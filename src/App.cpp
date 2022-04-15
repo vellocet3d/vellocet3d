@@ -46,45 +46,45 @@ namespace vel
 		// shaders required for generating a cubemap from an HDR image and pre-calculating
 		// IBL data required for image based lighting
         this->assetManager.loadShader("defaultEquirectangularToCubemap", 
-        "data/shaders/cubemap.vert", "data/shaders/equirectangular_to_cubemap.frag");
+        "data/shaders/defaults/cubemap.vert", "data/shaders/defaults/equirectangular_to_cubemap.frag");
         
         this->assetManager.loadShader("defaultIrradianceConvolution", 
-        "data/shaders/cubemap.vert", "data/shaders/irradiance_convolution.frag");
+        "data/shaders/defaults/cubemap.vert", "data/shaders/defaults/irradiance_convolution.frag");
         
         this->assetManager.loadShader("defaultPrefilter", 
-        "data/shaders/cubemap.vert", "data/shaders/prefilter.frag");
+        "data/shaders/defaults/cubemap.vert", "data/shaders/defaults/prefilter.frag");
         
         this->assetManager.loadShader("defaultBrdf", 
-        "data/shaders/brdf.vert", "data/shaders/brdf.frag");
+        "data/shaders/defaults/brdf.vert", "data/shaders/defaults/brdf.frag");
         
         this->assetManager.loadShader("defaultBackground", 
-        "data/shaders/background.vert", "data/shaders/background.frag");
+        "data/shaders/defaults/background.vert", "data/shaders/defaults/background.frag");
         
         
         // used for bullet debug drawer
         this->assetManager.loadShader("defaultDebug", 
-        "data/shaders/default_debug.vert", "data/shaders/default_debug.frag");
+        "data/shaders/defaults/debug.vert", "data/shaders/defaults/debug.frag");
         
 
 		// default PBR pipeline shader
-        this->assetManager.loadShader("defaultRenderable", 
-        "data/shaders/default_renderable.vert", "data/shaders/default_renderable.frag");
+        this->assetManager.loadShader("defaultPBRIBL", 
+        "data/shaders/defaults/default.vert", "data/shaders/defaults/pbr_ibl.frag");
 
 		this->assetManager.loadShader("defaultSkinnedRenderable",
-			"data/shaders/default_skinned_renderable.vert", "data/shaders/default_renderable.frag");
+			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/pbr_ibl.frag");
 
 
 		// shader for static diffuse color, a basic texture unaffected by light sources
-		this->assetManager.loadShader("defaultRenderableStaticDiffuse",
-			"data/shaders/default_renderable.vert", "data/shaders/default_renderable_static_diffuse.frag");
+		this->assetManager.loadShader("defaultStaticDiffuse",
+			"data/shaders/defaults/default.vert", "data/shaders/defaults/static_diffuse.frag");
 
-		this->assetManager.loadShader("defaultSkinnedRenderableStaticDiffuse",
-			"data/shaders/default_skinned_renderable.vert", "data/shaders/default_renderable_static_diffuse.frag");
+		this->assetManager.loadShader("defaultStaticDiffuseSkinned",
+			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/static_diffuse.frag");
         
 
         // shader for giving a loaded mesh an RGBA value, with no texture data, that is unaffected by light sources
-		this->assetManager.loadShader("defaultRenderableRGBA",
-			"data/shaders/default_renderable.vert", "data/shaders/default_renderable_rgba.frag");
+		this->assetManager.loadShader("defaultRGBA",
+			"data/shaders/defaults/default.vert", "data/shaders/defaults/rgba.frag");
         
         
         
