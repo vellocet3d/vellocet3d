@@ -66,9 +66,9 @@ namespace vel
         "data/shaders/defaults/debug.vert", "data/shaders/defaults/debug.frag");
         
 
-		// default PBR pipeline shader
+		// default PBR_IBL pipeline shader
         this->assetManager.loadShader("defaultPBRIBL", 
-        "data/shaders/defaults/default.vert", "data/shaders/defaults/pbr_ibl.frag");
+        "data/shaders/defaults/default.vert", "data/shaders/defaults/pbr_ibl_light_test.frag");
 
 		this->assetManager.loadShader("defaultSkinnedRenderable",
 			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/pbr_ibl.frag");
