@@ -22,7 +22,7 @@ namespace vel
 	GPU::GPU(Window* w) :
 		window(w),
 		activeShader(nullptr),
-        activeInfiniteHDR(nullptr),
+        activeInfiniteCubemap(nullptr),
 		activeMesh(nullptr),
 		activeMaterial(nullptr),
         equirectangularToCubemapShader(nullptr),
@@ -52,7 +52,7 @@ namespace vel
 	void GPU::resetActives()
 	{
 		this->activeShader = nullptr;
-        this->activeInfiniteHDR = nullptr;
+        this->activeInfiniteCubemap = nullptr;
 		this->activeMesh = nullptr;
 		this->activeMaterial = nullptr;
 	}
@@ -86,7 +86,7 @@ namespace vel
 		glDeleteTextures(1, &t->id);
 	}
     
-    void GPU::clearInfiniteHDR(InfiniteHDR* h)
+    void GPU::clearInfiniteCubemap(Cubemap* h)
     {
         glDeleteTextures(1, &h->hdrTexture);
         glDeleteTextures(1, &h->envCubemap);
@@ -315,7 +315,7 @@ namespace vel
 		stbi_image_free(t->primaryImageData.data);
 	}
 
-    void GPU::loadInfiniteHDR(InfiniteHDR* h)
+    void GPU::loadInfiniteCubemap(Cubemap* h)
     {		
         // pbr: reset framebuffers
         // ------------------------
@@ -519,9 +519,9 @@ namespace vel
 		return this->activeShader;
 	}
 
-    const InfiniteHDR* const GPU::getActiveInfiniteHDR() const
+    const Cubemap* const GPU::getActiveInfiniteCubemap() const
 	{
-		return this->activeInfiniteHDR;
+		return this->activeInfiniteCubemap;
 	}
 
 	const Mesh* const GPU::getActiveMesh() const
@@ -595,21 +595,21 @@ namespace vel
 		glBindVertexArray(m->getGpuMesh()->VAO);
 	}
 
-    void GPU::useIBL(InfiniteHDR* h)
+    void GPU::useIBL(Cubemap* c)
     {
-        this->activeInfiniteHDR = h;
+        this->activeInfiniteCubemap = c;
         
         // bind pre-computed IBL data
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, h->irradianceMap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, c->irradianceMap);
         this->setShaderInt("irradianceMap", 0);
         
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, h->prefilterMap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, c->prefilterMap);
         this->setShaderInt("prefilterMap", 1);
         
         glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, h->brdfLUTTexture);
+        glBindTexture(GL_TEXTURE_2D, c->brdfLUTTexture);
         this->setShaderInt("brdfLUT", 2);
     }
 

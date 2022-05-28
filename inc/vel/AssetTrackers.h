@@ -8,7 +8,7 @@
 #include "vel/Texture.h"
 #include "vel/Material.h"
 #include "vel/Renderable.h"
-#include "vel/InfiniteHDR.h"
+#include "vel/Cubemap.h"
 #include "vel/Animation.h"
 #include "vel/Armature.h"
 
@@ -34,8 +34,8 @@ namespace vel
 		size_t 			usageCount = 0;
 	};
     
-    struct InfiniteHDRTracker{
-		InfiniteHDR*	ptr = nullptr;
+    struct InfiniteCubemapTracker{
+		Cubemap*	ptr = nullptr;
 		bool 			gpuLoaded = false;
 		size_t 			usageCount = 0;
 	};

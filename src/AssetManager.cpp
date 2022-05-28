@@ -45,11 +45,11 @@ namespace vel
 			this->texturesThatNeedGpuLoad.pop_front();
 		}
         
-        for(auto& h : this->infiniteHDRsThatNeedGpuLoad)
+        for(auto& h : this->infiniteCubemapsThatNeedGpuLoad)
 		{
-			this->gpu->loadInfiniteHDR(h->ptr);
+			this->gpu->loadInfiniteCubemap(h->ptr);
 			h->gpuLoaded = true;
-			this->infiniteHDRsThatNeedGpuLoad.pop_front();
+			this->infiniteCubemapsThatNeedGpuLoad.pop_front();
 		}        
 	}
 
@@ -82,12 +82,12 @@ namespace vel
 			return;
 		}
         
-        if (this->infiniteHDRsThatNeedGpuLoad.size() > 0)
+        if (this->infiniteCubemapsThatNeedGpuLoad.size() > 0)
 		{
-			auto hdrTracker = this->infiniteHDRsThatNeedGpuLoad.at(0);
-			this->gpu->loadInfiniteHDR(hdrTracker->ptr);
+			auto hdrTracker = this->infiniteCubemapsThatNeedGpuLoad.at(0);
+			this->gpu->loadInfiniteCubemap(hdrTracker->ptr);
 			hdrTracker->gpuLoaded = true;
-			this->infiniteHDRsThatNeedGpuLoad.pop_front();
+			this->infiniteCubemapsThatNeedGpuLoad.pop_front();
 			return;
 		}
 	}
@@ -439,14 +439,14 @@ if (!this->meshTrackers.exists(name))
 
     /* HDRs
 	--------------------------------------------------*/
-    std::string AssetManager::loadInfiniteHDR(std::string name, std::string path)
+    std::string AssetManager::loadInfiniteCubemap(std::string name, std::string path)
     {
-        if (this->infiniteHDRTrackers.exists(name))
+        if (this->infiniteCubemapTrackers.exists(name))
 		{
 #ifdef DEBUG_LOG
-	Log::toCliAndFile("Existing InfiniteHDR, bypass reload: " + name);
+	Log::toCliAndFile("Existing Cubemap, bypass reload: " + name);
 #endif
-			auto h = this->infiniteHDRTrackers.get(name);
+			auto h = this->infiniteCubemapTrackers.get(name);
 			if(h->usageCount > 0)
 			{
 				h->usageCount++;
@@ -455,15 +455,15 @@ if (!this->meshTrackers.exists(name))
 			else
 			{
 				std::this_thread::sleep_for(100ms);
-				return this->loadInfiniteHDR(name, path);
+				return this->loadInfiniteCubemap(name, path);
 			}			
 		}
         
 #ifdef DEBUG_LOG
-	Log::toCliAndFile("Load new InfiniteHDR: " + name);
+	Log::toCliAndFile("Load new Cubemap: " + name);
 #endif
 
-        InfiniteHDR hdr;
+        Cubemap hdr;
         hdr.name = name;
         stbi_set_flip_vertically_on_load(true);
         hdr.primaryImageData.dataf = stbi_loadf(
@@ -478,7 +478,7 @@ if (!this->meshTrackers.exists(name))
         
 #ifdef DEBUG_LOG
 	if (!hdr.primaryImageData.dataf)
-		Log::crash("AssetManager::loadInfiniteHDR(): Unable to load hdr at path: " + path);
+		Log::crash("AssetManager::loadInfiniteCubemap(): Unable to load hdr at path: " + path);
 #endif
 
         if (hdr.primaryImageData.nrComponents == 1)
@@ -489,59 +489,59 @@ if (!this->meshTrackers.exists(name))
             hdr.primaryImageData.format = GL_RGBA;
         
         
-        auto hdrPtr = this->infiniteHDRs.insert(hdr.name, hdr);
+        auto hdrPtr = this->infiniteCubemaps.insert(hdr.name, hdr);
         
-        InfiniteHDRTracker t;
+        InfiniteCubemapTracker t;
         t.ptr = hdrPtr;
 		t.usageCount++;
         
-		this->infiniteHDRsThatNeedGpuLoad.push_back(this->infiniteHDRTrackers.insert(hdr.name, t));
+		this->infiniteCubemapsThatNeedGpuLoad.push_back(this->infiniteCubemapTrackers.insert(hdr.name, t));
 
 		return name;
     }
     
-    InfiniteHDR* AssetManager::getInfiniteHDR(std::string name)
+    Cubemap* AssetManager::getInfiniteCubemap(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->infiniteHDRTrackers.exists(name))
-		Log::crash("AssetManager::getInfiniteHDR(): Attempting to get InfiniteHDR that does not exist: " + name);
+	if (!this->infiniteCubemapTrackers.exists(name))
+		Log::crash("AssetManager::getInfiniteCubemap(): Attempting to get Cubemap that does not exist: " + name);
 #endif
 
-		return this->infiniteHDRTrackers.get(name)->ptr;		
+		return this->infiniteCubemapTrackers.get(name)->ptr;		
 	}
 
-	bool AssetManager::infiniteHDRIsGpuLoaded(std::string name)
+	bool AssetManager::infiniteCubemapIsGpuLoaded(std::string name)
 	{
-		return this->infiniteHDRTrackers.get(name)->gpuLoaded;
+		return this->infiniteCubemapTrackers.get(name)->gpuLoaded;
 	}
     
-    void AssetManager::removeInfiniteHDR(std::string name)
+    void AssetManager::removeInfiniteCubemap(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->infiniteHDRTrackers.exists(name))
-		Log::crash("AssetManager::removeInfiniteHDR(): Attempting to remove InfiniteHDR that does not exist: " + name);
+	if (!this->infiniteCubemapTrackers.exists(name))
+		Log::crash("AssetManager::removeInfiniteCubemap(): Attempting to remove Cubemap that does not exist: " + name);
 #endif
 
-		auto h = this->infiniteHDRTrackers.get(name);
+		auto h = this->infiniteCubemapTrackers.get(name);
 		h->usageCount--;
 		if (h->usageCount == 0)
 		{
 #ifdef DEBUG_LOG
-	Log::toCliAndFile("Full remove InfiniteHDR: " + name);
+	Log::toCliAndFile("Full remove Cubemap: " + name);
 #endif
 			if (!h->gpuLoaded)
-				for (size_t i = 0; i < this->infiniteHDRsThatNeedGpuLoad.size(); i++)
-					if (this->infiniteHDRsThatNeedGpuLoad.at(i) == h)
-						this->infiniteHDRsThatNeedGpuLoad.erase(this->infiniteHDRsThatNeedGpuLoad.begin() + i);
+				for (size_t i = 0; i < this->infiniteCubemapsThatNeedGpuLoad.size(); i++)
+					if (this->infiniteCubemapsThatNeedGpuLoad.at(i) == h)
+						this->infiniteCubemapsThatNeedGpuLoad.erase(this->infiniteCubemapsThatNeedGpuLoad.begin() + i);
 			else
-				this->gpu->clearInfiniteHDR(h->ptr);
+				this->gpu->clearInfiniteCubemap(h->ptr);
 			
-			this->infiniteHDRs.erase(name);
-			this->infiniteHDRTrackers.erase(name);
+			this->infiniteCubemaps.erase(name);
+			this->infiniteCubemapTrackers.erase(name);
 		}
 #ifdef DEBUG_LOG
 	else
-		Log::toCliAndFile("Decrement InfiniteHDR usageCount, retain: " + name);
+		Log::toCliAndFile("Decrement Cubemap usageCount, retain: " + name);
 #endif
 
     }

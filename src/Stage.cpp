@@ -21,9 +21,7 @@ namespace vel
 		collisionWorld(nullptr),
 		clearDepthBuffer(false),
 		name(name),
-        activeHdr(nullptr),
-		drawSkybox(false),
-		IBLCamera(nullptr)
+		useSceneSpaceLighting(true)
 	{}
 
 	Stage::~Stage()
@@ -51,34 +49,14 @@ namespace vel
 		return this->armatures.get(armatureName);
 	}
 
-	void Stage::setIBLCamera(Camera* c)
+	void Stage::setUseSceneSpaceLighting(bool b)
 	{
-		this->IBLCamera = c;
+		this->useSceneSpaceLighting = b;
 	}
 
-	Camera* Stage::getIBLCamera()
+	bool Stage::getUseSceneSpaceLighting()
 	{
-		return this->IBLCamera;
-	}
-
-    void Stage::setActiveHdr(HDR* h)
-    {
-        this->activeHdr = h;
-    }
-    
-    HDR* Stage::getActiveHdr()
-    {
-        return this->activeHdr;
-    }
-
-	void Stage::setDrawSkybox(bool b)
-	{
-		this->drawSkybox = b;
-	}
-
-	bool Stage::getDrawSkybox()
-	{
-		return this->drawSkybox;
+		return this->useSceneSpaceLighting;
 	}
 
 	Armature* Stage::addArmature(Armature a, std::string defaultAnimation, std::vector<std::string> actorsIn)
@@ -153,23 +131,13 @@ namespace vel
 		this->visible = true;
 	}
 
-	void Stage::addPerspectiveCamera(float nearPlane, float farPlane, float fov)
+	void Stage::addCamera(CameraType ct, float nearPlane, float farPlane, float fovOrScale)
 	{
 		this->camera = Camera(
-			CameraType::PERSPECTIVE,
+			ct,
 			nearPlane,
 			farPlane,
-			fov
-		);
-	}
-
-	void Stage::addOrthographicCamera(float nearPlane, float farPlane, float scale)
-	{
-		this->camera = Camera(
-			CameraType::ORTHOGRAPHIC,
-			nearPlane,
-			farPlane,
-			scale
+			fovOrScale
 		);
 	}
 

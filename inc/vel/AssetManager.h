@@ -13,7 +13,7 @@
 #include "vel/Texture.h"
 #include "vel/Material.h"
 #include "vel/Renderable.h"
-#include "vel/InfiniteHDR.h"
+#include "vel/Cubemap.h"
 #include "vel/Animation.h"
 #include "vel/Armature.h"
 
@@ -40,9 +40,12 @@ namespace vel
 		sac<TextureTracker> 								textureTrackers;
 		std::deque<TextureTracker*>							texturesThatNeedGpuLoad;
 
-        sac<InfiniteHDR>									infiniteHDRs;
-		sac<InfiniteHDRTracker> 							infiniteHDRTrackers;
-		std::deque<InfiniteHDRTracker*>						infiniteHDRsThatNeedGpuLoad;
+        sac<Cubemap>										infiniteCubemaps;
+		sac<InfiniteCubemapTracker> 						infiniteCubemapTrackers;
+		std::deque<InfiniteCubemapTracker*>					infiniteCubemapsThatNeedGpuLoad;
+
+		// TODO: when we do local cubemaps, they will be a struct of Cubemap and transform data, since
+		// infinite cubemaps have no transforms, just image data, they are simply the Cubemap struct
 
 		sac<Material>										materials;
 		sac<MaterialTracker> 								materialTrackers;
@@ -82,10 +85,10 @@ namespace vel
 		void						removeTexture(std::string name);
         
         
-        std::string                 loadInfiniteHDR(std::string name, std::string path);
-        InfiniteHDR*				getInfiniteHDR(std::string name);
-		bool						infiniteHDRIsGpuLoaded(std::string name);
-		void						removeInfiniteHDR(std::string name);
+        std::string                 loadInfiniteCubemap(std::string name, std::string path);
+        Cubemap*					getInfiniteCubemap(std::string name);
+		bool						infiniteCubemapIsGpuLoaded(std::string name);
+		void						removeInfiniteCubemap(std::string name);
         
 
 		std::string					addMaterial(Material m);

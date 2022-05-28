@@ -15,7 +15,6 @@
 #include "vel/CollisionDebugDrawer.h"
 #include "vel/Sensor.h"
 #include "vel/GPU.h"
-#include "vel/HDR.h"
 #include "vel/RenderMode.h"
 
 
@@ -38,14 +37,7 @@ namespace vel
 		bool											clearDepthBuffer;
 		std::string										name;
 		RenderMode										renderMode;
-        HDR*                                            activeHdr;
-		bool											drawSkybox;
-
-		// Need this to apply correct IBL to first person stage that
-		// logically does not have a view matrix (fixed to screen). With this member
-		// we can obtain what the correct IBL would be if the objects in this stage where
-		// using the camera pointed to by IBLCamera.
-		Camera*											IBLCamera;
+		bool											useSceneSpaceLighting;
 		
 		void											_removeActor(Actor* a);
 
@@ -64,8 +56,7 @@ namespace vel
 		std::optional<Camera>&							getCamera();
 		void											show();
 		void											hide();
-		void											addPerspectiveCamera(float nearPlane, float farPlane, float fov);
-		void											addOrthographicCamera(float nearPlane, float farPlane, float scale);
+		void											addCamera(CameraType ct, float nearPlane, float farPlane, float fovOrScale);
 		const bool										isVisible();
 		void											setClearDepthBuffer(bool b);
 		bool											getClearDepthBuffer();
@@ -76,19 +67,13 @@ namespace vel
 		Armature*										addArmature(Armature a, std::string defaultAnimation, std::vector<std::string> actors);	
 		const std::string&								getName() const;
 		
-		void 											setActiveHdr(HDR* h);
-		HDR* 											getActiveHdr();
-		void											setDrawSkybox(bool b);
-		bool											getDrawSkybox();
-
-		void											setIBLCamera(Camera* c);
-		Camera*											getIBLCamera();
-		
 		Armature*										getArmature(std::string armatureName);
 
 		RenderMode										getRenderMode();
 		void											setRenderMode(RenderMode rm);
 
+		void											setUseSceneSpaceLighting(bool b);
+		bool											getUseSceneSpaceLighting();
 		
 
 	};

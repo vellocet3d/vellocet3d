@@ -21,22 +21,53 @@ using json = nlohmann::json;
 namespace vel
 {
 	Scene::Scene() :
+		camera(Camera(CameraType::PERSPECTIVE, 0.1f, 250.0f, 60.0f)),
+		activeInfiniteCubemap(nullptr),
+		drawSkybox(false),
 		mainMemoryloaded(false),
 		swapWhenLoaded(false),
 		animationTime(0.0),
 		fixedAnimationTime(0.0)
 	{
 		this->sortedTransparentActors.reserve(1000); // reserve space for 1000 transparent actors (won't reallocate until that limit reached)
+
+		this->camera.setPosition(glm::vec3(0.0f, 2.0f, 0.0f));
+		this->camera.setLookAt(glm::vec3(0.0f, 0.0f, -1.0f));
 	}
 	
+	Scene::~Scene()
+	{
+		this->freeAssets();
+	}
+
+	Camera* Scene::getCamera()
+	{
+		return &this->camera;
+	}
+
 	void Scene::setName(std::string n)
 	{
 		this->name = n;
 	}
 
-	Scene::~Scene()
+	void Scene::setActiveInfiniteCubemap(Cubemap* c)
 	{
-		this->freeAssets();
+		this->activeInfiniteCubemap = c;
+	}
+
+	Cubemap* Scene::getActiveInfiniteCubemap()
+	{
+		return this->activeInfiniteCubemap;
+	}
+
+	void Scene::setDrawSkybox(bool b)
+	{
+		this->drawSkybox = b;
+	}
+
+	bool Scene::getDrawSkybox()
+	{
+		return this->drawSkybox;
 	}
 
 	void Scene::freeAssets()
@@ -59,8 +90,8 @@ namespace vel
 		for(auto& name : this->meshesInUse)
 			App::get().getAssetManager().removeMesh(name);
 		
-        for(auto& name : this->infiniteHDRsInUse)
-			App::get().getAssetManager().removeInfiniteHDR(name);
+        for(auto& name : this->infiniteCubemapsInUse)
+			App::get().getAssetManager().removeInfiniteCubemap(name);
         
 		for(auto& name : this->shadersInUse)
 			App::get().getAssetManager().removeShader(name);
@@ -88,8 +119,43 @@ namespace vel
 			this->loadShader(s["name"], s["vert_path"], s["frag_path"]);
 		
 		// Load infinitely distant hdr images (cubemaps with computed data for IBL)
-		for (auto& h : j["infiniteHDRs"])
-			this->loadInfiniteHDR(h["name"], h["path"]);
+		for (auto& h : j["infiniteCubemaps"])
+			this->loadInfiniteCubemap(h["name"], h["path"]);
+
+		// Set active infinite cubemap if parameter provided
+		if (j.contains("activeInfiniteCubemap") && !j["activeInfiniteCubemap"].is_null() && j["activeInfiniteCubemap"] != "")
+			this->setActiveInfiniteCubemap(this->getInfiniteCubemap(j["activeInfiniteCubemap"]));
+
+		// Set whether or not the scene should draw a skybox (which would use the previously set "activeInfiniteCubemap")
+		if (j.contains("drawSkybox") && j["drawSkybox"] != "" && !j["drawSkybox"].is_null())
+			this->setDrawSkybox(j["drawSkybox"]);
+
+		// Update camera
+		if (j.contains("camera") && j["camera"] != "" && !j["camera"].is_null())
+		{
+			if (j["camera"]["type"] == "perspective")
+				this->camera = Camera(CameraType::PERSPECTIVE, j["camera"]["near"], j["camera"]["far"], j["camera"]["fov"]);
+			else if (j["camera"]["type"] == "orthographic")
+				this->camera = Camera(CameraType::ORTHOGRAPHIC, j["camera"]["near"], j["camera"]["far"], j["camera"]["scale"]);
+#ifdef DEBUG_LOG
+			else
+				Log::crash("Scene::loadConfigFile(): config contains a camera type other than 'perspective' or 'orthographic'");
+#endif
+
+			this->camera.setPosition(glm::vec3(
+				(float)j["camera"]["position"][0],
+				(float)j["camera"]["position"][1],
+				(float)j["camera"]["position"][2]
+			));
+
+			this->camera.setLookAt(glm::vec3(
+				(float)j["camera"]["lookat"][0],
+				(float)j["camera"]["lookat"][1],
+				(float)j["camera"]["lookat"][2]
+			));
+
+		}
+
 
 		// Load meshes from .fbx files, will also load in associated armatures
 		if (j.contains("meshes") && j["meshes"] != "" && !j["meshes"].is_null())
@@ -154,52 +220,52 @@ namespace vel
 		}
 
 		// Load stages
-
-		auto stage = this->addStage(j["name"]);
-
-		if (j.contains("renderMode"))
+		for (auto& s : j["stages"])
 		{
-			if (j["renderMode"] == "RGBA")
-				stage->setRenderMode(RenderMode::RGBA);
-			else if (j["renderMode"] == "STATIC_DIFFUSE")
-				stage->setRenderMode(RenderMode::STATIC_DIFFUSE);
-			else if (j["renderMode"] == "PBR")
-				stage->setRenderMode(RenderMode::PBR);
-			else if (j["renderMode"] == "PBR_IBL")
-				stage->setRenderMode(RenderMode::PBR_IBL);
-		}
-			
-			
-		if (j.contains("clearDepthBuffer") && !j["clearDepthBuffer"].is_null() && j["clearDepthBuffer"] != "" && j["clearDepthBuffer"])
-			stage->setClearDepthBuffer(true);
+			auto stage = this->addStage(j["name"]);
 
-        if (j.contains("activeHdr") && !j["activeHdr"].is_null() && j["activeHdr"] != "")
-            stage->setActiveHdr(this->getInfiniteHDR(j["activeHdr"]));
+			if (s.contains("renderMode"))
+			{
+				if (s["renderMode"] == "RGBA")
+					stage->setRenderMode(RenderMode::RGBA);
+				else if (s["renderMode"] == "STATIC_DIFFUSE")
+					stage->setRenderMode(RenderMode::STATIC_DIFFUSE);
+				else if (s["renderMode"] == "PBR")
+					stage->setRenderMode(RenderMode::PBR);
+				else if (s["renderMode"] == "PBR_IBL")
+					stage->setRenderMode(RenderMode::PBR_IBL);
+			}
 
-		if (j.contains("drawSkybox") && j["drawSkybox"] != "" && !j["drawSkybox"].is_null())
-			stage->setDrawSkybox(j["drawSkybox"]);
 
-		if (j["camera"]["type"] == "perspective")
-			stage->addPerspectiveCamera(j["camera"]["near"], j["camera"]["far"], j["camera"]["fov"]);
-		else if (j["camera"]["type"] == "orthographic")
-			stage->addOrthographicCamera(j["camera"]["near"], j["camera"]["far"], j["camera"]["scale"]);
+			if (s.contains("clearDepthBuffer") && !s["clearDepthBuffer"].is_null() && s["clearDepthBuffer"] != "" && s["clearDepthBuffer"])
+				stage->setClearDepthBuffer(true);
+
+			if (s.contains("camera") && s["camera"] != "" && !s["camera"].is_null())
+			{
+				if (s["camera"]["type"] == "perspective")
+					stage->addCamera(CameraType::PERSPECTIVE, s["camera"]["near"], s["camera"]["far"], s["camera"]["fov"]);
+				else if (j["camera"]["type"] == "orthographic")
+					stage->addCamera(CameraType::ORTHOGRAPHIC, s["camera"]["near"], s["camera"]["far"], s["camera"]["scale"]);
 #ifdef DEBUG_LOG
-	else
-		Log::crash("Scene::loadConfigFile(): config contains a camera type other than 'perspective' or 'orthographic'");
+				else
+					Log::crash("Scene::loadConfigFile(): config contains a camera type other than 'perspective' or 'orthographic'");
 #endif
 
-		stage->getCamera()->setPosition(glm::vec3(
-			(float)j["camera"]["position"][0],
-			(float)j["camera"]["position"][1],
-			(float)j["camera"]["position"][2]
-		));
+				stage->getCamera()->setPosition(glm::vec3(
+					(float)s["camera"]["position"][0],
+					(float)s["camera"]["position"][1],
+					(float)s["camera"]["position"][2]
+				));
 
-		stage->getCamera()->setLookAt(glm::vec3(
-			(float)j["camera"]["lookat"][0],
-			(float)j["camera"]["lookat"][1],
-			(float)j["camera"]["lookat"][2]
-		));
-            
+				stage->getCamera()->setLookAt(glm::vec3(
+					(float)s["camera"]["lookat"][0],
+					(float)s["camera"]["lookat"][1],
+					(float)s["camera"]["lookat"][2]
+				));
+			}
+		}
+        
+		// TODO:
 		if (j.contains("useCollisionWorld") && !j["useCollisionWorld"].is_null())
         {
             stage->setCollisionWorld();
@@ -511,9 +577,9 @@ namespace vel
 		this->texturesInUse.push_back(App::get().getAssetManager().loadTexture(name, type, path, mips));
 	}
     
-    void Scene::loadInfiniteHDR(std::string name, std::string path)
+    void Scene::loadInfiniteCubemap(std::string name, std::string path)
     {
-        this->infiniteHDRsInUse.push_back(App::get().getAssetManager().loadInfiniteHDR(name, path));
+        this->infiniteCubemapsInUse.push_back(App::get().getAssetManager().loadInfiniteCubemap(name, path));
     }
 	
 	void Scene::addMaterial(Material m)
@@ -541,9 +607,9 @@ namespace vel
 		return App::get().getAssetManager().getTexture(name);
 	}
     
-    InfiniteHDR* Scene::getInfiniteHDR(std::string name)
+    Cubemap* Scene::getInfiniteCubemap(std::string name)
     {
-        return App::get().getAssetManager().getInfiniteHDR(name);
+        return App::get().getAssetManager().getInfiniteCubemap(name);
     }
 
 	Material* Scene::getMaterial(std::string name)
@@ -626,6 +692,22 @@ namespace vel
 
         gpu->disableBlend(); // disable blending for opaque objects
 
+		// set scene camera values
+		this->camera.update();
+		this->cameraPosition = this->camera.getPosition();
+		this->cameraProjectionMatrix = this->camera.getProjectionMatrix();
+		this->cameraViewMatrix = this->camera.getViewMatrix();
+		// these are for applying lighting to objects that are in screen space as if they were in world space, for example
+		// first person arms / weapons (allows us to use the view matrix of one camera only for lighting), set to scene camera defaults here
+		// only relevant for when stage has it's own camera AND useSceneSpaceLighting is set to true
+		this->renderCameraPosition = this->cameraPosition;
+		this->renderCameraOffset = glm::mat4(1.0f);
+
+		// draw cubemap skybox if we should
+		if (this->getDrawSkybox() && this->getActiveInfiniteCubemap() != nullptr)
+			gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, this->getActiveInfiniteCubemap()->envCubemap);
+
+		// loop through all stages
 		for (auto s : this->stages.getAll())
 		{
 			if (!s->isVisible())
@@ -638,17 +720,21 @@ namespace vel
 			if (s->getClearDepthBuffer())
 				gpu->clearDepthBuffer();
 
+			// if stage has camera, use stage camera values
+			if (s->getCamera().has_value())
+			{
+				s->getCamera()->update();
+				this->cameraPosition = s->getCamera()->getPosition();
+				this->cameraProjectionMatrix = s->getCamera()->getProjectionMatrix();
+				this->cameraViewMatrix = s->getCamera()->getViewMatrix();
 
-			// should always have a camera if we've made it this far
-			s->getCamera()->update();
-			this->cameraPosition = s->getCamera()->getPosition();
-			this->cameraProjectionMatrix = s->getCamera()->getProjectionMatrix();
-			this->cameraViewMatrix = s->getCamera()->getViewMatrix();
+				// these are for applying lighting to objects that are in screen space as if they were in world space, for example
+				// first person arms / weapons (allows us to use the view matrix of one camera only for lighting)
+				this->renderCameraPosition = s->getUseSceneSpaceLighting() == false ? this->cameraPosition : this->camera.getPosition();
+				this->renderCameraOffset = s->getUseSceneSpaceLighting() == false ? glm::mat4(1.0f) : glm::inverse(this->camera.getViewMatrix());
+			}
 
-			// these are for applying lighting to objects that are in screen space as if they were in world space, for example
-			// first person arms / weapons (allows us to use the view matrix of one camera only for lighting)
-			this->renderCameraPosition = s->getIBLCamera() == nullptr ? this->cameraPosition : s->getIBLCamera()->getPosition();
-			this->renderCameraOffset = s->getIBLCamera() == nullptr ? glm::mat4(1.0f) : glm::inverse(s->getIBLCamera()->getViewMatrix());
+			
 
 
 
@@ -660,16 +746,16 @@ namespace vel
 				gpu->setShaderMat4("vp", s->getCamera()->getProjectionMatrix() * s->getCamera()->getViewMatrix());
 				gpu->debugDrawCollisionWorld(s->getCollisionWorld()->getDebugDrawer()); // draw all loaded vertices with a single call and clear
 			}
-
-
 			// when we gpu load things, we're altering the state in order to load those elements,
 			// so we need to reset actives so that the gpu knows to reset state to what we're suppose to be drawing
+			// Commented this out at some point in the past, guessing it wasn't required after all, or something changed below that rendered
+			// this call redundant...that's probably it, yeah since I'm setting state for each new renderable now that would make sense...I think
 			//gpu->resetActives(); 
 			
 
-			// Draw cubemap skybox
-			if (s->getDrawSkybox() && s->getActiveHdr() != nullptr)
-				gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, s->getActiveHdr()->envCubemap);
+			//// Draw cubemap skybox
+			//if (s->getDrawSkybox() && s->getActiveHdr() != nullptr)
+			//	gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, s->getActiveHdr()->envCubemap);
 
 
 			std::vector<Renderable*> transparentRenderables;
