@@ -77,7 +77,7 @@ namespace vel
 
 
 		void								useShader(Shader* s);
-        void                                useIBL(Cubemap* h);
+        void                                useIBL(Cubemap* c);
 		void								useMaterial(Material* m);
 		void								useMesh(Mesh* m);
 
