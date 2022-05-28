@@ -22,7 +22,7 @@ namespace vel
 	GPU::GPU(Window* w) :
 		window(w),
 		activeShader(nullptr),
-        activeHdr(nullptr),
+        activeInfiniteHDR(nullptr),
 		activeMesh(nullptr),
 		activeMaterial(nullptr),
         equirectangularToCubemapShader(nullptr),
@@ -52,7 +52,7 @@ namespace vel
 	void GPU::resetActives()
 	{
 		this->activeShader = nullptr;
-        this->activeHdr = nullptr;
+        this->activeInfiniteHDR = nullptr;
 		this->activeMesh = nullptr;
 		this->activeMaterial = nullptr;
 	}
@@ -86,7 +86,7 @@ namespace vel
 		glDeleteTextures(1, &t->id);
 	}
     
-    void GPU::clearHdr(HDR* h)
+    void GPU::clearInfiniteHDR(InfiniteHDR* h)
     {
         glDeleteTextures(1, &h->hdrTexture);
         glDeleteTextures(1, &h->envCubemap);
@@ -315,7 +315,7 @@ namespace vel
 		stbi_image_free(t->primaryImageData.data);
 	}
 
-    void GPU::loadHdr(HDR* h)
+    void GPU::loadInfiniteHDR(InfiniteHDR* h)
     {		
         // pbr: reset framebuffers
         // ------------------------
@@ -519,9 +519,9 @@ namespace vel
 		return this->activeShader;
 	}
 
-    const HDR* const GPU::getActiveHdr() const
+    const InfiniteHDR* const GPU::getActiveInfiniteHDR() const
 	{
-		return this->activeHdr;
+		return this->activeInfiniteHDR;
 	}
 
 	const Mesh* const GPU::getActiveMesh() const
@@ -595,9 +595,9 @@ namespace vel
 		glBindVertexArray(m->getGpuMesh()->VAO);
 	}
 
-    void GPU::useIBL(HDR* h)
+    void GPU::useIBL(InfiniteHDR* h)
     {
-        this->activeHdr = h;
+        this->activeInfiniteHDR = h;
         
         // bind pre-computed IBL data
         glActiveTexture(GL_TEXTURE0);

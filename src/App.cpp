@@ -103,7 +103,7 @@ namespace vel
         
         
         // load default hdr image
-        this->assetManager.loadHdr("defaultHdr", "data/default_textures/default.hdr");
+        this->assetManager.loadInfiniteHDR("defaultHdr", "data/default_textures/default.hdr");
         this->assetManager.sendAllToGpu();
         
         

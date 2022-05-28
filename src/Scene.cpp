@@ -59,8 +59,8 @@ namespace vel
 		for(auto& name : this->meshesInUse)
 			App::get().getAssetManager().removeMesh(name);
 		
-        for(auto& name : this->hdrsInUse)
-			App::get().getAssetManager().removeHdr(name);
+        for(auto& name : this->infiniteHDRsInUse)
+			App::get().getAssetManager().removeInfiniteHDR(name);
         
 		for(auto& name : this->shadersInUse)
 			App::get().getAssetManager().removeShader(name);
@@ -68,7 +68,7 @@ namespace vel
 
 	/* Json Scene Loader
 	--------------------------------------------------*/
-	void Scene::loadStageConfig(std::string path)
+	void Scene::loadConfigFile(std::string path)
 	{
 		std::ifstream i(path);
 		json j;
@@ -80,26 +80,22 @@ namespace vel
 		//	std::cout << el.key() << " : " << el.value() << "\n";
 
 #ifdef DEBUG_LOG
-	Log::toCliAndFile("Loading Stage via configuration file: " + path);
+	Log::toCliAndFile("Loading Scene via configuration file: " + path);
 #endif
 
-		//load elements into scene
+		// Load user defined shaders
 		for (auto& s : j["shaders"])
 			this->loadShader(s["name"], s["vert_path"], s["frag_path"]);
-
-		int hdrCount = 0;
-		for (auto& h : j["hdrs"])
-		{
-			this->loadHdr(h["name"], h["path"]);
-			hdrCount++;
-		}
-			
-
-		if (j.contains("meshes") && j["meshes"] != "" && !j["meshes"].is_null())
-		{
-			this->loadMesh(j["meshes"]);
-		}
 		
+		// Load infinitely distant hdr images (cubemaps with computed data for IBL)
+		for (auto& h : j["infiniteHDRs"])
+			this->loadInfiniteHDR(h["name"], h["path"]);
+
+		// Load meshes from .fbx files, will also load in associated armatures
+		if (j.contains("meshes") && j["meshes"] != "" && !j["meshes"].is_null())
+			this->loadMesh(j["meshes"]);
+	
+		// Load textures and their associated mip chains
 		for (auto& t : j["textures"])
 		{
 			std::vector<std::string> mips;
@@ -109,6 +105,7 @@ namespace vel
 			this->loadTexture(t["name"], t["type"], t["path"], mips);
 		}
 
+		// Load materials which are created from previously loaded textures
 		for (auto& m : j["materials"])
 		{
 			Material mat;
@@ -145,6 +142,7 @@ namespace vel
 			this->addMaterial(mat);
 		}
 
+		// Load renderables
 		for (auto& r : j["renderables"])
 		{
 			this->addRenderable(
@@ -155,7 +153,7 @@ namespace vel
 			);
 		}
 
-		//load stage
+		// Load stages
 
 		auto stage = this->addStage(j["name"]);
 
@@ -176,7 +174,7 @@ namespace vel
 			stage->setClearDepthBuffer(true);
 
         if (j.contains("activeHdr") && !j["activeHdr"].is_null() && j["activeHdr"] != "")
-            stage->setActiveHdr(this->getHdr(j["activeHdr"]));
+            stage->setActiveHdr(this->getInfiniteHDR(j["activeHdr"]));
 
 		if (j.contains("drawSkybox") && j["drawSkybox"] != "" && !j["drawSkybox"].is_null())
 			stage->setDrawSkybox(j["drawSkybox"]);
@@ -187,7 +185,7 @@ namespace vel
 			stage->addOrthographicCamera(j["camera"]["near"], j["camera"]["far"], j["camera"]["scale"]);
 #ifdef DEBUG_LOG
 	else
-		Log::crash("Scene::loadStageConfig(): config contains a camera type other than 'perspective' or 'orthographic'");
+		Log::crash("Scene::loadConfigFile(): config contains a camera type other than 'perspective' or 'orthographic'");
 #endif
 
 		stage->getCamera()->setPosition(glm::vec3(
@@ -513,9 +511,9 @@ namespace vel
 		this->texturesInUse.push_back(App::get().getAssetManager().loadTexture(name, type, path, mips));
 	}
     
-    void Scene::loadHdr(std::string name, std::string path)
+    void Scene::loadInfiniteHDR(std::string name, std::string path)
     {
-        this->hdrsInUse.push_back(App::get().getAssetManager().loadHdr(name, path));
+        this->infiniteHDRsInUse.push_back(App::get().getAssetManager().loadInfiniteHDR(name, path));
     }
 	
 	void Scene::addMaterial(Material m)
@@ -543,9 +541,9 @@ namespace vel
 		return App::get().getAssetManager().getTexture(name);
 	}
     
-    HDR* Scene::getHdr(std::string name)
+    InfiniteHDR* Scene::getInfiniteHDR(std::string name)
     {
-        return App::get().getAssetManager().getHdr(name);
+        return App::get().getAssetManager().getInfiniteHDR(name);
     }
 
 	Material* Scene::getMaterial(std::string name)

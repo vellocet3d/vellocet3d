@@ -7,7 +7,7 @@
 
 namespace vel
 {
-	struct HDR
+	struct InfiniteHDR
 	{
 		std::string		name;
 		ImageData		primaryImageData;

@@ -45,11 +45,11 @@ namespace vel
 			this->texturesThatNeedGpuLoad.pop_front();
 		}
         
-        for(auto& h : this->hdrsThatNeedGpuLoad)
+        for(auto& h : this->infiniteHDRsThatNeedGpuLoad)
 		{
-			this->gpu->loadHdr(h->ptr);
+			this->gpu->loadInfiniteHDR(h->ptr);
 			h->gpuLoaded = true;
-			this->hdrsThatNeedGpuLoad.pop_front();
+			this->infiniteHDRsThatNeedGpuLoad.pop_front();
 		}        
 	}
 
@@ -82,12 +82,12 @@ namespace vel
 			return;
 		}
         
-        if (this->hdrsThatNeedGpuLoad.size() > 0)
+        if (this->infiniteHDRsThatNeedGpuLoad.size() > 0)
 		{
-			auto hdrTracker = this->hdrsThatNeedGpuLoad.at(0);
-			this->gpu->loadHdr(hdrTracker->ptr);
+			auto hdrTracker = this->infiniteHDRsThatNeedGpuLoad.at(0);
+			this->gpu->loadInfiniteHDR(hdrTracker->ptr);
 			hdrTracker->gpuLoaded = true;
-			this->hdrsThatNeedGpuLoad.pop_front();
+			this->infiniteHDRsThatNeedGpuLoad.pop_front();
 			return;
 		}
 	}
@@ -439,14 +439,14 @@ if (!this->meshTrackers.exists(name))
 
     /* HDRs
 	--------------------------------------------------*/
-    std::string AssetManager::loadHdr(std::string name, std::string path)
+    std::string AssetManager::loadInfiniteHDR(std::string name, std::string path)
     {
-        if (this->hdrTrackers.exists(name))
+        if (this->infiniteHDRTrackers.exists(name))
 		{
 #ifdef DEBUG_LOG
-	Log::toCliAndFile("Existing HDR, bypass reload: " + name);
+	Log::toCliAndFile("Existing InfiniteHDR, bypass reload: " + name);
 #endif
-			auto h = this->hdrTrackers.get(name);
+			auto h = this->infiniteHDRTrackers.get(name);
 			if(h->usageCount > 0)
 			{
 				h->usageCount++;
@@ -455,15 +455,15 @@ if (!this->meshTrackers.exists(name))
 			else
 			{
 				std::this_thread::sleep_for(100ms);
-				return this->loadHdr(name, path);
+				return this->loadInfiniteHDR(name, path);
 			}			
 		}
         
 #ifdef DEBUG_LOG
-	Log::toCliAndFile("Load new HDR: " + name);
+	Log::toCliAndFile("Load new InfiniteHDR: " + name);
 #endif
 
-        HDR hdr;
+        InfiniteHDR hdr;
         hdr.name = name;
         stbi_set_flip_vertically_on_load(true);
         hdr.primaryImageData.dataf = stbi_loadf(
@@ -478,7 +478,7 @@ if (!this->meshTrackers.exists(name))
         
 #ifdef DEBUG_LOG
 	if (!hdr.primaryImageData.dataf)
-		Log::crash("AssetManager::loadHdr(): Unable to load hdr at path: " + path);
+		Log::crash("AssetManager::loadInfiniteHDR(): Unable to load hdr at path: " + path);
 #endif
 
         if (hdr.primaryImageData.nrComponents == 1)
@@ -489,59 +489,59 @@ if (!this->meshTrackers.exists(name))
             hdr.primaryImageData.format = GL_RGBA;
         
         
-        auto hdrPtr = this->hdrs.insert(hdr.name, hdr);
+        auto hdrPtr = this->infiniteHDRs.insert(hdr.name, hdr);
         
-        HDRTracker t;
+        InfiniteHDRTracker t;
         t.ptr = hdrPtr;
 		t.usageCount++;
         
-		this->hdrsThatNeedGpuLoad.push_back(this->hdrTrackers.insert(hdr.name, t));
+		this->infiniteHDRsThatNeedGpuLoad.push_back(this->infiniteHDRTrackers.insert(hdr.name, t));
 
 		return name;
     }
     
-    HDR* AssetManager::getHdr(std::string name)
+    InfiniteHDR* AssetManager::getInfiniteHDR(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->hdrTrackers.exists(name))
-		Log::crash("AssetManager::getHdr(): Attempting to get HDR that does not exist: " + name);
+	if (!this->infiniteHDRTrackers.exists(name))
+		Log::crash("AssetManager::getInfiniteHDR(): Attempting to get InfiniteHDR that does not exist: " + name);
 #endif
 
-		return this->hdrTrackers.get(name)->ptr;		
+		return this->infiniteHDRTrackers.get(name)->ptr;		
 	}
 
-	bool AssetManager::hdrIsGpuLoaded(std::string name)
+	bool AssetManager::infiniteHDRIsGpuLoaded(std::string name)
 	{
-		return this->hdrTrackers.get(name)->gpuLoaded;
+		return this->infiniteHDRTrackers.get(name)->gpuLoaded;
 	}
     
-    void AssetManager::removeHdr(std::string name)
+    void AssetManager::removeInfiniteHDR(std::string name)
 	{
 #ifdef DEBUG_LOG
-	if (!this->hdrTrackers.exists(name))
-		Log::crash("AssetManager::removeHdr(): Attempting to remove HDR that does not exist: " + name);
+	if (!this->infiniteHDRTrackers.exists(name))
+		Log::crash("AssetManager::removeInfiniteHDR(): Attempting to remove InfiniteHDR that does not exist: " + name);
 #endif
 
-		auto h = this->hdrTrackers.get(name);
+		auto h = this->infiniteHDRTrackers.get(name);
 		h->usageCount--;
 		if (h->usageCount == 0)
 		{
 #ifdef DEBUG_LOG
-	Log::toCliAndFile("Full remove HDR: " + name);
+	Log::toCliAndFile("Full remove InfiniteHDR: " + name);
 #endif
 			if (!h->gpuLoaded)
-				for (size_t i = 0; i < this->hdrsThatNeedGpuLoad.size(); i++)
-					if (this->hdrsThatNeedGpuLoad.at(i) == h)
-						this->hdrsThatNeedGpuLoad.erase(this->hdrsThatNeedGpuLoad.begin() + i);
+				for (size_t i = 0; i < this->infiniteHDRsThatNeedGpuLoad.size(); i++)
+					if (this->infiniteHDRsThatNeedGpuLoad.at(i) == h)
+						this->infiniteHDRsThatNeedGpuLoad.erase(this->infiniteHDRsThatNeedGpuLoad.begin() + i);
 			else
-				this->gpu->clearHdr(h->ptr);
+				this->gpu->clearInfiniteHDR(h->ptr);
 			
-			this->hdrs.erase(name);
-			this->hdrTrackers.erase(name);
+			this->infiniteHDRs.erase(name);
+			this->infiniteHDRTrackers.erase(name);
 		}
 #ifdef DEBUG_LOG
 	else
-		Log::toCliAndFile("Decrement HDR usageCount, retain: " + name);
+		Log::toCliAndFile("Decrement InfiniteHDR usageCount, retain: " + name);
 #endif
 
     }

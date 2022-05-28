@@ -13,7 +13,7 @@
 #include "vel/Texture.h"
 #include "vel/Material.h"
 #include "vel/CollisionDebugDrawer.h"
-#include "vel/HDR.h"
+#include "vel/InfiniteHDR.h"
 #include "vel/RenderMode.h"
 
 
@@ -28,7 +28,7 @@ namespace vel
 
         const std::string                   defaultShaderPath;
 		Shader*								activeShader;
-        HDR*                                activeHdr;
+        InfiniteHDR*                        activeInfiniteHDR;
 		Mesh*								activeMesh;
 		Material*							activeMaterial;
         
@@ -65,7 +65,7 @@ namespace vel
 		void								drawLinesOnly();
 
 		const Shader* const					getActiveShader() const;
-        const HDR* const					getActiveHdr() const;
+        const InfiniteHDR* const			getActiveInfiniteHDR() const;
 		const Mesh*	const					getActiveMesh() const;
 		const Material*	const				getActiveMaterial() const;
 		void								resetActives();
@@ -73,11 +73,11 @@ namespace vel
 		void								loadShader(Shader* s);
 		void								loadMesh(Mesh* m);
 		void								loadTexture(Texture* t);
-        void                                loadHdr(HDR* h);
+        void                                loadInfiniteHDR(InfiniteHDR* h);
 
 
 		void								useShader(Shader* s);
-        void                                useIBL(HDR* h);
+        void                                useIBL(InfiniteHDR* h);
 		void								useMaterial(Material* m);
 		void								useMesh(Mesh* m);
 
@@ -99,7 +99,7 @@ namespace vel
 		void								debugDrawCollisionWorld(CollisionDebugDrawer* cdd);
 
 		void								clearShader(Shader* s);
-        void                                clearHdr(HDR* h);
+        void                                clearInfiniteHDR(InfiniteHDR* h);
 		void								clearMesh(Mesh* m);
 		void								clearTexture(Texture* t);
 

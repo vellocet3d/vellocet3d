@@ -13,7 +13,7 @@
 #include "vel/Texture.h"
 #include "vel/Material.h"
 #include "vel/Renderable.h"
-#include "vel/HDR.h"
+#include "vel/InfiniteHDR.h"
 #include "vel/Animation.h"
 #include "vel/Armature.h"
 
@@ -40,9 +40,9 @@ namespace vel
 		sac<TextureTracker> 								textureTrackers;
 		std::deque<TextureTracker*>							texturesThatNeedGpuLoad;
 
-        sac<HDR>											hdrs;
-		sac<HDRTracker> 									hdrTrackers;
-		std::deque<HDRTracker*>								hdrsThatNeedGpuLoad;
+        sac<InfiniteHDR>									infiniteHDRs;
+		sac<InfiniteHDRTracker> 							infiniteHDRTrackers;
+		std::deque<InfiniteHDRTracker*>						infiniteHDRsThatNeedGpuLoad;
 
 		sac<Material>										materials;
 		sac<MaterialTracker> 								materialTrackers;
@@ -82,10 +82,10 @@ namespace vel
 		void						removeTexture(std::string name);
         
         
-        std::string                 loadHdr(std::string name, std::string path);
-        HDR*					    getHdr(std::string name);
-		bool						hdrIsGpuLoaded(std::string name);
-		void						removeHdr(std::string name);
+        std::string                 loadInfiniteHDR(std::string name, std::string path);
+        InfiniteHDR*				getInfiniteHDR(std::string name);
+		bool						infiniteHDRIsGpuLoaded(std::string name);
+		void						removeInfiniteHDR(std::string name);
         
 
 		std::string					addMaterial(Material m);
