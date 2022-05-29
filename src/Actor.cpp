@@ -14,9 +14,10 @@ namespace vel
 		transform(Transform()),
 		parentActor(nullptr),
 		parentArmatureBone(nullptr),
-		rigidBody(nullptr),
 		armature(nullptr),
 		mesh(nullptr),
+		rigidBody(nullptr),
+		ghostObject(nullptr),
 		autoTransform(true) //TODO: tf is the point of this? Well, ok, so this is needed so that we don't update a static actor that has a rigidbody association
 	{}
 

@@ -19,6 +19,7 @@ namespace vel
 {
 	class	Stage;
 	struct	Sensor;
+	class	CollisionWorld;
 
 	class Actor
 	{
@@ -42,6 +43,7 @@ namespace vel
 		std::optional<Renderable*>						stageRenderable;
 
 		Mesh*											mesh; // pointer to mesh used by this Actor independant of renderable. required for headless mode since there will be no renderable instance
+
 
 		btRigidBody*									rigidBody;
 		btPairCachingGhostObject*						ghostObject;
@@ -111,7 +113,6 @@ namespace vel
 		void											addContactSensor(Sensor* s);
 		void											clearContactSensors();
 		std::vector<Sensor*>& 							getContactSensors();
-
 
 	};
 }

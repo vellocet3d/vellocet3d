@@ -15,6 +15,9 @@
 #include "vel/Material.h"
 #include "vel/Cubemap.h"
 #include "vel/AssetTrackers.h"
+#include "vel/CollisionWorld.h"
+#include "vel/CollisionDebugDrawer.h"
+
 
 namespace vel
 {
@@ -25,6 +28,7 @@ namespace vel
 		Cubemap*							activeInfiniteCubemap;
 		bool								drawSkybox;
 		sac<Stage>							stages;
+		CollisionWorld*						collisionWorld;
 		double								fixedAnimationTime;
 		double								animationTime;
 
@@ -105,6 +109,9 @@ namespace vel
 		void								stepPhysics(float delta);
 		void								applyTransformations();
 		void								processSensors();
+
+		CollisionWorld*						addCollisionWorld(float gravity = -10.0f);
+		CollisionWorld*						getCollisionWorld();
 
 	};
 

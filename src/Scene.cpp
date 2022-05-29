@@ -24,6 +24,7 @@ namespace vel
 		camera(Camera(CameraType::PERSPECTIVE, 0.1f, 250.0f, 60.0f)),
 		activeInfiniteCubemap(nullptr),
 		drawSkybox(false),
+		collisionWorld(nullptr),
 		mainMemoryloaded(false),
 		swapWhenLoaded(false),
 		animationTime(0.0),
@@ -95,6 +96,10 @@ namespace vel
         
 		for(auto& name : this->shadersInUse)
 			App::get().getAssetManager().removeShader(name);
+
+
+		delete this->collisionWorld;
+
 	}
 
 	/* Json Scene Loader
@@ -156,11 +161,11 @@ namespace vel
 
 		}
 
-
 		// Load meshes from .fbx files, will also load in associated armatures
-		if (j.contains("meshes") && j["meshes"] != "" && !j["meshes"].is_null())
-			this->loadMesh(j["meshes"]);
-	
+		for (auto& m : j["meshes"])
+			this->loadMesh(m);
+			
+
 		// Load textures and their associated mip chains
 		for (auto& t : j["textures"])
 		{
@@ -219,10 +224,63 @@ namespace vel
 			);
 		}
 
+		// Load collision world
+		if (j.contains("collisionWorld") && j["collisionWorld"] != "" && !j["collisionWorld"].is_null())
+		{
+			auto cw = this->addCollisionWorld(j["collisionWorld"]["gravity"]);
+			cw->setIsActive(j["collisionWorld"]["active"]);
+
+			if (j["collisionWorld"]["debug"])
+				cw->useDebugDrawer(this->getShader("defaultDebug"));
+
+			for (auto& cs : j["collisionWorld"]["collisionShapes"])
+			{
+				if (cs["type"] == "btCylinderShape")
+				{
+					btCollisionShape* btcs = new btCylinderShape(btVector3(cs["dimensions"][0], cs["dimensions"][1], cs["dimensions"][2]));
+					cw->addCollisionShape(cs["name"], btcs);
+				}
+
+				if (cs["type"] == "btCapsuleShape")
+				{
+					btCollisionShape* btcs = new btCapsuleShape(cs["dimensions"][0], cs["dimensions"][1]); // total height is height+2*radius
+					cw->addCollisionShape(cs["name"], btcs);
+				}
+
+				// Add support for more shapes as needed
+			}
+
+			for (auto& co : j["collisionWorld"]["collisionObjects"])
+			{
+				// Add support for more properties as needed
+				CollisionObjectTemplate cot;
+				cot.type = co["type"];
+				cot.name = co["name"];
+				cot.collisionShape = cw->getCollisionShape(co["collisionShape"]);
+				if (co.contains("mass") && !co["mass"].is_null())
+					cot.mass = co["mass"];
+				if (co.contains("friction") && !co["friction"].is_null())
+					cot.friction = co["friction"];
+				if (co.contains("restitution") && !co["restitution"].is_null())
+					cot.restitution = co["restitution"];
+				if (co.contains("linearDamping") && !co["linearDamping"].is_null())
+					cot.linearDamping = co["linearDamping"];
+				if (co.contains("angularFactor") && !co["angularFactor"].is_null())
+					cot.angularFactor = btVector3(co["angularFactor"][0], co["angularFactor"][1], co["angularFactor"][2]);
+				if (co.contains("activationState") && !co["activationState"].is_null())
+					cot.activationState = co["activationState"];
+				if (co.contains("gravity") && !co["gravity"].is_null())
+					cot.gravity = btVector3(co["gravity"][0], co["gravity"][1], co["gravity"][2]);
+
+				cw->addCollisionObjectTemplate(cot.name, cot);
+			}
+		}
+		
+
 		// Load stages
 		for (auto& s : j["stages"])
 		{
-			auto stage = this->addStage(j["name"]);
+			auto stage = this->addStage(s["name"]);
 
 			if (s.contains("renderMode"))
 			{
@@ -263,273 +321,234 @@ namespace vel
 					(float)s["camera"]["lookat"][2]
 				));
 			}
-		}
-        
-		// TODO:
-		if (j.contains("useCollisionWorld") && !j["useCollisionWorld"].is_null())
-        {
-            stage->setCollisionWorld();
 
-			if (j["debug"])
-				stage->getCollisionWorld()->useDebugDrawer(this->getShader("defaultDebug"));					
-                
-            for(auto& cs : j["collisionShapes"])
-            {
-                if(cs["type"] == "btCylinderShape")
-                {
-                    btCollisionShape* btcs = new btCylinderShape(btVector3(cs["dimensions"][0], cs["dimensions"][1], cs["dimensions"][2]));
-                    stage->getCollisionWorld()->addCollisionShape(cs["name"], btcs);
-                }
-					
-				if(cs["type"] == "btCapsuleShape")
-				{
-					btCollisionShape* btcs = new btCapsuleShape(cs["dimensions"][0], cs["dimensions"][1]); // total height is height+2*radius
-					stage->getCollisionWorld()->addCollisionShape(cs["name"], btcs);
-				}
-					
-				// Add support for more shapes as needed
-            }
-				
-			for(auto& co : j["collisionObjects"])
+			if (s.contains("useSceneCameraPositionForLighting") && !s["useSceneCameraPositionForLighting"].is_null())
+				stage->setUseSceneCameraPositionForLighting(s["useSceneCameraPositionForLighting"]);
+			
+			if (s.contains("activeInfiniteCubemap") && !s["activeInfiniteCubemap"].is_null() && s["activeInfiniteCubemap"] != "")
+				stage->setActiveInfiniteCubemap(this->getInfiniteCubemap(s["activeInfiniteCubemap"]));
+
+
+			for (auto& a : s["actors"])
 			{
-				// Add support for more properties as needed
-				CollisionObjectTemplate cot;
-				cot.type = co["type"];
-				cot.name = co["name"];
-				cot.collisionShape = stage->getCollisionWorld()->getCollisionShape(co["collisionShape"]);
-				if(co.contains("mass") && !co["mass"].is_null())
-					cot.mass = co["mass"];
-				if(co.contains("friction") && !co["friction"].is_null())
-					cot.friction = co["friction"];
-				if(co.contains("restitution") && !co["restitution"].is_null())
-					cot.restitution = co["restitution"];
-				if(co.contains("linearDamping") && !co["linearDamping"].is_null())
-					cot.linearDamping = co["linearDamping"];
-				if(co.contains("angularFactor") && !co["angularFactor"].is_null())
-					cot.angularFactor = btVector3(co["angularFactor"][0], co["angularFactor"][1], co["angularFactor"][2]);
-				if(co.contains("activationState") && !co["activationState"].is_null())
-					cot.activationState = co["activationState"];
-				if(co.contains("gravity") && !co["gravity"].is_null())
-					cot.gravity = btVector3(co["gravity"][0], co["gravity"][1], co["gravity"][2]);
-					
-				stage->getCollisionWorld()->addCollisionObjectTemplate(cot.name, cot);
-			}
-				
-        }
+				auto act = Actor(a["name"]);
+				act.setDynamic(a["dynamic"]);
+				act.setVisible(a["visible"]);
+				act.setAutoTransform(a["autoTransform"]);
+				act.addRenderable(this->getRenderable(a["renderable"]));//TODO: what if headless?
 
-		for (auto& a : j["actors"])
-		{
-			auto act = Actor(a["name"]);
-			act.setDynamic(a["dynamic"]);
-			act.setVisible(a["visible"]);
-			act.setAutoTransform(a["autoTransform"]);
-			act.addRenderable(this->getRenderable(a["renderable"]));//TODO: what if headless?
-				
-			if (!a["transform"].is_null())
-			{
-				auto trans = a["transform"]["translation"];
-				auto rot = a["transform"]["rotation"];
-				auto scale = a["transform"]["scale"];
-
-				if (!trans.is_null())
+				if (!a["transform"].is_null())
 				{
-					act.getTransform().setTranslation(glm::vec3(
-						(float)trans[0],
-						(float)trans[1],
-						(float)trans[2]
-					));
-				}
+					auto trans = a["transform"]["translation"];
+					auto rot = a["transform"]["rotation"];
+					auto scale = a["transform"]["scale"];
 
-				if (!rot.is_null())
-				{
-					if (rot["type"] == "euler")
+					if (!trans.is_null())
 					{
-						act.getTransform().setRotation((float)rot["val"]["angle"], glm::vec3(
-							(float)rot["val"]["axis"][0],
-							(float)rot["val"]["axis"][1],
-							(float)rot["val"]["axis"][2]
+						act.getTransform().setTranslation(glm::vec3(
+							(float)trans[0],
+							(float)trans[1],
+							(float)trans[2]
 						));
 					}
-					else if (rot["type"] == "quaternion")
+
+					if (!rot.is_null())
 					{
-						act.getTransform().setRotation(glm::quat(
-							(float)rot["val"][3],
-							(float)rot["val"][0],
-							(float)rot["val"][1],
-							(float)rot["val"][2]
-						));
-					}
+						if (rot["type"] == "euler")
+						{
+							act.getTransform().setRotation((float)rot["val"]["angle"], glm::vec3(
+								(float)rot["val"]["axis"][0],
+								(float)rot["val"]["axis"][1],
+								(float)rot["val"]["axis"][2]
+							));
+						}
+						else if (rot["type"] == "quaternion")
+						{
+							act.getTransform().setRotation(glm::quat(
+								(float)rot["val"][3],
+								(float)rot["val"][0],
+								(float)rot["val"][1],
+								(float)rot["val"][2]
+							));
+						}
 #ifdef DEBUG_LOG
-	else
-		Log::crash("Scene::loadSceneConfig(): config contains an actor transform rotation type other than 'euler' or 'quaternion'");
+						else
+							Log::crash("Scene::loadSceneConfig(): config contains an actor transform rotation type other than 'euler' or 'quaternion'");
 #endif
 
+					}
+
+					if (!scale.is_null())
+					{
+						act.getTransform().setScale(glm::vec3(
+							(float)scale[0],
+							(float)scale[1],
+							(float)scale[2]
+						));
+					}
 				}
 
-				if (!scale.is_null())
+
+				// must get final memory address of actor in order to pass userptr to rididbody or ghostobject, so we add actor to stage
+				// here, meaning everything above this line would be properties that the actor MUST HAVE before being added to stage,
+				// although at this time a Renderable is all that it needs to have before being added.
+				Actor* pActor = stage->addActor(act);
+
+
+				if (this->collisionWorld != nullptr && a.contains("collisionObject") && !a["collisionObject"].is_null())
 				{
-					act.getTransform().setScale(glm::vec3(
-						(float)scale[0],
-						(float)scale[1],
-						(float)scale[2]
-					));
+					if ((a["collisionObject"] != "GENERATE_STATIC_RIGIDBODY") && (a["collisionObject"] != "GENERATE_STATIC_GHOST"))
+					{
+						auto& cot = this->collisionWorld->getCollisionObjectTemplate(a["collisionObject"]);
+						auto actorTranslation = pActor->getTransform().getTranslation();
+
+						btTransform theTransform;
+						theTransform.setIdentity();
+						theTransform.setOrigin(btVector3(actorTranslation.x, actorTranslation.y, actorTranslation.z));
+						theTransform.setRotation(vel::glmToBulletQuat(pActor->getTransform().getRotation()));
+
+						if (cot.type == "rigidBody")
+						{
+							btVector3 theInertia(0.0f, 0.0f, 0.0f);
+							cot.collisionShape->calculateLocalInertia(cot.mass.value(), theInertia);
+
+							btDefaultMotionState* theMotionState = new btDefaultMotionState(theTransform);
+							btRigidBody::btRigidBodyConstructionInfo theBodyInfo(cot.mass.value(), theMotionState, cot.collisionShape, theInertia);
+
+							// Add support for more properties as needed
+							if (cot.friction)
+								theBodyInfo.m_friction = cot.friction.value();
+							if (cot.restitution)
+								theBodyInfo.m_restitution = cot.restitution.value();
+							if (cot.linearDamping)
+								theBodyInfo.m_linearDamping = cot.linearDamping.value();
+
+							btRigidBody* theRigidBody = new btRigidBody(theBodyInfo);
+							if (cot.gravity)
+								theRigidBody->setGravity(cot.gravity.value());
+							if (cot.angularFactor)
+								theRigidBody->setAngularFactor(cot.angularFactor.value());
+							if (cot.activationState)
+								theRigidBody->setActivationState(cot.activationState.value());
+
+							theRigidBody->setUserPointer(pActor);
+							this->collisionWorld->getDynamicsWorld()->addRigidBody(theRigidBody);
+
+							pActor->setRigidBody(theRigidBody);
+						}
+						else if (cot.type == "ghostObject")
+						{
+							btPairCachingGhostObject* theGhostObject = new btPairCachingGhostObject();
+							theGhostObject->setCollisionShape(cot.collisionShape);
+							theGhostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+							theGhostObject->setUserPointer(pActor);
+
+							this->collisionWorld->getDynamicsWorld()->addCollisionObject(theGhostObject,
+								btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
+
+							pActor->setGhostObject(theGhostObject);
+						}
+					}
+					else
+					{
+						if (a["collisionObject"] == "GENERATE_STATIC_RIGIDBODY")
+						{
+							this->collisionWorld->addStaticCollisionBody(pActor);
+						}
+						else if (a["collisionObject"] == "GENERATE_STATIC_GHOST")
+						{
+							btPairCachingGhostObject* theGhostObject = new btPairCachingGhostObject();
+							theGhostObject->setCollisionShape(this->collisionWorld->collisionShapeFromActor(pActor));
+							theGhostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+							theGhostObject->setUserPointer(pActor);
+
+							this->collisionWorld->getDynamicsWorld()->addCollisionObject(theGhostObject,
+								btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
+
+							pActor->setGhostObject(theGhostObject);
+						}
+					}
+
 				}
+
+			// end of actor foreach
 			}
-				
-				
-			// must get final memory address of actor in order to pass userptr to rididbody or ghostobject, so we add actor to stage
-			// here, meaning everything above this line would be properties that the actor MUST HAVE before being added to stage,
-			// although at this time a Renderable is all that it needs to have before being added.
-			Actor* pActor = stage->addActor(act);
-				
-				
-			if(a.contains("collisionObject") && !a["collisionObject"].is_null())
-			{	
-				if((a["collisionObject"] != "GENERATE_STATIC_RIGIDBODY") && (a["collisionObject"] != "GENERATE_STATIC_GHOST"))
-				{
-					auto& cot = stage->getCollisionWorld()->getCollisionObjectTemplate(a["collisionObject"]);
-					auto actorTranslation = pActor->getTransform().getTranslation();
-						
-					btTransform theTransform;
-					theTransform.setIdentity();
-					theTransform.setOrigin(btVector3(actorTranslation.x, actorTranslation.y, actorTranslation.z));
-					theTransform.setRotation(vel::glmToBulletQuat(pActor->getTransform().getRotation()));
-						
-					if(cot.type == "rigidBody")
-					{
-						btVector3 theInertia(0.0f, 0.0f, 0.0f);
-						cot.collisionShape->calculateLocalInertia(cot.mass.value(), theInertia);
-							
-						btDefaultMotionState* theMotionState = new btDefaultMotionState(theTransform);
-						btRigidBody::btRigidBodyConstructionInfo theBodyInfo(cot.mass.value(), theMotionState, cot.collisionShape, theInertia);
-							
-						// Add support for more properties as needed
-						if(cot.friction)
-							theBodyInfo.m_friction = cot.friction.value();
-						if(cot.restitution)
-							theBodyInfo.m_restitution = cot.restitution.value();
-						if(cot.linearDamping)
-							theBodyInfo.m_linearDamping = cot.linearDamping.value();
-							
-						btRigidBody* theRigidBody = new btRigidBody(theBodyInfo);
-						if(cot.gravity)
-							theRigidBody->setGravity(cot.gravity.value());
-						if(cot.angularFactor)
-							theRigidBody->setAngularFactor(cot.angularFactor.value());
-						if(cot.activationState)
-							theRigidBody->setActivationState(cot.activationState.value());
 
-						theRigidBody->setUserPointer(pActor);
-						stage->getCollisionWorld()->getDynamicsWorld()->addRigidBody(theRigidBody);
-							
-						pActor->setRigidBody(theRigidBody);
-					}
-					else if(cot.type == "ghostObject")
-					{
-						btPairCachingGhostObject* theGhostObject = new btPairCachingGhostObject();
-						theGhostObject->setCollisionShape(cot.collisionShape);
-						theGhostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
-						theGhostObject->setUserPointer(pActor);
-							
-						stage->getCollisionWorld()->getDynamicsWorld()->addCollisionObject(theGhostObject,
-						btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
-							
-						pActor->setGhostObject(theGhostObject);
-					}
-				}
-				else
-				{
-					if(a["collisionObject"] == "GENERATE_STATIC_RIGIDBODY")
-					{
-						stage->getCollisionWorld()->addStaticCollisionBody(pActor);
-					}
-					else if(a["collisionObject"] == "GENERATE_STATIC_GHOST")
-					{
-						btPairCachingGhostObject* theGhostObject = new btPairCachingGhostObject();
-						theGhostObject->setCollisionShape(stage->getCollisionWorld()->collisionShapeFromActor(pActor));
-						theGhostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
-						theGhostObject->setUserPointer(pActor);
-							
-						stage->getCollisionWorld()->getDynamicsWorld()->addCollisionObject(theGhostObject,
-						btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
-							
-						pActor->setGhostObject(theGhostObject);
-					}
-				}
-					
-			}
-		}
-
-		for (auto& a : j["armatures"])
-		{
-			std::vector<std::string> actorNames;
-
-			for (auto& actName : a["actors"])
-				actorNames.push_back(actName);
-
-			auto arm = stage->addArmature(this->getArmature(a["base"]), a["defaultAnimation"], actorNames);
-
-			if (a.contains("shouldInterpolate") && !a["shouldInterpolate"].is_null())
-				arm->setShouldInterpolate(a["shouldInterpolate"]);
-			
-			
-			if (!a["transform"].is_null())
+			for (auto& a : s["armatures"])
 			{
-				auto trans = a["transform"]["translation"];
-				auto rot = a["transform"]["rotation"];
-				auto scale = a["transform"]["scale"];
+				std::vector<std::string> actorNames;
 
-				if (!trans.is_null())
-				{
-					arm->getTransform().setTranslation(glm::vec3(
-						(float)trans[0],
-						(float)trans[1],
-						(float)trans[2]
-					));
-				}
+				for (auto& actName : a["actors"])
+					actorNames.push_back(actName);
 
-				if (!rot.is_null())
+				auto arm = stage->addArmature(this->getArmature(a["base"]), a["defaultAnimation"], actorNames);
+
+				if (a.contains("shouldInterpolate") && !a["shouldInterpolate"].is_null())
+					arm->setShouldInterpolate(a["shouldInterpolate"]);
+
+
+				if (!a["transform"].is_null())
 				{
-					if (rot["type"] == "euler")
+					auto trans = a["transform"]["translation"];
+					auto rot = a["transform"]["rotation"];
+					auto scale = a["transform"]["scale"];
+
+					if (!trans.is_null())
 					{
-						arm->getTransform().setRotation((float)rot["val"]["angle"], glm::vec3(
-							(float)rot["val"]["axis"][0],
-							(float)rot["val"]["axis"][1],
-							(float)rot["val"]["axis"][2]
+						arm->getTransform().setTranslation(glm::vec3(
+							(float)trans[0],
+							(float)trans[1],
+							(float)trans[2]
 						));
 					}
-					else if (rot["type"] == "quaternion")
+
+					if (!rot.is_null())
 					{
-						arm->getTransform().setRotation(glm::quat(
-							(float)rot["val"][3],
-							(float)rot["val"][0],
-							(float)rot["val"][1],
-							(float)rot["val"][2]
-						));
-					}
+						if (rot["type"] == "euler")
+						{
+							arm->getTransform().setRotation((float)rot["val"]["angle"], glm::vec3(
+								(float)rot["val"]["axis"][0],
+								(float)rot["val"]["axis"][1],
+								(float)rot["val"]["axis"][2]
+							));
+						}
+						else if (rot["type"] == "quaternion")
+						{
+							arm->getTransform().setRotation(glm::quat(
+								(float)rot["val"][3],
+								(float)rot["val"][0],
+								(float)rot["val"][1],
+								(float)rot["val"][2]
+							));
+						}
 #ifdef DEBUG_LOG
-	else
-		Log::crash("Scene::loadSceneConfig(): config contains an armature transform rotation type other than 'euler' or 'quaternion'");
+						else
+							Log::crash("Scene::loadSceneConfig(): config contains an armature transform rotation type other than 'euler' or 'quaternion'");
 #endif
 
+					}
+
+					if (!scale.is_null())
+					{
+						arm->getTransform().setScale(glm::vec3(
+							(float)scale[0],
+							(float)scale[1],
+							(float)scale[2]
+						));
+					}
 				}
 
-				if (!scale.is_null())
-				{
-					arm->getTransform().setScale(glm::vec3(
-						(float)scale[0],
-						(float)scale[1],
-						(float)scale[2]
-					));
-				}
+			// end of armatures foreach
 			}
-		}
 
-		for (auto& p : j["parenting"])
-		{
-			auto parent = stage->getActor(p["parent"]);
-			for (auto& c : p["children"])
-				stage->getActor(c)->setParentActor(parent);
+			for (auto& p : s["parenting"])
+			{
+				auto parent = stage->getActor(p["parent"]);
+				for (auto& c : p["children"])
+					stage->getActor(c)->setParentActor(parent);
+			}
+
+		// end stage foreach
 		}
 		
 	}
@@ -555,6 +574,20 @@ namespace vel
 				return false;
 
 		return true;
+	}
+
+	CollisionWorld* Scene::addCollisionWorld(float gravity)
+	{
+		// for some reason CollisionWorld has to be a pointer or bullet has read access violation issues
+		// delete in destructor
+		this->collisionWorld = new CollisionWorld(gravity);
+
+		return this->collisionWorld;
+	}
+
+	CollisionWorld* Scene::getCollisionWorld()
+	{
+		return this->collisionWorld;
 	}
 
 	void Scene::loadShader(std::string name, std::string vertFile, std::string fragFile)
@@ -631,7 +664,7 @@ namespace vel
 	--------------------------------------------------*/
 	Stage* Scene::addStage(std::string name)
 	{
-		return this->stages.insert(name, Stage(name));
+		return this->stages.insert(name, Stage(this, name));
 	}
 
 	Stage* Scene::getStage(std::string name)
@@ -663,8 +696,8 @@ namespace vel
 
 	void Scene::stepPhysics(float delta)
 	{
-		for (auto& s : this->stages.getAll())
-			s->stepPhysics(delta);
+		if(this->collisionWorld != nullptr && this->collisionWorld->getIsActive())
+			this->collisionWorld->getDynamicsWorld()->stepSimulation(delta, 0);
 	}
 
 	void Scene::postPhysics(float delta) {}
@@ -677,9 +710,8 @@ namespace vel
 
 	void Scene::processSensors()
 	{
-		for (auto& s : this->stages.getAll())
-			if (s->getCollisionWorld())
-				s->getCollisionWorld()->processSensors();
+		if (this->collisionWorld != nullptr && this->collisionWorld->getIsActive())
+			this->collisionWorld->processSensors();
 	}
 
 	void Scene::draw(float alpha)
@@ -699,7 +731,7 @@ namespace vel
 		this->cameraViewMatrix = this->camera.getViewMatrix();
 		// these are for applying lighting to objects that are in screen space as if they were in world space, for example
 		// first person arms / weapons (allows us to use the view matrix of one camera only for lighting), set to scene camera defaults here
-		// only relevant for when stage has it's own camera AND useSceneSpaceLighting is set to true
+		// only relevant for when stage has it's own camera AND useSceneCameraPositionForLighting is set to true
 		this->renderCameraPosition = this->cameraPosition;
 		this->renderCameraOffset = glm::mat4(1.0f);
 
@@ -707,6 +739,17 @@ namespace vel
 		if (this->getDrawSkybox() && this->getActiveInfiniteCubemap() != nullptr)
 			gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, this->getActiveInfiniteCubemap()->envCubemap);
 
+		// debug draw collision world
+#ifdef DEBUG_LOG
+		if(this->collisionWorld != nullptr && this->collisionWorld->getIsActive() && this->collisionWorld->getDebugDrawer() != nullptr)
+		{
+			this->collisionWorld->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
+			gpu->useShader(this->collisionWorld->getDebugDrawer()->getShaderProgram());
+			gpu->setShaderMat4("vp", this->camera.getProjectionMatrix() * this->camera.getViewMatrix());
+			gpu->debugDrawCollisionWorld(this->collisionWorld->getDebugDrawer()); // draw all loaded vertices with a single call and clear
+		}
+#endif
+		
 		// loop through all stages
 		for (auto s : this->stages.getAll())
 		{
@@ -730,32 +773,9 @@ namespace vel
 
 				// these are for applying lighting to objects that are in screen space as if they were in world space, for example
 				// first person arms / weapons (allows us to use the view matrix of one camera only for lighting)
-				this->renderCameraPosition = s->getUseSceneSpaceLighting() == false ? this->cameraPosition : this->camera.getPosition();
-				this->renderCameraOffset = s->getUseSceneSpaceLighting() == false ? glm::mat4(1.0f) : glm::inverse(this->camera.getViewMatrix());
+				this->renderCameraPosition = s->getUseSceneCameraPositionForLighting() == false ? this->cameraPosition : this->camera.getPosition();
+				this->renderCameraOffset = s->getUseSceneCameraPositionForLighting() == false ? glm::mat4(1.0f) : glm::inverse(this->camera.getViewMatrix());
 			}
-
-			
-
-
-
-			// if debug drawer set, do debug draw
-			if (s->getCollisionWorld() != nullptr && s->getCollisionWorld()->getDebugDrawer() != nullptr)
-			{
-				s->getCollisionWorld()->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
-				gpu->useShader(s->getCollisionWorld()->getDebugDrawer()->getShaderProgram());
-				gpu->setShaderMat4("vp", s->getCamera()->getProjectionMatrix() * s->getCamera()->getViewMatrix());
-				gpu->debugDrawCollisionWorld(s->getCollisionWorld()->getDebugDrawer()); // draw all loaded vertices with a single call and clear
-			}
-			// when we gpu load things, we're altering the state in order to load those elements,
-			// so we need to reset actives so that the gpu knows to reset state to what we're suppose to be drawing
-			// Commented this out at some point in the past, guessing it wasn't required after all, or something changed below that rendered
-			// this call redundant...that's probably it, yeah since I'm setting state for each new renderable now that would make sense...I think
-			//gpu->resetActives(); 
-			
-
-			//// Draw cubemap skybox
-			//if (s->getDrawSkybox() && s->getActiveHdr() != nullptr)
-			//	gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, s->getActiveHdr()->envCubemap);
 
 
 			std::vector<Renderable*> transparentRenderables;
@@ -770,11 +790,16 @@ namespace vel
 
 				// DRAW OPAQUES
 
-				// Reset gpu state for this renderable
+				// RESET GPU STATE FOR THIS RENDERABLE
 				gpu->useShader(r->getShader());
 
 				if(s->getRenderMode() == RenderMode::PBR_IBL)
-					gpu->useIBL(s->getActiveHdr());
+					if(s->getActiveInfiniteCubemap() != nullptr)
+						gpu->useIBL(s->getActiveInfiniteCubemap());
+					else if(this->activeInfiniteCubemap != nullptr)
+						gpu->useIBL(this->activeInfiniteCubemap);
+					else
+						gpu->useIBL(App::get().getAssetManager().getInfiniteCubemap("defaultCubemap"));
 
 				gpu->useMesh(r->getMesh());
 				gpu->useMaterial(r->getMaterial());
@@ -784,7 +809,7 @@ namespace vel
 			}
 
 
-			// DRAW TRANSPARENTS
+			// DRAW TRANSPARENTS/TRANSLUCENTS
 
 			// TODO: not proud of this, but it gets the job done for the time being (can't use map since there's a chance keys could be the same,
 			// not that using map would make this anymore acceptable for a performance crucial application)
@@ -811,7 +836,12 @@ namespace vel
 				gpu->useShader(r->getShader());
 
 				if (s->getRenderMode() == RenderMode::PBR_IBL)
-					gpu->useIBL(s->getActiveHdr());
+					if (s->getActiveInfiniteCubemap() != nullptr)
+						gpu->useIBL(s->getActiveInfiniteCubemap());
+					else if (this->activeInfiniteCubemap != nullptr)
+						gpu->useIBL(this->activeInfiniteCubemap);
+					else
+						gpu->useIBL(App::get().getAssetManager().getInfiniteCubemap("defaultCubemap"));
 
 				gpu->useMesh(r->getMesh());
 				gpu->useMaterial(r->getMaterial());

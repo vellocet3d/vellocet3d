@@ -29,6 +29,7 @@ namespace vel
 	class CollisionWorld
 	{
 	private:
+		bool									isActive;
 		btDefaultCollisionConfiguration*		collisionConfiguration;
 		btCollisionDispatcher*					dispatcher;
 		btBroadphaseInterface*					overlappingPairCache;
@@ -70,6 +71,9 @@ namespace vel
         btCollisionShape*                       getCollisionShape(std::string name);
 		void									addCollisionObjectTemplate(std::string name, CollisionObjectTemplate cot);
 		CollisionObjectTemplate&				getCollisionObjectTemplate(std::string name);
+
+		bool									getIsActive();
+		void									setIsActive(bool b);
 
 	};
 

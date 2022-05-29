@@ -14,6 +14,7 @@
 namespace vel
 {
 	CollisionWorld::CollisionWorld(float gravity) :
+		isActive(true),
 		collisionConfiguration(new btDefaultCollisionConfiguration()),
 		dispatcher(new btCollisionDispatcher(collisionConfiguration)),
 		overlappingPairCache(new btDbvtBroadphase()),
@@ -70,6 +71,16 @@ namespace vel
 
 		//next line is optional: it will be cleared by the destructor when the array goes out of scope
 		this->collisionShapes.clear();
+	}
+
+	bool CollisionWorld::getIsActive()
+	{
+		return this->isActive;
+	}
+
+	void CollisionWorld::setIsActive(bool b)
+	{
+		this->isActive = b;
 	}
 
 	void CollisionWorld::addCollisionObjectTemplate(std::string name, CollisionObjectTemplate cot)

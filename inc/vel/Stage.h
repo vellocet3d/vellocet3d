@@ -11,11 +11,10 @@
 #include "vel/Actor.h"
 #include "vel/Camera.h"
 #include "vel/Renderable.h"
-#include "vel/CollisionWorld.h"
-#include "vel/CollisionDebugDrawer.h"
 #include "vel/Sensor.h"
 #include "vel/GPU.h"
 #include "vel/RenderMode.h"
+#include "vel/Cubemap.h"
 
 
 namespace vel
@@ -27,23 +26,26 @@ namespace vel
 	class Stage
 	{
 	private:
-
+		Scene*											parentScene;
 		bool											visible;
 		std::optional<Camera>							camera;
 		sac<Actor>										actors;
 		sac<Armature>									armatures;
 		sac<Renderable>									renderables;
-		CollisionWorld*									collisionWorld;
 		bool											clearDepthBuffer;
 		std::string										name;
 		RenderMode										renderMode;
-		bool											useSceneSpaceLighting;
+		Cubemap*										activeInfiniteCubemap;
+		bool											useSceneCameraPositionForLighting;
+
 		
+
+
 		void											_removeActor(Actor* a);
 
 
 	public:
-														Stage(std::string name);
+														Stage(Scene* ps, std::string name);
 														~Stage();
 		void											updateFixedArmatureAnimations(double runTime);
 		void											updateArmatureAnimations(double runTime);
@@ -61,9 +63,7 @@ namespace vel
 		void											setClearDepthBuffer(bool b);
 		bool											getClearDepthBuffer();
 		void											applyTransformations();
-		void											setCollisionWorld(float gravity = -10.0f);
-		CollisionWorld*									getCollisionWorld();
-		void											stepPhysics(float delta);
+
 		Armature*										addArmature(Armature a, std::string defaultAnimation, std::vector<std::string> actors);	
 		const std::string&								getName() const;
 		
@@ -72,8 +72,11 @@ namespace vel
 		RenderMode										getRenderMode();
 		void											setRenderMode(RenderMode rm);
 
-		void											setUseSceneSpaceLighting(bool b);
-		bool											getUseSceneSpaceLighting();
+		void 											setActiveInfiniteCubemap(Cubemap* c);
+		Cubemap* 										getActiveInfiniteCubemap();
+
+		void											setUseSceneCameraPositionForLighting(bool b);
+		bool											getUseSceneCameraPositionForLighting();
 		
 
 	};

@@ -15,18 +15,19 @@
 namespace vel
 {
 
-	Stage::Stage(std::string name) :
+	Stage::Stage(Scene* ps, std::string name) :
+		parentScene(ps),
 		renderMode(RenderMode::STATIC_DIFFUSE),
+		activeInfiniteCubemap(nullptr),
 		visible(true),
-		collisionWorld(nullptr),
 		clearDepthBuffer(false),
 		name(name),
-		useSceneSpaceLighting(true)
+		useSceneCameraPositionForLighting(true)
 	{}
 
 	Stage::~Stage()
 	{
-		delete this->collisionWorld;
+		
 	}
 
 	void Stage::setRenderMode(RenderMode rm)
@@ -39,6 +40,16 @@ namespace vel
 		return this->renderMode;
 	}
 
+	void Stage::setActiveInfiniteCubemap(Cubemap* c)
+	{
+		this->activeInfiniteCubemap = c;
+	}
+
+	Cubemap* Stage::getActiveInfiniteCubemap()
+	{
+		return this->activeInfiniteCubemap;
+	}
+
 	const std::string& Stage::getName() const
 	{
 		return this->name;
@@ -49,14 +60,14 @@ namespace vel
 		return this->armatures.get(armatureName);
 	}
 
-	void Stage::setUseSceneSpaceLighting(bool b)
+	void Stage::setUseSceneCameraPositionForLighting(bool b)
 	{
-		this->useSceneSpaceLighting = b;
+		this->useSceneCameraPositionForLighting = b;
 	}
 
-	bool Stage::getUseSceneSpaceLighting()
+	bool Stage::getUseSceneCameraPositionForLighting()
 	{
-		return this->useSceneSpaceLighting;
+		return this->useSceneCameraPositionForLighting;
 	}
 
 	Armature* Stage::addArmature(Armature a, std::string defaultAnimation, std::vector<std::string> actorsIn)
@@ -91,24 +102,6 @@ namespace vel
 	void Stage::setClearDepthBuffer(bool b)
 	{
 		this->clearDepthBuffer = b;
-	}
-
-	void Stage::stepPhysics(float delta)
-	{
-		if (this->collisionWorld)
-			this->collisionWorld->getDynamicsWorld()->stepSimulation(delta, 0);
-	}
-
-	CollisionWorld* Stage::getCollisionWorld()
-	{
-		return this->collisionWorld;
-	}
-
-	void Stage::setCollisionWorld(float gravity)
-	{
-		// for some reason this has to be a pointer or bullet has read access violation issues
-		// delete in destructor
-		this->collisionWorld = new CollisionWorld(gravity); 
 	}
 
 	std::vector<Actor*>& Stage::getActors()
@@ -210,7 +203,7 @@ namespace vel
 
 		// remove all sensors associated with this actor
 		for(auto s : a->getContactSensors())
-			this->collisionWorld->removeSensor(s);
+			this->parentScene->getCollisionWorld()->removeSensor(s);
 		
 		a->clearContactSensors();
 		
@@ -218,14 +211,14 @@ namespace vel
 		auto arb = a->getRigidBody();
 		if (arb != nullptr)
 		{
-			this->collisionWorld->removeRigidBody(arb);
+			this->parentScene->getCollisionWorld()->removeRigidBody(arb);
 			a->setRigidBody(nullptr);
 		}
 
 		auto ago = a->getGhostObject();
 		if (ago != nullptr)
 		{
-			this->collisionWorld->removeGhostObject(ago);
+			this->parentScene->getCollisionWorld()->removeGhostObject(ago);
 			a->setGhostObject(nullptr);
 		}
 
