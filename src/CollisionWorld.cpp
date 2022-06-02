@@ -20,6 +20,7 @@ namespace vel
 		overlappingPairCache(new btDbvtBroadphase()),
 		solver(new btSequentialImpulseConstraintSolver),
 		dynamicsWorld(new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration)),
+		camera(nullptr),
 		collisionDebugDrawer(nullptr)
 	{
 		this->dynamicsWorld->getPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
@@ -71,6 +72,16 @@ namespace vel
 
 		//next line is optional: it will be cleared by the destructor when the array goes out of scope
 		this->collisionShapes.clear();
+	}
+
+	void CollisionWorld::setCamera(Camera* c)
+	{
+		this->camera = c;
+	}
+
+	Camera* CollisionWorld::getCamera()
+	{
+		return this->camera;
 	}
 
 	bool CollisionWorld::getIsActive()

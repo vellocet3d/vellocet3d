@@ -25,6 +25,7 @@
 namespace vel
 {
 	class Stage;
+	class Camera;
 
 	class CollisionWorld
 	{
@@ -37,6 +38,7 @@ namespace vel
 		btDiscreteDynamicsWorld*				dynamicsWorld;
 		std::unordered_map<std::string, btCollisionShape*> collisionShapes;
 		sac<Sensor>								sensors;
+		Camera*									camera;
 		CollisionDebugDrawer* 					collisionDebugDrawer;
 		std::unordered_map<std::string, CollisionObjectTemplate> collisionObjectTemplates;
 
@@ -74,6 +76,9 @@ namespace vel
 
 		bool									getIsActive();
 		void									setIsActive(bool b);
+
+		void									setCamera(Camera* c);
+		Camera*									getCamera();
 
 	};
 

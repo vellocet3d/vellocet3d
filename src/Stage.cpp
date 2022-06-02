@@ -15,11 +15,11 @@
 namespace vel
 {
 
-	Stage::Stage(Scene* ps, std::string name) :
-		parentScene(ps),
+	Stage::Stage(std::string name) :
 		renderMode(RenderMode::STATIC_DIFFUSE),
 		activeInfiniteCubemap(nullptr),
 		visible(true),
+		camera(nullptr),
 		clearDepthBuffer(false),
 		name(name),
 		useSceneCameraPositionForLighting(true)
@@ -124,24 +124,13 @@ namespace vel
 		this->visible = true;
 	}
 
-	void Stage::addCamera(CameraType ct, float nearPlane, float farPlane, float fovOrScale)
+	void Stage::setCamera(Camera* c)
 	{
-		this->camera = Camera(
-			ct,
-			nearPlane,
-			farPlane,
-			fovOrScale
-		);
+		this->camera = c;
 	}
 
 	void Stage::updateFixedArmatureAnimations(double runTime)
 	{
-		// TODO: This needs to update Armatures regardless of actors since if
-		// 30 actors use the same armature, this will update the armature 30 times
-		//for (auto a : this->actors.getAll())
-		//	if (!a->isDeleted() && a->isAnimated())
-		//		a->getArmature()->updateAnimation(runTime);
-
 		for (auto a : this->armatures.getAll())
 			if(a->getShouldInterpolate())
 				a->updateAnimation(runTime);
@@ -203,7 +192,7 @@ namespace vel
 
 		// remove all sensors associated with this actor
 		for(auto s : a->getContactSensors())
-			this->parentScene->getCollisionWorld()->removeSensor(s);
+			a->getCollisionWorld()->removeSensor(s);
 		
 		a->clearContactSensors();
 		
@@ -211,14 +200,14 @@ namespace vel
 		auto arb = a->getRigidBody();
 		if (arb != nullptr)
 		{
-			this->parentScene->getCollisionWorld()->removeRigidBody(arb);
+			a->getCollisionWorld()->removeRigidBody(arb);
 			a->setRigidBody(nullptr);
 		}
 
 		auto ago = a->getGhostObject();
 		if (ago != nullptr)
 		{
-			this->parentScene->getCollisionWorld()->removeGhostObject(ago);
+			a->getCollisionWorld()->removeGhostObject(ago);
 			a->setGhostObject(nullptr);
 		}
 
@@ -242,7 +231,7 @@ namespace vel
 		return this->renderables.getAll();
 	}
 
-	std::optional<Camera>& Stage::getCamera()
+	Camera* Stage::getCamera()
 	{
 		return this->camera;
 	}

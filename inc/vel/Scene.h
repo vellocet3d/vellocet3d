@@ -6,6 +6,7 @@
 #include <optional>
 
 #include "vel/sac.h"
+#include "vel/ptrsac.h"
 
 #include "vel/Camera.h"
 #include "vel/Mesh.h"
@@ -24,11 +25,12 @@ namespace vel
 	class Scene
 	{
 	private:
-		Camera								camera;
+		sac<Camera>							cameras;
+		Camera*								sceneCamera;
 		Cubemap*							activeInfiniteCubemap;
 		bool								drawSkybox;
 		sac<Stage>							stages;
-		CollisionWorld*						collisionWorld;
+		ptrsac<CollisionWorld*> 			collisionWorlds;
 		double								fixedAnimationTime;
 		double								animationTime;
 
@@ -96,7 +98,13 @@ namespace vel
 		std::string							getName();
 		bool								isFullyLoaded();
 		
-		Camera*								getCamera();
+		// TODO: some of these should probably be protected
+
+		void								setSceneCamera(Camera* c);
+		Camera*								getSceneCamera(); // get Camera assigned to this scene
+
+		Camera*								addCamera(std::string name, Camera c);
+		Camera*								getCamera(std::string name); // get Camera pointer from cameras sac
 
 		void 								setActiveInfiniteCubemap(Cubemap* c);
 		Cubemap* 							getActiveInfiniteCubemap();
@@ -110,8 +118,8 @@ namespace vel
 		void								applyTransformations();
 		void								processSensors();
 
-		CollisionWorld*						addCollisionWorld(float gravity = -10.0f);
-		CollisionWorld*						getCollisionWorld();
+		CollisionWorld*						addCollisionWorld(std::string name, float gravity = -10.0f);
+		CollisionWorld*						getCollisionWorld(std::string name);
 
 	};
 

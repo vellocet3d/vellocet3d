@@ -16,10 +16,21 @@ namespace vel
 		parentArmatureBone(nullptr),
 		armature(nullptr),
 		mesh(nullptr),
+		collisionWorld(nullptr),
 		rigidBody(nullptr),
 		ghostObject(nullptr),
-		autoTransform(true) //TODO: tf is the point of this? Well, ok, so this is needed so that we don't update a static actor that has a rigidbody association
+		autoTransform(true) // this is needed so that we don't update a static actor that has a rigidbody association
 	{}
+
+	void Actor::setCollisionWorld(CollisionWorld* cw)
+	{
+		this->collisionWorld = cw;
+	}
+
+	CollisionWorld* Actor::getCollisionWorld()
+	{
+		return this->collisionWorld;
+	}
 
 	void Actor::addContactSensor(Sensor* s)
 	{

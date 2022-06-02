@@ -26,9 +26,8 @@ namespace vel
 	class Stage
 	{
 	private:
-		Scene*											parentScene;
 		bool											visible;
-		std::optional<Camera>							camera;
+		Camera*											camera;
 		sac<Actor>										actors;
 		sac<Armature>									armatures;
 		sac<Renderable>									renderables;
@@ -45,7 +44,7 @@ namespace vel
 
 
 	public:
-														Stage(Scene* ps, std::string name);
+														Stage(std::string name);
 														~Stage();
 		void											updateFixedArmatureAnimations(double runTime);
 		void											updateArmatureAnimations(double runTime);
@@ -55,10 +54,10 @@ namespace vel
 		Actor*											getActor(std::string name);
 		std::vector<Actor*>&							getActors();
 		std::vector<Renderable*>& 						getRenderables();
-		std::optional<Camera>&							getCamera();
+		void											setCamera(Camera* c);
+		Camera*											getCamera();
 		void											show();
 		void											hide();
-		void											addCamera(CameraType ct, float nearPlane, float farPlane, float fovOrScale);
 		const bool										isVisible();
 		void											setClearDepthBuffer(bool b);
 		bool											getClearDepthBuffer();

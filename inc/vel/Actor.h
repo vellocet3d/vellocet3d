@@ -44,7 +44,7 @@ namespace vel
 
 		Mesh*											mesh; // pointer to mesh used by this Actor independant of renderable. required for headless mode since there will be no renderable instance
 
-
+		CollisionWorld*									collisionWorld;
 		btRigidBody*									rigidBody;
 		btPairCachingGhostObject*						ghostObject;
 		bool											autoTransform;
@@ -95,6 +95,9 @@ namespace vel
 		glm::quat										getInterpolatedRotation(float alpha);
 		glm::vec3										getInterpolatedScale(float alpha);
 
+
+		void											setCollisionWorld(CollisionWorld* cw);
+		CollisionWorld*									getCollisionWorld();
 		void											setRigidBody(btRigidBody* rb);
 		btRigidBody*									getRigidBody();
 		void											setGhostObject(btPairCachingGhostObject* go);
@@ -113,6 +116,8 @@ namespace vel
 		void											addContactSensor(Sensor* s);
 		void											clearContactSensors();
 		std::vector<Sensor*>& 							getContactSensors();
+
+
 
 	};
 }

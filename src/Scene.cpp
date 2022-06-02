@@ -21,10 +21,9 @@ using json = nlohmann::json;
 namespace vel
 {
 	Scene::Scene() :
-		camera(Camera(CameraType::PERSPECTIVE, 0.1f, 250.0f, 60.0f)),
+		sceneCamera(nullptr),
 		activeInfiniteCubemap(nullptr),
 		drawSkybox(false),
-		collisionWorld(nullptr),
 		mainMemoryloaded(false),
 		swapWhenLoaded(false),
 		animationTime(0.0),
@@ -32,8 +31,10 @@ namespace vel
 	{
 		this->sortedTransparentActors.reserve(1000); // reserve space for 1000 transparent actors (won't reallocate until that limit reached)
 
-		this->camera.setPosition(glm::vec3(0.0f, 2.0f, 0.0f));
-		this->camera.setLookAt(glm::vec3(0.0f, 0.0f, -1.0f));
+		// create a default camera for scene
+		this->sceneCamera = this->cameras.insert("defaultSceneCamera", Camera(CameraType::PERSPECTIVE, 0.1f, 250.0f, 60.0f));
+		this->sceneCamera->setPosition(glm::vec3(0.0f, 2.0f, 0.0f));
+		this->sceneCamera->setLookAt(glm::vec3(0.0f, 0.0f, -1.0f));
 	}
 	
 	Scene::~Scene()
@@ -41,9 +42,9 @@ namespace vel
 		this->freeAssets();
 	}
 
-	Camera* Scene::getCamera()
+	Camera* Scene::getSceneCamera()
 	{
-		return &this->camera;
+		return this->sceneCamera;
 	}
 
 	void Scene::setName(std::string n)
@@ -71,6 +72,23 @@ namespace vel
 		return this->drawSkybox;
 	}
 
+	Camera* Scene::addCamera(std::string name, Camera c)
+	{
+		return this->cameras.insert(name, c);
+	}
+
+	Camera* Scene::getCamera(std::string name)
+	{
+		return this->cameras.get(name);
+	}
+
+	void Scene::setSceneCamera(Camera* c)
+	{
+		this->sceneCamera = c;
+	}
+
+
+
 	void Scene::freeAssets()
 	{
 #ifdef DEBUG_LOG
@@ -97,8 +115,8 @@ namespace vel
 		for(auto& name : this->shadersInUse)
 			App::get().getAssetManager().removeShader(name);
 
-
-		delete this->collisionWorld;
+		for (auto cw : this->collisionWorlds.getAll())
+			delete cw;
 
 	}
 
@@ -135,31 +153,37 @@ namespace vel
 		if (j.contains("drawSkybox") && j["drawSkybox"] != "" && !j["drawSkybox"].is_null())
 			this->setDrawSkybox(j["drawSkybox"]);
 
-		// Update camera
-		if (j.contains("camera") && j["camera"] != "" && !j["camera"].is_null())
+		// Add cameras to scene
+		for (auto& c : j["cameras"])
 		{
-			if (j["camera"]["type"] == "perspective")
-				this->camera = Camera(CameraType::PERSPECTIVE, j["camera"]["near"], j["camera"]["far"], j["camera"]["fov"]);
-			else if (j["camera"]["type"] == "orthographic")
-				this->camera = Camera(CameraType::ORTHOGRAPHIC, j["camera"]["near"], j["camera"]["far"], j["camera"]["scale"]);
+			Camera* tmpCamPtr;
+			if (c["type"] == "perspective")
+				tmpCamPtr = this->cameras.insert(c["name"], Camera(CameraType::PERSPECTIVE, c["near"], c["far"], c["fov"]));
+			else if (c["type"] == "orthographic")
+				tmpCamPtr = this->cameras.insert(c["name"], Camera(CameraType::ORTHOGRAPHIC, c["near"], c["far"], c["scale"]));
 #ifdef DEBUG_LOG
 			else
 				Log::crash("Scene::loadConfigFile(): config contains a camera type other than 'perspective' or 'orthographic'");
 #endif
 
-			this->camera.setPosition(glm::vec3(
-				(float)j["camera"]["position"][0],
-				(float)j["camera"]["position"][1],
-				(float)j["camera"]["position"][2]
+			tmpCamPtr->setPosition(glm::vec3(
+				(float)c["position"][0],
+				(float)c["position"][1],
+				(float)c["position"][2]
 			));
 
-			this->camera.setLookAt(glm::vec3(
-				(float)j["camera"]["lookat"][0],
-				(float)j["camera"]["lookat"][1],
-				(float)j["camera"]["lookat"][2]
+			tmpCamPtr->setLookAt(glm::vec3(
+				(float)c["lookat"][0],
+				(float)c["lookat"][1],
+				(float)c["lookat"][2]
 			));
-
 		}
+
+		// Update sceneCamera if provided
+		if (j.contains("sceneCamera") && !j["sceneCamera"].is_null() && j["sceneCamera"] != "")
+			this->sceneCamera = this->cameras.get(j["sceneCamera"]);
+
+
 
 		// Load meshes from .fbx files, will also load in associated armatures
 		for (auto& m : j["meshes"])
@@ -224,16 +248,19 @@ namespace vel
 			);
 		}
 
-		// Load collision world
-		if (j.contains("collisionWorld") && j["collisionWorld"] != "" && !j["collisionWorld"].is_null())
+		// Load collision worlds
+		for(auto& cwj : j["collisionWorlds"])
 		{
-			auto cw = this->addCollisionWorld(j["collisionWorld"]["gravity"]);
-			cw->setIsActive(j["collisionWorld"]["active"]);
-
-			if (j["collisionWorld"]["debug"])
+			auto cw = this->addCollisionWorld(cwj["name"], cwj["gravity"]);
+			cw->setIsActive(cwj["active"]);
+			
+			if (cwj["debug"])
+			{
 				cw->useDebugDrawer(this->getShader("defaultDebug"));
+				cw->setCamera(this->getCamera(cwj["debugCamera"]));
+			}
 
-			for (auto& cs : j["collisionWorld"]["collisionShapes"])
+			for (auto& cs : cwj["collisionShapes"])
 			{
 				if (cs["type"] == "btCylinderShape")
 				{
@@ -250,7 +277,7 @@ namespace vel
 				// Add support for more shapes as needed
 			}
 
-			for (auto& co : j["collisionWorld"]["collisionObjects"])
+			for (auto& co : cwj["collisionObjects"])
 			{
 				// Add support for more properties as needed
 				CollisionObjectTemplate cot;
@@ -299,28 +326,7 @@ namespace vel
 				stage->setClearDepthBuffer(true);
 
 			if (s.contains("camera") && s["camera"] != "" && !s["camera"].is_null())
-			{
-				if (s["camera"]["type"] == "perspective")
-					stage->addCamera(CameraType::PERSPECTIVE, s["camera"]["near"], s["camera"]["far"], s["camera"]["fov"]);
-				else if (j["camera"]["type"] == "orthographic")
-					stage->addCamera(CameraType::ORTHOGRAPHIC, s["camera"]["near"], s["camera"]["far"], s["camera"]["scale"]);
-#ifdef DEBUG_LOG
-				else
-					Log::crash("Scene::loadConfigFile(): config contains a camera type other than 'perspective' or 'orthographic'");
-#endif
-
-				stage->getCamera()->setPosition(glm::vec3(
-					(float)s["camera"]["position"][0],
-					(float)s["camera"]["position"][1],
-					(float)s["camera"]["position"][2]
-				));
-
-				stage->getCamera()->setLookAt(glm::vec3(
-					(float)s["camera"]["lookat"][0],
-					(float)s["camera"]["lookat"][1],
-					(float)s["camera"]["lookat"][2]
-				));
-			}
+				stage->setCamera(this->cameras.get(s["camera"]));
 
 			if (s.contains("useSceneCameraPositionForLighting") && !s["useSceneCameraPositionForLighting"].is_null())
 				stage->setUseSceneCameraPositionForLighting(s["useSceneCameraPositionForLighting"]);
@@ -395,11 +401,13 @@ namespace vel
 				Actor* pActor = stage->addActor(act);
 
 
-				if (this->collisionWorld != nullptr && a.contains("collisionObject") && !a["collisionObject"].is_null())
+				if (a.contains("collisionWorld") && !a["collisionWorld"].is_null() && a.contains("collisionObject") && !a["collisionObject"].is_null())
 				{
+					pActor->setCollisionWorld(this->getCollisionWorld(a["collisionWorld"]));
+					
 					if ((a["collisionObject"] != "GENERATE_STATIC_RIGIDBODY") && (a["collisionObject"] != "GENERATE_STATIC_GHOST"))
 					{
-						auto& cot = this->collisionWorld->getCollisionObjectTemplate(a["collisionObject"]);
+						auto& cot = pActor->getCollisionWorld()->getCollisionObjectTemplate(a["collisionObject"]);
 						auto actorTranslation = pActor->getTransform().getTranslation();
 
 						btTransform theTransform;
@@ -432,7 +440,7 @@ namespace vel
 								theRigidBody->setActivationState(cot.activationState.value());
 
 							theRigidBody->setUserPointer(pActor);
-							this->collisionWorld->getDynamicsWorld()->addRigidBody(theRigidBody);
+							pActor->getCollisionWorld()->getDynamicsWorld()->addRigidBody(theRigidBody);
 
 							pActor->setRigidBody(theRigidBody);
 						}
@@ -443,7 +451,7 @@ namespace vel
 							theGhostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 							theGhostObject->setUserPointer(pActor);
 
-							this->collisionWorld->getDynamicsWorld()->addCollisionObject(theGhostObject,
+							pActor->getCollisionWorld()->getDynamicsWorld()->addCollisionObject(theGhostObject,
 								btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
 
 							pActor->setGhostObject(theGhostObject);
@@ -453,16 +461,16 @@ namespace vel
 					{
 						if (a["collisionObject"] == "GENERATE_STATIC_RIGIDBODY")
 						{
-							this->collisionWorld->addStaticCollisionBody(pActor);
+							pActor->getCollisionWorld()->addStaticCollisionBody(pActor);
 						}
 						else if (a["collisionObject"] == "GENERATE_STATIC_GHOST")
 						{
 							btPairCachingGhostObject* theGhostObject = new btPairCachingGhostObject();
-							theGhostObject->setCollisionShape(this->collisionWorld->collisionShapeFromActor(pActor));
+							theGhostObject->setCollisionShape(pActor->getCollisionWorld()->collisionShapeFromActor(pActor));
 							theGhostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 							theGhostObject->setUserPointer(pActor);
 
-							this->collisionWorld->getDynamicsWorld()->addCollisionObject(theGhostObject,
+							pActor->getCollisionWorld()->getDynamicsWorld()->addCollisionObject(theGhostObject,
 								btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
 
 							pActor->setGhostObject(theGhostObject);
@@ -576,18 +584,19 @@ namespace vel
 		return true;
 	}
 
-	CollisionWorld* Scene::addCollisionWorld(float gravity)
+	CollisionWorld* Scene::addCollisionWorld(std::string name, float gravity)
 	{
 		// for some reason CollisionWorld has to be a pointer or bullet has read access violation issues
 		// delete in destructor
-		this->collisionWorld = new CollisionWorld(gravity);
+		CollisionWorld* cw = new CollisionWorld(gravity);
+		this->collisionWorlds.insert(name, cw);
 
-		return this->collisionWorld;
+		return cw;
 	}
 
-	CollisionWorld* Scene::getCollisionWorld()
+	CollisionWorld* Scene::getCollisionWorld(std::string name)
 	{
-		return this->collisionWorld;
+		return this->collisionWorlds.get(name);
 	}
 
 	void Scene::loadShader(std::string name, std::string vertFile, std::string fragFile)
@@ -664,7 +673,7 @@ namespace vel
 	--------------------------------------------------*/
 	Stage* Scene::addStage(std::string name)
 	{
-		return this->stages.insert(name, Stage(this, name));
+		return this->stages.insert(name, Stage(name));
 	}
 
 	Stage* Scene::getStage(std::string name)
@@ -696,8 +705,9 @@ namespace vel
 
 	void Scene::stepPhysics(float delta)
 	{
-		if(this->collisionWorld != nullptr && this->collisionWorld->getIsActive())
-			this->collisionWorld->getDynamicsWorld()->stepSimulation(delta, 0);
+		for(auto cw : this->collisionWorlds.getAll())
+			if(cw->getIsActive())
+				cw->getDynamicsWorld()->stepSimulation(delta, 0);
 	}
 
 	void Scene::postPhysics(float delta) {}
@@ -710,8 +720,9 @@ namespace vel
 
 	void Scene::processSensors()
 	{
-		if (this->collisionWorld != nullptr && this->collisionWorld->getIsActive())
-			this->collisionWorld->processSensors();
+		for (auto cw : this->collisionWorlds.getAll())
+			if (cw->getIsActive())
+				cw->processSensors();
 	}
 
 	void Scene::draw(float alpha)
@@ -725,10 +736,10 @@ namespace vel
         gpu->disableBlend(); // disable blending for opaque objects
 
 		// set scene camera values
-		this->camera.update();
-		this->cameraPosition = this->camera.getPosition();
-		this->cameraProjectionMatrix = this->camera.getProjectionMatrix();
-		this->cameraViewMatrix = this->camera.getViewMatrix();
+		this->sceneCamera->update();
+		this->cameraPosition = this->sceneCamera->getPosition();
+		this->cameraProjectionMatrix = this->sceneCamera->getProjectionMatrix();
+		this->cameraViewMatrix = this->sceneCamera->getViewMatrix();
 		// these are for applying lighting to objects that are in screen space as if they were in world space, for example
 		// first person arms / weapons (allows us to use the view matrix of one camera only for lighting), set to scene camera defaults here
 		// only relevant for when stage has it's own camera AND useSceneCameraPositionForLighting is set to true
@@ -741,12 +752,15 @@ namespace vel
 
 		// debug draw collision world
 #ifdef DEBUG_LOG
-		if(this->collisionWorld != nullptr && this->collisionWorld->getIsActive() && this->collisionWorld->getDebugDrawer() != nullptr)
+		for (auto cw : this->collisionWorlds.getAll())
 		{
-			this->collisionWorld->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
-			gpu->useShader(this->collisionWorld->getDebugDrawer()->getShaderProgram());
-			gpu->setShaderMat4("vp", this->camera.getProjectionMatrix() * this->camera.getViewMatrix());
-			gpu->debugDrawCollisionWorld(this->collisionWorld->getDebugDrawer()); // draw all loaded vertices with a single call and clear
+			if (cw->getIsActive() && cw->getDebugDrawer() != nullptr)
+			{
+				cw->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
+				gpu->useShader(cw->getDebugDrawer()->getShaderProgram());
+				gpu->setShaderMat4("vp", cw->getCamera()->getProjectionMatrix() * cw->getCamera()->getViewMatrix());
+				gpu->debugDrawCollisionWorld(cw->getDebugDrawer()); // draw all loaded vertices with a single call and clear
+			}
 		}
 #endif
 		
@@ -764,7 +778,7 @@ namespace vel
 				gpu->clearDepthBuffer();
 
 			// if stage has camera, use stage camera values
-			if (s->getCamera().has_value())
+			if (s->getCamera() != nullptr)
 			{
 				s->getCamera()->update();
 				this->cameraPosition = s->getCamera()->getPosition();
@@ -773,8 +787,8 @@ namespace vel
 
 				// these are for applying lighting to objects that are in screen space as if they were in world space, for example
 				// first person arms / weapons (allows us to use the view matrix of one camera only for lighting)
-				this->renderCameraPosition = s->getUseSceneCameraPositionForLighting() == false ? this->cameraPosition : this->camera.getPosition();
-				this->renderCameraOffset = s->getUseSceneCameraPositionForLighting() == false ? glm::mat4(1.0f) : glm::inverse(this->camera.getViewMatrix());
+				this->renderCameraPosition = s->getUseSceneCameraPositionForLighting() == false ? this->cameraPosition : this->sceneCamera->getPosition();
+				this->renderCameraOffset = s->getUseSceneCameraPositionForLighting() == false ? glm::mat4(1.0f) : glm::inverse(this->sceneCamera->getViewMatrix());
 			}
 
 

@@ -178,7 +178,7 @@ T ptrsac<T>::get(std::string name)
 		exit(EXIT_FAILURE);
 	}
 
-	return this->trackerMap[name];
+	return this->slots.at(this->trackerMap[name]);
 }
 
 template <typename T>
