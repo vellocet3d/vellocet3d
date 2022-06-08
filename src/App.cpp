@@ -71,7 +71,7 @@ namespace vel
         "data/shaders/defaults/default.vert", "data/shaders/defaults/pbr_ibl_light_test.frag");
 
 		this->assetManager.loadShader("defaultPBRIBLSkinned",
-			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/pbr_ibl_light_test.frag");
+			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/pbr_ibl_light_test_parallax.frag");
 
 
 		// shader for static diffuse color, a basic texture unaffected by light sources
