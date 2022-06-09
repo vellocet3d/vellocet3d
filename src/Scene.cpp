@@ -234,6 +234,12 @@ namespace vel
 			if (m.contains("ao") && m["ao"] != "" && !m["ao"].is_null())
 				mat.ao = this->getTexture(m["ao"]);
 
+			if (m.contains("height") && m["height"] != "" && !m["height"].is_null())
+				mat.height = this->getTexture(m["height"]);
+
+			if (m.contains("heightScale") && m["heightScale"] != "" && !m["heightScale"].is_null())
+				mat.heightScale = m["heightScale"];
+
 			this->addMaterial(mat);
 		}
 

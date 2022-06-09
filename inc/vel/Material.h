@@ -18,6 +18,8 @@ namespace vel
 		Texture* metallic = nullptr;
 		Texture* roughness = nullptr;
 		Texture* ao = nullptr; // ambient occlusion
+		Texture* height = nullptr;
+		float heightScale = 0.0f;
 		bool hasAlphaChannel = false;
 	};
 }

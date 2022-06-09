@@ -71,7 +71,15 @@ namespace vel
         "data/shaders/defaults/default.vert", "data/shaders/defaults/pbr_ibl_light_test.frag");
 
 		this->assetManager.loadShader("defaultPBRIBLSkinned",
-			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/pbr_ibl_light_test_parallax.frag");
+			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/pbr_ibl_light_test.frag");
+
+
+		// PBR_IBL pipeline shader with parallax occlusion mapping logic
+		this->assetManager.loadShader("defaultPBRIBLParallax",
+			"data/shaders/defaults/default.vert", "data/shaders/defaults/pbr_ibl_pom_light_test.frag");
+
+		this->assetManager.loadShader("defaultPBRIBLParallaxSkinned",
+			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/pbr_ibl_pom_light_test.frag");
 
 
 		// shader for static diffuse color, a basic texture unaffected by light sources
@@ -113,6 +121,7 @@ namespace vel
 		this->assetManager.loadTexture("defaultMetallic", "metallic", "data/default_textures/metallic.jpg");
 		this->assetManager.loadTexture("defaultRoughness", "roughness", "data/default_textures/roughness.jpg");
 		this->assetManager.loadTexture("defaultNormal", "normal", "data/default_textures/normal.jpg");
+		this->assetManager.loadTexture("defaultHeight", "height", "data/default_textures/height.jpg");
 		this->assetManager.sendAllToGpu();
 
 

@@ -359,6 +359,7 @@ if (!this->meshTrackers.exists(name))
 
         for (auto& m : mips)
         {
+			//Log::toCliAndFile("mip:" + m);
             ImageData id;
             id.data = stbi_load(m.c_str(), &id.width, &id.height, &id.nrComponents, 0);
 

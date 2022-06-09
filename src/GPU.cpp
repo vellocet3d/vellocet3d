@@ -648,6 +648,12 @@ namespace vel
 			glActiveTexture(GL_TEXTURE4);
 			glBindTexture(GL_TEXTURE_2D, m->ao->id);
 			this->setShaderInt("aoMap", 4);
+
+			glActiveTexture(GL_TEXTURE5);
+			glBindTexture(GL_TEXTURE_2D, m->height->id);
+			this->setShaderInt("heightMap", 5);
+
+			this->setShaderFloat("heightScale", m->heightScale);
 		}
 		else if (this->currentRenderMode == RenderMode::PBR_IBL)
 		{
@@ -670,6 +676,12 @@ namespace vel
 			glActiveTexture(GL_TEXTURE7);
 			glBindTexture(GL_TEXTURE_2D, m->ao->id);
 			this->setShaderInt("aoMap", 7);
+
+			glActiveTexture(GL_TEXTURE8);
+			glBindTexture(GL_TEXTURE_2D, m->height->id);
+			this->setShaderInt("heightMap", 8);
+
+			this->setShaderFloat("heightScale", m->heightScale);
 		}
 	}
 
