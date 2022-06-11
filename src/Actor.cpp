@@ -279,12 +279,12 @@ namespace vel
 		this->childActors.push_back(a);
 	}
 
-	void Actor::setActiveBones(std::vector<std::pair<size_t, std::string>> activeBones)
+	void Actor::setActiveBones(std::vector<std::pair<size_t, unsigned int>> activeBones)
 	{
 		this->activeBones = activeBones;
 	}
 
-	const std::vector<std::pair<size_t, std::string>>& Actor::getActiveBones() const
+	const std::vector<std::pair<size_t, unsigned int>>& Actor::getActiveBones() const
 	{
 		return this->activeBones;
 	}

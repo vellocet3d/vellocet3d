@@ -56,7 +56,7 @@ namespace vel
 		ArmatureBone&										getRootBone();
 		std::vector<ArmatureBone>&							getBones();
 		const std::vector<ArmatureBone>&					getBones() const;
-		ArmatureBone&										getBone(size_t index);
+		ArmatureBone&										getBone(unsigned int index);
 		ArmatureBone*										getBone(std::string boneName);
 		const std::string&									getName() const;
 		const std::vector<std::pair<std::string, Animation*>>&		getAnimations() const;

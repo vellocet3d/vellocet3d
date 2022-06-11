@@ -53,6 +53,9 @@ namespace vel
         unsigned int                        pbrCaptureRBO;
 
 		RenderMode							currentRenderMode;
+		
+		unsigned int						bonesUBO;
+		void								initBoneUBO();
         
 
 	public:
@@ -106,6 +109,8 @@ namespace vel
 		void                                drawSkybox(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, unsigned int cm);
 
 		void								setCurrentRenderMode(RenderMode rm);
+
+		void								updateBonesUBO(std::vector<std::pair<unsigned int, glm::mat4>> boneData); // first = bone array index, second = bone matrix
 
 	};
 }

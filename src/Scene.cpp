@@ -893,6 +893,7 @@ namespace vel
 				auto armature = a->getArmature();
 
 				size_t boneIndex = 0;
+				std::vector<std::pair<unsigned int, glm::mat4>> boneData;
 				if (armature->getShouldInterpolate())
 				{
 					for (auto& activeBone : a->getActiveBones())
@@ -902,7 +903,8 @@ namespace vel
 						// global inverse matrix does not seem to make any difference
 						//glm::mat4 meshBoneTransform = mesh->getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrixInterpolated(alphaTime) * mesh->getBone(boneIndex).offsetMatrix;
 						glm::mat4 meshBoneTransform = armature->getBone(activeBone.first).getRenderMatrixInterpolated(alphaTime) * mesh->getBone(boneIndex).offsetMatrix;
-						gpu->setShaderMat4(activeBone.second, meshBoneTransform);
+						//gpu->setShaderMat4(activeBone.second, meshBoneTransform);
+						boneData.push_back(std::pair<unsigned int, glm::mat4>(activeBone.second, meshBoneTransform));
 						boneIndex++;
 					}
 				}
@@ -912,11 +914,13 @@ namespace vel
 					{
 						//glm::mat4 meshBoneTransform = mesh->getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrix() * mesh->getBone(boneIndex).offsetMatrix;
 						glm::mat4 meshBoneTransform = armature->getBone(activeBone.first).getRenderMatrix() * mesh->getBone(boneIndex).offsetMatrix;
-						gpu->setShaderMat4(activeBone.second, meshBoneTransform);
+						//gpu->setShaderMat4(activeBone.second, meshBoneTransform);
+						boneData.push_back(std::pair<unsigned int, glm::mat4>(activeBone.second, meshBoneTransform));
 						boneIndex++;
 					}
 				}
 
+				gpu->updateBonesUBO(boneData);
 				
 			}
 

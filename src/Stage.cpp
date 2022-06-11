@@ -80,11 +80,11 @@ namespace vel
 			auto act = this->actors.get(actorName);
 			act->setArmature(sa);
 
-			std::vector<std::pair<size_t, std::string>> activeBones;
-			size_t index = 0;
+			std::vector<std::pair<size_t, unsigned int>> activeBones;
+			unsigned int index = 0;
 			for (auto& meshBone : act->getMesh()->getBones())
 			{
-				activeBones.push_back(std::pair<size_t, std::string>(act->getArmature()->getBoneIndex(meshBone.name), "bones[" + std::to_string(index) + "]"));
+				activeBones.push_back(std::pair<size_t, unsigned int>(act->getArmature()->getBoneIndex(meshBone.name), index));
 				index++;
 			}
 

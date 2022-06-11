@@ -38,6 +38,8 @@ namespace vel
         this->initQuad();
         this->initCube();
 
+		this->initBoneUBO();
+
         glGenFramebuffers(1, &this->pbrCaptureFBO);
         glGenRenderbuffers(1, &this->pbrCaptureRBO);
 	}
@@ -65,6 +67,34 @@ namespace vel
         this->brdfShader = brdf;
         this->backgroundShader = back;
     }
+
+	void GPU::initBoneUBO()
+	{
+		const int MAX_SUPPORTED_BONES = 200;
+		glGenBuffers(1, &this->bonesUBO);
+		glBindBuffer(GL_UNIFORM_BUFFER, this->bonesUBO);
+		glBufferData(GL_UNIFORM_BUFFER, MAX_SUPPORTED_BONES * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		// use below example if ever needing to store multiple ubo blocks in a asingle buffer which allows you to bind
+		// each block to a different binding point
+		//glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->bonesUBO);
+
+		// unbind for piece of mind
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
+
+	void GPU::updateBonesUBO(std::vector<std::pair<unsigned int, glm::mat4>> boneData)
+	{
+		
+		glBindBuffer(GL_UNIFORM_BUFFER, this->bonesUBO);
+		for (auto& bd : boneData)
+		{
+			//Log::toCli(std::to_string(bd.first) + glm::to_string(bd.second));
+			glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * bd.first, sizeof(glm::mat4), glm::value_ptr(bd.second));
+		}
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
 
 	void GPU::clearShader(Shader* s)
 	{

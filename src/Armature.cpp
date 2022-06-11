@@ -309,7 +309,7 @@ namespace vel
 		return nullptr;
 	}
 
-	ArmatureBone& Armature::getBone(size_t index)
+	ArmatureBone& Armature::getBone(unsigned int index)
 	{
 		return this->bones.at(index);
 	}
