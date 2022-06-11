@@ -898,8 +898,6 @@ namespace vel
 				{
 					for (auto& activeBone : a->getActiveBones())
 					{
-						//std::cout << activeBone.second << std::endl;
-
 						// global inverse matrix does not seem to make any difference
 						//glm::mat4 meshBoneTransform = mesh->getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrixInterpolated(alphaTime) * mesh->getBone(boneIndex).offsetMatrix;
 						glm::mat4 meshBoneTransform = armature->getBone(activeBone.first).getRenderMatrixInterpolated(alphaTime) * mesh->getBone(boneIndex).offsetMatrix;
