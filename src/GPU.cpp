@@ -321,6 +321,8 @@ namespace vel
 
 			int mipcount = (int)t->mips.size();
 
+			// mip level is zero based index of last mip-level
+			// https://gamedev.stackexchange.com/questions/84398/texture-is-black-when-manually-building-mipmap
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipcount);
 
 			while (mipcount > 0)
