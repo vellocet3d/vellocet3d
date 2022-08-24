@@ -111,17 +111,17 @@ namespace vel
         
         
         // load default hdr image
-        this->assetManager.loadInfiniteCubemap("defaultCubemap", "data/default_textures/default.hdr");
+        this->assetManager.loadInfiniteCubemap("defaultCubemap", "data/textures/defaults/default.hdr");
         this->assetManager.sendAllToGpu();
         
         
         // load default textures
-		this->assetManager.loadTexture("defaultAlbedo", "albedo", "data/default_textures/albedo.jpg");
-		this->assetManager.loadTexture("defaultAO", "ao", "data/default_textures/ao.jpg");
-		this->assetManager.loadTexture("defaultMetallic", "metallic", "data/default_textures/metallic.jpg");
-		this->assetManager.loadTexture("defaultRoughness", "roughness", "data/default_textures/roughness.jpg");
-		this->assetManager.loadTexture("defaultNormal", "normal", "data/default_textures/normal.jpg");
-		this->assetManager.loadTexture("defaultHeight", "height", "data/default_textures/height.jpg");
+		this->assetManager.loadTexture("defaultAlbedo", "albedo", "data/textures/defaults/albedo.jpg");
+		this->assetManager.loadTexture("defaultAO", "ao", "data/textures/defaults/ao.jpg");
+		this->assetManager.loadTexture("defaultMetallic", "metallic", "data/textures/defaults/metallic.jpg");
+		this->assetManager.loadTexture("defaultRoughness", "roughness", "data/textures/defaults/roughness.jpg");
+		this->assetManager.loadTexture("defaultNormal", "normal", "data/textures/defaults/normal.jpg");
+		this->assetManager.loadTexture("defaultHeight", "height", "data/textures/defaults/height.jpg");
 		this->assetManager.sendAllToGpu();
 
 
