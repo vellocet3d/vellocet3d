@@ -158,9 +158,9 @@ namespace vel
 		{
 			Camera* tmpCamPtr;
 			if (c["type"] == "perspective")
-				tmpCamPtr = this->cameras.insert(c["name"], Camera(CameraType::PERSPECTIVE, c["near"], c["far"], c["fov"]));
+				tmpCamPtr = this->cameras.insert(c["name"], Camera(CameraType::PERSPECTIVE, c["near"], c["far"], c["fovOrScale"]));
 			else if (c["type"] == "orthographic")
-				tmpCamPtr = this->cameras.insert(c["name"], Camera(CameraType::ORTHOGRAPHIC, c["near"], c["far"], c["scale"]));
+				tmpCamPtr = this->cameras.insert(c["name"], Camera(CameraType::ORTHOGRAPHIC, c["near"], c["far"], c["fovOrScale"]));
 #ifdef DEBUG_LOG
 			else
 				Log::crash("Scene::loadConfigFile(): config contains a camera type other than 'perspective' or 'orthographic'");
