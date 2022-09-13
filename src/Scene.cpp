@@ -31,8 +31,9 @@ namespace vel
 	{
 		this->sortedTransparentActors.reserve(1000); // reserve space for 1000 transparent actors (won't reallocate until that limit reached)
 
-		// create a default camera for scene
-		this->sceneCamera = this->cameras.insert("defaultSceneCamera", Camera(CameraType::PERSPECTIVE, 0.1f, 250.0f, 60.0f));
+		// create a default camera for scene (required so sceneCamera is never nullptr, can be set to another pointer at runtime if required)
+		this->addCamera(Camera("defaultSceneCamera", CameraType::PERSPECTIVE, 0.1f, 250.0f, 60.0f));
+		this->sceneCamera = this->getCamera("defaultSceneCamera");
 		this->sceneCamera->setPosition(glm::vec3(0.0f, 2.0f, 0.0f));
 		this->sceneCamera->setLookAt(glm::vec3(0.0f, 0.0f, -1.0f));
 	}
@@ -72,14 +73,13 @@ namespace vel
 		return this->drawSkybox;
 	}
 
-	Camera* Scene::addCamera(std::string name, Camera c)
+	void Scene::addCamera(Camera c)
 	{
-		return this->cameras.insert(name, c);
+		this->camerasInUse.push_back(App::get().getAssetManager().addCamera(c));
 	}
-
 	Camera* Scene::getCamera(std::string name)
 	{
-		return this->cameras.get(name);
+		return App::get().getAssetManager().getCamera(name);
 	}
 
 	void Scene::setSceneCamera(Camera* c)
@@ -121,6 +121,9 @@ namespace vel
 	}
 
 	/* Json Scene Loader
+	* NOTE: This is the old version before we wrote gui scenebuilder
+	* retaining until I'm done implementing that process as this will
+	* change to load in json files with different structures
 	--------------------------------------------------*/
 	void Scene::loadConfigFile(std::string path)
 	{
@@ -152,15 +155,15 @@ namespace vel
 		// Set whether or not the scene should draw a skybox (which would use the previously set "activeInfiniteCubemap")
 		if (j.contains("drawSkybox") && j["drawSkybox"] != "" && !j["drawSkybox"].is_null())
 			this->setDrawSkybox(j["drawSkybox"]);
-
+		/* Broke this when refactored for AssetManager to manage cameras
 		// Add cameras to scene
 		for (auto& c : j["cameras"])
 		{
 			Camera* tmpCamPtr;
 			if (c["type"] == "perspective")
-				tmpCamPtr = this->cameras.insert(c["name"], Camera(CameraType::PERSPECTIVE, c["near"], c["far"], c["fovOrScale"]));
+				tmpCamPtr = this->cameras.insert(Camera(c["name"], CameraType::PERSPECTIVE, c["near"], c["far"], c["fovOrScale"]));
 			else if (c["type"] == "orthographic")
-				tmpCamPtr = this->cameras.insert(c["name"], Camera(CameraType::ORTHOGRAPHIC, c["near"], c["far"], c["fovOrScale"]));
+				tmpCamPtr = this->cameras.insert(Camera(c["name"], CameraType::ORTHOGRAPHIC, c["near"], c["far"], c["fovOrScale"]));
 #ifdef DEBUG_LOG
 			else
 				Log::crash("Scene::loadConfigFile(): config contains a camera type other than 'perspective' or 'orthographic'");
@@ -182,7 +185,7 @@ namespace vel
 		// Update sceneCamera if provided
 		if (j.contains("sceneCamera") && !j["sceneCamera"].is_null() && j["sceneCamera"] != "")
 			this->sceneCamera = this->cameras.get(j["sceneCamera"]);
-
+		*/
 
 
 		// Load meshes from .fbx files, will also load in associated armatures
@@ -331,8 +334,10 @@ namespace vel
 			if (s.contains("clearDepthBuffer") && !s["clearDepthBuffer"].is_null() && s["clearDepthBuffer"] != "" && s["clearDepthBuffer"])
 				stage->setClearDepthBuffer(true);
 
+			/* broke this when refactor for asset manager to track cameras
 			if (s.contains("camera") && s["camera"] != "" && !s["camera"].is_null())
 				stage->setCamera(this->cameras.get(s["camera"]));
+			*/
 
 			if (s.contains("useSceneCameraPositionForLighting") && !s["useSceneCameraPositionForLighting"].is_null())
 				stage->setUseSceneCameraPositionForLighting(s["useSceneCameraPositionForLighting"]);

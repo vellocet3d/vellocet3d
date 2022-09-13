@@ -25,7 +25,7 @@ namespace vel
 	class Scene
 	{
 	private:
-		sac<Camera>							cameras;
+		//sac<Camera>							cameras;
 		Camera*								sceneCamera;
 		Cubemap*							activeInfiniteCubemap;
 		bool								drawSkybox;
@@ -34,7 +34,7 @@ namespace vel
 		double								fixedAnimationTime;
 		double								animationTime;
 
-
+		std::vector<std::string>			camerasInUse;
 		std::vector<std::string>			shadersInUse;
 		std::vector<std::string>			meshesInUse;
 		std::vector<std::string> 			texturesInUse;
@@ -56,7 +56,8 @@ namespace vel
 
 		std::string							name = "";
 
-	protected:
+	//protected:
+	public:
 		
 		
 
@@ -66,6 +67,7 @@ namespace vel
 		void                                loadInfiniteCubemap(std::string name, std::string path);
         void								loadConfigFile(std::string path);
 
+		void								addCamera(Camera m);
 		void								addMaterial(Material m);
 		void								addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material);
 		Stage*								addStage(std::string name);
@@ -74,6 +76,7 @@ namespace vel
         Cubemap*							getInfiniteCubemap(std::string name);
 		Mesh*								getMesh(std::string name);
 		Texture*							getTexture(std::string name);
+		Camera*								getCamera(std::string name);
 		Material*							getMaterial(std::string name);
 		Renderable							getRenderable(std::string name);
 		Armature							getArmature(std::string name);
@@ -81,7 +84,7 @@ namespace vel
 		Stage*								getStage(std::string name);
 
 
-	public:
+	//public:
 		Scene();
 		~Scene();
 		virtual void						load() = 0;
@@ -103,8 +106,8 @@ namespace vel
 		void								setSceneCamera(Camera* c);
 		Camera*								getSceneCamera(); // get Camera assigned to this scene
 
-		Camera*								addCamera(std::string name, Camera c);
-		Camera*								getCamera(std::string name); // get Camera pointer from cameras sac
+		//Camera*								addCamera(Camera c);
+		//Camera*								getCamera(std::string name); // get Camera pointer from cameras sac
 
 		void 								setActiveInfiniteCubemap(Cubemap* c);
 		Cubemap* 							getActiveInfiniteCubemap();

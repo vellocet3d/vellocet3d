@@ -87,5 +87,7 @@ namespace vel
 		void											swapScene(std::string name);
 		bool											sceneExists(std::string name);
 
+		Scene*											getActiveScene();
+
     };
 };

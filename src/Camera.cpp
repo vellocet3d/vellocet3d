@@ -2,14 +2,18 @@
 #define GLM_FORCE_ALIGNED_GENTYPES
 #include "glm/gtx/matrix_decompose.hpp"
 
+
+
 #include "vel/App.h"
 #include "vel/Camera.h"
 
 
+using json = nlohmann::json;
 
 namespace vel
 {
-	Camera::Camera(CameraType type, float nearPlane, float farPlane, float fovScale) :
+	Camera::Camera(std::string name, CameraType type, float nearPlane, float farPlane, float fovScale) :
+		name(name),
 		type(type),
 		screenSize(&App::get().getScreenSize()),
 		nearPlane(nearPlane),
@@ -22,6 +26,11 @@ namespace vel
 		projectionMatrix(glm::mat4(1.0f))
 	{
 
+	}
+
+	std::string Camera::getName()
+	{
+		return this->name;
 	}
 
 	glm::ivec2 Camera::getScreenSize()
@@ -95,6 +104,18 @@ namespace vel
 		return this->position;
 	}
 
+	json Camera::toJson()
+	{
+		json j;
+		j["name"] = this->name;
+		j["type"] = this->type == CameraType::ORTHOGRAPHIC ? "orthographic" : "perspective";
+		j["near"] = this->nearPlane;
+		j["far"] = this->farPlane;
+		j["fovOrScale"] = this->fovScale;
+		j["position"] = { this->position.x, this->position.y, this->position.z };
+		j["lookat"] = { this->lookAt.x, this->lookAt.y, this->lookAt.z };
 
+		return j;
+	}
 
 }

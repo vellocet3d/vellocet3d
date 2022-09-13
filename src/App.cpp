@@ -146,6 +146,11 @@ namespace vel
 
     }
 
+	Scene* App::getActiveScene()
+	{
+		return this->activeScene;
+	}
+
 	Scene* App::getNextSceneToLoad()
 	{
 		if (this->sceneLoadingQueue.size() == 0)

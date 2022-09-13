@@ -4,6 +4,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#include "nlohmann/json.hpp"
+
 #include "vel/Transform.h"
 
 namespace vel
@@ -17,6 +19,7 @@ namespace vel
 	{
 	private:
 		CameraType              type;
+		std::string				name;
 		float                   fovScale;
 		const glm::ivec2*       screenSize;
 		float                   nearPlane;
@@ -31,8 +34,9 @@ namespace vel
 		void                    updateProjectionMatrix();
 
 	public:
-		Camera(CameraType type, float nearPlane, float farPlane, float fovScale);
+		Camera(std::string name, CameraType type, float nearPlane, float farPlane, float fovScale);
 		void                    update();
+		std::string				getName();
 		glm::mat4               getViewMatrix();
 		glm::mat4               getProjectionMatrix();
 		glm::vec3               getPosition();
@@ -42,6 +46,6 @@ namespace vel
 		void                    setLookAt(float x, float y, float z);
 		void                    setLookAt(glm::vec3 direction);
 
-
+		nlohmann::json			toJson();
 	};
 }

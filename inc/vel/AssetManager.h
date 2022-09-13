@@ -47,6 +47,9 @@ namespace vel
 		// TODO: when we do local cubemaps, they will be a struct of Cubemap and transform data, since
 		// infinite cubemaps have no transforms, just image data, they are simply the Cubemap struct
 
+		sac<Camera>											cameras;
+		sac<CameraTracker> 									cameraTrackers;
+
 		sac<Material>										materials;
 		sac<MaterialTracker> 								materialTrackers;
 
@@ -94,6 +97,10 @@ namespace vel
 		std::string					addMaterial(Material m);
 		Material*					getMaterial(std::string name);
 		void						removeMaterial(std::string name);
+
+		std::string					addCamera(Camera c);
+		Camera*						getCamera(std::string name);
+		void						removeCamera(std::string name);
 
 		Animation*					addAnimation(Animation a);
 

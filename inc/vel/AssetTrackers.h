@@ -44,6 +44,11 @@ namespace vel
 		Material* 		ptr = nullptr;
 		size_t 			usageCount = 0;
 	};
+
+	struct CameraTracker {
+		Camera* 		ptr = nullptr;
+		size_t 			usageCount = 0;
+	};
 	
 	struct RenderableTracker{
 		Renderable* 	ptr = nullptr;

@@ -547,6 +547,76 @@ if (!this->meshTrackers.exists(name))
 
     }
 
+	/* Cameras
+	--------------------------------------------------*/
+	std::string AssetManager::addCamera(Camera c)
+	{
+		if (this->cameraTrackers.exists(c.getName()))
+		{
+#ifdef DEBUG_LOG
+			Log::toCliAndFile("Existing Camera, bypass reload: " + c.getName());
+#endif
+			auto t = this->cameraTrackers.get(c.getName());
+			if (t->usageCount > 0)
+			{
+				t->usageCount++;
+				return c.getName();
+			}
+			else
+			{
+				std::this_thread::sleep_for(100ms);
+				return this->addCamera(c);
+			}
+		}
+
+#ifdef DEBUG_LOG
+		Log::toCliAndFile("Loading new Camera: " + c.getName());
+#endif		
+
+		auto cameraPtr = this->cameras.insert(c.getName(), c);
+
+		CameraTracker t;
+		t.ptr = cameraPtr;
+		t.usageCount++;
+
+		this->cameraTrackers.insert(c.getName(), t);
+
+		return c.getName();
+	}
+
+	Camera* AssetManager::getCamera(std::string name)
+	{
+#ifdef DEBUG_LOG
+		if (!this->cameraTrackers.exists(name))
+			Log::crash("AssetManager::getCamera(): Attempting to get camera that does not exist: " + name);
+#endif
+
+		return this->cameraTrackers.get(name)->ptr;
+	}
+
+	void AssetManager::removeCamera(std::string name)
+	{
+#ifdef DEBUG_LOG
+		if (!this->cameraTrackers.exists(name))
+			Log::crash("AssetManager::removeCamera(): Attempting to remove camera that does not exist: " + name);
+#endif
+
+		auto t = this->cameraTrackers.get(name);
+		t->usageCount--;
+		if (t->usageCount == 0)
+		{
+#ifdef DEBUG_LOG
+			Log::toCliAndFile("Full remove Camera: " + name);
+#endif
+			this->cameras.erase(name);
+			this->cameraTrackers.erase(name);
+		}
+#ifdef DEBUG_LOG
+		else
+			Log::toCliAndFile("Decrement Camera usageCount, retain: " + name);
+#endif	
+	}
+
 	/* Materials
 	--------------------------------------------------*/
 	std::string AssetManager::addMaterial(Material m)
