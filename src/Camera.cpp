@@ -28,6 +28,26 @@ namespace vel
 
 	}
 
+	void Camera::setFovOrScale(float fos)
+	{
+		this->fovScale = fos;
+	}
+
+	void Camera::setNearPlane(float np)
+	{
+		this->nearPlane = np;
+	}
+
+	void Camera::setFarPlane(float fp)
+	{
+		this->farPlane = fp;
+	}
+
+	void Camera::setType(CameraType type)
+	{
+		this->type = type;
+	}
+
 	std::string Camera::getName()
 	{
 		return this->name;

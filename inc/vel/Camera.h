@@ -45,6 +45,10 @@ namespace vel
 		void                    setPosition(glm::vec3 position);
 		void                    setLookAt(float x, float y, float z);
 		void                    setLookAt(glm::vec3 direction);
+		void					setType(CameraType type);
+		void					setNearPlane(float np);
+		void					setFarPlane(float fp);
+		void					setFovOrScale(float fos);
 
 		nlohmann::json			toJson();
 	};
