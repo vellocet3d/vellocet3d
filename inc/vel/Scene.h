@@ -82,6 +82,7 @@ namespace vel
 		Armature							getArmature(std::string name);
 		
 		Stage*								getStage(std::string name);
+		std::vector<Stage*>&				getStages();
 
 
 	//public:

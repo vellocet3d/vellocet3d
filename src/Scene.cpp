@@ -43,6 +43,11 @@ namespace vel
 		this->freeAssets();
 	}
 
+	std::vector<Stage*>& Scene::getStages()
+	{
+		return this->stages.getAll();
+	}
+
 	Camera* Scene::getSceneCamera()
 	{
 		return this->sceneCamera;
