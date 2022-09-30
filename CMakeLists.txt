@@ -363,7 +363,7 @@ ExternalProject_Add(${libCDT}
 PREFIX			${CMAKE_CURRENT_BINARY_DIR}/_deps/${libCDT}
 GIT_REPOSITORY  https://github.com/artem-ogre/CDT.git
 SOURCE_SUBDIR 	"CDT"
-GIT_TAG         1.1.2
+GIT_TAG         origin/master
 GIT_SHALLOW     ON
 UPDATE_COMMAND 	""
 CMAKE_ARGS      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libCDT}
