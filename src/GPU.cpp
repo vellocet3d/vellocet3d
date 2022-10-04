@@ -46,6 +46,16 @@ namespace vel
 
 	GPU::~GPU(){}
 
+	void GPU::enableBackfaceCulling()
+	{
+		glEnable(GL_CULL_FACE);
+	}
+
+	void GPU::disableBackfaceCulling()
+	{
+		glDisable(GL_CULL_FACE);
+	}
+
 	void GPU::setCurrentRenderMode(RenderMode rm)
 	{
 		this->currentRenderMode = rm;

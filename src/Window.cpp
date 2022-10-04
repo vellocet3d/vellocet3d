@@ -180,8 +180,6 @@ namespace vel
 
 				//glfwFocusWindow(this->glfwWindow);
 
-				
-
 				if (this->useImGui)
 				{
 					// Setup Dear ImGui context

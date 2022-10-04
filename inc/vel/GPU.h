@@ -112,5 +112,7 @@ namespace vel
 
 		void								updateBonesUBO(std::vector<std::pair<unsigned int, glm::mat4>> boneData); // first = bone array index, second = bone matrix
 
+		void								enableBackfaceCulling();
+		void								disableBackfaceCulling();
 	};
 }

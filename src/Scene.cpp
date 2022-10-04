@@ -749,6 +749,9 @@ namespace vel
 
 		auto gpu = App::get().getGPU(); // for convenience
 
+		// disable backface culling for cubemap i guess as it wasn't being drawn with it enabled
+		gpu->disableBackfaceCulling();
+
         gpu->disableBlend(); // disable blending for opaque objects
 
 		// set scene camera values
@@ -764,7 +767,10 @@ namespace vel
 
 		// draw cubemap skybox if we should
 		if (this->getDrawSkybox() && this->getActiveInfiniteCubemap() != nullptr)
+		{
 			gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, this->getActiveInfiniteCubemap()->envCubemap);
+		}
+			
 
 		// debug draw collision world
 #ifdef DEBUG_LOG
@@ -807,6 +813,8 @@ namespace vel
 				this->renderCameraOffset = s->getUseSceneCameraPositionForLighting() == false ? glm::mat4(1.0f) : glm::inverse(this->sceneCamera->getViewMatrix());
 			}
 
+			// enable backface culling for actors
+			gpu->enableBackfaceCulling();
 
 			std::vector<Renderable*> transparentRenderables;
 			
