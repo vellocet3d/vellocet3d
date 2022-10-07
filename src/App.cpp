@@ -41,45 +41,11 @@ namespace vel
     {        
         /* load default shaders
 		***************************************************************/
-
-
-		// shaders required for generating a cubemap from an HDR image and pre-calculating
-		// IBL data required for image based lighting
-        this->assetManager.loadShader("defaultEquirectangularToCubemap", 
-        "data/shaders/defaults/cubemap.vert", "data/shaders/defaults/equirectangular_to_cubemap.frag");
-        
-        this->assetManager.loadShader("defaultIrradianceConvolution", 
-        "data/shaders/defaults/cubemap.vert", "data/shaders/defaults/irradiance_convolution.frag");
-        
-        this->assetManager.loadShader("defaultPrefilter", 
-        "data/shaders/defaults/cubemap.vert", "data/shaders/defaults/prefilter.frag");
-        
-        this->assetManager.loadShader("defaultBrdf", 
-        "data/shaders/defaults/brdf.vert", "data/shaders/defaults/brdf.frag");
-        
-        this->assetManager.loadShader("defaultBackground", 
-        "data/shaders/defaults/background.vert", "data/shaders/defaults/background.frag");
         
         
         // used for bullet debug drawer
         this->assetManager.loadShader("defaultDebug", 
         "data/shaders/defaults/debug.vert", "data/shaders/defaults/debug.frag");
-        
-
-		// default PBR_IBL pipeline shader
-        this->assetManager.loadShader("defaultPBRIBL", 
-        "data/shaders/defaults/default.vert", "data/shaders/defaults/pbr_ibl_light_test.frag");
-
-		this->assetManager.loadShader("defaultPBRIBLSkinned",
-			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/pbr_ibl_light_test.frag");
-
-
-		// PBR_IBL pipeline shader with parallax occlusion mapping logic
-		this->assetManager.loadShader("defaultPBRIBLParallax",
-			"data/shaders/defaults/default.vert", "data/shaders/defaults/pbr_ibl_pom_light_test.frag");
-
-		this->assetManager.loadShader("defaultPBRIBLParallaxSkinned",
-			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/pbr_ibl_pom_light_test.frag");
 
 
 		// shader for static diffuse color, a basic texture unaffected by light sources
@@ -95,33 +61,12 @@ namespace vel
 			"data/shaders/defaults/default.vert", "data/shaders/defaults/rgba.frag");
         
         
-        
         // send all these shaders to gpu
         this->assetManager.sendAllToGpu();
-        
-        
-        // pass shaders gpu needs for generating hdr assets
-        this->gpu->initPbrShaders(
-            this->assetManager.getShader("defaultEquirectangularToCubemap"),
-            this->assetManager.getShader("defaultIrradianceConvolution"),
-            this->assetManager.getShader("defaultPrefilter"),
-            this->assetManager.getShader("defaultBrdf"),
-            this->assetManager.getShader("defaultBackground")
-        );
-        
-        
-        // load default hdr image
-        this->assetManager.loadInfiniteCubemap("defaultCubemap", "data/textures/defaults/default.hdr");
-        this->assetManager.sendAllToGpu();
-        
+       
         
         // load default textures
-		this->assetManager.loadTexture("defaultAlbedo", "albedo", "data/textures/defaults/albedo.jpg");
-		this->assetManager.loadTexture("defaultAO", "ao", "data/textures/defaults/ao.jpg");
-		this->assetManager.loadTexture("defaultMetallic", "metallic", "data/textures/defaults/metallic.jpg");
-		this->assetManager.loadTexture("defaultRoughness", "roughness", "data/textures/defaults/roughness.jpg");
-		this->assetManager.loadTexture("defaultNormal", "normal", "data/textures/defaults/normal.jpg");
-		this->assetManager.loadTexture("defaultHeight", "height", "data/textures/defaults/height.jpg");
+		this->assetManager.loadTexture("defaultDiffuse", "diffuse", "data/textures/defaults/diffuse.jpg");
 		this->assetManager.sendAllToGpu();
 
 

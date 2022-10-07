@@ -22,8 +22,6 @@ namespace vel
 {
 	Scene::Scene() :
 		sceneCamera(nullptr),
-		activeInfiniteCubemap(nullptr),
-		drawSkybox(false),
 		mainMemoryloaded(false),
 		swapWhenLoaded(false),
 		animationTime(0.0),
@@ -56,26 +54,6 @@ namespace vel
 	void Scene::setName(std::string n)
 	{
 		this->name = n;
-	}
-
-	void Scene::setActiveInfiniteCubemap(Cubemap* c)
-	{
-		this->activeInfiniteCubemap = c;
-	}
-
-	Cubemap* Scene::getActiveInfiniteCubemap()
-	{
-		return this->activeInfiniteCubemap;
-	}
-
-	void Scene::setDrawSkybox(bool b)
-	{
-		this->drawSkybox = b;
-	}
-
-	bool Scene::getDrawSkybox()
-	{
-		return this->drawSkybox;
 	}
 
 	void Scene::addCamera(Camera c)
@@ -113,9 +91,6 @@ namespace vel
 		
 		for(auto& name : this->meshesInUse)
 			App::get().getAssetManager().removeMesh(name);
-		
-        for(auto& name : this->infiniteCubemapsInUse)
-			App::get().getAssetManager().removeInfiniteCubemap(name);
         
 		for(auto& name : this->shadersInUse)
 			App::get().getAssetManager().removeShader(name);
@@ -149,17 +124,6 @@ namespace vel
 		for (auto& s : j["shaders"])
 			this->loadShader(s["name"], s["vert_path"], s["frag_path"]);
 		
-		// Load infinitely distant hdr images (cubemaps with computed data for IBL)
-		for (auto& h : j["infiniteCubemaps"])
-			this->loadInfiniteCubemap(h["name"], h["path"]);
-
-		// Set active infinite cubemap if parameter provided
-		if (j.contains("activeInfiniteCubemap") && !j["activeInfiniteCubemap"].is_null() && j["activeInfiniteCubemap"] != "")
-			this->setActiveInfiniteCubemap(this->getInfiniteCubemap(j["activeInfiniteCubemap"]));
-
-		// Set whether or not the scene should draw a skybox (which would use the previously set "activeInfiniteCubemap")
-		if (j.contains("drawSkybox") && j["drawSkybox"] != "" && !j["drawSkybox"].is_null())
-			this->setDrawSkybox(j["drawSkybox"]);
 		/* Broke this when refactored for AssetManager to manage cameras
 		// Add cameras to scene
 		for (auto& c : j["cameras"])
@@ -226,27 +190,6 @@ namespace vel
 
 			if (m.contains("diffuse") && m["diffuse"] != "" && !m["diffuse"].is_null())
 				mat.diffuse = this->getTexture(m["diffuse"]);
-
-			if (m.contains("albedo") && m["albedo"] != "" && !m["albedo"].is_null())
-				mat.albedo = this->getTexture(m["albedo"]);
-
-			if (m.contains("normal") && m["normal"] != "" && !m["normal"].is_null())
-				mat.normal = this->getTexture(m["normal"]);	
-
-			if (m.contains("metallic") && m["metallic"] != "" && !m["metallic"].is_null())
-				mat.metallic = this->getTexture(m["metallic"]);
-
-			if (m.contains("roughness") && m["roughness"] != "" && !m["roughness"].is_null())
-				mat.roughness = this->getTexture(m["roughness"]);
-
-			if (m.contains("ao") && m["ao"] != "" && !m["ao"].is_null())
-				mat.ao = this->getTexture(m["ao"]);
-
-			if (m.contains("height") && m["height"] != "" && !m["height"].is_null())
-				mat.height = this->getTexture(m["height"]);
-
-			if (m.contains("heightScale") && m["heightScale"] != "" && !m["heightScale"].is_null())
-				mat.heightScale = m["heightScale"];
 
 			this->addMaterial(mat);
 		}
@@ -329,10 +272,6 @@ namespace vel
 					stage->setRenderMode(RenderMode::RGBA);
 				else if (s["renderMode"] == "STATIC_DIFFUSE")
 					stage->setRenderMode(RenderMode::STATIC_DIFFUSE);
-				else if (s["renderMode"] == "PBR")
-					stage->setRenderMode(RenderMode::PBR);
-				else if (s["renderMode"] == "PBR_IBL")
-					stage->setRenderMode(RenderMode::PBR_IBL);
 			}
 
 
@@ -344,11 +283,7 @@ namespace vel
 				stage->setCamera(this->cameras.get(s["camera"]));
 			*/
 
-			if (s.contains("useSceneCameraPositionForLighting") && !s["useSceneCameraPositionForLighting"].is_null())
-				stage->setUseSceneCameraPositionForLighting(s["useSceneCameraPositionForLighting"]);
-			
-			if (s.contains("activeInfiniteCubemap") && !s["activeInfiniteCubemap"].is_null() && s["activeInfiniteCubemap"] != "")
-				stage->setActiveInfiniteCubemap(this->getInfiniteCubemap(s["activeInfiniteCubemap"]));
+
 
 
 			for (auto& a : s["actors"])
@@ -634,11 +569,6 @@ namespace vel
 	{
 		this->texturesInUse.push_back(App::get().getAssetManager().loadTexture(name, type, path, mips));
 	}
-    
-    void Scene::loadInfiniteCubemap(std::string name, std::string path)
-    {
-        this->infiniteCubemapsInUse.push_back(App::get().getAssetManager().loadInfiniteCubemap(name, path));
-    }
 	
 	void Scene::addMaterial(Material m)
 	{
@@ -664,11 +594,6 @@ namespace vel
 	{
 		return App::get().getAssetManager().getTexture(name);
 	}
-    
-    Cubemap* Scene::getInfiniteCubemap(std::string name)
-    {
-        return App::get().getAssetManager().getInfiniteCubemap(name);
-    }
 
 	Material* Scene::getMaterial(std::string name)
 	{
@@ -750,9 +675,9 @@ namespace vel
 		auto gpu = App::get().getGPU(); // for convenience
 
 		// disable backface culling for cubemap i guess as it wasn't being drawn with it enabled
-		gpu->disableBackfaceCulling();
+		//gpu->disableBackfaceCulling();
 
-        gpu->disableBlend(); // disable blending for opaque objects
+        //gpu->disableBlend(); // disable blending for opaque objects
 
 		// set scene camera values
 		this->sceneCamera->update();
@@ -762,14 +687,10 @@ namespace vel
 		// these are for applying lighting to objects that are in screen space as if they were in world space, for example
 		// first person arms / weapons (allows us to use the view matrix of one camera only for lighting), set to scene camera defaults here
 		// only relevant for when stage has it's own camera AND useSceneCameraPositionForLighting is set to true
+		//
+		// Removed dynamic lighting from this build so this no longer makes sense, but leaving these variables as they are for now
 		this->renderCameraPosition = this->cameraPosition;
 		this->renderCameraOffset = glm::mat4(1.0f);
-
-		// draw cubemap skybox if we should
-		if (this->getDrawSkybox() && this->getActiveInfiniteCubemap() != nullptr)
-		{
-			gpu->drawSkybox(this->cameraProjectionMatrix, this->cameraViewMatrix, this->getActiveInfiniteCubemap()->envCubemap);
-		}
 			
 
 		// debug draw collision world
@@ -806,15 +727,10 @@ namespace vel
 				this->cameraPosition = s->getCamera()->getPosition();
 				this->cameraProjectionMatrix = s->getCamera()->getProjectionMatrix();
 				this->cameraViewMatrix = s->getCamera()->getViewMatrix();
-
-				// these are for applying lighting to objects that are in screen space as if they were in world space, for example
-				// first person arms / weapons (allows us to use the view matrix of one camera only for lighting)
-				this->renderCameraPosition = s->getUseSceneCameraPositionForLighting() == false ? this->cameraPosition : this->sceneCamera->getPosition();
-				this->renderCameraOffset = s->getUseSceneCameraPositionForLighting() == false ? glm::mat4(1.0f) : glm::inverse(this->sceneCamera->getViewMatrix());
 			}
 
-			// enable backface culling for actors
-			gpu->enableBackfaceCulling();
+			// enable backface culling for actors, enabling globally in GPU at the moment
+			//gpu->enableBackfaceCulling();
 
 			std::vector<Renderable*> transparentRenderables;
 			
@@ -830,15 +746,6 @@ namespace vel
 
 				// RESET GPU STATE FOR THIS RENDERABLE
 				gpu->useShader(r->getShader());
-
-				if(s->getRenderMode() == RenderMode::PBR_IBL)
-					if(s->getActiveInfiniteCubemap() != nullptr)
-						gpu->useIBL(s->getActiveInfiniteCubemap());
-					else if(this->activeInfiniteCubemap != nullptr)
-						gpu->useIBL(this->activeInfiniteCubemap);
-					else
-						gpu->useIBL(App::get().getAssetManager().getInfiniteCubemap("defaultCubemap"));
-
 				gpu->useMesh(r->getMesh());
 				gpu->useMaterial(r->getMaterial());
 					
@@ -872,15 +779,6 @@ namespace vel
 				auto r = it->second->getStageRenderable().value();
 
 				gpu->useShader(r->getShader());
-
-				if (s->getRenderMode() == RenderMode::PBR_IBL)
-					if (s->getActiveInfiniteCubemap() != nullptr)
-						gpu->useIBL(s->getActiveInfiniteCubemap());
-					else if (this->activeInfiniteCubemap != nullptr)
-						gpu->useIBL(this->activeInfiniteCubemap);
-					else
-						gpu->useIBL(App::get().getAssetManager().getInfiniteCubemap("defaultCubemap"));
-
 				gpu->useMesh(r->getMesh());
 				gpu->useMaterial(r->getMaterial());
 

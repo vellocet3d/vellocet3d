@@ -14,7 +14,6 @@
 #include "vel/Sensor.h"
 #include "vel/GPU.h"
 #include "vel/RenderMode.h"
-#include "vel/Cubemap.h"
 
 
 namespace vel
@@ -34,7 +33,6 @@ namespace vel
 		bool											clearDepthBuffer;
 		std::string										name;
 		RenderMode										renderMode;
-		Cubemap*										activeInfiniteCubemap;
 		bool											useSceneCameraPositionForLighting;
 
 		
@@ -69,14 +67,7 @@ namespace vel
 		Armature*										getArmature(std::string armatureName);
 
 		RenderMode										getRenderMode();
-		void											setRenderMode(RenderMode rm);
-
-		void 											setActiveInfiniteCubemap(Cubemap* c);
-		Cubemap* 										getActiveInfiniteCubemap();
-
-		void											setUseSceneCameraPositionForLighting(bool b);
-		bool											getUseSceneCameraPositionForLighting();
-		
+		void											setRenderMode(RenderMode rm);		
 
 	};
 }

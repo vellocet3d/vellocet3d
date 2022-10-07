@@ -43,14 +43,7 @@ namespace vel
 			this->gpu->loadTexture(t->ptr);
 			t->gpuLoaded = true;
 			this->texturesThatNeedGpuLoad.pop_front();
-		}
-        
-        for(auto& h : this->infiniteCubemapsThatNeedGpuLoad)
-		{
-			this->gpu->loadInfiniteCubemap(h->ptr);
-			h->gpuLoaded = true;
-			this->infiniteCubemapsThatNeedGpuLoad.pop_front();
-		}        
+		}      
 	}
 
 	void AssetManager::sendNextToGpu()
@@ -79,15 +72,6 @@ namespace vel
 			this->gpu->loadTexture(textureTracker->ptr);
 			textureTracker->gpuLoaded = true;
 			this->texturesThatNeedGpuLoad.pop_front();
-			return;
-		}
-        
-        if (this->infiniteCubemapsThatNeedGpuLoad.size() > 0)
-		{
-			auto hdrTracker = this->infiniteCubemapsThatNeedGpuLoad.at(0);
-			this->gpu->loadInfiniteCubemap(hdrTracker->ptr);
-			hdrTracker->gpuLoaded = true;
-			this->infiniteCubemapsThatNeedGpuLoad.pop_front();
 			return;
 		}
 	}
@@ -438,115 +422,6 @@ if (!this->meshTrackers.exists(name))
 #endif	
 	}
 
-    /* HDRs
-	--------------------------------------------------*/
-    std::string AssetManager::loadInfiniteCubemap(std::string name, std::string path)
-    {
-        if (this->infiniteCubemapTrackers.exists(name))
-		{
-#ifdef DEBUG_LOG
-	Log::toCliAndFile("Existing Cubemap, bypass reload: " + name);
-#endif
-			auto h = this->infiniteCubemapTrackers.get(name);
-			if(h->usageCount > 0)
-			{
-				h->usageCount++;
-				return name;
-			}
-			else
-			{
-				std::this_thread::sleep_for(100ms);
-				return this->loadInfiniteCubemap(name, path);
-			}			
-		}
-        
-#ifdef DEBUG_LOG
-	Log::toCliAndFile("Load new Cubemap: " + name);
-#endif
-
-        Cubemap hdr;
-        hdr.name = name;
-        stbi_set_flip_vertically_on_load(true);
-        hdr.primaryImageData.dataf = stbi_loadf(
-			path.c_str(), 
-			&hdr.primaryImageData.width, 
-			&hdr.primaryImageData.height, 
-			&hdr.primaryImageData.nrComponents, 
-			0
-		);
-		stbi_set_flip_vertically_on_load(false);
-        
-        
-#ifdef DEBUG_LOG
-	if (!hdr.primaryImageData.dataf)
-		Log::crash("AssetManager::loadInfiniteCubemap(): Unable to load hdr at path: " + path);
-#endif
-
-        if (hdr.primaryImageData.nrComponents == 1)
-            hdr.primaryImageData.format = GL_RED;
-        else if (hdr.primaryImageData.nrComponents == 3)
-            hdr.primaryImageData.format = GL_RGB;
-        else if (hdr.primaryImageData.nrComponents == 4)
-            hdr.primaryImageData.format = GL_RGBA;
-        
-        
-        auto hdrPtr = this->infiniteCubemaps.insert(hdr.name, hdr);
-        
-        InfiniteCubemapTracker t;
-        t.ptr = hdrPtr;
-		t.usageCount++;
-        
-		this->infiniteCubemapsThatNeedGpuLoad.push_back(this->infiniteCubemapTrackers.insert(hdr.name, t));
-
-		return name;
-    }
-    
-    Cubemap* AssetManager::getInfiniteCubemap(std::string name)
-	{
-#ifdef DEBUG_LOG
-	if (!this->infiniteCubemapTrackers.exists(name))
-		Log::crash("AssetManager::getInfiniteCubemap(): Attempting to get Cubemap that does not exist: " + name);
-#endif
-
-		return this->infiniteCubemapTrackers.get(name)->ptr;		
-	}
-
-	bool AssetManager::infiniteCubemapIsGpuLoaded(std::string name)
-	{
-		return this->infiniteCubemapTrackers.get(name)->gpuLoaded;
-	}
-    
-    void AssetManager::removeInfiniteCubemap(std::string name)
-	{
-#ifdef DEBUG_LOG
-	if (!this->infiniteCubemapTrackers.exists(name))
-		Log::crash("AssetManager::removeInfiniteCubemap(): Attempting to remove Cubemap that does not exist: " + name);
-#endif
-
-		auto h = this->infiniteCubemapTrackers.get(name);
-		h->usageCount--;
-		if (h->usageCount == 0)
-		{
-#ifdef DEBUG_LOG
-	Log::toCliAndFile("Full remove Cubemap: " + name);
-#endif
-			if (!h->gpuLoaded)
-				for (size_t i = 0; i < this->infiniteCubemapsThatNeedGpuLoad.size(); i++)
-					if (this->infiniteCubemapsThatNeedGpuLoad.at(i) == h)
-						this->infiniteCubemapsThatNeedGpuLoad.erase(this->infiniteCubemapsThatNeedGpuLoad.begin() + i);
-			else
-				this->gpu->clearInfiniteCubemap(h->ptr);
-			
-			this->infiniteCubemaps.erase(name);
-			this->infiniteCubemapTrackers.erase(name);
-		}
-#ifdef DEBUG_LOG
-	else
-		Log::toCliAndFile("Decrement Cubemap usageCount, retain: " + name);
-#endif
-
-    }
-
 	/* Cameras
 	--------------------------------------------------*/
 	std::string AssetManager::addCamera(Camera c)
@@ -651,33 +526,7 @@ if (!this->meshTrackers.exists(name))
 		{
 			if (!m.hasAlphaChannel && m.diffuse && m.diffuse->alphaChannel)
 				m.hasAlphaChannel = true;
-			if (!m.hasAlphaChannel && m.albedo && m.albedo->alphaChannel)
-				m.hasAlphaChannel = true;
-			if (!m.hasAlphaChannel && m.normal && m.normal->alphaChannel)
-				m.hasAlphaChannel = true;
-			if (!m.hasAlphaChannel && m.metallic && m.metallic->alphaChannel)
-				m.hasAlphaChannel = true;
-			if (!m.hasAlphaChannel && m.roughness && m.roughness->alphaChannel)
-				m.hasAlphaChannel = true;
-			if (!m.hasAlphaChannel && m.ao && m.ao->alphaChannel)
-				m.hasAlphaChannel = true;
 		}
-
-        // add default textures to material for those which are not provided
-		// removed when we added renderModes, it's expected to provide a texture for every
-		// element in a material by user, if they don't have one, they must specify that they
-		// want to use default**
-        //if(m.albedo == nullptr)
-        //    m.albedo = this->getTexture("defaultAlbedo");
-        //if(m.normal == nullptr)
-        //    m.normal = this->getTexture("defaultNormal");
-        //if(m.metallic == nullptr)
-        //    m.metallic = this->getTexture("defaultMetallic");
-        //if(m.roughness == nullptr)
-        //    m.roughness = this->getTexture("defaultRoughness");
-        //if(m.ao == nullptr)
-        //    m.ao = this->getTexture("defaultAO");
-        
 
 		auto materialPtr = this->materials.insert(m.name, m);
 		

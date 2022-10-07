@@ -13,7 +13,6 @@
 #include "vel/Texture.h"
 #include "vel/Material.h"
 #include "vel/CollisionDebugDrawer.h"
-#include "vel/Cubemap.h"
 #include "vel/RenderMode.h"
 
 
@@ -25,50 +24,23 @@ namespace vel
 	{
 	private:
 		Window*								window;
-
         const std::string                   defaultShaderPath;
 		Shader*								activeShader;
-        Cubemap*							activeInfiniteCubemap;
 		Mesh*								activeMesh;
 		Material*							activeMaterial;
-        
-        Shader*                             equirectangularToCubemapShader;
-        Shader*                             irradianceShader;
-        Shader*                             prefilterShader;
-        Shader*                             brdfShader;
-        Shader*                             backgroundShader;
-        
-        unsigned int                        quadVAO;
-        unsigned int                        quadVBO;
-        void                                initQuad();
-        void                                drawQuad();
-        
-        unsigned int                        cubeVAO;
-        unsigned int                        cubeVBO;
-        void                                initCube();
-        void                                drawCube();
-        
-        
-        unsigned int                        pbrCaptureFBO;
-        unsigned int                        pbrCaptureRBO;
-
 		RenderMode							currentRenderMode;
-		
 		unsigned int						bonesUBO;
 		void								initBoneUBO();
-        
 
 	public:
 		GPU(Window* w);
 		~GPU();
 		GPU(GPU&&) = default;
-        void                                initPbrShaders(Shader* equi, Shader* irr, Shader* pre, Shader* brdf, Shader* back);
         void								enableDepthTest();
 		void								clearBuffers(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 0.0f);
 		void								drawLinesOnly();
 
 		const Shader* const					getActiveShader() const;
-        const Cubemap* const				getActiveInfiniteCubemap() const;
 		const Mesh*	const					getActiveMesh() const;
 		const Material*	const				getActiveMaterial() const;
 		void								resetActives();
@@ -76,11 +48,9 @@ namespace vel
 		void								loadShader(Shader* s);
 		void								loadMesh(Mesh* m);
 		void								loadTexture(Texture* t);
-        void                                loadInfiniteCubemap(Cubemap* h);
 
 
 		void								useShader(Shader* s);
-        void                                useIBL(Cubemap* c);
 		void								useMaterial(Material* m);
 		void								useMesh(Mesh* m);
 
@@ -97,16 +67,12 @@ namespace vel
 		void								finish();
 		void								enableBlend();
         void                                disableBlend();
-        void                                enableCubeMapTextures();
 
 		void								debugDrawCollisionWorld(CollisionDebugDrawer* cdd);
 
 		void								clearShader(Shader* s);
-        void                                clearInfiniteCubemap(Cubemap* h);
 		void								clearMesh(Mesh* m);
 		void								clearTexture(Texture* t);
-
-		void                                drawSkybox(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, unsigned int cm);
 
 		void								setCurrentRenderMode(RenderMode rm);
 

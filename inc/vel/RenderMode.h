@@ -5,8 +5,6 @@ namespace vel
 	enum RenderMode
 	{
 		RGBA,
-		STATIC_DIFFUSE,
-		PBR,
-		PBR_IBL
+		STATIC_DIFFUSE
 	};
 }

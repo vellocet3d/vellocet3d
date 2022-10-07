@@ -17,7 +17,6 @@ namespace vel
 
 	Stage::Stage(std::string name) :
 		renderMode(RenderMode::STATIC_DIFFUSE),
-		activeInfiniteCubemap(nullptr),
 		visible(true),
 		camera(nullptr),
 		clearDepthBuffer(false),
@@ -40,16 +39,6 @@ namespace vel
 		return this->renderMode;
 	}
 
-	void Stage::setActiveInfiniteCubemap(Cubemap* c)
-	{
-		this->activeInfiniteCubemap = c;
-	}
-
-	Cubemap* Stage::getActiveInfiniteCubemap()
-	{
-		return this->activeInfiniteCubemap;
-	}
-
 	const std::string& Stage::getName() const
 	{
 		return this->name;
@@ -58,16 +47,6 @@ namespace vel
 	Armature* Stage::getArmature(std::string armatureName)
 	{
 		return this->armatures.get(armatureName);
-	}
-
-	void Stage::setUseSceneCameraPositionForLighting(bool b)
-	{
-		this->useSceneCameraPositionForLighting = b;
-	}
-
-	bool Stage::getUseSceneCameraPositionForLighting()
-	{
-		return this->useSceneCameraPositionForLighting;
 	}
 
 	Armature* Stage::addArmature(Armature a, std::string defaultAnimation, std::vector<std::string> actorsIn)
