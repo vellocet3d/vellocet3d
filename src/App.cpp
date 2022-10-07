@@ -55,18 +55,13 @@ namespace vel
 		this->assetManager.loadShader("defaultStaticDiffuseSkinned",
 			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/static_diffuse.frag");
         
-
-        // shader for giving a loaded mesh an RGBA value, with no texture data, that is unaffected by light sources
-		this->assetManager.loadShader("defaultRGBA",
-			"data/shaders/defaults/default.vert", "data/shaders/defaults/rgba.frag");
-        
         
         // send all these shaders to gpu
         this->assetManager.sendAllToGpu();
        
         
         // load default textures
-		this->assetManager.loadTexture("defaultDiffuse", "diffuse", "data/textures/defaults/diffuse.jpg");
+		this->assetManager.loadTexture("__default__", "diffuse", "data/textures/defaults/default.jpg");
 		this->assetManager.sendAllToGpu();
 
 

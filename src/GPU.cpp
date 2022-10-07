@@ -23,8 +23,7 @@ namespace vel
 		window(w),
 		activeShader(nullptr),
 		activeMesh(nullptr),
-		activeMaterial(nullptr),
-		currentRenderMode(RenderMode::STATIC_DIFFUSE)
+		activeMaterial(nullptr)
 	{
         this->enableDepthTest();
 		this->enableBackfaceCulling();
@@ -41,11 +40,6 @@ namespace vel
 	void GPU::disableBackfaceCulling()
 	{
 		glDisable(GL_CULL_FACE);
-	}
-
-	void GPU::setCurrentRenderMode(RenderMode rm)
-	{
-		this->currentRenderMode = rm;
 	}
 
 	void GPU::resetActives()
@@ -405,17 +399,14 @@ namespace vel
 	{
 		this->activeMaterial = m;
 
-		if (this->currentRenderMode == RenderMode::RGBA)
-		{
-			this->setShaderVec4("color", m->color);
-		}
-		else if (this->currentRenderMode == RenderMode::STATIC_DIFFUSE)
+		this->setShaderVec4("color", m->color);
+
+		if (m->diffuse != nullptr)
 		{
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, m->diffuse->id);
 			this->setShaderInt("diffuseMap", 0);
 		}
-
 	}
 
 	void GPU::drawGpuMesh()

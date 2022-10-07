@@ -518,15 +518,15 @@ if (!this->meshTrackers.exists(name))
 	Log::toCliAndFile("Loading new Material: " + m.name);
 #endif		
 
+		// assign default texture to material if a material is not provided at this time
+		if (m.diffuse == nullptr)
+			m.diffuse = this->getTexture("__default__");
+
 		if (m.color.w < 1.0f)
-		{
 			m.hasAlphaChannel = true;
-		}
 		else
-		{
 			if (!m.hasAlphaChannel && m.diffuse && m.diffuse->alphaChannel)
 				m.hasAlphaChannel = true;
-		}
 
 		auto materialPtr = this->materials.insert(m.name, m);
 		

@@ -13,7 +13,6 @@
 #include "vel/Renderable.h"
 #include "vel/Sensor.h"
 #include "vel/GPU.h"
-#include "vel/RenderMode.h"
 
 
 namespace vel
@@ -32,7 +31,6 @@ namespace vel
 		sac<Renderable>									renderables;
 		bool											clearDepthBuffer;
 		std::string										name;
-		RenderMode										renderMode;
 		bool											useSceneCameraPositionForLighting;
 
 		
@@ -64,10 +62,7 @@ namespace vel
 		Armature*										addArmature(Armature a, std::string defaultAnimation, std::vector<std::string> actors);	
 		const std::string&								getName() const;
 		
-		Armature*										getArmature(std::string armatureName);
-
-		RenderMode										getRenderMode();
-		void											setRenderMode(RenderMode rm);		
+		Armature*										getArmature(std::string armatureName);	
 
 	};
 }

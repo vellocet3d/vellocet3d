@@ -266,14 +266,6 @@ namespace vel
 		{
 			auto stage = this->addStage(s["name"]);
 
-			if (s.contains("renderMode"))
-			{
-				if (s["renderMode"] == "RGBA")
-					stage->setRenderMode(RenderMode::RGBA);
-				else if (s["renderMode"] == "STATIC_DIFFUSE")
-					stage->setRenderMode(RenderMode::STATIC_DIFFUSE);
-			}
-
 
 			if (s.contains("clearDepthBuffer") && !s["clearDepthBuffer"].is_null() && s["clearDepthBuffer"] != "" && s["clearDepthBuffer"])
 				stage->setClearDepthBuffer(true);
@@ -677,7 +669,7 @@ namespace vel
 		// disable backface culling for cubemap i guess as it wasn't being drawn with it enabled
 		//gpu->disableBackfaceCulling();
 
-        //gpu->disableBlend(); // disable blending for opaque objects
+        gpu->disableBlend(); // disable blending for opaque objects
 
 		// set scene camera values
 		this->sceneCamera->update();
@@ -712,9 +704,6 @@ namespace vel
 		{
 			if (!s->isVisible())
 				continue;
-
-			// send render mode used for this stage to gpu
-			gpu->setCurrentRenderMode(s->getRenderMode());
 
 			// clear depth buffer if flag set in stage
 			if (s->getClearDepthBuffer())
@@ -795,12 +784,7 @@ namespace vel
 
 		if (a->isVisible())
 		{
-			gpu->setShaderVec3("camPos", this->renderCameraPosition);
-			gpu->setShaderMat4("camOffset", this->renderCameraOffset);
-
-            gpu->setShaderMat4("projection", this->cameraProjectionMatrix);
-            gpu->setShaderMat4("view", this->cameraViewMatrix);
-            gpu->setShaderMat4("model", a->getWorldRenderMatrix(alphaTime));
+			gpu->setShaderMat4("mvp", this->cameraProjectionMatrix * this->cameraViewMatrix * a->getWorldRenderMatrix(alphaTime));
 
 			// If this actor is animated, send the bone transforms of it's armature to the shader
 			if (a->isAnimated())

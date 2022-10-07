@@ -13,7 +13,6 @@
 #include "vel/Texture.h"
 #include "vel/Material.h"
 #include "vel/CollisionDebugDrawer.h"
-#include "vel/RenderMode.h"
 
 
 namespace vel
@@ -28,7 +27,6 @@ namespace vel
 		Shader*								activeShader;
 		Mesh*								activeMesh;
 		Material*							activeMaterial;
-		RenderMode							currentRenderMode;
 		unsigned int						bonesUBO;
 		void								initBoneUBO();
 
@@ -73,8 +71,6 @@ namespace vel
 		void								clearShader(Shader* s);
 		void								clearMesh(Mesh* m);
 		void								clearTexture(Texture* t);
-
-		void								setCurrentRenderMode(RenderMode rm);
 
 		void								updateBonesUBO(std::vector<std::pair<unsigned int, glm::mat4>> boneData); // first = bone array index, second = bone matrix
 
