@@ -51,6 +51,7 @@ namespace vel
 		
 		std::vector<Sensor*>							contactSensors;
 		
+		glm::vec4										color; // overwrites material color property, defaults to 1.0
 
 
 
@@ -117,7 +118,8 @@ namespace vel
 		void											clearContactSensors();
 		std::vector<Sensor*>& 							getContactSensors();
 
-
+		void											setColor(glm::vec4 c);
+		const glm::vec4&								getColor();
 
 	};
 }

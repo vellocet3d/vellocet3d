@@ -19,8 +19,18 @@ namespace vel
 		collisionWorld(nullptr),
 		rigidBody(nullptr),
 		ghostObject(nullptr),
-		autoTransform(true) // this is needed so that we don't update a static actor that has a rigidbody association
+		autoTransform(true), // this is needed so that we don't update a static actor that has a rigidbody association
+		color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))
 	{}
+
+	void Actor::setColor(glm::vec4 c)
+	{
+		this->color = c;
+	}
+	const glm::vec4& Actor::getColor()
+	{
+		return this->color;
+	}
 
 	void Actor::setCollisionWorld(CollisionWorld* cw)
 	{

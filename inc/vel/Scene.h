@@ -43,7 +43,7 @@ namespace vel
 		
 		void								freeAssets();
 		void								drawActor(Actor* a, float alphaTime);
-		std::vector<std::pair<float, Actor*>> sortedTransparentActors;
+		std::vector<std::pair<float, Actor*>> transparentActors;
 
 		glm::vec3							cameraPosition;
 		glm::mat4							cameraProjectionMatrix;

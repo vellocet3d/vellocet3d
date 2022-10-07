@@ -27,7 +27,7 @@ namespace vel
 		animationTime(0.0),
 		fixedAnimationTime(0.0)
 	{
-		this->sortedTransparentActors.reserve(1000); // reserve space for 1000 transparent actors (won't reallocate until that limit reached)
+		this->transparentActors.reserve(1000); // reserve space for 1000 transparent actors (won't reallocate until that limit reached)
 
 		// create a default camera for scene (required so sceneCamera is never nullptr, can be set to another pointer at runtime if required)
 		this->addCamera(Camera("defaultSceneCamera", CameraType::PERSPECTIVE, 0.1f, 250.0f, 60.0f));
@@ -705,9 +705,11 @@ namespace vel
 			if (!s->isVisible())
 				continue;
 
+
 			// clear depth buffer if flag set in stage
 			if (s->getClearDepthBuffer())
 				gpu->clearDepthBuffer();
+
 
 			// if stage has camera, use stage camera values
 			if (s->getCamera() != nullptr)
@@ -718,16 +720,19 @@ namespace vel
 				this->cameraViewMatrix = s->getCamera()->getViewMatrix();
 			}
 
-			// enable backface culling for actors, enabling globally in GPU at the moment
-			//gpu->enableBackfaceCulling();
-
-			std::vector<Renderable*> transparentRenderables;
 			
+			this->transparentActors.clear();
+
+
 			for(auto r : s->getRenderables())
 			{
 				if (r->getMaterialHasAlpha())
 				{
-					transparentRenderables.push_back(r); //TODO this reallocates on every insert
+					for (auto a : r->actors.getAll())
+					{
+						float dist = glm::length(this->cameraPosition - a->getTransform().getTranslation());
+						this->transparentActors.push_back(std::pair<float, Actor*>(dist, a));
+					}
 					continue;
 				}
 
@@ -739,30 +744,30 @@ namespace vel
 				gpu->useMaterial(r->getMaterial());
 					
 				for (auto a : r->actors.getAll())
+				{
+					// if this actor has a color with a transparent component less than fully opaque, push it onto
+					// transparentActors queue and continue the loop without drawing the actor
+					if (a->getColor().w < 1.0f)
+					{
+						float dist = glm::length(this->cameraPosition - a->getTransform().getTranslation());
+						this->transparentActors.push_back(std::pair<float, Actor*>(dist, a));
+						continue;
+					}
+
 					this->drawActor(a, alpha);
+				}
 			}
 
 
 			// DRAW TRANSPARENTS/TRANSLUCENTS
-
-			// TODO: not proud of this, but it gets the job done for the time being (can't use map since there's a chance keys could be the same,
-			// not that using map would make this anymore acceptable for a performance crucial application)
             gpu->enableBlend();
-			this->sortedTransparentActors.clear();
-			for (auto& r : transparentRenderables)
-			{
-				for (auto a : r->actors.getAll())
-				{
-					float dist = glm::length(this->cameraPosition - a->getTransform().getTranslation());
-					this->sortedTransparentActors.push_back(std::pair<float, Actor*>(dist, a));
-				}
-			}
-				
-			std::sort(sortedTransparentActors.begin(), sortedTransparentActors.end(), [](auto &left, auto &right) {
+
+			// TODO: not proud of this, but it gets the job done for the time being
+			std::sort(transparentActors.begin(), transparentActors.end(), [](auto &left, auto &right) {
 				return left.first < right.first;
 			});
 
-			for (std::vector<std::pair<float, Actor*>>::reverse_iterator it = sortedTransparentActors.rbegin(); it != sortedTransparentActors.rend(); ++it)
+			for (std::vector<std::pair<float, Actor*>>::reverse_iterator it = transparentActors.rbegin(); it != transparentActors.rend(); ++it)
 			{
 				// Reset gpu state for this ACTOR and draw
 				auto r = it->second->getStageRenderable().value();
@@ -784,6 +789,7 @@ namespace vel
 
 		if (a->isVisible())
 		{
+			gpu->setShaderVec4("color", a->getColor());
 			gpu->setShaderMat4("mvp", this->cameraProjectionMatrix * this->cameraViewMatrix * a->getWorldRenderMatrix(alphaTime));
 
 			// If this actor is animated, send the bone transforms of it's armature to the shader
