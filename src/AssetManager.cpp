@@ -226,7 +226,7 @@ if (!this->shaderTrackers.exists(name))
 			}
 			else
 			{
-				std::this_thread::sleep_for(100ms); //tf? Guessing I did this as some form of ghetto thread-safety?
+				std::this_thread::sleep_for(100ms); //tf? Guessing I did this as some form of ghetto thread-safety? why not use mutex?
 				return this->getMeshTracker(name);
 			}
 		}

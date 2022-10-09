@@ -177,6 +177,7 @@ namespace vel
 	void AssetLoaderV2::processNode(aiNode* node)
 	{
 		std::string nodeName = node->mName.C_Str();
+		//std::cout << "processNode:" << nodeName << std::endl;
 
 
 		if (nodeName == "RootNode")
@@ -225,6 +226,7 @@ namespace vel
 		// this, just note that any mesh loaded with a `.something_else` in it's name will have that
 		// `.something_else` stripped
 		std::string cleanName = explode_string(aiMesh->mName.C_Str(), '.')[0];
+		//std::cout << "processMesh:" << cleanName << std::endl;
 
 		//auto mesh = Mesh(aiMesh->mName.C_Str());
 		auto mesh = Mesh(cleanName);
