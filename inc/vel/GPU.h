@@ -6,14 +6,15 @@
 #include <optional>
 
 #include "glm/glm.hpp"
+//#include "glad/glad.h"
 
 
 #include "vel/Shader.h"
 #include "vel/Mesh.h"
 #include "vel/Texture.h"
-#include "vel/Material.h"
 #include "vel/CollisionDebugDrawer.h"
 
+typedef uint64_t GLuint64;
 
 namespace vel
 {
@@ -26,9 +27,13 @@ namespace vel
         const std::string                   defaultShaderPath;
 		Shader*								activeShader;
 		Mesh*								activeMesh;
-		Material*							activeMaterial;
 		unsigned int						bonesUBO;
 		void								initBoneUBO();
+
+		unsigned int						texturesUBO;
+		void								initTextureUBO();
+
+		std::vector<unsigned int>			freeTextureDsaIds;
 
 	public:
 		GPU(Window* w);
@@ -40,7 +45,6 @@ namespace vel
 
 		const Shader* const					getActiveShader() const;
 		const Mesh*	const					getActiveMesh() const;
-		const Material*	const				getActiveMaterial() const;
 		void								resetActives();
 
 		void								loadShader(Shader* s);
@@ -49,7 +53,6 @@ namespace vel
 
 
 		void								useShader(Shader* s);
-		void								useMaterial(Material* m);
 		void								useMesh(Mesh* m);
 
 		void								setShaderBool(const std::string &name, bool value) const;
@@ -76,5 +79,10 @@ namespace vel
 
 		void								enableBackfaceCulling();
 		void								disableBackfaceCulling();
+
+		void								updateTextureUBO(unsigned int index, GLuint64 dsaHandle);
+
+		unsigned int						getTextureDsaId();
+		void								insertTextureDsaId(unsigned int i);
 	};
 }

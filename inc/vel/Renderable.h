@@ -5,7 +5,6 @@
 
 #include "vel/Shader.h"
 #include "vel/Mesh.h"
-#include "vel/Material.h"
 
 #include "vel/ptrsac.h"
 
@@ -19,15 +18,11 @@ namespace vel
 		std::string					name;
 		Shader*						shader;
 		Mesh*						mesh;
-		Material*					material;
-		size_t						materialHasAlpha;
 
     public:
-									Renderable(std::string rn, Shader* shader, Mesh* mesh, Material* material);
-		const size_t&				getMaterialHasAlpha() const;
+									Renderable(std::string rn, Shader* shader, Mesh* mesh);
 		const std::string&			getName();
 		Shader*						getShader();
-		Material*					getMaterial();
 		Mesh*						getMesh();
 
 		ptrsac<Actor*>				actors;

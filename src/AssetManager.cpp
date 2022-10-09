@@ -21,6 +21,7 @@ namespace vel
 	{}
 	AssetManager::~AssetManager(){}
 
+	
 
 	void AssetManager::sendAllToGpu()
 	{
@@ -31,19 +32,19 @@ namespace vel
 			this->shadersThatNeedGpuLoad.pop_front();
 		}
 		
+		for (auto& t : this->texturesThatNeedGpuLoad)
+		{
+			this->gpu->loadTexture(t->ptr);
+			t->gpuLoaded = true;
+			this->texturesThatNeedGpuLoad.pop_front();
+		}
+
 		for(auto& m : this->meshesThatNeedGpuLoad)
 		{
 			this->gpu->loadMesh(m->ptr);
 			m->gpuLoaded = true;
 			this->meshesThatNeedGpuLoad.pop_front();
 		}
-		
-		for(auto& t : this->texturesThatNeedGpuLoad)
-		{
-			this->gpu->loadTexture(t->ptr);
-			t->gpuLoaded = true;
-			this->texturesThatNeedGpuLoad.pop_front();
-		}      
 	}
 
 	void AssetManager::sendNextToGpu()
@@ -57,21 +58,21 @@ namespace vel
 			return;
 		}
 
-		if (this->meshesThatNeedGpuLoad.size() > 0)
-		{
-			auto meshTracker = this->meshesThatNeedGpuLoad.at(0);
-			this->gpu->loadMesh(meshTracker->ptr);
-			meshTracker->gpuLoaded = true;
-			this->meshesThatNeedGpuLoad.pop_front();
-			return;
-		}
-
 		if (this->texturesThatNeedGpuLoad.size() > 0)
 		{
 			auto textureTracker = this->texturesThatNeedGpuLoad.at(0);
 			this->gpu->loadTexture(textureTracker->ptr);
 			textureTracker->gpuLoaded = true;
 			this->texturesThatNeedGpuLoad.pop_front();
+			return;
+		}
+
+		if (this->meshesThatNeedGpuLoad.size() > 0)
+		{
+			auto meshTracker = this->meshesThatNeedGpuLoad.at(0);
+			this->gpu->loadMesh(meshTracker->ptr);
+			meshTracker->gpuLoaded = true;
+			this->meshesThatNeedGpuLoad.pop_front();
 			return;
 		}
 	}
@@ -209,9 +210,14 @@ if (!this->shaderTrackers.exists(name))
 		
 		auto meshTrackerPtr = this->meshTrackers.insert(m.getName(), t);
 
-		this->meshesThatNeedGpuLoad.push_back(meshTrackerPtr);
+		//this->meshesThatNeedGpuLoad.push_back(meshTrackerPtr);
 
 		return meshTrackerPtr;
+	}
+
+	void AssetManager::addMeshToGpuLoadQueue(Mesh* m)
+	{
+		this->meshesThatNeedGpuLoad.push_back(this->getMeshTracker(m->getName()));
 	}
 
 	MeshTracker* AssetManager::getMeshTracker(std::string name)
@@ -308,6 +314,7 @@ if (!this->meshTrackers.exists(name))
 		Texture texture;
 		texture.name = name;
 		texture.type = type;
+		texture.dsaIdIndex = this->gpu->getTextureDsaId();
 		texture.primaryImageData.data = stbi_load(
 			path.c_str(), 
 			&texture.primaryImageData.width, 
@@ -328,41 +335,21 @@ if (!this->meshTrackers.exists(name))
         if (texture.primaryImageData.nrComponents == 1)
         {
             texture.alphaChannel = false;
+			texture.primaryImageData.sizedFormat = GL_R8; // TODO IDK if 8 bit is right for this
             texture.primaryImageData.format = GL_RED;
         }
         else if (texture.primaryImageData.nrComponents == 3)
         {
             texture.alphaChannel = false;
+			texture.primaryImageData.sizedFormat = GL_RGB8; // TODO IDK if 8 bit is right for this
             texture.primaryImageData.format = GL_RGB;
         }
         else if (texture.primaryImageData.nrComponents == 4)
         {
             texture.alphaChannel = true;
+			texture.primaryImageData.sizedFormat = GL_RGBA8; // TODO IDK if 8 bit is right for this
             texture.primaryImageData.format = GL_RGBA;
         }
-
-        for (auto& m : mips)
-        {
-			//Log::toCliAndFile("mip:" + m);
-            ImageData id;
-            id.data = stbi_load(m.c_str(), &id.width, &id.height, &id.nrComponents, 0);
-
-#ifdef DEBUG_LOG
-	if (!id.data)
-		Log::crash("AssetManager::loadTexture(): Unable to load texture at path: " + m);
-#endif
-
-            if (id.nrComponents == 1)
-                id.format = GL_RED;
-            else if (id.nrComponents == 3)
-                id.format = GL_RGB;
-            else if (id.nrComponents == 4)
-                id.format = GL_RGBA;
-
-            texture.mips.push_back(id);
-            
-        }
-		
 
 		/////////////////////////////////////////
 
@@ -407,11 +394,22 @@ if (!this->meshTrackers.exists(name))
 	Log::toCliAndFile("Full remove Texture: " + name);
 #endif
 			if (!t->gpuLoaded)
+			{
 				for (size_t i = 0; i < this->texturesThatNeedGpuLoad.size(); i++)
+				{
 					if (this->texturesThatNeedGpuLoad.at(i) == t)
+					{
+						this->gpu->insertTextureDsaId(this->texturesThatNeedGpuLoad.at(i)->ptr->dsaIdIndex);
 						this->texturesThatNeedGpuLoad.erase(this->texturesThatNeedGpuLoad.begin() + i);
+					}
+				}
+			}		
 			else
+			{
+				this->gpu->insertTextureDsaId(t->ptr->dsaIdIndex);
 				this->gpu->clearTexture(t->ptr);
+			}
+				
 			
 			this->textures.erase(name);
 			this->textureTrackers.erase(name);
@@ -492,86 +490,6 @@ if (!this->meshTrackers.exists(name))
 #endif	
 	}
 
-	/* Materials
-	--------------------------------------------------*/
-	std::string AssetManager::addMaterial(Material m)
-	{
-		if (this->materialTrackers.exists(m.name))
-		{
-#ifdef DEBUG_LOG
-	Log::toCliAndFile("Existing Material, bypass reload: " + m.name);
-#endif
-			auto t = this->materialTrackers.get(m.name);
-			if(t->usageCount > 0)
-			{
-				t->usageCount++;
-				return m.name;
-			}
-			else
-			{
-				std::this_thread::sleep_for(100ms);
-				return this->addMaterial(m);
-			}			
-		}
-
-#ifdef DEBUG_LOG
-	Log::toCliAndFile("Loading new Material: " + m.name);
-#endif		
-
-		// assign default texture to material if a material is not provided at this time
-		if (m.diffuse == nullptr)
-			m.diffuse = this->getTexture("__default__");
-
-		if (m.color.w < 1.0f)
-			m.hasAlphaChannel = true;
-		else
-			if (!m.hasAlphaChannel && m.diffuse && m.diffuse->alphaChannel)
-				m.hasAlphaChannel = true;
-
-		auto materialPtr = this->materials.insert(m.name, m);
-		
-		MaterialTracker t;
-		t.ptr = materialPtr;
-		t.usageCount++;
-
-		this->materialTrackers.insert(m.name, t);
-
-		return m.name;
-	}
-
-	Material* AssetManager::getMaterial(std::string name)
-	{
-#ifdef DEBUG_LOG
-	if (!this->materialTrackers.exists(name))
-		Log::crash("AssetManager::getMaterial(): Attempting to get material that does not exist: " + name);
-#endif
-
-		return this->materialTrackers.get(name)->ptr;
-	}
-	
-	void AssetManager::removeMaterial(std::string name)
-	{
-#ifdef DEBUG_LOG
-	if (!this->materialTrackers.exists(name))
-		Log::crash("AssetManager::removeMaterial(): Attempting to remove material that does not exist: " + name);
-#endif
-
-		auto t = this->materialTrackers.get(name);
-		t->usageCount--;
-		if (t->usageCount == 0)
-		{
-#ifdef DEBUG_LOG
-	Log::toCliAndFile("Full remove Material: " + name);
-#endif
-			this->materials.erase(name);
-			this->materialTrackers.erase(name);
-		}
-#ifdef DEBUG_LOG
-	else
-		Log::toCliAndFile("Decrement Material usageCount, retain: " + name);
-#endif	
-	}
-
 	/* Animations
 	--------------------------------------------------*/	
 	Animation* AssetManager::addAnimation(Animation a)
@@ -581,7 +499,7 @@ if (!this->meshTrackers.exists(name))
 
 	/* Renderables
 	--------------------------------------------------*/
-	std::string AssetManager::addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material)
+	std::string AssetManager::addRenderable(std::string name, Shader* shader, Mesh* mesh)
 	{
 		if (this->renderableTrackers.exists(name))
 		{
@@ -597,7 +515,7 @@ if (!this->meshTrackers.exists(name))
 			else
 			{
 				std::this_thread::sleep_for(100ms);
-				return this->addRenderable(name, shader, mesh, material);
+				return this->addRenderable(name, shader, mesh);
 			}			
 		}
 
@@ -605,7 +523,7 @@ if (!this->meshTrackers.exists(name))
 	Log::toCliAndFile("Loading new Renderable: " + name);
 #endif	
 
-		auto renderablePtr = this->renderables.insert(name, Renderable(name, shader, mesh, material));
+		auto renderablePtr = this->renderables.insert(name, Renderable(name, shader, mesh));
 		
 		RenderableTracker t;
 		t.ptr = renderablePtr;

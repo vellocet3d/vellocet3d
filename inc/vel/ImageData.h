@@ -13,5 +13,6 @@ namespace vel
 		int					height;
 		int					nrComponents;
 		unsigned int		format;
+		unsigned int		sizedFormat;
 	};
 }

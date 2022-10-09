@@ -8,8 +8,34 @@ namespace vel
 {
 
     Mesh::Mesh(std::string name) :
-        name(name)
+        name(name),
+		texture(nullptr),
+		isOpaque(true)
     {}
+
+	bool Mesh::getIsOpaque()
+	{
+		return this->isOpaque;
+	}
+
+	void Mesh::finalize()
+	{
+		for (auto& v : this->vertices)
+			v.textureId = this->texture->dsaIdIndex;
+
+		if (this->texture->alphaChannel)
+			this->isOpaque = false;
+	}
+
+	void Mesh::setTexture(Texture* t)
+	{
+		this->texture = t;
+	}
+
+	Texture* Mesh::getTexture()
+	{
+		return this->texture;
+	}
 
 	const std::vector<MeshBone>& Mesh::getBones() const
 	{
@@ -52,7 +78,7 @@ namespace vel
 
 	void Mesh::addVertexWeight(unsigned int vertexIndex, unsigned int boneIndex, float weight)
 	{
-		this->vertices[vertexIndex].attemptedVertexWeightAdditions++;
+		//this->vertices[vertexIndex].attemptedVertexWeightAdditions++;
 		for (unsigned int i = 0; i < (sizeof(this->vertices[vertexIndex].weights.ids) / sizeof(this->vertices[vertexIndex].weights.ids[0])); i++)
 		{
 			if (this->vertices[vertexIndex].weights.weights[i] == 0.0f)

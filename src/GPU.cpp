@@ -22,15 +22,36 @@ namespace vel
 	GPU::GPU(Window* w) :
 		window(w),
 		activeShader(nullptr),
-		activeMesh(nullptr),
-		activeMaterial(nullptr)
+		activeMesh(nullptr)
 	{
         this->enableDepthTest();
 		this->enableBackfaceCulling();
 		this->initBoneUBO();
+		this->initTextureUBO();
+
+		this->freeTextureDsaIds.reserve(500);
+
+		// initialize freeTextureDsaIds with all allowable indexes
+		for (int i = 499; i > -1; i--)
+			this->freeTextureDsaIds.push_back(i);
+
 	}
 
 	GPU::~GPU(){}
+
+	void GPU::insertTextureDsaId(unsigned int i)
+	{
+		this->freeTextureDsaIds.push_back(i);
+	}
+
+	unsigned int GPU::getTextureDsaId()
+	{
+		unsigned int id = this->freeTextureDsaIds.back();
+
+		this->freeTextureDsaIds.pop_back();
+
+		return id;
+	}
 
 	void GPU::enableBackfaceCulling()
 	{
@@ -46,8 +67,33 @@ namespace vel
 	{
 		this->activeShader = nullptr;
 		this->activeMesh = nullptr;
-		this->activeMaterial = nullptr;
 	}
+
+	void GPU::initTextureUBO()
+	{
+		
+		const int MAX_SUPPORTED_TEXTURES = 500;
+		glGenBuffers(1, &this->texturesUBO);
+		glBindBuffer(GL_UNIFORM_BUFFER, this->texturesUBO);
+		glBufferData(GL_UNIFORM_BUFFER, MAX_SUPPORTED_TEXTURES * sizeof(GLuint64), NULL, GL_STATIC_DRAW);
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->texturesUBO);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+		std::cout << "textureUBO: " << this->texturesUBO << std::endl;
+	}
+
+	void GPU::updateTextureUBO(unsigned int index, GLuint64 dsaHandle)
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, this->texturesUBO);
+
+		//glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLuint64) * index, sizeof(GLuint64), (void*)dsaHandle);
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLuint64) * index, sizeof(GLuint64), (void*)&dsaHandle);
+
+
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
+
+
 
 	void GPU::initBoneUBO()
 	{
@@ -55,25 +101,20 @@ namespace vel
 		glGenBuffers(1, &this->bonesUBO);
 		glBindBuffer(GL_UNIFORM_BUFFER, this->bonesUBO);
 		glBufferData(GL_UNIFORM_BUFFER, MAX_SUPPORTED_BONES * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-		// use below example if ever needing to store multiple ubo blocks in a asingle buffer which allows you to bind
-		// each block to a different binding point
-		//glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
 		glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->bonesUBO);
-
-		// unbind for piece of mind
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+		std::cout << "bonesUBO: " << this->bonesUBO << std::endl;
 	}
 
 	void GPU::updateBonesUBO(std::vector<std::pair<unsigned int, glm::mat4>> boneData)
 	{
 		
 		glBindBuffer(GL_UNIFORM_BUFFER, this->bonesUBO);
+
 		for (auto& bd : boneData)
-		{
-			//Log::toCli(std::to_string(bd.first) + glm::to_string(bd.second));
 			glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * bd.first, sizeof(glm::mat4), glm::value_ptr(bd.second));
-		}
+
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
@@ -94,6 +135,7 @@ namespace vel
 
 	void GPU::clearTexture(Texture* t)
 	{
+		glMakeTextureHandleNonResidentARB(this->freeTextureDsaIds.at(t->dsaIdIndex));
 		glDeleteTextures(1, &t->id);
 	}
 
@@ -238,17 +280,21 @@ namespace vel
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureCoordinates));
 
-		// Assign vertex bone ids to location = 3 (and 4 for second array element)
+		// Assign texture id to location = 3
 		glEnableVertexAttribArray(3);
-		glVertexAttribIPointer(3, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, weights.ids));
-		glEnableVertexAttribArray(4);
-		glVertexAttribIPointer(4, 4, GL_INT, sizeof(Vertex), (void*)(offsetof(Vertex, weights.ids) + 16));
+		glVertexAttribIPointer(3, 1, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, textureId));
 
-		// Assign vertex weights to location = 5 (and 6 for second array element)
+		// Assign vertex bone ids to location = 4 (and 5 for second array element)
+		glEnableVertexAttribArray(4);
+		glVertexAttribIPointer(4, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, weights.ids));
 		glEnableVertexAttribArray(5);
-		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, weights.weights));
+		glVertexAttribIPointer(5, 4, GL_INT, sizeof(Vertex), (void*)(offsetof(Vertex, weights.ids) + 16));
+
+		// Assign vertex weights to location = 6 (and 7 for second array element)
 		glEnableVertexAttribArray(6);
-		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, weights.weights) + 16));
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, weights.weights));
+		glEnableVertexAttribArray(7);
+		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, weights.weights) + 16));
 
 		// Unbind the vertex array to prevent accidental operations
 		glBindVertexArray(0);
@@ -258,12 +304,37 @@ namespace vel
 
 	void GPU::loadTexture(Texture* t)
 	{
+		//// create a texture buffer and bind it to context
 		glGenTextures(1, &t->id);
 		glBindTexture(GL_TEXTURE_2D, t->id);
+
+		////// define properties of this texture
+		//glTexStorage2D(
+		//	GL_TEXTURE_2D,
+		//	6,
+		//	//t->primaryImageData.format,
+		//	t->primaryImageData.sizedFormat,
+		//	t->primaryImageData.width,
+		//	t->primaryImageData.height
+		//);
+
+		////// fill texture with data
+		//glTexSubImage2D(
+		//	GL_TEXTURE_2D,
+		//	0,
+		//	0,
+		//	0,
+		//	t->primaryImageData.width,
+		//	t->primaryImageData.height,
+		//	t->primaryImageData.format,
+		//	GL_UNSIGNED_BYTE,
+		//	t->primaryImageData.data
+		//);
+
 		glTexImage2D(
 			GL_TEXTURE_2D, 
 			0, 
-			t->primaryImageData.format, 
+			t->primaryImageData.sizedFormat, 
 			t->primaryImageData.width, 
 			t->primaryImageData.height, 
 			0, 
@@ -272,49 +343,25 @@ namespace vel
 			t->primaryImageData.data
 		);
 
-		if (t->mips.size() == 0)
-		{
-#ifdef DEBUG_LOG
-	Log::toCliAndFile("Generating mipmaps");
-#endif
-			glGenerateMipmap(GL_TEXTURE_2D);
-		}
-		
+		//// auto generate mipmap levels for texture
+		glGenerateMipmap(GL_TEXTURE_2D);
+
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-		if (t->mips.size() > 0)
-		{
-#ifdef DEBUG_LOG
-	Log::toCliAndFile("Loading pre-computed mipmaps");
-#endif
+		// obtain texture's DSA handle
+		GLuint64 handle = glGetTextureHandleARB(t->id);
 
-			int mipcount = (int)t->mips.size();
+		// set texture's DSA handle as resident so it can be accessed in shaders
+		glMakeTextureHandleResidentARB(handle);
 
-			// mip level is zero based index of last mip-level
-			// https://gamedev.stackexchange.com/questions/84398/texture-is-black-when-manually-building-mipmap
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipcount);
+		// send handle to texturesUBO inserting this handle at this texture's dsaIdIndex
+		this->updateTextureUBO(t->dsaIdIndex, handle);
 
-			while (mipcount > 0)
-			{
-				glTexImage2D(
-					GL_TEXTURE_2D, 
-					mipcount, 
-					t->mips.at((mipcount - 1)).format, 
-					t->mips.at((mipcount - 1)).width, 
-					t->mips.at((mipcount - 1)).height, 
-					0, 
-					t->mips.at((mipcount - 1)).format, 
-					GL_UNSIGNED_BYTE, 
-					t->mips.at((mipcount - 1)).data
-				);
 
-				stbi_image_free(t->mips.at((mipcount - 1)).data);
-				mipcount--;
-			}
-		}
+
 			
 		stbi_image_free(t->primaryImageData.data);
 	}
@@ -327,11 +374,6 @@ namespace vel
 	const Mesh* const GPU::getActiveMesh() const
 	{
 		return this->activeMesh;
-	}
-
-	const Material* const GPU::getActiveMaterial() const
-	{
-		return this->activeMaterial;
 	}
 
 	void GPU::useShader(Shader* s)
@@ -393,20 +435,6 @@ namespace vel
 	{
 		this->activeMesh = m;
 		glBindVertexArray(m->getGpuMesh()->VAO);
-	}
-
-	void GPU::useMaterial(Material* m)
-	{
-		this->activeMaterial = m;
-
-		this->setShaderVec4("color", m->color);
-
-		if (m->diffuse != nullptr)
-		{
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m->diffuse->id);
-			this->setShaderInt("diffuseMap", 0);
-		}
 	}
 
 	void GPU::drawGpuMesh()

@@ -61,8 +61,8 @@ namespace vel
        
         
         // load default textures
-		this->assetManager.loadTexture("__default__", "diffuse", "data/textures/defaults/default.jpg");
-		this->assetManager.sendAllToGpu();
+		//this->assetManager.loadTexture("__default__", "diffuse", "data/textures/defaults/default.jpg");
+		//this->assetManager.sendAllToGpu();
 
 
 		//create separate thread that will poll scenes and load them into system memory asynchronously
@@ -389,8 +389,8 @@ namespace vel
 				// perform draw (render) logic
 				if (!this->pauseBufferClearAndSwap)
 				{
-					//this->gpu->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);
-					this->gpu->clearBuffers(0.0f, 0.0f, 0.0f, 1.0f);
+					this->gpu->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);
+					//this->gpu->clearBuffers(0.0f, 0.0f, 0.0f, 1.0f);
 				}
 					
 

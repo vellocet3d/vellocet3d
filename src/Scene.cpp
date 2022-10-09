@@ -83,9 +83,6 @@ namespace vel
 		for(auto& name : this->renderablesInUse)
 			App::get().getAssetManager().removeRenderable(name);
 		
-		for(auto& name : this->materialsInUse)
-			App::get().getAssetManager().removeMaterial(name);
-		
 		for(auto& name : this->texturesInUse)
 			App::get().getAssetManager().removeTexture(name);
 		
@@ -172,36 +169,13 @@ namespace vel
 			this->loadTexture(t["name"], t["type"], t["path"], mips);
 		}
 
-		// Load materials which are created from previously loaded textures
-		for (auto& m : j["materials"])
-		{
-			Material mat;
-			mat.name = m["name"];
-
-			if (m.contains("color") && m["color"] != "" && !m["color"].is_null())
-			{
-				mat.color = glm::vec4(
-					(float)m["color"][0],
-					(float)m["color"][1],
-					(float)m["color"][2],
-					(float)m["color"][3]
-				);
-			}
-
-			if (m.contains("diffuse") && m["diffuse"] != "" && !m["diffuse"].is_null())
-				mat.diffuse = this->getTexture(m["diffuse"]);
-
-			this->addMaterial(mat);
-		}
-
 		// Load renderables
 		for (auto& r : j["renderables"])
 		{
 			this->addRenderable(
 				r["name"],
 				this->getShader(r["shader"]),
-				this->getMesh(r["mesh"]),
-				this->getMaterial(r["material"])
+				this->getMesh(r["mesh"])
 			);
 		}
 
@@ -556,20 +530,21 @@ namespace vel
 		if(tts.second != "")
 			this->armaturesInUse.push_back(tts.second);
 	}
+
+	void Scene::finalizeMesh(Mesh* m)
+	{
+		m->finalize();
+		App::get().getAssetManager().addMeshToGpuLoadQueue(m);
+	}
 	
 	void Scene::loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips)
 	{
 		this->texturesInUse.push_back(App::get().getAssetManager().loadTexture(name, type, path, mips));
 	}
 	
-	void Scene::addMaterial(Material m)
+	void Scene::addRenderable(std::string name, Shader* shader, Mesh* mesh)
 	{
-		this->materialsInUse.push_back(App::get().getAssetManager().addMaterial(m));
-	}
-	
-	void Scene::addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material)
-	{
-		this->renderablesInUse.push_back(App::get().getAssetManager().addRenderable(name, shader, mesh, material));
+		this->renderablesInUse.push_back(App::get().getAssetManager().addRenderable(name, shader, mesh));
 	}
 
 	Shader* Scene::getShader(std::string name)
@@ -585,11 +560,6 @@ namespace vel
 	Texture* Scene::getTexture(std::string name)
 	{
 		return App::get().getAssetManager().getTexture(name);
-	}
-
-	Material* Scene::getMaterial(std::string name)
-	{
-		return App::get().getAssetManager().getMaterial(name);
 	}
 
 	Renderable Scene::getRenderable(std::string name)
@@ -726,7 +696,7 @@ namespace vel
 
 			for(auto r : s->getRenderables())
 			{
-				if (r->getMaterialHasAlpha())
+				if (!r->getMesh()->getIsOpaque())
 				{
 					for (auto a : r->actors.getAll())
 					{
@@ -741,7 +711,6 @@ namespace vel
 				// RESET GPU STATE FOR THIS RENDERABLE
 				gpu->useShader(r->getShader());
 				gpu->useMesh(r->getMesh());
-				gpu->useMaterial(r->getMaterial());
 					
 				for (auto a : r->actors.getAll())
 				{
@@ -774,7 +743,6 @@ namespace vel
 
 				gpu->useShader(r->getShader());
 				gpu->useMesh(r->getMesh());
-				gpu->useMaterial(r->getMaterial());
 
 				this->drawActor(it->second, alpha);
 			}

@@ -11,7 +11,6 @@
 #include "vel/Shader.h"
 #include "vel/Mesh.h"
 #include "vel/Texture.h"
-#include "vel/Material.h"
 #include "vel/Renderable.h"
 #include "vel/Animation.h"
 #include "vel/Armature.h"
@@ -38,12 +37,10 @@ namespace vel
 		sac<Texture>										textures;
 		sac<TextureTracker> 								textureTrackers;
 		std::deque<TextureTracker*>							texturesThatNeedGpuLoad;
+		
 
 		sac<Camera>											cameras;
 		sac<CameraTracker> 									cameraTrackers;
-
-		sac<Material>										materials;
-		sac<MaterialTracker> 								materialTrackers;
 
 		sac<Renderable>										renderables;
 		sac<RenderableTracker> 								renderableTrackers;
@@ -54,6 +51,8 @@ namespace vel
 		sac<Animation>										animations;
 		// since animations are tracked within an Armature, and they are only associated with a single armatureTracker
 		// we shouldn't need to track them, just account for them when adding/removing an armature
+
+		
 
 	public:
 		AssetManager(GPU* gpu);
@@ -70,6 +69,7 @@ namespace vel
 
 		std::pair<std::vector<std::string>, std::string> loadMesh(std::string path);
 		MeshTracker*				addMesh(Mesh m);
+		void						addMeshToGpuLoadQueue(Mesh* m);
 		Mesh*						getMesh(std::string name);
 		bool						meshIsGpuLoaded(std::string name);
 		void						removeMesh(std::string name);
@@ -78,11 +78,6 @@ namespace vel
 		Texture*					getTexture(std::string name);
 		bool						textureIsGpuLoaded(std::string name);
 		void						removeTexture(std::string name);
-        
-
-		std::string					addMaterial(Material m);
-		Material*					getMaterial(std::string name);
-		void						removeMaterial(std::string name);
 
 		std::string					addCamera(Camera c);
 		Camera*						getCamera(std::string name);
@@ -90,7 +85,7 @@ namespace vel
 
 		Animation*					addAnimation(Animation a);
 
-		std::string					addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material);
+		std::string					addRenderable(std::string name, Shader* shader, Mesh* mesh);
 		Renderable					getRenderable(std::string name);
 		void						removeRenderable(std::string name);
 
