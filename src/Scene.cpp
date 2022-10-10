@@ -797,35 +797,26 @@ namespace vel
 			{
 				auto mesh = a->getMesh();
 				auto armature = a->getArmature();
+				bool armInterp = armature->getShouldInterpolate();
 
 				size_t boneIndex = 0;
 				std::vector<std::pair<unsigned int, glm::mat4>> boneData;
-				if (armature->getShouldInterpolate())
+
+				glm::mat4 meshBoneTransform;
+				for (auto& activeBone : a->getActiveBones())
 				{
-					for (auto& activeBone : a->getActiveBones())
-					{
+					if(armInterp)
 						// global inverse matrix does not seem to make any difference
-						//glm::mat4 meshBoneTransform = mesh->getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrixInterpolated(alphaTime) * mesh->getBone(boneIndex).offsetMatrix;
-						glm::mat4 meshBoneTransform = armature->getBone(activeBone.first).getRenderMatrixInterpolated(alphaTime) * mesh->getBone(boneIndex).offsetMatrix;
-						//gpu->setShaderMat4(activeBone.second, meshBoneTransform);
-						boneData.push_back(std::pair<unsigned int, glm::mat4>(activeBone.second, meshBoneTransform));
-						boneIndex++;
-					}
-				}
-				else
-				{
-					for (auto& activeBone : a->getActiveBones())
-					{
-						//glm::mat4 meshBoneTransform = mesh->getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrix() * mesh->getBone(boneIndex).offsetMatrix;
-						glm::mat4 meshBoneTransform = armature->getBone(activeBone.first).getRenderMatrix() * mesh->getBone(boneIndex).offsetMatrix;
-						//gpu->setShaderMat4(activeBone.second, meshBoneTransform);
-						boneData.push_back(std::pair<unsigned int, glm::mat4>(activeBone.second, meshBoneTransform));
-						boneIndex++;
-					}
+						//meshBoneTransform = mesh->getGlobalInverseMatrix() * armature->getBone(activeBone.first).getRenderMatrixInterpolated(alphaTime) * mesh->getBone(boneIndex).offsetMatrix;
+						meshBoneTransform = armature->getBone(activeBone.first).getRenderMatrixInterpolated(alphaTime) * mesh->getBone(boneIndex).offsetMatrix;
+					else
+						meshBoneTransform = armature->getBone(activeBone.first).getRenderMatrix() * mesh->getBone(boneIndex).offsetMatrix;
+
+					boneData.push_back(std::pair<unsigned int, glm::mat4>(activeBone.second, meshBoneTransform));
+					boneIndex++;
 				}
 
 				gpu->updateBonesUBO(boneData);
-				
 			}
 
 			gpu->drawGpuMesh();
