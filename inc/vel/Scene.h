@@ -13,6 +13,7 @@
 #include "vel/Stage.h"
 #include "vel/Armature.h"
 #include "vel/Animation.h"
+#include "vel/Material.h"
 #include "vel/AssetTrackers.h"
 #include "vel/CollisionWorld.h"
 #include "vel/CollisionDebugDrawer.h"
@@ -59,19 +60,20 @@ namespace vel
 		
 
 		void								loadShader(std::string name, std::string vertFile, std::string fragFile);
-		void								loadMesh(std::string path);
+		void								loadMesh(std::string path, bool textured = false);
 		void								loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
         void								loadConfigFile(std::string path);
 
 		void								addCamera(Camera m);
-		void								addRenderable(std::string name, Shader* shader, Mesh* mesh);
+		void								addMaterial(Material m);
+		void								addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material);
 		Stage*								addStage(std::string name);
 
 		Shader*								getShader(std::string name);
 		Mesh*								getMesh(std::string name);
-		void								finalizeMesh(Mesh* m);
 		Texture*							getTexture(std::string name);
 		Camera*								getCamera(std::string name);
+		Material*							getMaterial(std::string name);
 		Renderable							getRenderable(std::string name);
 		Armature							getArmature(std::string name);
 		

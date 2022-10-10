@@ -22,17 +22,18 @@ namespace vel
 	GPU::GPU(Window* w) :
 		window(w),
 		activeShader(nullptr),
-		activeMesh(nullptr)
+		activeMesh(nullptr),
+		activeMaterial(nullptr)
 	{
         this->enableDepthTest();
 		this->enableBackfaceCulling();
 		this->initBoneUBO();
 		this->initTextureUBO();
 
-		this->freeTextureDsaIds.reserve(500);
+		this->freeTextureDsaIds.reserve(4000);
 
 		// initialize freeTextureDsaIds with all allowable indexes
-		for (int i = 499; i > -1; i--)
+		for (int i = 3999; i > -1; i--)
 			this->freeTextureDsaIds.push_back(i);
 
 	}
@@ -67,28 +68,27 @@ namespace vel
 	{
 		this->activeShader = nullptr;
 		this->activeMesh = nullptr;
+		this->activeMaterial = nullptr;
 	}
 
 	void GPU::initTextureUBO()
 	{
 		
-		const int MAX_SUPPORTED_TEXTURES = 500;
+		const int MAX_SUPPORTED_TEXTURES = 4000;
 		glGenBuffers(1, &this->texturesUBO);
 		glBindBuffer(GL_UNIFORM_BUFFER, this->texturesUBO);
 		glBufferData(GL_UNIFORM_BUFFER, MAX_SUPPORTED_TEXTURES * sizeof(GLuint64), NULL, GL_STATIC_DRAW);
 		glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->texturesUBO);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-		std::cout << "textureUBO: " << this->texturesUBO << std::endl;
+		//std::cout << "textureUBO: " << this->texturesUBO << std::endl;
 	}
 
 	void GPU::updateTextureUBO(unsigned int index, GLuint64 dsaHandle)
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, this->texturesUBO);
 
-		//glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLuint64) * index, sizeof(GLuint64), (void*)dsaHandle);
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLuint64) * index, sizeof(GLuint64), (void*)&dsaHandle);
-
 
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
@@ -104,7 +104,7 @@ namespace vel
 		glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->bonesUBO);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-		std::cout << "bonesUBO: " << this->bonesUBO << std::endl;
+		//std::cout << "bonesUBO: " << this->bonesUBO << std::endl;
 	}
 
 	void GPU::updateBonesUBO(std::vector<std::pair<unsigned int, glm::mat4>> boneData)
@@ -135,7 +135,7 @@ namespace vel
 
 	void GPU::clearTexture(Texture* t)
 	{
-		glMakeTextureHandleNonResidentARB(this->freeTextureDsaIds.at(t->dsaIdIndex));
+		glMakeTextureHandleNonResidentARB(t->dsaHandle);
 		glDeleteTextures(1, &t->id);
 	}
 
@@ -352,13 +352,14 @@ namespace vel
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
 		// obtain texture's DSA handle
-		GLuint64 handle = glGetTextureHandleARB(t->id);
+		t->dsaHandle = glGetTextureHandleARB(t->id);
 
 		// set texture's DSA handle as resident so it can be accessed in shaders
-		glMakeTextureHandleResidentARB(handle);
+		glMakeTextureHandleResidentARB(t->dsaHandle);
 
 		// send handle to texturesUBO inserting this handle at this texture's dsaIdIndex
-		this->updateTextureUBO(t->dsaIdIndex, handle);
+		//this->updateTextureUBO(t->dsaIdIndex, handle);
+
 
 
 
@@ -374,6 +375,11 @@ namespace vel
 	const Mesh* const GPU::getActiveMesh() const
 	{
 		return this->activeMesh;
+	}
+
+	const Material* const GPU::getActiveMaterial() const
+	{
+		return this->activeMaterial;
 	}
 
 	void GPU::useShader(Shader* s)
@@ -435,6 +441,21 @@ namespace vel
 	{
 		this->activeMesh = m;
 		glBindVertexArray(m->getGpuMesh()->VAO);
+	}
+
+	void GPU::useMaterial(Material* m)
+	{
+		this->activeMaterial = m;
+
+		this->setShaderVec4("color", m->color);
+
+		if (m->textures.size() > 0)
+		{
+			for (unsigned int i = 0; i < this->activeMesh->textureIds.size(); i++)
+			{
+				this->updateTextureUBO(this->activeMesh->textureIds.at(i), m->textures.at(i)->dsaHandle);
+			}
+		}
 	}
 
 	void GPU::drawGpuMesh()

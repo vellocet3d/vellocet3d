@@ -12,7 +12,7 @@ namespace vel
 		glm::vec3		position;
 		glm::vec3		normal;
 		glm::vec2		textureCoordinates;
-		int				textureId;
+		unsigned int	textureId;
 		VertexBoneData	weights;
 
 		//int				attemptedVertexWeightAdditions = 0; // for debugging

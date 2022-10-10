@@ -28,8 +28,10 @@ namespace vel
 		std::optional<GpuMesh>              gpuMesh;
 		glm::mat4							globalInverseMatrix;
 
-		Texture*							texture;
-		bool								isOpaque;
+		
+
+		//Texture*							texture;
+		//bool								isOpaque;
 
 
 	public:
@@ -51,11 +53,13 @@ namespace vel
 		MeshBone*							getBone(std::string boneName);
 		const std::vector<MeshBone>&		getBones() const;
 
-		void								setTexture(Texture* t);
-		Texture*							getTexture();
-		void								finalize();
+		//void								setTexture(Texture* t);
+		//Texture*							getTexture();
+		//void								finalize();
 
-		bool								getIsOpaque();
+		//bool								getIsOpaque();
+
+		std::vector<unsigned int>			textureIds;
 
 	};
     

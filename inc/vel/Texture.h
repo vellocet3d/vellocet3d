@@ -11,7 +11,7 @@ namespace vel
 	{
 		std::string					name;
 		unsigned int				id; // buffer object id
-		unsigned int				dsaIdIndex; // index of handle in ubo
+		uint64_t					dsaHandle;
 		std::string					type;
 		bool						alphaChannel;
 		ImageData					primaryImageData;

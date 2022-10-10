@@ -11,6 +11,7 @@
 #include "vel/Shader.h"
 #include "vel/Mesh.h"
 #include "vel/Texture.h"
+#include "vel/Material.h"
 #include "vel/Renderable.h"
 #include "vel/Animation.h"
 #include "vel/Armature.h"
@@ -42,6 +43,9 @@ namespace vel
 		sac<Camera>											cameras;
 		sac<CameraTracker> 									cameraTrackers;
 
+		sac<Material>										materials;
+		sac<MaterialTracker> 								materialTrackers;
+
 		sac<Renderable>										renderables;
 		sac<RenderableTracker> 								renderableTrackers;
 
@@ -67,7 +71,7 @@ namespace vel
 		bool						shaderIsGpuLoaded(std::string name);
 		void						removeShader(std::string name);
 
-		std::pair<std::vector<std::string>, std::string> loadMesh(std::string path);
+		std::pair<std::vector<std::string>, std::string> loadMesh(std::string path, bool textured = false);
 		MeshTracker*				addMesh(Mesh m);
 		void						addMeshToGpuLoadQueue(Mesh* m);
 		Mesh*						getMesh(std::string name);
@@ -78,6 +82,11 @@ namespace vel
 		Texture*					getTexture(std::string name);
 		bool						textureIsGpuLoaded(std::string name);
 		void						removeTexture(std::string name);
+        
+
+		std::string					addMaterial(Material m);
+		Material*					getMaterial(std::string name);
+		void						removeMaterial(std::string name);
 
 		std::string					addCamera(Camera c);
 		Camera*						getCamera(std::string name);
@@ -85,7 +94,7 @@ namespace vel
 
 		Animation*					addAnimation(Animation a);
 
-		std::string					addRenderable(std::string name, Shader* shader, Mesh* mesh);
+		std::string					addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material);
 		Renderable					getRenderable(std::string name);
 		void						removeRenderable(std::string name);
 

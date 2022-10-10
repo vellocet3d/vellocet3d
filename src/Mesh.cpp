@@ -8,34 +8,34 @@ namespace vel
 {
 
     Mesh::Mesh(std::string name) :
-        name(name),
-		texture(nullptr),
-		isOpaque(true)
+        name(name)
+		//,texture(nullptr),
+		//isOpaque(true)
     {}
 
-	bool Mesh::getIsOpaque()
-	{
-		return this->isOpaque;
-	}
+	//bool Mesh::getIsOpaque()
+	//{
+	//	return this->isOpaque;
+	//}
 
-	void Mesh::finalize()
-	{
-		for (auto& v : this->vertices)
-			v.textureId = this->texture->dsaIdIndex;
+	//void Mesh::finalize()
+	//{
+	//	for (auto& v : this->vertices)
+	//		v.textureId = this->texture->dsaIdIndex;
 
-		if (this->texture->alphaChannel)
-			this->isOpaque = false;
-	}
+	//	if (this->texture->alphaChannel)
+	//		this->isOpaque = false;
+	//}
 
-	void Mesh::setTexture(Texture* t)
-	{
-		this->texture = t;
-	}
+	//void Mesh::setTexture(Texture* t)
+	//{
+	//	this->texture = t;
+	//}
 
-	Texture* Mesh::getTexture()
-	{
-		return this->texture;
-	}
+	//Texture* Mesh::getTexture()
+	//{
+	//	return this->texture;
+	//}
 
 	const std::vector<MeshBone>& Mesh::getBones() const
 	{

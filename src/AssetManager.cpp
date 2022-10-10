@@ -181,9 +181,9 @@ if (!this->shaderTrackers.exists(name))
 
 	/* Meshes
 	--------------------------------------------------*/
-	std::pair<std::vector<std::string>, std::string> AssetManager::loadMesh(std::string path)
+	std::pair<std::vector<std::string>, std::string> AssetManager::loadMesh(std::string path, bool textured)
 	{
-		auto al = AssetLoaderV2(this, path);
+		auto al = AssetLoaderV2(this, path, textured);
 		al.load();
 
 		std::pair<std::vector<std::string>, std::string> out;
@@ -210,16 +210,11 @@ if (!this->shaderTrackers.exists(name))
 		
 		auto meshTrackerPtr = this->meshTrackers.insert(m.getName(), t);
 
-		//this->meshesThatNeedGpuLoad.push_back(meshTrackerPtr);
+		this->meshesThatNeedGpuLoad.push_back(meshTrackerPtr);
 
 		return meshTrackerPtr;
 	}
-
-	void AssetManager::addMeshToGpuLoadQueue(Mesh* m)
-	{
-		this->meshesThatNeedGpuLoad.push_back(this->getMeshTracker(m->getName()));
-	}
-
+	
 	MeshTracker* AssetManager::getMeshTracker(std::string name)
 	{
 		if(this->meshTrackers.exists(name))
@@ -314,7 +309,6 @@ if (!this->meshTrackers.exists(name))
 		Texture texture;
 		texture.name = name;
 		texture.type = type;
-		texture.dsaIdIndex = this->gpu->getTextureDsaId();
 		texture.primaryImageData.data = stbi_load(
 			path.c_str(), 
 			&texture.primaryImageData.width, 
@@ -399,14 +393,12 @@ if (!this->meshTrackers.exists(name))
 				{
 					if (this->texturesThatNeedGpuLoad.at(i) == t)
 					{
-						this->gpu->insertTextureDsaId(this->texturesThatNeedGpuLoad.at(i)->ptr->dsaIdIndex);
 						this->texturesThatNeedGpuLoad.erase(this->texturesThatNeedGpuLoad.begin() + i);
 					}
 				}
 			}		
 			else
 			{
-				this->gpu->insertTextureDsaId(t->ptr->dsaIdIndex);
 				this->gpu->clearTexture(t->ptr);
 			}
 				
@@ -490,6 +482,96 @@ if (!this->meshTrackers.exists(name))
 #endif	
 	}
 
+	/* Materials
+	--------------------------------------------------*/
+	std::string AssetManager::addMaterial(Material m)
+	{
+		if (this->materialTrackers.exists(m.name))
+		{
+#ifdef DEBUG_LOG
+	Log::toCliAndFile("Existing Material, bypass reload: " + m.name);
+#endif
+			auto t = this->materialTrackers.get(m.name);
+			if(t->usageCount > 0)
+			{
+				t->usageCount++;
+				return m.name;
+			}
+			else
+			{
+				std::this_thread::sleep_for(100ms);
+				return this->addMaterial(m);
+			}			
+		}
+
+#ifdef DEBUG_LOG
+	Log::toCliAndFile("Loading new Material: " + m.name);
+#endif		
+
+		//// assign default texture to material if a material is not provided at this time
+		//if (m.diffuse == nullptr)
+		//	m.diffuse = this->getTexture("__default__");
+
+		if (m.color.w < 1.0f)
+		{
+			m.hasAlphaChannel = true;
+		}
+		else
+		{
+			//if (!m.hasAlphaChannel && m.diffuse && m.diffuse->alphaChannel)
+			//	m.hasAlphaChannel = true;
+			for (auto& t : m.textures)
+			{
+				if (t->alphaChannel)
+					m.hasAlphaChannel = true;
+			}
+		}
+			
+
+		auto materialPtr = this->materials.insert(m.name, m);
+		
+		MaterialTracker t;
+		t.ptr = materialPtr;
+		t.usageCount++;
+
+		this->materialTrackers.insert(m.name, t);
+
+		return m.name;
+	}
+
+	Material* AssetManager::getMaterial(std::string name)
+	{
+#ifdef DEBUG_LOG
+	if (!this->materialTrackers.exists(name))
+		Log::crash("AssetManager::getMaterial(): Attempting to get material that does not exist: " + name);
+#endif
+
+		return this->materialTrackers.get(name)->ptr;
+	}
+	
+	void AssetManager::removeMaterial(std::string name)
+	{
+#ifdef DEBUG_LOG
+	if (!this->materialTrackers.exists(name))
+		Log::crash("AssetManager::removeMaterial(): Attempting to remove material that does not exist: " + name);
+#endif
+
+		auto t = this->materialTrackers.get(name);
+		t->usageCount--;
+		if (t->usageCount == 0)
+		{
+#ifdef DEBUG_LOG
+	Log::toCliAndFile("Full remove Material: " + name);
+#endif
+			this->materials.erase(name);
+			this->materialTrackers.erase(name);
+		}
+#ifdef DEBUG_LOG
+	else
+		Log::toCliAndFile("Decrement Material usageCount, retain: " + name);
+#endif	
+	}
+
 	/* Animations
 	--------------------------------------------------*/	
 	Animation* AssetManager::addAnimation(Animation a)
@@ -499,7 +581,7 @@ if (!this->meshTrackers.exists(name))
 
 	/* Renderables
 	--------------------------------------------------*/
-	std::string AssetManager::addRenderable(std::string name, Shader* shader, Mesh* mesh)
+	std::string AssetManager::addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material)
 	{
 		if (this->renderableTrackers.exists(name))
 		{
@@ -515,7 +597,7 @@ if (!this->meshTrackers.exists(name))
 			else
 			{
 				std::this_thread::sleep_for(100ms);
-				return this->addRenderable(name, shader, mesh);
+				return this->addRenderable(name, shader, mesh, material);
 			}			
 		}
 
@@ -523,7 +605,7 @@ if (!this->meshTrackers.exists(name))
 	Log::toCliAndFile("Loading new Renderable: " + name);
 #endif	
 
-		auto renderablePtr = this->renderables.insert(name, Renderable(name, shader, mesh));
+		auto renderablePtr = this->renderables.insert(name, Renderable(name, shader, mesh, material));
 		
 		RenderableTracker t;
 		t.ptr = renderablePtr;

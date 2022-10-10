@@ -32,6 +32,11 @@ namespace vel
 		bool 			gpuLoaded = false;
 		size_t 			usageCount = 0;
 	};
+	
+	struct MaterialTracker{
+		Material* 		ptr = nullptr;
+		size_t 			usageCount = 0;
+	};
 
 	struct CameraTracker {
 		Camera* 		ptr = nullptr;
