@@ -812,6 +812,8 @@ namespace vel
 					else
 						meshBoneTransform = armature->getBone(activeBone.first).getRenderMatrix() * mesh->getBone(boneIndex).offsetMatrix;
 
+					//std::cout << glm::to_string(meshBoneTransform) << std::endl;
+
 					boneData.push_back(std::pair<unsigned int, glm::mat4>(activeBone.second, meshBoneTransform));
 					boneIndex++;
 				}

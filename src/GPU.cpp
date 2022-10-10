@@ -101,7 +101,7 @@ namespace vel
 		glGenBuffers(1, &this->bonesUBO);
 		glBindBuffer(GL_UNIFORM_BUFFER, this->bonesUBO);
 		glBufferData(GL_UNIFORM_BUFFER, MAX_SUPPORTED_BONES * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
-		glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->bonesUBO);
+		glBindBufferBase(GL_UNIFORM_BUFFER, 1, this->bonesUBO);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 		//std::cout << "bonesUBO: " << this->bonesUBO << std::endl;
