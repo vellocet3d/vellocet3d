@@ -30,10 +30,10 @@ namespace vel
 		this->initBoneUBO();
 		this->initTextureUBO();
 
-		this->freeTextureDsaIds.reserve(4000);
+		this->freeTextureDsaIds.reserve(1000);
 
 		// initialize freeTextureDsaIds with all allowable indexes
-		for (int i = 3999; i > -1; i--)
+		for (int i = 999; i > -1; i--)
 			this->freeTextureDsaIds.push_back(i);
 
 	}
@@ -74,10 +74,11 @@ namespace vel
 	void GPU::initTextureUBO()
 	{
 		
-		const int MAX_SUPPORTED_TEXTURES = 4000;
+		const int MAX_SUPPORTED_TEXTURES = 1000;
 		glGenBuffers(1, &this->texturesUBO);
 		glBindBuffer(GL_UNIFORM_BUFFER, this->texturesUBO);
-		glBufferData(GL_UNIFORM_BUFFER, MAX_SUPPORTED_TEXTURES * sizeof(GLuint64), NULL, GL_STATIC_DRAW);
+		//glBufferData(GL_UNIFORM_BUFFER, MAX_SUPPORTED_TEXTURES * sizeof(GLuint64), NULL, GL_STATIC_DRAW);
+		glBufferData(GL_UNIFORM_BUFFER, MAX_SUPPORTED_TEXTURES * sizeof(GLuint64) * 2, NULL, GL_STATIC_DRAW);
 		glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->texturesUBO);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -88,7 +89,8 @@ namespace vel
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, this->texturesUBO);
 
-		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLuint64) * index, sizeof(GLuint64), (void*)&dsaHandle);
+		//glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLuint64) * index, sizeof(GLuint64), (void*)&dsaHandle);
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLuint64) * index * 2, sizeof(GLuint64) * 2, (void*)&dsaHandle);
 
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
