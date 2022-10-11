@@ -205,13 +205,60 @@ namespace vel
 			}
 			else
 			{
+				// use node name for mesh name
+
+				// check if a mesh already exists with this node name and don't load if there is
+				auto meshTracker = this->assetManager->getMeshTracker(nodeName);
+				if (meshTracker != nullptr)
+				{
+#ifdef DEBUG_LOG
+	Log::toCliAndFile("Existing Mesh, bypass reload: " + nodeName);
+#endif
+					meshTracker->usageCount++;
+					this->meshTrackers.push_back(meshTracker);
+					return;
+				}
+
+				// otherwise loop through all meshes for this node, creating a Mesh for each one
+#ifdef DEBUG_LOG
+	Log::toCliAndFile("Loading new Mesh: " + nodeName);
+#endif
+
+				// add each generated mesh to a vector
+				std::vector<Mesh> subMeshes = {};
+
 				auto meshCount = node->mNumMeshes;
+
 				while (meshCount > 0)
 				{
-					this->processMesh(this->impScene->mMeshes[node->mMeshes[(meshCount - 1)]]);
+					std::string subMeshName = nodeName + "_" + std::to_string(meshCount - 1);
+					
+					subMeshes.push_back(Mesh(subMeshName));
+
+					this->processMesh(this->impScene->mMeshes[node->mMeshes[(meshCount - 1)]], subMeshes.back());
+
 					this->currentMeshTextureId++;
 					meshCount--;
 				}
+
+				// after we've converted all assimp meshes into our mesh format, loop through all meshes
+				// and join them into a single mesh object
+				Mesh finalMesh = Mesh(nodeName);
+				unsigned int indiceOffset = 0;
+
+				for (auto& m : subMeshes)
+				{
+					//std::vector<Vertex>
+
+					// bone indexes are screwing us right now, have to figure out how we'll handle these
+					// when merging multiple meshes
+
+				}
+
+
+
+				// then send to asset manager
+				//this->assetManager->addMesh();
 			}
 		}
 
@@ -220,38 +267,8 @@ namespace vel
 			this->processNode(node->mChildren[i]);
 	}
 
-	void AssetLoaderV2::processMesh(aiMesh* aiMesh)
+	void AssetLoaderV2::processMesh(aiMesh* aiMesh, Mesh& mesh)
 	{
-		// there is a bug within blender or the blender fbx exporter that seemingly randomly adds
-		// .001/.002/etc to the end of mesh names EVEN though from within the .blend file their
-		// names do not include the postfixes, therefore the below is a gross hack to account for
-		// this, just note that any mesh loaded with a `.something_else` in it's name will have that
-		// `.something_else` stripped
-		std::string cleanName = explode_string(aiMesh->mName.C_Str(), '.')[0];
-		//std::cout << "processMesh:" << cleanName << std::endl;
-
-		//auto mesh = Mesh(aiMesh->mName.C_Str());
-		auto mesh = Mesh(cleanName);
-		
-		// if mesh already exists in AssetManager, do not load again
-		auto meshTracker = this->assetManager->getMeshTracker(mesh.getName());
-		if(meshTracker != nullptr)
-		{
-#ifdef DEBUG_LOG
-	Log::toCliAndFile("Existing Mesh, bypass reload: " + mesh.getName());
-#endif
-			meshTracker->usageCount++;
-			this->meshTrackers.push_back(meshTracker);
-			return;
-		}
-
-#ifdef DEBUG_LOG
-	Log::toCliAndFile("Loading new Mesh: " + mesh.getName());
-#endif
-
-		// assign a textureid to this mesh
-		mesh.textureId = this->currentMeshTextureId;
-
 		// walk through each of the mesh's vertices
 		std::vector<Vertex> vertices;
 		for (unsigned int i = 0; i < aiMesh->mNumVertices; i++)
@@ -282,7 +299,7 @@ namespace vel
 				vertex.textureCoordinates = vec;
 
 				// assign this mesh's textureid to each vertex
-				vertex.textureId = mesh.textureId;
+				vertex.textureId = this->currentMeshTextureId;
 			}
 			else
 			{
@@ -333,8 +350,6 @@ namespace vel
 		mesh.setBones(bones);
 
 		mesh.setGlobalInverseMatrix(this->currentGlobalInverseMatrix);
-
-		this->assetManager->addMesh(mesh);
 	}
 
 	glm::mat4 AssetLoaderV2::aiMatrix4x4ToGlm(const aiMatrix4x4 &from)

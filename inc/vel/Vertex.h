@@ -15,8 +15,6 @@ namespace vel
 		unsigned int	textureId;
 		VertexBoneData	weights;
 
-		//int				attemptedVertexWeightAdditions = 0; // for debugging
-
 		bool operator==(const Vertex &) const;
 	};      
 }

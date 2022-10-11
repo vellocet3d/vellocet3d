@@ -45,11 +45,12 @@ namespace vel
 		void								processAnimations();
 		void								processArmatureNode(aiNode* node);
 		void								processNode(aiNode* node);
-		void								processMesh(aiMesh* aiMesh);
+		void								processMesh(aiMesh* aiMesh, Mesh& mesh);
 		bool								isRootArmatureNode(aiNode* node);
 		glm::mat4							aiMatrix4x4ToGlm(const aiMatrix4x4 &from);
 		aiMatrix4x4							glmToAssImpMat4(glm::mat4 mat);
 		bool								nodeHasBeenProcessed(aiNode* in);
+
 
 		unsigned int						currentMeshTextureId;
 
