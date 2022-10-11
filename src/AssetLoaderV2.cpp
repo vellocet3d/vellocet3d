@@ -308,6 +308,8 @@ namespace vel
 	{
 		unsigned int indiceOffset = meshVertices.size();
 
+		std::cout << "processMesh!!!\n";
+
 		// walk through each of the aimesh's vertices
 		for (unsigned int i = 0; i < aiMesh->mNumVertices; i++)
 		{
@@ -380,6 +382,8 @@ namespace vel
 					}
 				}
 
+				//std::cout << "foundExistingBone:" << std::to_string(foundExistingBone) << std::endl;
+
 				if (!foundExistingBone)
 				{
 					auto b = MeshBone();
@@ -398,6 +402,7 @@ namespace vel
 						{
 							meshVertices.at(tmpVertInd).weights.ids[m] = boneIndex;
 							meshVertices.at(tmpVertInd).weights.weights[m] = aiMesh->mBones[i]->mWeights[j].mWeight;
+							break;
 						}
 					}
 				}
