@@ -45,7 +45,10 @@ namespace vel
 		void								processAnimations();
 		void								processArmatureNode(aiNode* node);
 		void								processNode(aiNode* node);
-		void								processMesh(aiMesh* aiMesh, Mesh& mesh);
+		void								processMesh(aiMesh* aiMesh, 
+														std::vector<Vertex>& meshVertices, 
+														std::vector<unsigned int>& meshIndices,
+														std::vector<MeshBone>& meshBones);
 		bool								isRootArmatureNode(aiNode* node);
 		glm::mat4							aiMatrix4x4ToGlm(const aiMatrix4x4 &from);
 		aiMatrix4x4							glmToAssImpMat4(glm::mat4 mat);

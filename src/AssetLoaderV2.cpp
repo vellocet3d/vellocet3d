@@ -225,6 +225,8 @@ namespace vel
 #endif
 
 				// add each generated mesh to a vector
+				
+				/* // this comment block was working code, commented to experiment
 				std::vector<Mesh> subMeshes = {};
 
 				auto meshCount = node->mNumMeshes;
@@ -240,22 +242,54 @@ namespace vel
 					this->currentMeshTextureId++;
 					meshCount--;
 				}
+				*/
 
 				// after we've converted all assimp meshes into our mesh format, loop through all meshes
 				// and join them into a single mesh object
-				Mesh finalMesh = Mesh(nodeName);
-				unsigned int indiceOffset = 0;
+				//Mesh finalMesh = Mesh(nodeName);
+				//unsigned int indiceOffset = 0;
 
-				for (auto& m : subMeshes)
+				//for (auto& m : subMeshes)
+				//{
+				//	//std::vector<Vertex>
+
+				//	// bone indexes are screwing us right now, have to figure out how we'll handle these
+				//	// when merging multiple meshes
+
+				//}
+
+				// trying something different, lets see if we can just create one single mesh from data that we generate
+				// from all of the aiMeshes
+				
+
+				std::vector<Vertex> meshVertices = {};
+				std::vector<unsigned int> meshIndices = {};
+				std::vector<MeshBone> meshBones = {};
+
+				auto meshCount = node->mNumMeshes;
+
+				while (meshCount > 0)
 				{
-					//std::vector<Vertex>
+					this->processMesh(this->impScene->mMeshes[node->mMeshes[(meshCount - 1)]], meshVertices, meshIndices, meshBones);
 
-					// bone indexes are screwing us right now, have to figure out how we'll handle these
-					// when merging multiple meshes
-
+					this->currentMeshTextureId++;
+					meshCount--;
 				}
 
+				Mesh finalMesh = Mesh(nodeName);
+				finalMesh.setVertices(meshVertices);
+				finalMesh.setIndices(meshIndices);
+				finalMesh.setBones(meshBones);
+				finalMesh.setGlobalInverseMatrix(this->currentGlobalInverseMatrix);
+				
+				this->assetManager->addMesh(finalMesh);
 
+
+
+
+
+
+				//mesh.setGlobalInverseMatrix(this->currentGlobalInverseMatrix);
 
 				// then send to asset manager
 				//this->assetManager->addMesh();
@@ -267,10 +301,14 @@ namespace vel
 			this->processNode(node->mChildren[i]);
 	}
 
-	void AssetLoaderV2::processMesh(aiMesh* aiMesh, Mesh& mesh)
+	void AssetLoaderV2::processMesh(aiMesh* aiMesh,
+		std::vector<Vertex>& meshVertices,
+		std::vector<unsigned int>& meshIndices,
+		std::vector<MeshBone>& meshBones)
 	{
-		// walk through each of the mesh's vertices
-		std::vector<Vertex> vertices;
+		unsigned int indiceOffset = meshVertices.size();
+
+		// walk through each of the aimesh's vertices
 		for (unsigned int i = 0; i < aiMesh->mNumVertices; i++)
 		{
 			Vertex vertex;
@@ -306,50 +344,72 @@ namespace vel
 				vertex.textureCoordinates = glm::vec2(0.0f, 0.0f);
 			}
 
-			vertices.push_back(vertex);
+			meshVertices.push_back(vertex);
 		}
-
-		mesh.setVertices(vertices);
 
 
 		// now walk through each of the mesh's faces (a face is a mesh's triangle) and retrieve the corresponding vertex indices.
-		std::vector<unsigned int> indices;
 		for (unsigned int i = 0; i < aiMesh->mNumFaces; i++)
 		{
 			aiFace face = aiMesh->mFaces[i];
 
 			// retrieve all indices of the face and store them in the indices vector
 			for (unsigned int j = 0; j < face.mNumIndices; j++)
-				indices.push_back(face.mIndices[j]);
+				meshIndices.push_back(face.mIndices[j] + indiceOffset);
 		}
-		mesh.setIndices(indices);
 
 
 		// if mesh has bones, process bones
-		std::vector<MeshBone> bones;
-
 		if (aiMesh->HasBones())
 		{
-			unsigned int boneIndex = 0;
 			for (unsigned int i = 0; i < aiMesh->mNumBones; i++)
 			{
 				if (aiMesh->mBones[i]->mNumWeights == 0)
 					continue;
 
-				auto b = MeshBone();
-				b.name = aiMesh->mBones[i]->mName.C_Str();
-				b.offsetMatrix = this->aiMatrix4x4ToGlm(aiMesh->mBones[i]->mOffsetMatrix);
-				bones.push_back(b);
+				std::string aBoneName = aiMesh->mBones[i]->mName.C_Str();
+				unsigned int boneIndex;
+				bool foundExistingBone = false;
+				for (unsigned int k = 0; k < meshBones.size(); k++)
+				{
+					if (meshBones.at(k).name == aBoneName)
+					{
+						boneIndex = k;
+						foundExistingBone = true;
+						break;
+					}
+				}
+
+				if (!foundExistingBone)
+				{
+					auto b = MeshBone();
+					b.name = aiMesh->mBones[i]->mName.C_Str();
+					b.offsetMatrix = this->aiMatrix4x4ToGlm(aiMesh->mBones[i]->mOffsetMatrix);
+					meshBones.push_back(b);
+					boneIndex = meshBones.size() - 1;
+				}
 
 				for (unsigned int j = 0; j < aiMesh->mBones[i]->mNumWeights; j++)
-					mesh.addVertexWeight(aiMesh->mBones[i]->mWeights[j].mVertexId, boneIndex, aiMesh->mBones[i]->mWeights[j].mWeight);
+				{
+					unsigned int tmpVertInd = aiMesh->mBones[i]->mWeights[j].mVertexId + indiceOffset;
+					for (unsigned int m = 0; m < (sizeof(meshVertices.at(tmpVertInd).weights.ids) / sizeof(meshVertices.at(tmpVertInd).weights.ids[0])); m++)
+					{
+						if (meshVertices.at(tmpVertInd).weights.weights[m] == 0.0f)
+						{
+							meshVertices.at(tmpVertInd).weights.ids[m] = boneIndex;
+							meshVertices.at(tmpVertInd).weights.weights[m] = aiMesh->mBones[i]->mWeights[j].mWeight;
+						}
+					}
+				}
 
-				boneIndex++;
+
+				//for (unsigned int j = 0; j < aiMesh->mBones[i]->mNumWeights; j++)
+				//	mesh.addVertexWeight(aiMesh->mBones[i]->mWeights[j].mVertexId, boneIndex, aiMesh->mBones[i]->mWeights[j].mWeight);
 			}
 		}
-		mesh.setBones(bones);
+		//mesh.setBones(bones);
 
-		mesh.setGlobalInverseMatrix(this->currentGlobalInverseMatrix);
+		//mesh.setGlobalInverseMatrix(this->currentGlobalInverseMatrix);
 	}
 
 	glm::mat4 AssetLoaderV2::aiMatrix4x4ToGlm(const aiMatrix4x4 &from)
