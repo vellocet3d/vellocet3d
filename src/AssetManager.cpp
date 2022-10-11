@@ -181,9 +181,9 @@ if (!this->shaderTrackers.exists(name))
 
 	/* Meshes
 	--------------------------------------------------*/
-	std::pair<std::vector<std::string>, std::string> AssetManager::loadMesh(std::string path, bool textured)
+	std::pair<std::vector<std::string>, std::string> AssetManager::loadMesh(std::string path)
 	{
-		auto al = AssetLoaderV2(this, path, textured);
+		auto al = AssetLoaderV2(this, path);
 		al.load();
 
 		std::pair<std::vector<std::string>, std::string> out;

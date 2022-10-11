@@ -35,7 +35,6 @@ namespace vel
 		unsigned int						texturesUBO;
 		void								initTextureUBO();
 
-		std::vector<unsigned int>			freeTextureDsaIds;
 
 	public:
 		GPU(Window* w);
@@ -86,7 +85,5 @@ namespace vel
 
 		void								updateTextureUBO(unsigned int index, GLuint64 dsaHandle);
 
-		unsigned int						getTextureDsaId();
-		void								insertTextureDsaId(unsigned int i);
 	};
 }

@@ -547,9 +547,9 @@ namespace vel
 		this->shadersInUse.push_back(App::get().getAssetManager().loadShader(name, vertFile, fragFile));
 	}
 	
-	void Scene::loadMesh(std::string path, bool textured)
+	void Scene::loadMesh(std::string path)
 	{
-		auto tts = App::get().getAssetManager().loadMesh(path, textured);
+		auto tts = App::get().getAssetManager().loadMesh(path);
 		for(auto& t : tts.first)
 			this->meshesInUse.push_back(t);
 		

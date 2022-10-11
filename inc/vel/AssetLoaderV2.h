@@ -51,10 +51,10 @@ namespace vel
 		aiMatrix4x4							glmToAssImpMat4(glm::mat4 mat);
 		bool								nodeHasBeenProcessed(aiNode* in);
 
-		bool								textured;
+		unsigned int						currentMeshTextureId;
 
 	public:
-		AssetLoaderV2(AssetManager* currentScene, std::string assetFile, bool textured = false);
+		AssetLoaderV2(AssetManager* currentScene, std::string assetFile);
 		void								load();
 		
 		std::pair<std::vector<MeshTracker*>, ArmatureTracker*> getTrackers();

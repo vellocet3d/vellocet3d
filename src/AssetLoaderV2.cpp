@@ -18,13 +18,13 @@
 
 namespace vel
 {
-	AssetLoaderV2::AssetLoaderV2(AssetManager* assetManager, std::string assetFile, bool textured) :
+	AssetLoaderV2::AssetLoaderV2(AssetManager* assetManager, std::string assetFile) :
 		assetManager(assetManager),
 		currentAssetFile(assetFile),
 		armatureTracker(nullptr),
 		currentArmature(nullptr),
 		existingArmature(false),
-		textured(textured)
+		currentMeshTextureId(0)
 	{
 		this->impScene = this->aiImporter.ReadFile(this->currentAssetFile, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
 
@@ -209,6 +209,7 @@ namespace vel
 				while (meshCount > 0)
 				{
 					this->processMesh(this->impScene->mMeshes[node->mMeshes[(meshCount - 1)]]);
+					this->currentMeshTextureId++;
 					meshCount--;
 				}
 			}
@@ -248,10 +249,8 @@ namespace vel
 	Log::toCliAndFile("Loading new Mesh: " + mesh.getName());
 #endif
 
-		// if mesh textured member set, then generate a texture id for this mesh,
-		// add it to the meshes textureIds vector, and set each vertex's textureId to this value
-		if (this->textured)
-			mesh.textureIds.push_back(App::get().getGPU()->getTextureDsaId());
+		// assign a textureid to this mesh
+		mesh.textureId = this->currentMeshTextureId;
 
 		// walk through each of the mesh's vertices
 		std::vector<Vertex> vertices;
@@ -282,9 +281,8 @@ namespace vel
 				vec.y = aiMesh->mTextureCoords[0][i].y;
 				vertex.textureCoordinates = vec;
 
-				// TODO: this will need revised when we do multiple submeshes for mesh
-				if (this->textured)
-					vertex.textureId = mesh.textureIds.back();
+				// assign this mesh's textureid to each vertex
+				vertex.textureId = mesh.textureId;
 			}
 			else
 			{

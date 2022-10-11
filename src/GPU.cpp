@@ -30,29 +30,9 @@ namespace vel
 		this->initBoneUBO();
 		this->initTextureUBO();
 
-		this->freeTextureDsaIds.reserve(1000);
-
-		// initialize freeTextureDsaIds with all allowable indexes
-		for (int i = 999; i > -1; i--)
-			this->freeTextureDsaIds.push_back(i);
-
 	}
 
 	GPU::~GPU(){}
-
-	void GPU::insertTextureDsaId(unsigned int i)
-	{
-		this->freeTextureDsaIds.push_back(i);
-	}
-
-	unsigned int GPU::getTextureDsaId()
-	{
-		unsigned int id = this->freeTextureDsaIds.back();
-
-		this->freeTextureDsaIds.pop_back();
-
-		return id;
-	}
 
 	void GPU::enableBackfaceCulling()
 	{
@@ -451,19 +431,23 @@ namespace vel
 
 		this->setShaderVec4("color", m->color);
 
-		if (m->textures.size() > 0)
+		for (unsigned int i = 0; i < m->textures.size(); i++)
 		{
-			for (unsigned int i = 0; i < this->activeMesh->textureIds.size(); i++)
-			{
-				this->updateTextureUBO(this->activeMesh->textureIds.at(i), m->textures.at(i)->dsaHandle);
-			}
+			this->updateTextureUBO(i, m->textures.at(i)->dsaHandle);
 		}
+		
 	}
 
 	void GPU::drawGpuMesh()
 	{
 		// The naive approach. But after researching how to optimize this for 3 days I decided to leave it alone
 		// until there's an actual reason to complicate things.
+		//
+		// TODO: Coming back to this years later, we should definitely refactor so that we don't have to swap
+		// buffer objects for each different object, just pack all of our vertex data into the same buffer
+		// and draw elements of that object individually using glDrawElementsBaseVertex()... I think that's the right
+		// method, need to confirm... doing this will greatly reduce the number of state switches, especially since
+		// we now use DSA textures
 		glDrawElements(GL_TRIANGLES, this->activeMesh->getGpuMesh()->indiceCount, GL_UNSIGNED_INT, 0);
 	}
 

@@ -71,9 +71,8 @@ namespace vel
 		bool						shaderIsGpuLoaded(std::string name);
 		void						removeShader(std::string name);
 
-		std::pair<std::vector<std::string>, std::string> loadMesh(std::string path, bool textured = false);
+		std::pair<std::vector<std::string>, std::string> loadMesh(std::string path);
 		MeshTracker*				addMesh(Mesh m);
-		void						addMeshToGpuLoadQueue(Mesh* m);
 		Mesh*						getMesh(std::string name);
 		bool						meshIsGpuLoaded(std::string name);
 		void						removeMesh(std::string name);

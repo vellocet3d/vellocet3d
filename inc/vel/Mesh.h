@@ -59,7 +59,7 @@ namespace vel
 
 		//bool								getIsOpaque();
 
-		std::vector<unsigned int>			textureIds;
+		unsigned int						textureId;
 
 	};
     
