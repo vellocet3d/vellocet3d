@@ -284,7 +284,6 @@ namespace vel
 				// if there is a scene in the loading queue, then check whether all of it's assets have
 				// been loaded into both main memory and gpu memory and if so and it has swapWhenLoaded set
 				// then set activeScene to this scene after moving it into this->scenes, then pop it off sceneLoadingQueue
-
 				if (this->sceneLoadingQueue.at(0)->isFullyLoaded())
 				{
 					if (this->sceneLoadingQueue.at(0)->swapWhenLoaded)

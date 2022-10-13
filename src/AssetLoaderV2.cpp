@@ -282,7 +282,7 @@ namespace vel
 				finalMesh.setBones(meshBones);
 				finalMesh.setGlobalInverseMatrix(this->currentGlobalInverseMatrix);
 				
-				this->assetManager->addMesh(finalMesh);
+				this->meshTrackers.push_back(this->assetManager->addMesh(finalMesh));
 
 
 
@@ -307,8 +307,6 @@ namespace vel
 		std::vector<MeshBone>& meshBones)
 	{
 		unsigned int indiceOffset = meshVertices.size();
-
-		std::cout << "processMesh!!!\n";
 
 		// walk through each of the aimesh's vertices
 		for (unsigned int i = 0; i < aiMesh->mNumVertices; i++)

@@ -138,7 +138,7 @@ namespace vel
 
 		try
 		{
-			std::cout << s->vertFile << std::endl << s->fragFile << std::endl;
+			//std::cout << s->vertFile << std::endl << s->fragFile << std::endl;
 			
 			// open files
 			vShaderFile.open(s->vertFile);

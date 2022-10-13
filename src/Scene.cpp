@@ -550,9 +550,10 @@ namespace vel
 	void Scene::loadMesh(std::string path)
 	{
 		auto tts = App::get().getAssetManager().loadMesh(path);
-		for(auto& t : tts.first)
+
+		for (auto& t : tts.first)
 			this->meshesInUse.push_back(t);
-		
+			
 		if(tts.second != "")
 			this->armaturesInUse.push_back(tts.second);
 	}
@@ -811,8 +812,6 @@ namespace vel
 						meshBoneTransform = armature->getBone(activeBone.first).getRenderMatrixInterpolated(alphaTime) * mesh->getBone(boneIndex).offsetMatrix;
 					else
 						meshBoneTransform = armature->getBone(activeBone.first).getRenderMatrix() * mesh->getBone(boneIndex).offsetMatrix;
-
-					//std::cout << glm::to_string(meshBoneTransform) << std::endl;
 
 					boneData.push_back(std::pair<unsigned int, glm::mat4>(activeBone.second, meshBoneTransform));
 					boneIndex++;
