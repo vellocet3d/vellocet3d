@@ -49,23 +49,37 @@ namespace vel
 
 	void Tweener::updateCompletionStatus()
 	{
+		//if (this->currentVec == this->toVec)
+		//{
+		//	this->forwardUpdateComplete = true;
+		//}
+		//else
+		//{
+		//	this->forwardUpdateComplete = false;
+		//}
+
+		//if (this->currentVec == this->fromVec)
+		//{
+		//	this->backwardUpdateComplete = true;
+		//}
+		//else
+		//{
+		//	this->backwardUpdateComplete = false;
+		//}
+
 		if (this->currentVec == this->toVec)
 		{
 			this->forwardUpdateComplete = true;
-		}
-		else
-		{
-			this->forwardUpdateComplete = false;
+			this->backwardUpdateComplete = false;
+			return;
 		}
 
 		if (this->currentVec == this->fromVec)
 		{
 			this->backwardUpdateComplete = true;
+			this->forwardUpdateComplete = false;
 		}
-		else
-		{
-			this->backwardUpdateComplete = false;
-		}
+
 	}
 
 	glm::vec3 Tweener::updateForward(float dt)

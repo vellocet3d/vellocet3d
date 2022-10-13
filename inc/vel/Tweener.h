@@ -5,7 +5,9 @@
 
 namespace vel
 {
-
+	// TODO: my god this is possibly the worst most overly complicated implementation of tweening between two
+	// vectors one could possibly implement. I did this very early on before I really understood vector directions
+	// and lengths apparently...this MUST be re-implemented
 	class Tweener
 	{
 	private:
