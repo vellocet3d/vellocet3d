@@ -87,6 +87,7 @@ namespace vel
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         
 		if (c.OPENGL_DEBUG_CONTEXT)
 		{
@@ -175,7 +176,7 @@ namespace vel
 
 
 
-                // Set opengl viewport size
+                // Set default viewport size loaded from config file
                 glViewport(0, 0, this->screenSize.x, this->screenSize.y);
 
 				//glfwFocusWindow(this->glfwWindow);
@@ -265,17 +266,17 @@ namespace vel
         });
 
         // Window size updated
-        glfwSetFramebufferSizeCallback(this->glfwWindow, [](GLFWwindow* window, int width, int height) {
+        //glfwSetFramebufferSizeCallback(this->glfwWindow, [](GLFWwindow* window, int width, int height) {
 
-            // get this from window
-            void* data = glfwGetWindowUserPointer(window);
-            Window* w = static_cast<Window*>(data);
-            w->screenSize.x = width;
-            w->screenSize.y = height;
+        //    // get this from window
+        //    void* data = glfwGetWindowUserPointer(window);
+        //    Window* w = static_cast<Window*>(data);
+        //    w->screenSize.x = width;
+        //    w->screenSize.y = height;
 
-            glViewport(0, 0, width, height);
+        //    glViewport(0, 0, width, height);
 
-        });
+        //});
 
 		glfwSetWindowFocusCallback(this->glfwWindow, [](GLFWwindow* window, int focused) {
 		
