@@ -24,10 +24,6 @@ namespace vel
 	class Scene
 	{
 	private:
-		//sac<Camera>							cameras;
-		Camera*								sceneCamera;
-
-
 		sac<Stage>							stages;
 		ptrsac<CollisionWorld*> 			collisionWorlds;
 		double								fixedAnimationTime;
@@ -49,11 +45,11 @@ namespace vel
 		glm::mat4							cameraProjectionMatrix;
 		glm::mat4							cameraViewMatrix;
 
-		glm::vec3							renderCameraPosition;
-		glm::mat4							renderCameraOffset;
 
 		std::string							name = "";
 
+		// these used to be protected before we started working on level builders where we needed to be able to generate
+		// and add things to scenes from outside of a child scene
 	//protected:
 	public:
 		
@@ -89,7 +85,7 @@ namespace vel
 		virtual void						outerLoop(float frameTime, float renderLerpInterval) = 0;
 		virtual void						postPhysics(float deltaTime);
 
-		// TODO: why are these public?
+		// TODO: why are these public? probably being lazy and didn't want to write getters/setters
 		bool								mainMemoryloaded;
 		bool								swapWhenLoaded;
 		//////////////
@@ -97,15 +93,6 @@ namespace vel
 		void								setName(std::string n);
 		std::string							getName();
 		bool								isFullyLoaded();
-		
-		// TODO: some of these should probably be protected
-
-		void								setSceneCamera(Camera* c);
-		Camera*								getSceneCamera(); // get Camera assigned to this scene
-
-		//Camera*								addCamera(Camera c);
-		//Camera*								getCamera(std::string name); // get Camera pointer from cameras sac
-
 
 
 		void								updateFixedAnimations(double runTime);

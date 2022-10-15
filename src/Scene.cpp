@@ -21,19 +21,12 @@ using json = nlohmann::json;
 namespace vel
 {
 	Scene::Scene() :
-		sceneCamera(nullptr),
 		mainMemoryloaded(false),
 		swapWhenLoaded(false),
 		animationTime(0.0),
 		fixedAnimationTime(0.0)
 	{
 		this->transparentActors.reserve(1000); // reserve space for 1000 transparent actors (won't reallocate until that limit reached)
-
-		// create a default camera for scene (required so sceneCamera is never nullptr, can be set to another pointer at runtime if required)
-		this->addCamera(Camera("defaultSceneCamera", CameraType::PERSPECTIVE, 0.1f, 250.0f, 60.0f));
-		this->sceneCamera = this->getCamera("defaultSceneCamera");
-		this->sceneCamera->setPosition(glm::vec3(0.0f, 2.0f, 0.0f));
-		this->sceneCamera->setLookAt(glm::vec3(0.0f, 0.0f, -1.0f));
 	}
 	
 	Scene::~Scene()
@@ -44,11 +37,6 @@ namespace vel
 	std::vector<Stage*>& Scene::getStages()
 	{
 		return this->stages.getAll();
-	}
-
-	Camera* Scene::getSceneCamera()
-	{
-		return this->sceneCamera;
 	}
 
 	void Scene::setName(std::string n)
@@ -64,12 +52,6 @@ namespace vel
 	{
 		return App::get().getAssetManager().getCamera(name);
 	}
-
-	void Scene::setSceneCamera(Camera* c)
-	{
-		this->sceneCamera = c;
-	}
-
 
 
 	void Scene::freeAssets()
@@ -667,38 +649,10 @@ namespace vel
 
 		auto gpu = App::get().getGPU(); // for convenience
 
-		// disable backface culling for cubemap i guess as it wasn't being drawn with it enabled
-		//gpu->disableBackfaceCulling();
-
+		gpu->enableDepthTest(); // insure depth buffer is active
+		gpu->enableBackfaceCulling(); // insure backface culling is occurring
         gpu->disableBlend(); // disable blending for opaque objects
-
-		// set scene camera values
-		this->sceneCamera->update();
-		this->cameraPosition = this->sceneCamera->getPosition();
-		this->cameraProjectionMatrix = this->sceneCamera->getProjectionMatrix();
-		this->cameraViewMatrix = this->sceneCamera->getViewMatrix();
-		// these are for applying lighting to objects that are in screen space as if they were in world space, for example
-		// first person arms / weapons (allows us to use the view matrix of one camera only for lighting), set to scene camera defaults here
-		// only relevant for when stage has it's own camera AND useSceneCameraPositionForLighting is set to true
-		//
-		// Removed dynamic lighting from this build so this no longer makes sense, but leaving these variables as they are for now
-		this->renderCameraPosition = this->cameraPosition;
-		this->renderCameraOffset = glm::mat4(1.0f);
 			
-
-		// debug draw collision world
-#ifdef DEBUG_LOG
-		for (auto cw : this->collisionWorlds.getAll())
-		{
-			if (cw->getIsActive() && cw->getDebugDrawer() != nullptr)
-			{
-				cw->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
-				gpu->useShader(cw->getDebugDrawer()->getShaderProgram());
-				gpu->setShaderMat4("vp", cw->getCamera()->getProjectionMatrix() * cw->getCamera()->getViewMatrix());
-				gpu->debugDrawCollisionWorld(cw->getDebugDrawer()); // draw all loaded vertices with a single call and clear
-			}
-		}
-#endif
 		
 		// loop through all stages
 		for (auto s : this->stages.getAll())
@@ -708,22 +662,26 @@ namespace vel
 
 
 			// clear depth buffer if flag set in stage
+			// not really sure this makes sense to do anymore as the only reason i had it prior to the framebuffer refactor
+			// was to clear the depth buffer before drawing a stage on top of another stage, and sense we can accomplish that
+			// now by each stage drawing to it's own camera's framebuffer...is this superfluous? I guess if multiple stages used
+			// multiple cameras...maybe having the option to clear the depth buffer would be useful? IDK, will leave it for now I suppose
 			if (s->getClearDepthBuffer())
 				gpu->clearDepthBuffer();
 
 
 			// if stage has camera, use stage camera values
-			if (s->getCamera() != nullptr)
-			{
-				s->getCamera()->update();
-				this->cameraPosition = s->getCamera()->getPosition();
-				this->cameraProjectionMatrix = s->getCamera()->getProjectionMatrix();
-				this->cameraViewMatrix = s->getCamera()->getViewMatrix();
-			}
 
+			// update stage camera (view/projection matrices), update scene's camera data to this stage's camera data
+			s->getCamera()->update();
+			this->cameraPosition = s->getCamera()->getPosition();
+			this->cameraProjectionMatrix = s->getCamera()->getProjectionMatrix();
+			this->cameraViewMatrix = s->getCamera()->getViewMatrix();
 			
-			this->transparentActors.clear();
 
+			// loop through all renderables and build a vector of actors which use an alpha channel, and draw all
+			// completely opaque actors
+			this->transparentActors.clear();
 
 			for(auto r : s->getRenderables())
 			{
@@ -763,11 +721,13 @@ namespace vel
 			// DRAW TRANSPARENTS/TRANSLUCENTS
             gpu->enableBlend();
 
-			// TODO: not proud of this, but it gets the job done for the time being
+			// not proud of this, but it gets the job done for the time being, loop through all transparent actors and sort by their distance
+			// from the current camera position
 			std::sort(transparentActors.begin(), transparentActors.end(), [](auto &left, auto &right) {
 				return left.first < right.first;
 			});
 
+			// Draw all transparent/translucent actors
 			for (std::vector<std::pair<float, Actor*>>::reverse_iterator it = transparentActors.rbegin(); it != transparentActors.rend(); ++it)
 			{
 				// Reset gpu state for this ACTOR and draw
@@ -781,6 +741,30 @@ namespace vel
 			}
             
 		}
+
+
+		//TODO: all stage camera's framebuffers are now updated, loop through each stage camera and check if it should display it's contents to
+		// screen, if so do so...
+
+
+
+
+
+		// moving collision debug draw event as final thing as it draws directly to the screen buffer, and I don't want to have to think about updating
+		// it right now
+#ifdef DEBUG_LOG
+		for (auto cw : this->collisionWorlds.getAll())
+		{
+			if (cw->getIsActive() && cw->getDebugDrawer() != nullptr)
+			{
+				cw->getDynamicsWorld()->debugDrawWorld(); // load vertices into associated CollisionDebugDrawer
+				gpu->useShader(cw->getDebugDrawer()->getShaderProgram());
+				gpu->setShaderMat4("vp", cw->getCamera()->getProjectionMatrix() * cw->getCamera()->getViewMatrix());
+				gpu->debugDrawCollisionWorld(cw->getDebugDrawer()); // draw all loaded vertices with a single call and clear
+			}
+		}
+#endif
+
 
 	}
 

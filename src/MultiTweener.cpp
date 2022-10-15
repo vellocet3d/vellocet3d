@@ -223,7 +223,7 @@ namespace vel
 	{
 		//std::cout << this->currentTweenIndex << std::endl;
 
-		if (this->shouldPlayForward)
+		//if (this->shouldPlayForward)
 			return this->playForward(dt);
 		
 		//return this->playBackward(dt);
