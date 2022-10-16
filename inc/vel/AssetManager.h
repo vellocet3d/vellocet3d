@@ -31,6 +31,10 @@ namespace vel
 		sac<ShaderTracker>									shaderTrackers;
 		std::deque<ShaderTracker*>							shadersThatNeedGpuLoad;
 		
+		sac<Camera>											cameras;
+		sac<CameraTracker> 									cameraTrackers;
+		std::deque<CameraTracker*>							camerasThatNeedGpuLoad;
+
 		sac<Mesh>											meshes;
 		sac<MeshTracker>									meshTrackers;
 		std::deque<MeshTracker*>							meshesThatNeedGpuLoad;
@@ -38,10 +42,6 @@ namespace vel
 		sac<Texture>										textures;
 		sac<TextureTracker> 								textureTrackers;
 		std::deque<TextureTracker*>							texturesThatNeedGpuLoad;
-		
-
-		sac<Camera>											cameras;
-		sac<CameraTracker> 									cameraTrackers;
 
 		sac<Material>										materials;
 		sac<MaterialTracker> 								materialTrackers;
@@ -71,6 +71,11 @@ namespace vel
 		bool						shaderIsGpuLoaded(std::string name);
 		void						removeShader(std::string name);
 
+		std::string					addCamera(Camera c);
+		Camera*						getCamera(std::string name);
+		bool						cameraIsGpuLoaded(std::string name);
+		void						removeCamera(std::string name);
+
 		std::pair<std::vector<std::string>, std::string> loadMesh(std::string path);
 		MeshTracker*				addMesh(Mesh m);
 		Mesh*						getMesh(std::string name);
@@ -87,9 +92,7 @@ namespace vel
 		Material*					getMaterial(std::string name);
 		void						removeMaterial(std::string name);
 
-		std::string					addCamera(Camera c);
-		Camera*						getCamera(std::string name);
-		void						removeCamera(std::string name);
+		
 
 		Animation*					addAnimation(Animation a);
 

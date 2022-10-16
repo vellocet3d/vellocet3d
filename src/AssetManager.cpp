@@ -31,6 +31,13 @@ namespace vel
 			s->gpuLoaded = true;
 			this->shadersThatNeedGpuLoad.pop_front();
 		}
+
+		for (auto& c : this->camerasThatNeedGpuLoad)
+		{
+			c->ptr->setRenderTarget(this->gpu->createRenderTarget(c->ptr->getViewportSize().x, c->ptr->getViewportSize().y));
+			c->gpuLoaded = true;
+			this->shadersThatNeedGpuLoad.pop_front();
+		}
 		
 		for (auto& t : this->texturesThatNeedGpuLoad)
 		{
@@ -55,6 +62,16 @@ namespace vel
 			this->gpu->loadShader(shaderTracker->ptr);
 			shaderTracker->gpuLoaded = true;
 			this->shadersThatNeedGpuLoad.pop_front();
+			return;
+		}
+
+		if (this->camerasThatNeedGpuLoad.size() > 0)
+		{
+			auto cameraTracker = this->camerasThatNeedGpuLoad.at(0);
+			cameraTracker->ptr->setRenderTarget(this->gpu->createRenderTarget(
+				cameraTracker->ptr->getViewportSize().x, cameraTracker->ptr->getViewportSize().y));
+			cameraTracker->gpuLoaded = true;
+			this->camerasThatNeedGpuLoad.pop_front();
 			return;
 		}
 
@@ -444,7 +461,7 @@ if (!this->meshTrackers.exists(name))
 		t.ptr = cameraPtr;
 		t.usageCount++;
 
-		this->cameraTrackers.insert(c.getName(), t);
+		this->camerasThatNeedGpuLoad.push_back(this->cameraTrackers.insert(c.getName(), t));
 
 		return c.getName();
 	}
@@ -457,6 +474,16 @@ if (!this->meshTrackers.exists(name))
 #endif
 
 		return this->cameraTrackers.get(name)->ptr;
+	}
+
+	bool AssetManager::cameraIsGpuLoaded(std::string name)
+	{
+#ifdef DEBUG_LOG
+		if (!this->cameraTrackers.exists(name))
+			Log::crash("AssetManager::cameraIsGpuLoaded(): Attempting to get camera that does not exist: " + name);
+#endif
+
+		return this->cameraTrackers.get(name)->gpuLoaded;
 	}
 
 	void AssetManager::removeCamera(std::string name)
@@ -473,6 +500,7 @@ if (!this->meshTrackers.exists(name))
 #ifdef DEBUG_LOG
 			Log::toCliAndFile("Full remove Camera: " + name);
 #endif
+			this->gpu->clearRenderTarget(t->ptr->getRenderTarget());
 			this->cameras.erase(name);
 			this->cameraTrackers.erase(name);
 		}

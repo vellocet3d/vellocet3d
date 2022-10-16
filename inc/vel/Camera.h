@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -7,6 +9,7 @@
 #include "nlohmann/json.hpp"
 
 #include "vel/Transform.h"
+#include "vel/RenderTarget.h"
 
 namespace vel
 {
@@ -36,6 +39,11 @@ namespace vel
 		bool					useCustomViewportSize;
 		glm::ivec2				customViewportSize;
 
+		bool					finalRenderCam;
+
+		// defined as optional so that we can set at a later stage in the pipeline as opposed to during initialization
+		std::optional<RenderTarget> renderTarget;
+
 	public:
 		Camera(std::string name, CameraType type, float nearPlane, float farPlane, float fovScale);
 		void                    update();
@@ -55,6 +63,12 @@ namespace vel
 
 		void					setCustomViewportSize(int width, int height);
 		void					setCustomViewportSize(bool b);
+
+		void					setFinalRenderCam(bool b); // whether or not this camera is used to draw to screen buffer
+
+		void					setRenderTarget(RenderTarget rt);
+		RenderTarget*			getRenderTarget();
+
 
 		nlohmann::json			toJson();
 	};

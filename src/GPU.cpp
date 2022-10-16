@@ -121,6 +121,14 @@ namespace vel
 		glDeleteTextures(1, &t->id);
 	}
 
+	void GPU::clearRenderTarget(RenderTarget* rt)
+	{
+		glMakeTextureHandleNonResidentARB(rt->FBOTextureDSAHandle);
+		glDeleteTextures(1, &rt->FBOTexture);
+		glDeleteRenderbuffers(1, &rt->RBO);
+		glDeleteFramebuffers(1, &rt->FBO);
+	}
+
 	void GPU::loadShader(Shader* s)
 	{
 		//TODO: Totally missed moving this file read out of this class and into assetmanager
@@ -229,6 +237,49 @@ namespace vel
 
 
 		s->id = id;
+	}
+
+	RenderTarget GPU::createRenderTarget(unsigned int width, unsigned int height)
+	{
+		RenderTarget rt;
+		rt.resolution = glm::ivec2(width, height);
+		glGenFramebuffers(1, &rt.FBO);
+		glGenTextures(1, &rt.FBOTexture);
+		glGenRenderbuffers(1, &rt.RBO);
+
+		// obtain texture's DSA handle
+		rt.FBOTextureDSAHandle = glGetTextureHandleARB(rt.FBOTexture);
+
+		// set texture's DSA handle as resident so it can be accessed in shaders
+		glMakeTextureHandleResidentARB(rt.FBOTextureDSAHandle);
+
+		this->updateRenderTarget(&rt);
+
+		return rt;
+	}
+
+	void GPU::updateRenderTarget(RenderTarget* rt)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, rt->FBO);
+
+		glBindTexture(GL_TEXTURE_2D, rt->FBOTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rt->resolution.x, rt->resolution.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rt->FBOTexture, 0);
+
+		glBindRenderbuffer(GL_RENDERBUFFER, rt->RBO);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, rt->resolution.x, rt->resolution.y);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rt->RBO);
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		{
+			std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+			std::cin.get();
+			exit(EXIT_FAILURE);
+		}
+			
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void GPU::loadMesh(Mesh* m)

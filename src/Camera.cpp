@@ -25,9 +25,25 @@ namespace vel
 		viewMatrix(glm::mat4(1.0f)),
 		projectionMatrix(glm::mat4(1.0f)),
 		useCustomViewportSize(false),
-		customViewportSize(glm::ivec2(0, 0))
+		customViewportSize(glm::ivec2(0, 0)),
+		finalRenderCam(true)
 	{
 
+	}
+
+	RenderTarget* Camera::getRenderTarget()
+	{
+		return &this->renderTarget.value();
+	}
+
+	void Camera::setRenderTarget(RenderTarget rt)
+	{
+		this->renderTarget = rt;
+	}
+
+	void Camera::setFinalRenderCam(bool b)
+	{
+		this->finalRenderCam = b;
 	}
 
 	void Camera::setCustomViewportSize(int width, int height)

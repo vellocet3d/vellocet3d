@@ -10,10 +10,12 @@
 
 
 #include "vel/Shader.h"
+#include "vel/Camera.h"
 #include "vel/Mesh.h"
 #include "vel/Texture.h"
 #include "vel/Material.h"
 #include "vel/CollisionDebugDrawer.h"
+#include "vel/RenderTarget.h"
 
 typedef uint64_t GLuint64;
 
@@ -53,6 +55,10 @@ namespace vel
 		void								loadMesh(Mesh* m);
 		void								loadTexture(Texture* t);
 
+		RenderTarget						createRenderTarget(unsigned int width, unsigned int height);
+		void								updateRenderTarget(RenderTarget* rt);
+		void								clearRenderTarget(RenderTarget* rt);
+
 
 		void								useShader(Shader* s);
 		void								useMaterial(Material* m);
@@ -84,6 +90,5 @@ namespace vel
 		void								disableBackfaceCulling();
 
 		void								updateTextureUBO(unsigned int index, GLuint64 dsaHandle);
-
 	};
 }

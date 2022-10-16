@@ -21,6 +21,12 @@ namespace vel
 		size_t 			usageCount = 0;
 	};
 	
+	struct CameraTracker {
+		Camera* 		ptr = nullptr;
+		bool 			gpuLoaded = false;
+		size_t 			usageCount = 0;
+	};
+
 	struct MeshTracker{
 		Mesh* 			ptr = nullptr;
 		bool 			gpuLoaded = false;
@@ -38,11 +44,6 @@ namespace vel
 		size_t 			usageCount = 0;
 	};
 
-	struct CameraTracker {
-		Camera* 		ptr = nullptr;
-		size_t 			usageCount = 0;
-	};
-	
 	struct RenderableTracker{
 		Renderable* 	ptr = nullptr;
 		size_t 			usageCount = 0;
