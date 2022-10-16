@@ -15,7 +15,7 @@ namespace vel
 	Camera::Camera(std::string name, CameraType type, float nearPlane, float farPlane, float fovScale) :
 		name(name),
 		type(type),
-		screenSize(&App::get().getScreenSize()),
+		viewportSize(&App::get().getScreenSize()),
 		nearPlane(nearPlane),
 		farPlane(farPlane),
 		fovScale(fovScale),
@@ -23,9 +23,23 @@ namespace vel
 		lookAt(glm::vec3(0.0f, 0.0f, 0.0f)),
 		up(glm::vec3(0.0f, 1.0f, 0.0f)),
 		viewMatrix(glm::mat4(1.0f)),
-		projectionMatrix(glm::mat4(1.0f))
+		projectionMatrix(glm::mat4(1.0f)),
+		useCustomViewportSize(false),
+		customViewportSize(glm::ivec2(0, 0))
 	{
 
+	}
+
+	void Camera::setCustomViewportSize(int width, int height)
+	{
+		this->customViewportSize = glm::ivec2(width, height);
+		this->useCustomViewportSize = true;
+	}
+
+	void Camera::setCustomViewportSize(bool b)
+	{
+		this->customViewportSize = glm::ivec2(0,0);
+		this->useCustomViewportSize = false;
 	}
 
 	void Camera::setFovOrScale(float fos)
@@ -53,26 +67,31 @@ namespace vel
 		return this->name;
 	}
 
-	glm::ivec2 Camera::getScreenSize()
+	glm::ivec2 Camera::getViewportSize()
 	{
-		return glm::ivec2(this->screenSize->x, this->screenSize->y);
+		if (this->useCustomViewportSize)
+			return this->customViewportSize;
+
+		return glm::ivec2(this->viewportSize->x, this->viewportSize->y);
 	}
 
 	void Camera::updateProjectionMatrix()
 	{
+		glm::ivec2 vps = this->getViewportSize();
+
 		if (type == CameraType::ORTHOGRAPHIC)
 		{
-			float aspect = (float)this->screenSize->x / (float)this->screenSize->y;
+			float aspect = (float)vps.x / (float)vps.y;
 			float sizeX = fovScale * aspect;
 			float sizeY = fovScale;
 			this->projectionMatrix = glm::ortho(-sizeX, sizeX, -sizeY, sizeY, this->nearPlane, this->farPlane);
 		}
 		else
 		{
-			if (this->screenSize->x > 0 && this->screenSize->y > 0) // crashes when windowing out of fullscreen if this condition is not checked
+			if (vps.x > 0 && vps.y > 0) // crashes when windowing out of fullscreen if this condition is not checked
 			{
 				this->projectionMatrix = glm::perspective(glm::radians(this->fovScale),
-					(float)this->screenSize->x / (float)this->screenSize->y, this->nearPlane, this->farPlane);
+					(float)vps.x / (float)vps.y, this->nearPlane, this->farPlane);
 			}
 		}
 

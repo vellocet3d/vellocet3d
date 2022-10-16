@@ -21,7 +21,7 @@ namespace vel
 		CameraType              type;
 		std::string				name;
 		float                   fovScale;
-		const glm::ivec2*       screenSize;
+		const glm::ivec2*       viewportSize;
 		float                   nearPlane;
 		float                   farPlane;
 		glm::vec3			    position;
@@ -33,6 +33,9 @@ namespace vel
 		void                    updateViewMatrix();
 		void                    updateProjectionMatrix();
 
+		bool					useCustomViewportSize;
+		glm::ivec2				customViewportSize;
+
 	public:
 		Camera(std::string name, CameraType type, float nearPlane, float farPlane, float fovScale);
 		void                    update();
@@ -40,7 +43,7 @@ namespace vel
 		glm::mat4               getViewMatrix();
 		glm::mat4               getProjectionMatrix();
 		glm::vec3               getPosition();
-		glm::ivec2				getScreenSize();
+		glm::ivec2				getViewportSize();
 		void                    setPosition(float x, float y, float z);
 		void                    setPosition(glm::vec3 position);
 		void                    setLookAt(float x, float y, float z);
@@ -49,6 +52,9 @@ namespace vel
 		void					setNearPlane(float np);
 		void					setFarPlane(float fp);
 		void					setFovOrScale(float fos);
+
+		void					setCustomViewportSize(int width, int height);
+		void					setCustomViewportSize(bool b);
 
 		nlohmann::json			toJson();
 	};
