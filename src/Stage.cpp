@@ -17,7 +17,6 @@ namespace vel
 
 	Stage::Stage(std::string name) :
 		visible(true),
-		camera(nullptr),
 		clearDepthBuffer(false),
 		name(name),
 		useSceneCameraPositionForLighting(true)
@@ -93,9 +92,23 @@ namespace vel
 		this->visible = true;
 	}
 
-	void Stage::setCamera(Camera* c)
+	void Stage::addCamera(Camera* c)
 	{
-		this->camera = c;
+		this->cameras.push_back(c);
+	}
+
+	Camera* Stage::getCamera(std::string name)
+	{
+		for (auto c : this->cameras)
+			if (c->getName() == name)
+				return c;
+
+		return nullptr;
+	}
+
+	std::vector<Camera*>& Stage::getCameras()
+	{
+		return this->cameras;
 	}
 
 	void Stage::updateFixedArmatureAnimations(double runTime)
@@ -200,9 +213,6 @@ namespace vel
 		return this->renderables.getAll();
 	}
 
-	Camera* Stage::getCamera()
-	{
-		return this->camera;
-	}
+	
 
 }

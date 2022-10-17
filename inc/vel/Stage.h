@@ -25,7 +25,7 @@ namespace vel
 	{
 	private:
 		bool											visible;
-		Camera*											camera;
+		std::vector<Camera*>							cameras;
 		sac<Actor>										actors;
 		sac<Armature>									armatures;
 		sac<Renderable>									renderables;
@@ -50,8 +50,11 @@ namespace vel
 		Actor*											getActor(std::string name);
 		std::vector<Actor*>&							getActors();
 		std::vector<Renderable*>& 						getRenderables();
-		void											setCamera(Camera* c);
-		Camera*											getCamera();
+
+		void											addCamera(Camera* c);
+		Camera*											getCamera(std::string name);
+		std::vector<Camera*>&							getCameras();
+
 		void											show();
 		void											hide();
 		const bool										isVisible();

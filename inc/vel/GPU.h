@@ -37,6 +37,9 @@ namespace vel
 		unsigned int						texturesUBO;
 		void								initTextureUBO();
 
+		Mesh								screenSpaceMesh;
+		void								initScreenSpaceMesh();
+
 
 	public:
 		GPU(Window* w);

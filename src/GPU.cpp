@@ -23,16 +23,59 @@ namespace vel
 		window(w),
 		activeShader(nullptr),
 		activeMesh(nullptr),
-		activeMaterial(nullptr)
+		activeMaterial(nullptr),
+		screenSpaceMesh(Mesh("screenSpaceMesh"))
 	{
         this->enableDepthTest();
 		this->enableBackfaceCulling();
 		this->initBoneUBO();
 		this->initTextureUBO();
+		this->initScreenSpaceMesh();
 
 	}
 
-	GPU::~GPU(){}
+	GPU::~GPU()
+	{
+		this->clearMesh(&this->screenSpaceMesh);
+	}
+
+	void GPU::initScreenSpaceMesh()
+	{
+		// top left
+		Vertex v1;
+		v1.position = glm::vec3(-1.0f, 1.0f, 0.0f);
+		v1.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+		v1.textureCoordinates = glm::vec2(0.0f, 1.0f);
+		v1.textureId = 0;
+
+		// bottom left
+		Vertex v2;
+		v2.position = glm::vec3(-1.0f, -1.0f, 0.0f);
+		v2.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+		v2.textureCoordinates = glm::vec2(0.0f, 0.0f);
+		v2.textureId = 0;
+
+		// bottom right
+		Vertex v3;
+		v3.position = glm::vec3(1.0f, -1.0f, 0.0f);
+		v3.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+		v3.textureCoordinates = glm::vec2(1.0f, 0.0f);
+		v3.textureId = 0;
+
+		// top right
+		Vertex v4;
+		v4.position = glm::vec3(1.0f, 1.0f, 0.0f);
+		v4.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+		v4.textureCoordinates = glm::vec2(1.0f, 1.0f);
+		v4.textureId = 0;
+
+		this->screenSpaceMesh.setVertices({v1, v2, v3, v4});
+
+		// With culling enabled indices need to be set clockwise, check here if things act strange incase i have that backwards
+		this->screenSpaceMesh.setIndices({3, 2, 0, 2, 1, 0});
+
+		this->loadMesh(&this->screenSpaceMesh);
+	}
 
 	void GPU::enableBackfaceCulling()
 	{
@@ -131,8 +174,10 @@ namespace vel
 
 	void GPU::loadShader(Shader* s)
 	{
+		//TODO!!!!!
 		//TODO: Totally missed moving this file read out of this class and into assetmanager
-		
+		//TODO!!!!!!
+
 		unsigned int id;
 
 		// 1. retrieve the vertex/fragment source code from filePath

@@ -28,11 +28,6 @@ namespace vel
 		std::optional<GpuMesh>              gpuMesh;
 		glm::mat4							globalInverseMatrix;
 
-		
-
-		//Texture*							texture;
-		//bool								isOpaque;
-
 
 	public:
 											Mesh(std::string name);
