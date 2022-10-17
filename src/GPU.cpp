@@ -56,7 +56,9 @@ namespace vel
 		this->updateTextureUBO(0, dsaHandle);
 
 		// set mesh
-		this->activeMesh = &this->screenSpaceMesh;
+		//this->activeMesh = &this->screenSpaceMesh;
+
+		this->useMesh(&this->screenSpaceMesh);
 
 		// draw mesh
 		this->drawGpuMesh();
@@ -120,8 +122,8 @@ namespace vel
 		this->screenSpaceMesh.setVertices(vs);
 
 		// With culling enabled indices need to be set clockwise, check here if things act strange incase i have that backwards
-		std::vector<unsigned int> is = { 3, 2, 0, 2, 1, 0 };
-		//std::vector<unsigned int> is = { 0,1,2,2,3,0 };
+		//std::vector<unsigned int> is = { 3, 2, 0, 2, 1, 0 };
+		std::vector<unsigned int> is = { 0,1,2,0,2,3 };
 		//std::vector<unsigned int> is = { 0,3,2,2,1,0 };
 		//std::vector<unsigned int> is = { 1,0,2,0,3,2 };
 		this->screenSpaceMesh.setIndices(is);
