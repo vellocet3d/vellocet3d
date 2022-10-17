@@ -41,6 +41,11 @@ namespace vel
 		this->renderTarget = rt;
 	}
 
+	bool Camera::isFinalRenderCam()
+	{
+		return this->finalRenderCam;
+	}
+
 	void Camera::setFinalRenderCam(bool b)
 	{
 		this->finalRenderCam = b;

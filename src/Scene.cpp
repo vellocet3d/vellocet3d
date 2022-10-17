@@ -663,81 +663,114 @@ namespace vel
 			if (s->getClearDepthBuffer())
 				gpu->clearDepthBuffer();
 
-			// update stage camera (view/projection matrices), update scene's camera data to this stage's camera data
-			s->getCamera()->update();
-			this->cameraPosition = s->getCamera()->getPosition();
-			this->cameraProjectionMatrix = s->getCamera()->getProjectionMatrix();
-			this->cameraViewMatrix = s->getCamera()->getViewMatrix();
-			
-
-			// loop through all renderables and build a vector of actors which use an alpha channel, and draw all
-			// completely opaque actors
-			this->transparentActors.clear();
-
-			for(auto r : s->getRenderables())
+			for (auto c : s->getCameras())
 			{
-				if (r->getMaterialHasAlpha())
-				{
-					for (auto a : r->actors.getAll())
-					{
-						float dist = glm::length(this->cameraPosition - a->getTransform().getTranslation());
-						this->transparentActors.push_back(std::pair<float, Actor*>(dist, a));
-					}
-					continue;
-				}
+				// update stage camera (view/projection matrices), update scene's camera data to this stage's camera data
+				c->update();
+				this->cameraPosition = c->getPosition();
+				this->cameraProjectionMatrix = c->getProjectionMatrix();
+				this->cameraViewMatrix = c->getViewMatrix();
 
-				// DRAW OPAQUES
 
-				// RESET GPU STATE FOR THIS RENDERABLE
-				gpu->useShader(r->getShader());
-				gpu->useMesh(r->getMesh());
-				gpu->useMaterial(r->getMaterial());
-					
-				for (auto a : r->actors.getAll())
+				// setup gl state to render to framebuffer
+				gpu->setRenderTarget(c->getRenderTarget()->FBO, true); // should always write to depth buffer here
+				gpu->updateViewportSize(c->getViewportSize().x, c->getViewportSize().y);
+
+				//std::cout << "VPSIZE:" << c->getViewportSize().x << "," << c->getViewportSize().y << std::endl;
+
+				
+				// loop through all renderables and build a vector of actors which use an alpha channel, and draw all
+				// completely opaque actors
+				this->transparentActors.clear();
+
+				for (auto r : s->getRenderables())
 				{
-					// if this actor has a color with a transparent component less than fully opaque, push it onto
-					// transparentActors queue and continue the loop without drawing the actor
-					if (a->getColor().w < 1.0f)
+					if (r->getMaterialHasAlpha())
 					{
-						float dist = glm::length(this->cameraPosition - a->getTransform().getTranslation());
-						this->transparentActors.push_back(std::pair<float, Actor*>(dist, a));
+						for (auto a : r->actors.getAll())
+						{
+							float dist = glm::length(this->cameraPosition - a->getTransform().getTranslation());
+							this->transparentActors.push_back(std::pair<float, Actor*>(dist, a));
+						}
 						continue;
 					}
 
-					this->drawActor(a, alpha);
+					// DRAW OPAQUES
+
+					// RESET GPU STATE FOR THIS RENDERABLE
+					gpu->useShader(r->getShader());
+					gpu->useMesh(r->getMesh());
+					gpu->useMaterial(r->getMaterial());
+
+					for (auto a : r->actors.getAll())
+					{
+						// if this actor has a color with a transparent component less than fully opaque, push it onto
+						// transparentActors queue and continue the loop without drawing the actor
+						if (a->getColor().w < 1.0f)
+						{
+							float dist = glm::length(this->cameraPosition - a->getTransform().getTranslation());
+							this->transparentActors.push_back(std::pair<float, Actor*>(dist, a));
+							continue;
+						}
+
+						this->drawActor(a, alpha);
+					}
 				}
-			}
+
+				// DRAW TRANSPARENTS/TRANSLUCENTS
+				gpu->enableBlend();
+
+				// not proud of this, but it gets the job done for the time being, loop through all transparent actors and sort by their distance
+				// from the current camera position
+				std::sort(transparentActors.begin(), transparentActors.end(), [](auto &left, auto &right) {
+					return left.first < right.first;
+					});
+
+				// Draw all transparent/translucent actors
+				for (std::vector<std::pair<float, Actor*>>::reverse_iterator it = transparentActors.rbegin(); it != transparentActors.rend(); ++it)
+				{
+					// Reset gpu state for this ACTOR and draw
+					auto r = it->second->getStageRenderable().value();
+
+					gpu->useShader(r->getShader());
+					gpu->useMesh(r->getMesh());
+					gpu->useMaterial(r->getMaterial());
+
+					this->drawActor(it->second, alpha);
+				}
+
+				// clear buffers for this render target
+				//gpu->clearBuffers(0.0f, 0.0f, 0.0f, 1.0f);
 
 
-			// DRAW TRANSPARENTS/TRANSLUCENTS
-            gpu->enableBlend();
+			} // end for each camera
 
-			// not proud of this, but it gets the job done for the time being, loop through all transparent actors and sort by their distance
-			// from the current camera position
-			std::sort(transparentActors.begin(), transparentActors.end(), [](auto &left, auto &right) {
-				return left.first < right.first;
-			});
-
-			// Draw all transparent/translucent actors
-			for (std::vector<std::pair<float, Actor*>>::reverse_iterator it = transparentActors.rbegin(); it != transparentActors.rend(); ++it)
-			{
-				// Reset gpu state for this ACTOR and draw
-				auto r = it->second->getStageRenderable().value();
-
-				gpu->useShader(r->getShader());
-				gpu->useMesh(r->getMesh());
-				gpu->useMaterial(r->getMaterial());
-
-				this->drawActor(it->second, alpha);
-			}
-            
-		}
+		} // end for each stage
 
 
-		//TODO: all stage camera's framebuffers are now updated, loop through each stage camera and check if it should display it's contents to
+		// all stage camera's framebuffers are now updated, loop through each stage camera and check if it should display it's contents to
 		// screen, if so do so...
 
+		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
+		// disable depth test so screen-space quad isn't discarded due to depth test.
+		gpu->setRenderTarget(0, false);
+		for (auto s : this->stages.getAll())
+		{
+			if (!s->isVisible())
+				continue;
 
+			for (auto c : s->getCameras())
+			{
+				if (c->isFinalRenderCam())
+				{
+					gpu->updateViewportSize(c->getViewportSize().x, c->getViewportSize().y); // TODO: can probably do this outside of this loop since this render is the screen size
+					gpu->drawScreen(c->getRenderTarget()->FBOTextureDSAHandle);
+				}
+			}
+		}
+
+		// clear buffers for this render target
+		//gpu->clearBuffers(0.0f, 0.0f, 0.0f, 1.0f);
 
 
 

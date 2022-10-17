@@ -65,6 +65,7 @@ namespace vel
 		void					setCustomViewportSize(bool b);
 
 		void					setFinalRenderCam(bool b); // whether or not this camera is used to draw to screen buffer
+		bool					isFinalRenderCam();
 
 		void					setRenderTarget(RenderTarget rt);
 		RenderTarget*			getRenderTarget();

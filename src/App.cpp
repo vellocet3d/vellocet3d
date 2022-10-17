@@ -55,10 +55,15 @@ namespace vel
 		this->assetManager.loadShader("defaultStaticDiffuseSkinned",
 			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/static_diffuse.frag");
         
+		// used for rendering texture to screen buffer
+		this->assetManager.loadShader("defaultScreen",
+			"data/shaders/defaults/screen.vert", "data/shaders/defaults/screen.frag");
+
         
         // send all these shaders to gpu
         this->assetManager.sendAllToGpu();
        
+		this->gpu->setDefaultShader(this->assetManager.getShader("defaultScreen"));
         
         // load default textures
 		//this->assetManager.loadTexture("__default__", "diffuse", "data/textures/defaults/default.jpg");
@@ -386,17 +391,18 @@ namespace vel
 				
 
 				// perform draw (render) logic
-				if (!this->pauseBufferClearAndSwap)
-				{
-					this->gpu->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);
-					//this->gpu->clearBuffers(0.0f, 0.0f, 0.0f, 1.0f);
-				}
+				//if (!this->pauseBufferClearAndSwap)
+				//{
+				//	this->gpu->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);
+				//	//this->gpu->clearBuffers(0.0f, 0.0f, 0.0f, 1.0f);
+				//}
 					
 
                 this->activeScene->draw(renderLerpInterval);
 
 
-				this->window->renderGui();
+				//this->window->renderGui();
+
 
 
 				if (!this->pauseBufferClearAndSwap)

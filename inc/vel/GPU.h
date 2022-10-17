@@ -27,7 +27,7 @@ namespace vel
 	{
 	private:
 		Window*								window;
-        const std::string                   defaultShaderPath;
+        Shader*								defaultShader;
 		Shader*								activeShader;
 		Mesh*								activeMesh;
 		Material*							activeMaterial;
@@ -93,5 +93,13 @@ namespace vel
 		void								disableBackfaceCulling();
 
 		void								updateTextureUBO(unsigned int index, GLuint64 dsaHandle);
+
+		void								updateViewportSize(unsigned int width, unsigned int height);
+		void								setRenderTarget(unsigned int FBO, bool depth);
+
+		void								drawScreen(GLuint64 dsaHandle);
+
+		void								setDefaultShader(Shader* s);
+
 	};
 }

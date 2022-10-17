@@ -21,6 +21,7 @@ namespace vel
 {
 	GPU::GPU(Window* w) :
 		window(w),
+		defaultShader(nullptr),
 		activeShader(nullptr),
 		activeMesh(nullptr),
 		activeMaterial(nullptr),
@@ -39,40 +40,91 @@ namespace vel
 		this->clearMesh(&this->screenSpaceMesh);
 	}
 
+	void GPU::setDefaultShader(Shader* s)
+	{
+		this->defaultShader = s;
+	}
+
+	void GPU::drawScreen(GLuint64 dsaHandle)
+	{
+		this->useShader(this->defaultShader);
+
+		//this->setShaderVec4("color", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+		//this->setShaderMat4("mvp", glm::mat4(1.0f));
+
+		// send texture dsa id to ubo
+		this->updateTextureUBO(0, dsaHandle);
+
+		// set mesh
+		this->activeMesh = &this->screenSpaceMesh;
+
+		// draw mesh
+		this->drawGpuMesh();
+	}
+
+	void GPU::setRenderTarget(unsigned int FBO, bool useDepthBuffer)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+		
+		if (useDepthBuffer)
+			glEnable(GL_DEPTH_TEST);
+		else
+			glDisable(GL_DEPTH_TEST);
+
+		// make sure we clear the framebuffer's content
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void GPU::updateViewportSize(unsigned int width, unsigned int height)
+	{
+		glViewport(0, 0, width, height);
+	}
+
 	void GPU::initScreenSpaceMesh()
 	{
 		// top left
-		Vertex v1;
-		v1.position = glm::vec3(-1.0f, 1.0f, 0.0f);
-		v1.normal = glm::vec3(0.0f, 0.0f, 1.0f);
-		v1.textureCoordinates = glm::vec2(0.0f, 1.0f);
-		v1.textureId = 0;
+		Vertex v0;
+		v0.position = glm::vec3(-1.0f, 1.0f, 0.0f);
+		v0.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+		v0.textureCoordinates = glm::vec2(0.0f, 1.0f);
+		//v0.textureCoordinates = glm::vec2(1.0f, 1.0f);
+		v0.textureId = 0;
 
 		// bottom left
-		Vertex v2;
-		v2.position = glm::vec3(-1.0f, -1.0f, 0.0f);
-		v2.normal = glm::vec3(0.0f, 0.0f, 1.0f);
-		v2.textureCoordinates = glm::vec2(0.0f, 0.0f);
-		v2.textureId = 0;
+		Vertex v1;
+		v1.position = glm::vec3(-1.0f, -1.0f, 0.0f);
+		v1.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+		v1.textureCoordinates = glm::vec2(0.0f, 0.0f);
+		//v1.textureCoordinates = glm::vec2(1.0f, 1.0f);
+		v1.textureId = 0;
 
 		// bottom right
-		Vertex v3;
-		v3.position = glm::vec3(1.0f, -1.0f, 0.0f);
-		v3.normal = glm::vec3(0.0f, 0.0f, 1.0f);
-		v3.textureCoordinates = glm::vec2(1.0f, 0.0f);
-		v3.textureId = 0;
+		Vertex v2;
+		v2.position = glm::vec3(1.0f, -1.0f, 0.0f);
+		v2.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+		v2.textureCoordinates = glm::vec2(1.0f, 0.0f);
+		//v2.textureCoordinates = glm::vec2(1.0f, 1.0f);
+		v2.textureId = 0;
 
 		// top right
-		Vertex v4;
-		v4.position = glm::vec3(1.0f, 1.0f, 0.0f);
-		v4.normal = glm::vec3(0.0f, 0.0f, 1.0f);
-		v4.textureCoordinates = glm::vec2(1.0f, 1.0f);
-		v4.textureId = 0;
+		Vertex v3;
+		v3.position = glm::vec3(1.0f, 1.0f, 0.0f);
+		v3.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+		v3.textureCoordinates = glm::vec2(1.0f, 1.0f);
+		//v3.textureCoordinates = glm::vec2(1.0f, 1.0f);
+		v3.textureId = 0;
 
-		this->screenSpaceMesh.setVertices({v1, v2, v3, v4});
+		//std::vector<Vertex> vs = { v0, v1, v2, v3 };
+		std::vector<Vertex> vs = { v0, v1, v2, v3 };
+		this->screenSpaceMesh.setVertices(vs);
 
 		// With culling enabled indices need to be set clockwise, check here if things act strange incase i have that backwards
-		this->screenSpaceMesh.setIndices({3, 2, 0, 2, 1, 0});
+		std::vector<unsigned int> is = { 3, 2, 0, 2, 1, 0 };
+		//std::vector<unsigned int> is = { 0,1,2,2,3,0 };
+		//std::vector<unsigned int> is = { 0,3,2,2,1,0 };
+		//std::vector<unsigned int> is = { 1,0,2,0,3,2 };
+		this->screenSpaceMesh.setIndices(is);
 
 		this->loadMesh(&this->screenSpaceMesh);
 	}
@@ -292,13 +344,13 @@ namespace vel
 		glGenTextures(1, &rt.FBOTexture);
 		glGenRenderbuffers(1, &rt.RBO);
 
+		this->updateRenderTarget(&rt);
+
 		// obtain texture's DSA handle
 		rt.FBOTextureDSAHandle = glGetTextureHandleARB(rt.FBOTexture);
 
 		// set texture's DSA handle as resident so it can be accessed in shaders
 		glMakeTextureHandleResidentARB(rt.FBOTextureDSAHandle);
-
-		this->updateRenderTarget(&rt);
 
 		return rt;
 	}
@@ -323,7 +375,7 @@ namespace vel
 			std::cin.get();
 			exit(EXIT_FAILURE);
 		}
-			
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
