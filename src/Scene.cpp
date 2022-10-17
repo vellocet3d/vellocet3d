@@ -831,4 +831,25 @@ namespace vel
 			gpu->drawGpuMesh();
 		}
 	}
+
+	void Scene::clearAllRenderTargetBuffers()
+	{
+		auto gpu = App::get().getGPU();
+
+		for (auto s : this->stages.getAll())
+		{
+			for (auto c : s->getCameras())
+			{
+				gpu->setRenderTarget(c->getRenderTarget()->FBO, true);
+				gpu->clearBuffers(0.0f, 0.0f, 0.0f, 1.0f);
+			}
+		}
+
+		// clear default screen buffer
+		gpu->setRenderTarget(0, false);
+		gpu->clearBuffers(0.0f, 0.0f, 0.0f, 1.0f);
+
+	}
+
+// END VEL NAMESPACE
 }

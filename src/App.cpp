@@ -302,15 +302,9 @@ namespace vel
 
 			}
 
+
 			if (this->activeScene == nullptr)
 				continue;
-
-			//        if (this->scene != nullptr && !this->scene->loaded)
-			//        {
-			//            this->scene->load();
-			//            this->scene->loaded = true;
-						//this->setPauseBufferClearAndSwap(false);
-			//        }
 
 
             this->newTime = this->time();
@@ -391,11 +385,19 @@ namespace vel
 				
 
 				// perform draw (render) logic
+
 				//if (!this->pauseBufferClearAndSwap)
 				//{
 				//	this->gpu->clearBuffers(0.2f, 0.3f, 0.3f, 1.0f);
 				//	//this->gpu->clearBuffers(0.0f, 0.0f, 0.0f, 1.0f);
 				//}
+
+				// clear all previous render target buffers, this is done here as doing it right before or right after
+				// we draw, wouldn't work as far as I can tell at the moment as many stages can have many cameras and
+				// many cameras can have many stages, meaning that if we clear render buffers after drawing to camera's render target
+				// in one stage, if it's used in another stage we would get not good results
+				this->activeScene->clearAllRenderTargetBuffers();
+				
 					
 
                 this->activeScene->draw(renderLerpInterval);
@@ -405,8 +407,8 @@ namespace vel
 
 
 
-				if (!this->pauseBufferClearAndSwap)
-					this->window->swapBuffers();
+				
+				this->window->swapBuffers();
             }
 
         }

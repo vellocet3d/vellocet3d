@@ -105,6 +105,8 @@ namespace vel
 		CollisionWorld*						addCollisionWorld(std::string name, float gravity = -10.0f);
 		CollisionWorld*						getCollisionWorld(std::string name);
 
+		void								clearAllRenderTargetBuffers();
+
 	};
 
 }

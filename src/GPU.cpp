@@ -90,7 +90,6 @@ namespace vel
 		v0.position = glm::vec3(-1.0f, 1.0f, 0.0f);
 		v0.normal = glm::vec3(0.0f, 0.0f, 1.0f);
 		v0.textureCoordinates = glm::vec2(0.0f, 1.0f);
-		//v0.textureCoordinates = glm::vec2(1.0f, 1.0f);
 		v0.textureId = 0;
 
 		// bottom left
@@ -98,7 +97,6 @@ namespace vel
 		v1.position = glm::vec3(-1.0f, -1.0f, 0.0f);
 		v1.normal = glm::vec3(0.0f, 0.0f, 1.0f);
 		v1.textureCoordinates = glm::vec2(0.0f, 0.0f);
-		//v1.textureCoordinates = glm::vec2(1.0f, 1.0f);
 		v1.textureId = 0;
 
 		// bottom right
@@ -106,7 +104,6 @@ namespace vel
 		v2.position = glm::vec3(1.0f, -1.0f, 0.0f);
 		v2.normal = glm::vec3(0.0f, 0.0f, 1.0f);
 		v2.textureCoordinates = glm::vec2(1.0f, 0.0f);
-		//v2.textureCoordinates = glm::vec2(1.0f, 1.0f);
 		v2.textureId = 0;
 
 		// top right
@@ -114,18 +111,12 @@ namespace vel
 		v3.position = glm::vec3(1.0f, 1.0f, 0.0f);
 		v3.normal = glm::vec3(0.0f, 0.0f, 1.0f);
 		v3.textureCoordinates = glm::vec2(1.0f, 1.0f);
-		//v3.textureCoordinates = glm::vec2(1.0f, 1.0f);
 		v3.textureId = 0;
 
-		//std::vector<Vertex> vs = { v0, v1, v2, v3 };
 		std::vector<Vertex> vs = { v0, v1, v2, v3 };
 		this->screenSpaceMesh.setVertices(vs);
 
-		// With culling enabled indices need to be set clockwise, check here if things act strange incase i have that backwards
-		//std::vector<unsigned int> is = { 3, 2, 0, 2, 1, 0 };
 		std::vector<unsigned int> is = { 0,1,2,0,2,3 };
-		//std::vector<unsigned int> is = { 0,3,2,2,1,0 };
-		//std::vector<unsigned int> is = { 1,0,2,0,3,2 };
 		this->screenSpaceMesh.setIndices(is);
 
 		this->loadMesh(&this->screenSpaceMesh);
