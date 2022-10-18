@@ -751,9 +751,10 @@ namespace vel
 		// all stage camera's framebuffers are now updated, loop through each stage camera and check if it should display it's contents to
 		// screen, if so do so...
 
-		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
-		// disable depth test so screen-space quad isn't discarded due to depth test.
+		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer texture
+		// disable depth test so screen-space quad isn't discarded due to depth test. ????
 		gpu->setRenderTarget(0, false);
+		gpu->enableBlend2();
 		for (auto s : this->stages.getAll())
 		{
 			if (!s->isVisible())
@@ -764,7 +765,7 @@ namespace vel
 				if (c->isFinalRenderCam())
 				{
 					gpu->updateViewportSize(c->getViewportSize().x, c->getViewportSize().y); // TODO: can probably do this outside of this loop since this render is the screen size
-					gpu->drawScreen(c->getRenderTarget()->FBOTextureDSAHandle);
+					gpu->drawScreen(c->getRenderTarget()->texture.dsaHandle);
 				}
 			}
 		}
@@ -841,13 +842,14 @@ namespace vel
 			for (auto c : s->getCameras())
 			{
 				gpu->setRenderTarget(c->getRenderTarget()->FBO, true);
-				gpu->clearBuffers(0.0f, 0.0f, 0.0f, 1.0f);
+				gpu->clearBuffers(0.0f, 0.0f, 0.0f, 0.1f);
 			}
 		}
 
 		// clear default screen buffer
 		gpu->setRenderTarget(0, false);
-		gpu->clearBuffers(0.0f, 0.0f, 0.0f, 1.0f);
+		//gpu->clearBuffers(0.0f, 0.0f, 0.0f, 0.1f);
+		gpu->clearBuffers(1.0f, 0.0f, 0.0f, 1.0f);
 
 	}
 

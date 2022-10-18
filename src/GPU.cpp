@@ -73,9 +73,9 @@ namespace vel
 		else
 			glDisable(GL_DEPTH_TEST);
 
-		// make sure we clear the framebuffer's content
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//// make sure we clear the framebuffer's content
+		//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void GPU::updateViewportSize(unsigned int width, unsigned int height)
@@ -211,8 +211,8 @@ namespace vel
 
 	void GPU::clearRenderTarget(RenderTarget* rt)
 	{
-		glMakeTextureHandleNonResidentARB(rt->FBOTextureDSAHandle);
-		glDeleteTextures(1, &rt->FBOTexture);
+		glMakeTextureHandleNonResidentARB(rt->texture.dsaHandle);
+		glDeleteTextures(1, &rt->texture.id);
 		glDeleteRenderbuffers(1, &rt->RBO);
 		glDeleteFramebuffers(1, &rt->FBO);
 	}
@@ -333,17 +333,20 @@ namespace vel
 	{
 		RenderTarget rt;
 		rt.resolution = glm::ivec2(width, height);
+
+		
+
 		glGenFramebuffers(1, &rt.FBO);
-		glGenTextures(1, &rt.FBOTexture);
+		glGenTextures(1, &rt.texture.id);
 		glGenRenderbuffers(1, &rt.RBO);
 
 		this->updateRenderTarget(&rt);
 
 		// obtain texture's DSA handle
-		rt.FBOTextureDSAHandle = glGetTextureHandleARB(rt.FBOTexture);
+		rt.texture.dsaHandle = glGetTextureHandleARB(rt.texture.id);
 
 		// set texture's DSA handle as resident so it can be accessed in shaders
-		glMakeTextureHandleResidentARB(rt.FBOTextureDSAHandle);
+		glMakeTextureHandleResidentARB(rt.texture.dsaHandle);
 
 		return rt;
 	}
@@ -352,11 +355,12 @@ namespace vel
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, rt->FBO);
 
-		glBindTexture(GL_TEXTURE_2D, rt->FBOTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rt->resolution.x, rt->resolution.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glBindTexture(GL_TEXTURE_2D, rt->texture.id);
+		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rt->resolution.x, rt->resolution.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rt->resolution.x, rt->resolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rt->FBOTexture, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rt->texture.id, 0);
 
 		glBindRenderbuffer(GL_RENDERBUFFER, rt->RBO);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, rt->resolution.x, rt->resolution.y);
@@ -602,6 +606,17 @@ namespace vel
 	{
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+
+	// https://apoorvaj.io/alpha-compositing-opengl-blending-and-premultiplied-alpha/#toc5
+	// with this method we can enable transparent framebuffers in glfw, clear the framebuffers
+	// that we render as textures with alpha component, render those, then use this blending 
+	// method when we draw them to the screenbuffer
+	void GPU::enableBlend2()
+	{
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_FUNC_ADD);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	}
     
     void GPU::disableBlend()

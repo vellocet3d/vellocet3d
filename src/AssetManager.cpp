@@ -36,6 +36,11 @@ namespace vel
 		{
 			c->ptr->setRenderTarget(this->gpu->createRenderTarget(c->ptr->getViewportSize().x, c->ptr->getViewportSize().y));
 			c->gpuLoaded = true;
+
+			c->ptr->getRenderTarget()->texture.name = c->ptr->getName() + "_RT";
+			c->ptr->getRenderTarget()->texture.type = "RENDER_TARGET";
+			c->ptr->getRenderTarget()->texture.alphaChannel = false;
+
 			this->shadersThatNeedGpuLoad.pop_front();
 		}
 		
