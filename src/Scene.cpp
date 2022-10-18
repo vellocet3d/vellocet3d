@@ -718,7 +718,7 @@ namespace vel
 				}
 
 				// DRAW TRANSPARENTS/TRANSLUCENTS
-				gpu->enableBlend();
+				gpu->enableBlend2();
 
 				// not proud of this, but it gets the job done for the time being, loop through all transparent actors and sort by their distance
 				// from the current camera position
@@ -849,7 +849,7 @@ namespace vel
 		// clear default screen buffer
 		gpu->setRenderTarget(0, false);
 		//gpu->clearBuffers(0.0f, 0.0f, 0.0f, 0.1f);
-		gpu->clearBuffers(1.0f, 0.0f, 0.0f, 1.0f);
+		gpu->clearBuffers(1.0f, 1.0f, 0.0f, 1.0f);
 
 	}
 
