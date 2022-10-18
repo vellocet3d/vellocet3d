@@ -49,11 +49,14 @@ namespace vel
 
 
 		// shader for static diffuse color, a basic texture unaffected by light sources
-		this->assetManager.loadShader("defaultStaticDiffuse",
-			"data/shaders/defaults/default.vert", "data/shaders/defaults/static_diffuse.frag");
+		this->assetManager.loadShader("default",
+			"data/shaders/defaults/default.vert", "data/shaders/defaults/default.frag");
 
-		this->assetManager.loadShader("defaultStaticDiffuseSkinned",
-			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/static_diffuse.frag");
+		this->assetManager.loadShader("defaultInvertUV",
+			"data/shaders/defaults/default.vert", "data/shaders/defaults/defaultInvertUV.frag");
+
+		this->assetManager.loadShader("defaultSkinned",
+			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/default.frag");
         
 		// used for rendering texture to screen buffer
 		this->assetManager.loadShader("defaultScreen",

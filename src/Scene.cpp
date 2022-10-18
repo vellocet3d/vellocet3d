@@ -842,7 +842,7 @@ namespace vel
 			for (auto c : s->getCameras())
 			{
 				gpu->setRenderTarget(c->getRenderTarget()->FBO, true);
-				gpu->clearBuffers(0.0f, 0.0f, 0.0f, 0.1f);
+				gpu->clearBuffers(0.0f, 0.0f, 0.0f, 0.0f);
 			}
 		}
 

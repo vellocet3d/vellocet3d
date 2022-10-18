@@ -31,6 +31,11 @@ namespace vel
 
 	}
 
+	glm::vec3 Camera::getLookAt()
+	{
+		return this->lookAt;
+	}
+
 	RenderTarget* Camera::getRenderTarget()
 	{
 		return &this->renderTarget.value();

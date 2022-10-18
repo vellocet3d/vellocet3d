@@ -52,6 +52,7 @@ namespace vel
 		glm::mat4               getProjectionMatrix();
 		glm::vec3               getPosition();
 		glm::ivec2				getViewportSize();
+		glm::vec3				getLookAt();
 		void                    setPosition(float x, float y, float z);
 		void                    setPosition(glm::vec3 position);
 		void                    setLookAt(float x, float y, float z);
