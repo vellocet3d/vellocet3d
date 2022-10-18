@@ -26,7 +26,8 @@ namespace vel
 		projectionMatrix(glm::mat4(1.0f)),
 		useCustomViewportSize(false),
 		customViewportSize(glm::ivec2(0, 0)),
-		finalRenderCam(true)
+		finalRenderCam(true),
+		previousTickViewportSize(glm::ivec2(0, 0))
 	{
 
 	}
@@ -130,6 +131,30 @@ namespace vel
 
 	void Camera::update()
 	{
+		// get current viewport size
+		auto currentViewportSize = this->getViewportSize();
+
+		// if current viewport size does not equal the previous tick's viewport size, we have to rebuild
+		// the render target
+		if (currentViewportSize != this->previousTickViewportSize)
+		{
+			std::cout << "viewport size altered" << std::endl;
+			//this->renderTarget->resolution = currentViewportSize;
+			//App::get().getGPU()->updateRenderTarget(&this->renderTarget.value());
+
+			// create a new render target
+			RenderTarget rt = App::get().getGPU()->createRenderTarget(currentViewportSize.x, currentViewportSize.y);
+
+			// clear existing render target
+			App::get().getGPU()->clearRenderTarget(&this->renderTarget.value());
+
+			// attach new render target to camera
+			this->renderTarget = rt;
+
+		}
+
+		this->previousTickViewportSize = currentViewportSize;
+
 		this->updateViewMatrix();
 		this->updateProjectionMatrix();
 	}

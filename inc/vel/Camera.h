@@ -41,6 +41,8 @@ namespace vel
 
 		bool					finalRenderCam;
 
+		glm::ivec2				previousTickViewportSize;
+
 		// defined as optional so that we can set at a later stage in the pipeline as opposed to during initialization
 		std::optional<RenderTarget> renderTarget;
 
