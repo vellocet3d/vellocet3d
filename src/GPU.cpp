@@ -580,9 +580,6 @@ namespace vel
 
 		this->setShaderVec4("color", m->color);
 
-		if (m->heightScales.size() > 0)
-			this->setShaderFloatArray("heightScales", m->heightScales);
-
 		for (unsigned int i = 0; i < m->textures.size(); i++)
 			this->updateTextureUBO(i, m->textures.at(i)->dsaHandle);
 	}
