@@ -368,7 +368,7 @@ namespace vel
                 }
 				
 
-				//this->activeScene->updateAnimations(this->frameTime);
+				//this->activeScene->updateAnimations(this->frameTime); // not sure why this was commented out, but probably shouldn't be
 
 
 				float renderLerpInterval = (float)(this->accumulator / this->fixedLogicTime);
