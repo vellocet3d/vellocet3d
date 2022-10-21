@@ -70,6 +70,7 @@ namespace vel
 		void								setShaderBool(const std::string &name, bool value) const;
 		void								setShaderInt(const std::string &name, int value) const;
 		void								setShaderFloat(const std::string &name, float value) const;
+		void								setShaderFloatArray(const std::string &name, std::vector<float> value);
 		void								setShaderMat4(const std::string &name, glm::mat4 value) const;
 		void								setShaderVec3(const std::string &name, glm::vec3 value) const;
 		void								setShaderVec4(const std::string &name, glm::vec4 value) const;

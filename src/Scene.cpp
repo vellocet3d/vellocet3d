@@ -799,8 +799,14 @@ namespace vel
 
 		if (a->isVisible())
 		{
+			gpu->setShaderVec3("camPos", this->cameraPosition);
 			gpu->setShaderVec4("color", a->getColor());
-			gpu->setShaderMat4("mvp", this->cameraProjectionMatrix * this->cameraViewMatrix * a->getWorldRenderMatrix(alphaTime));
+
+			gpu->setShaderMat4("projection", this->cameraProjectionMatrix);
+			gpu->setShaderMat4("view", this->cameraViewMatrix);
+			gpu->setShaderMat4("model", a->getWorldRenderMatrix(alphaTime));
+
+			//gpu->setShaderMat4("mvp", this->cameraProjectionMatrix * this->cameraViewMatrix * a->getWorldRenderMatrix(alphaTime));
 
 			// If this actor is animated, send the bone transforms of it's armature to the shader
 			if (a->isAnimated())

@@ -535,6 +535,14 @@ namespace vel
 		glUniform1f(this->activeShader->uniformLocations[name], value);
 	}
 
+	void GPU::setShaderFloatArray(const std::string &name, std::vector<float> value)
+	{
+		if (!this->activeShader->uniformLocations.count(name) == 1)
+			this->activeShader->uniformLocations[name] = glGetUniformLocation(this->activeShader->id, name.c_str());
+
+		glUniform1fv(this->activeShader->uniformLocations[name], value.size(), &value[0]);
+	}
+
 	void GPU::setShaderMat4(const std::string& name, glm::mat4 value) const
 	{
 		if (!this->activeShader->uniformLocations.count(name) == 1)
@@ -572,11 +580,11 @@ namespace vel
 
 		this->setShaderVec4("color", m->color);
 
+		if (m->heightScales.size() > 0)
+			this->setShaderFloatArray("heightScales", m->heightScales);
+
 		for (unsigned int i = 0; i < m->textures.size(); i++)
-		{
 			this->updateTextureUBO(i, m->textures.at(i)->dsaHandle);
-		}
-		
 	}
 
 	void GPU::drawGpuMesh()

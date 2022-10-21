@@ -39,16 +39,11 @@ namespace vel
 		activeScene(nullptr),
         startTime(std::chrono::high_resolution_clock::now())
     {        
-        /* load default shaders
+        /* load default shaders and textures
 		***************************************************************/
-        
-        
-        // used for bullet debug drawer
         this->assetManager.loadShader("defaultDebug", 
         "data/shaders/defaults/debug.vert", "data/shaders/defaults/debug.frag");
 
-
-		// shader for static diffuse color, a basic texture unaffected by light sources
 		this->assetManager.loadShader("default",
 			"data/shaders/defaults/default.vert", "data/shaders/defaults/default.frag");
 
@@ -57,20 +52,23 @@ namespace vel
 
 		this->assetManager.loadShader("defaultSkinned",
 			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/default.frag");
+
+		this->assetManager.loadShader("defaultPOM",
+			"data/shaders/defaults/default.vert", "data/shaders/defaults/defaultPOM.frag");
         
 		// used for rendering texture to screen buffer
 		this->assetManager.loadShader("defaultScreen",
 			"data/shaders/defaults/screen.vert", "data/shaders/defaults/screen.frag");
 
+		// load default textures
+		this->assetManager.loadTexture("defaultNormal", "normal", "data/textures/defaults/normal.jpg");
+		this->assetManager.loadTexture("defaultHeight", "height", "data/textures/defaults/height.jpg");
         
-        // send all these shaders to gpu
+        // send all these shaders and textures to gpu
         this->assetManager.sendAllToGpu();
        
 		this->gpu->setDefaultShader(this->assetManager.getShader("defaultScreen"));
         
-        // load default textures
-		//this->assetManager.loadTexture("__default__", "diffuse", "data/textures/defaults/default.jpg");
-		//this->assetManager.sendAllToGpu();
 
 
 		//create separate thread that will poll scenes and load them into system memory asynchronously
