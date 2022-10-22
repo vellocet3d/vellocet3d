@@ -1,0 +1,57 @@
+#include "vel\TextureAnimator.h"
+
+namespace vel
+{
+
+	TextureAnimator::TextureAnimator(float frameCount, float fps) :
+		frameCount(frameCount),
+		framesPerSecond(fps),
+		currentFrame(0),
+		currentCycleTime(0.0f),
+		currentCycle(1),
+		paused(true),
+		pauseAfterCycles(0)
+	{}
+
+	void TextureAnimator::setPaused(bool p)
+	{
+		this->paused = p;
+	}
+
+	void TextureAnimator::setFramesPerSecond(float fps)
+	{
+		this->framesPerSecond = fps;
+	}
+
+	void TextureAnimator::setPauseAfterCycles(unsigned int c)
+	{
+		this->pauseAfterCycles = c;
+	}
+
+	unsigned int TextureAnimator::update(float frameTime)
+	{
+		if (this->paused)
+			return this->currentFrame;
+
+		float numberOfFramesToPlayPerSecond = 1.0f / this->framesPerSecond;
+
+		unsigned int nextFrame = (unsigned int)(this->currentCycleTime / numberOfFramesToPlayPerSecond);
+
+		if (nextFrame == this->frameCount) // since we're 0 based
+		{
+			if (this->pauseAfterCycles == this->currentCycle)
+				this->paused = true;
+
+			this->currentCycle += 1;
+			this->currentCycleTime = 0.0f;
+
+			return this->currentFrame;
+		}
+
+		this->currentCycleTime += frameTime;
+
+		this->currentFrame = nextFrame;
+
+		return this->currentFrame;
+	}
+}
