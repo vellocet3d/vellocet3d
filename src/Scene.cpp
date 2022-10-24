@@ -540,9 +540,9 @@ namespace vel
 			this->armaturesInUse.push_back(tts.second);
 	}
 	
-	void Scene::loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips)
+	void Scene::loadTexture(std::string name, std::string path)
 	{
-		this->texturesInUse.push_back(App::get().getAssetManager().loadTexture(name, type, path, mips));
+		this->texturesInUse.push_back(App::get().getAssetManager().loadTexture(name, path));
 	}
 	
 	void Scene::addMaterial(Material m)
@@ -765,7 +765,7 @@ namespace vel
 				if (c->isFinalRenderCam())
 				{
 					gpu->updateViewportSize(c->getViewportSize().x, c->getViewportSize().y); // TODO: can probably do this outside of this loop since this render is the screen size
-					gpu->drawScreen(c->getRenderTarget()->texture.dsaHandle);
+					gpu->drawScreen(c->getRenderTarget()->texture.frames.at(0).dsaHandle);
 				}
 			}
 		}

@@ -1,6 +1,7 @@
 #include <thread> 
 #include <chrono>
 #include <iostream>
+#include <filesystem>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image/stb_image.h"
@@ -38,7 +39,6 @@ namespace vel
 			c->gpuLoaded = true;
 
 			c->ptr->getRenderTarget()->texture.name = c->ptr->getName() + "_RT";
-			c->ptr->getRenderTarget()->texture.type = "RENDER_TARGET";
 			c->ptr->getRenderTarget()->texture.alphaChannel = false;
 
 			this->shadersThatNeedGpuLoad.pop_front();
@@ -304,7 +304,49 @@ if (!this->meshTrackers.exists(name))
 
 	/* Textures
 	--------------------------------------------------*/
-	std::string AssetManager::loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips)
+	TextureData AssetManager::generateTextureData(std::string path)
+	{
+		TextureData td;
+		td.primaryImageData.data = stbi_load(
+			path.c_str(),
+			&td.primaryImageData.width,
+			&td.primaryImageData.height,
+			&td.primaryImageData.nrComponents,
+			0
+		);
+
+#ifdef DEBUG_LOG
+		if (!td.primaryImageData.data)
+			Log::crash("AssetManager::loadTexture(): Unable to load texture at path: " + path);
+		if (td.primaryImageData.width != td.primaryImageData.height)
+			Log::crash("AssetManager::loadTexture(): Texture not square: " + path);
+		if (!isPowerOfTwo(td.primaryImageData.width))
+			Log::crash("AssetManager::loadTexture(): Texture not power of two: " + path);
+#endif
+
+		if (td.primaryImageData.nrComponents == 1)
+		{
+			td.alphaChannel = false;
+			td.primaryImageData.sizedFormat = GL_R8; // TODO IDK if 8 bit is right for this
+			td.primaryImageData.format = GL_RED;
+		}
+		else if (td.primaryImageData.nrComponents == 3)
+		{
+			td.alphaChannel = false;
+			td.primaryImageData.sizedFormat = GL_RGB8; // TODO IDK if 8 bit is right for this
+			td.primaryImageData.format = GL_RGB;
+		}
+		else if (td.primaryImageData.nrComponents == 4)
+		{
+			td.alphaChannel = true;
+			td.primaryImageData.sizedFormat = GL_RGBA8; // TODO IDK if 8 bit is right for this
+			td.primaryImageData.format = GL_RGBA;
+		}
+
+		return td;
+	}
+
+	std::string AssetManager::loadTexture(std::string name, std::string path)
 	{	
 		if (this->textureTrackers.exists(name))
 		{
@@ -320,52 +362,42 @@ if (!this->meshTrackers.exists(name))
 			else
 			{
 				std::this_thread::sleep_for(100ms);
-				return this->loadTexture(name, type, path, mips);
+				return this->loadTexture(name, path);
 			}			
 		}
 
 #ifdef DEBUG_LOG
 	Log::toCliAndFile("Load new Texture: " + name);
 #endif
-
 		Texture texture;
 		texture.name = name;
-		texture.type = type;
-		texture.primaryImageData.data = stbi_load(
-			path.c_str(), 
-			&texture.primaryImageData.width, 
-			&texture.primaryImageData.height, 
-			&texture.primaryImageData.nrComponents, 
-			0
-		);
 
-#ifdef DEBUG_LOG
-	if (!texture.primaryImageData.data)
-		Log::crash("AssetManager::loadTexture(): Unable to load texture at path: " + path);
-	if (texture.primaryImageData.width != texture.primaryImageData.height)
-		Log::crash("AssetManager::loadTexture(): Texture not square: " + name);
-	if (!isPowerOfTwo(texture.primaryImageData.width))
-		Log::crash("AssetManager::loadTexture(): Texture not power of two: " + name);
-#endif
+		// Determine if path is a directory or file, if directory then load each file in the directory as
+		// a texture frame
+		if (std::filesystem::is_directory(path))
+		{
+			for (const auto & entry : std::filesystem::directory_iterator(path))
+			{
+				//std::cout << entry.path().string() << "\n";
+				texture.frames.push_back(this->generateTextureData(entry.path().string()));
+			}
+		}
+		else
+		{
+			texture.frames.push_back(this->generateTextureData(path));
+		}
 
-        if (texture.primaryImageData.nrComponents == 1)
-        {
-            texture.alphaChannel = false;
-			texture.primaryImageData.sizedFormat = GL_R8; // TODO IDK if 8 bit is right for this
-            texture.primaryImageData.format = GL_RED;
-        }
-        else if (texture.primaryImageData.nrComponents == 3)
-        {
-            texture.alphaChannel = false;
-			texture.primaryImageData.sizedFormat = GL_RGB8; // TODO IDK if 8 bit is right for this
-            texture.primaryImageData.format = GL_RGB;
-        }
-        else if (texture.primaryImageData.nrComponents == 4)
-        {
-            texture.alphaChannel = true;
-			texture.primaryImageData.sizedFormat = GL_RGBA8; // TODO IDK if 8 bit is right for this
-            texture.primaryImageData.format = GL_RGBA;
-        }
+		// loop over all frames and if any of them have alpha channel, set alpha channel member of texture to true
+		texture.alphaChannel = false;
+		for (auto& f : texture.frames)
+		{
+			if (f.alphaChannel)
+			{
+				texture.alphaChannel = true;
+				break;
+			}
+		}
+
 
 		/////////////////////////////////////////
 
@@ -604,6 +636,78 @@ if (!this->meshTrackers.exists(name))
 		Log::toCliAndFile("Decrement Material usageCount, retain: " + name);
 #endif	
 	}
+
+	/* MaterialAnimators
+	--------------------------------------------------*/
+	std::string AssetManager::addMaterialAnimator(MaterialAnimator ma)
+	{
+		if (this->materialAnimatorTrackers.exists(ma.name))
+		{
+#ifdef DEBUG_LOG
+			Log::toCliAndFile("Existing MaterialAnimator, bypass reload: " + ma.name);
+#endif
+			auto t = this->materialAnimatorTrackers.get(ma.name);
+			if (t->usageCount > 0)
+			{
+				t->usageCount++;
+				return ma.name;
+			}
+			else
+			{
+				std::this_thread::sleep_for(100ms);
+				return this->addMaterialAnimator(ma);
+			}
+		}
+
+#ifdef DEBUG_LOG
+		Log::toCliAndFile("Loading new MaterialAnimator: " + ma.name);
+#endif		
+
+
+		auto materialAnimatorPtr = this->materialAnimators.insert(ma.name, ma);
+
+		MaterialAnimatorTracker t;
+		t.ptr = materialAnimatorPtr;
+		t.usageCount++;
+
+		this->materialAnimatorTrackers.insert(ma.name, t);
+
+		return ma.name;
+	}
+
+	MaterialAnimator AssetManager::getMaterialAnimator(std::string name)
+	{
+#ifdef DEBUG_LOG
+		if (!this->materialAnimatorTrackers.exists(name))
+			Log::crash("AssetManager::getMaterialAnimator(): Attempting to get material animator that does not exist: " + name);
+#endif
+
+		return *this->materialAnimatorTrackers.get(name)->ptr;
+	}
+
+	void AssetManager::removeMaterialAnimator(std::string name)
+	{
+#ifdef DEBUG_LOG
+		if (!this->materialAnimatorTrackers.exists(name))
+			Log::crash("AssetManager::removeMaterialAnimator(): Attempting to remove material animator that does not exist: " + name);
+#endif
+
+		auto t = this->materialAnimatorTrackers.get(name);
+		t->usageCount--;
+		if (t->usageCount == 0)
+		{
+#ifdef DEBUG_LOG
+			Log::toCliAndFile("Full remove MaterialAnimator: " + name);
+#endif
+			this->materialAnimators.erase(name);
+			this->materialAnimatorTrackers.erase(name);
+		}
+#ifdef DEBUG_LOG
+		else
+			Log::toCliAndFile("Decrement MaterialAnimator usageCount, retain: " + name);
+#endif	
+	}
+
 
 	/* Animations
 	--------------------------------------------------*/	

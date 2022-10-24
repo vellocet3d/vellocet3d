@@ -12,7 +12,10 @@ namespace vel
 		shader(shader),
 		mesh(mesh),
 		material(material),
-		materialHasAlpha((material->hasAlphaChannel ? 1 : 0)){}
+		materialHasAlpha((material->hasAlphaChannel ? 1 : 0)),
+		materialAnimator(nullptr),
+		materialAnimatorUpdatedByActor(false)
+	{}
 
 	const std::string& Renderable::getName()
 	{

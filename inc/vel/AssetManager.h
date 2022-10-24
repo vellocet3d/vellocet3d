@@ -12,6 +12,7 @@
 #include "vel/Mesh.h"
 #include "vel/Texture.h"
 #include "vel/Material.h"
+#include "vel/MaterialAnimator.h"
 #include "vel/Renderable.h"
 #include "vel/Animation.h"
 #include "vel/Armature.h"
@@ -46,6 +47,9 @@ namespace vel
 		sac<Material>										materials;
 		sac<MaterialTracker> 								materialTrackers;
 
+		sac<MaterialAnimator>								materialAnimators;
+		sac<MaterialAnimatorTracker> 						materialAnimatorTrackers;
+
 		sac<Renderable>										renderables;
 		sac<RenderableTracker> 								renderableTrackers;
 
@@ -56,6 +60,7 @@ namespace vel
 		// since animations are tracked within an Armature, and they are only associated with a single armatureTracker
 		// we shouldn't need to track them, just account for them when adding/removing an armature
 
+		TextureData											generateTextureData(std::string path);
 		
 
 	public:
@@ -82,7 +87,7 @@ namespace vel
 		bool						meshIsGpuLoaded(std::string name);
 		void						removeMesh(std::string name);
 
-		std::string					loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
+		std::string					loadTexture(std::string name, std::string path);
 		Texture*					getTexture(std::string name);
 		bool						textureIsGpuLoaded(std::string name);
 		void						removeTexture(std::string name);
@@ -91,6 +96,11 @@ namespace vel
 		std::string					addMaterial(Material m);
 		Material*					getMaterial(std::string name);
 		void						removeMaterial(std::string name);
+
+
+		std::string					addMaterialAnimator(MaterialAnimator m);
+		MaterialAnimator			getMaterialAnimator(std::string name);
+		void						removeMaterialAnimator(std::string name);
 
 		
 

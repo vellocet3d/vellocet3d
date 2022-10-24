@@ -2,10 +2,12 @@
 
 #include <vector>
 #include <string>
+#include <optional>
 
 #include "vel/Shader.h"
 #include "vel/Mesh.h"
 #include "vel/Material.h"
+#include "vel/MaterialAnimator.h"
 
 #include "vel/ptrsac.h"
 
@@ -16,11 +18,15 @@ namespace vel
     class Renderable
     {
     private:
-		std::string					name;
-		Shader*						shader;
-		Mesh*						mesh;
-		Material*					material;
-		size_t						materialHasAlpha;
+		std::string						name;
+		Shader*							shader;
+		Mesh*							mesh;
+		Material*						material;
+		size_t							materialHasAlpha;
+
+		//MaterialAnimator*				materialAnimator;
+		//bool							materialAnimatorUpdatedByActor;
+
 
     public:
 									Renderable(std::string rn, Shader* shader, Mesh* mesh, Material* material);
@@ -31,6 +37,11 @@ namespace vel
 		Mesh*						getMesh();
 
 		ptrsac<Actor*>				actors;
+
+		//void								setMaterialAnimator(MaterialAnimator ma);
+		//MaterialAnimator*					getMaterialAnimator();
+		//void								setMaterialAnimatorUpdatedByActor(bool b);
+		//bool								getMaterialAnimatorUpdatedByActor();
 
     };
 }

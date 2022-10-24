@@ -138,7 +138,7 @@ namespace vel
 	void GPU::initTextureUBO()
 	{
 		
-		const int MAX_SUPPORTED_TEXTURES = 1000;
+		const int MAX_SUPPORTED_TEXTURES = 250;
 		glGenBuffers(1, &this->texturesUBO);
 		glBindBuffer(GL_UNIFORM_BUFFER, this->texturesUBO);
 		//glBufferData(GL_UNIFORM_BUFFER, MAX_SUPPORTED_TEXTURES * sizeof(GLuint64), NULL, GL_STATIC_DRAW);
@@ -201,14 +201,18 @@ namespace vel
 
 	void GPU::clearTexture(Texture* t)
 	{
-		glMakeTextureHandleNonResidentARB(t->dsaHandle);
-		glDeleteTextures(1, &t->id);
+		for (auto& td : t->frames)
+		{
+			glMakeTextureHandleNonResidentARB(td.dsaHandle);
+			glDeleteTextures(1, &td.id);
+		}
+		
 	}
 
 	void GPU::clearRenderTarget(RenderTarget* rt)
 	{
-		glMakeTextureHandleNonResidentARB(rt->texture.dsaHandle);
-		glDeleteTextures(1, &rt->texture.id);
+		glMakeTextureHandleNonResidentARB(rt->texture.frames.at(0).dsaHandle);
+		glDeleteTextures(1, &rt->texture.frames.at(0).id);
 		glDeleteRenderbuffers(1, &rt->RBO);
 		glDeleteFramebuffers(1, &rt->FBO);
 	}
@@ -330,19 +334,21 @@ namespace vel
 		RenderTarget rt;
 		rt.resolution = glm::ivec2(width, height);
 
+		TextureData td;
+		rt.texture.frames.push_back(td);
 		
 
 		glGenFramebuffers(1, &rt.FBO);
-		glGenTextures(1, &rt.texture.id);
+		glGenTextures(1, &rt.texture.frames.at(0).id);
 		glGenRenderbuffers(1, &rt.RBO);
 
 		this->updateRenderTarget(&rt);
 
 		// obtain texture's DSA handle
-		rt.texture.dsaHandle = glGetTextureHandleARB(rt.texture.id);
+		rt.texture.frames.at(0).dsaHandle = glGetTextureHandleARB(rt.texture.frames.at(0).id);
 
 		// set texture's DSA handle as resident so it can be accessed in shaders
-		glMakeTextureHandleResidentARB(rt.texture.dsaHandle);
+		glMakeTextureHandleResidentARB(rt.texture.frames.at(0).dsaHandle);
 
 		return rt;
 	}
@@ -351,12 +357,12 @@ namespace vel
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, rt->FBO);
 
-		glBindTexture(GL_TEXTURE_2D, rt->texture.id);
+		glBindTexture(GL_TEXTURE_2D, rt->texture.frames.at(0).id);
 		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rt->resolution.x, rt->resolution.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rt->resolution.x, rt->resolution.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rt->texture.id, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rt->texture.frames.at(0).id, 0);
 
 		glBindRenderbuffer(GL_RENDERBUFFER, rt->RBO);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, rt->resolution.x, rt->resolution.y);
@@ -427,67 +433,43 @@ namespace vel
 
 	void GPU::loadTexture(Texture* t)
 	{
-		//// create a texture buffer and bind it to context
-		glGenTextures(1, &t->id);
-		glBindTexture(GL_TEXTURE_2D, t->id);
+		for (auto& td : t->frames)
+		{
+			//// create a texture buffer and bind it to context
+			glGenTextures(1, &td.id);
+			glBindTexture(GL_TEXTURE_2D, td.id);
 
-		////// define properties of this texture
-		//glTexStorage2D(
-		//	GL_TEXTURE_2D,
-		//	6,
-		//	//t->primaryImageData.format,
-		//	t->primaryImageData.sizedFormat,
-		//	t->primaryImageData.width,
-		//	t->primaryImageData.height
-		//);
+			// load data into the buffer
+			glTexImage2D(
+				GL_TEXTURE_2D,
+				0,
+				td.primaryImageData.sizedFormat,
+				td.primaryImageData.width,
+				td.primaryImageData.height,
+				0,
+				td.primaryImageData.format,
+				GL_UNSIGNED_BYTE,
+				td.primaryImageData.data
+			);
 
-		////// fill texture with data
-		//glTexSubImage2D(
-		//	GL_TEXTURE_2D,
-		//	0,
-		//	0,
-		//	0,
-		//	t->primaryImageData.width,
-		//	t->primaryImageData.height,
-		//	t->primaryImageData.format,
-		//	GL_UNSIGNED_BYTE,
-		//	t->primaryImageData.data
-		//);
+			//// auto generate mipmap levels for texture
+			glGenerateMipmap(GL_TEXTURE_2D);
 
-		glTexImage2D(
-			GL_TEXTURE_2D, 
-			0, 
-			t->primaryImageData.sizedFormat, 
-			t->primaryImageData.width, 
-			t->primaryImageData.height, 
-			0, 
-			t->primaryImageData.format, 
-			GL_UNSIGNED_BYTE,
-			t->primaryImageData.data
-		);
+			// set texture parameters
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-		//// auto generate mipmap levels for texture
-		glGenerateMipmap(GL_TEXTURE_2D);
+			// obtain texture's DSA handle
+			td.dsaHandle = glGetTextureHandleARB(td.id);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			// set texture's DSA handle as resident so it can be accessed in shaders
+			glMakeTextureHandleResidentARB(td.dsaHandle);
 
-		// obtain texture's DSA handle
-		t->dsaHandle = glGetTextureHandleARB(t->id);
-
-		// set texture's DSA handle as resident so it can be accessed in shaders
-		glMakeTextureHandleResidentARB(t->dsaHandle);
-
-		// send handle to texturesUBO inserting this handle at this texture's dsaIdIndex
-		//this->updateTextureUBO(t->dsaIdIndex, handle);
-
-
-
-
-			
-		stbi_image_free(t->primaryImageData.data);
+			stbi_image_free(td.primaryImageData.data);
+		}
+		
 	}
 
 	const Shader* const GPU::getActiveShader() const

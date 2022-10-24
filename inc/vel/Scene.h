@@ -57,7 +57,7 @@ namespace vel
 
 		void								loadShader(std::string name, std::string vertFile, std::string fragFile);
 		void								loadMesh(std::string path);
-		void								loadTexture(std::string name, std::string type, std::string path, std::vector<std::string> mips = std::vector<std::string>());
+		void								loadTexture(std::string name, std::string path);
         void								loadConfigFile(std::string path);
 
 		void								addCamera(Camera m);
