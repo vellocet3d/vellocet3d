@@ -604,14 +604,14 @@ if (!this->meshTrackers.exists(name))
 		return m.name;
 	}
 
-	Material* AssetManager::getMaterial(std::string name)
+	Material AssetManager::getMaterial(std::string name)
 	{
 #ifdef DEBUG_LOG
 	if (!this->materialTrackers.exists(name))
 		Log::crash("AssetManager::getMaterial(): Attempting to get material that does not exist: " + name);
 #endif
 
-		return this->materialTrackers.get(name)->ptr;
+		return *this->materialTrackers.get(name)->ptr;
 	}
 	
 	void AssetManager::removeMaterial(std::string name)
@@ -637,78 +637,6 @@ if (!this->meshTrackers.exists(name))
 #endif	
 	}
 
-	/* MaterialAnimators
-	--------------------------------------------------*/
-	std::string AssetManager::addMaterialAnimator(MaterialAnimator ma)
-	{
-		if (this->materialAnimatorTrackers.exists(ma.name))
-		{
-#ifdef DEBUG_LOG
-			Log::toCliAndFile("Existing MaterialAnimator, bypass reload: " + ma.name);
-#endif
-			auto t = this->materialAnimatorTrackers.get(ma.name);
-			if (t->usageCount > 0)
-			{
-				t->usageCount++;
-				return ma.name;
-			}
-			else
-			{
-				std::this_thread::sleep_for(100ms);
-				return this->addMaterialAnimator(ma);
-			}
-		}
-
-#ifdef DEBUG_LOG
-		Log::toCliAndFile("Loading new MaterialAnimator: " + ma.name);
-#endif		
-
-
-		auto materialAnimatorPtr = this->materialAnimators.insert(ma.name, ma);
-
-		MaterialAnimatorTracker t;
-		t.ptr = materialAnimatorPtr;
-		t.usageCount++;
-
-		this->materialAnimatorTrackers.insert(ma.name, t);
-
-		return ma.name;
-	}
-
-	MaterialAnimator AssetManager::getMaterialAnimator(std::string name)
-	{
-#ifdef DEBUG_LOG
-		if (!this->materialAnimatorTrackers.exists(name))
-			Log::crash("AssetManager::getMaterialAnimator(): Attempting to get material animator that does not exist: " + name);
-#endif
-
-		return *this->materialAnimatorTrackers.get(name)->ptr;
-	}
-
-	void AssetManager::removeMaterialAnimator(std::string name)
-	{
-#ifdef DEBUG_LOG
-		if (!this->materialAnimatorTrackers.exists(name))
-			Log::crash("AssetManager::removeMaterialAnimator(): Attempting to remove material animator that does not exist: " + name);
-#endif
-
-		auto t = this->materialAnimatorTrackers.get(name);
-		t->usageCount--;
-		if (t->usageCount == 0)
-		{
-#ifdef DEBUG_LOG
-			Log::toCliAndFile("Full remove MaterialAnimator: " + name);
-#endif
-			this->materialAnimators.erase(name);
-			this->materialAnimatorTrackers.erase(name);
-		}
-#ifdef DEBUG_LOG
-		else
-			Log::toCliAndFile("Decrement MaterialAnimator usageCount, retain: " + name);
-#endif	
-	}
-
-
 	/* Animations
 	--------------------------------------------------*/	
 	Animation* AssetManager::addAnimation(Animation a)
@@ -718,7 +646,42 @@ if (!this->meshTrackers.exists(name))
 
 	/* Renderables
 	--------------------------------------------------*/
-	std::string AssetManager::addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material)
+	std::string AssetManager::addRenderable(std::string name, Shader* shader, Mesh* mesh)
+	{
+		if (this->renderableTrackers.exists(name))
+		{
+#ifdef DEBUG_LOG
+			Log::toCliAndFile("Existing Renderable, bypass reload: " + name);
+#endif
+			auto t = this->renderableTrackers.get(name);
+			if (t->usageCount > 0)
+			{
+				t->usageCount++;
+				return name;
+			}
+			else
+			{
+				std::this_thread::sleep_for(100ms);
+				return this->addRenderable(name, shader, mesh);
+			}
+		}
+
+#ifdef DEBUG_LOG
+		Log::toCliAndFile("Loading new Renderable: " + name);
+#endif	
+
+		auto renderablePtr = this->renderables.insert(name, Renderable(name, shader, mesh));
+
+		RenderableTracker t;
+		t.ptr = renderablePtr;
+		t.usageCount++;
+
+		this->renderableTrackers.insert(name, t);
+
+		return name;
+	}
+
+	std::string AssetManager::addRenderable(std::string name, Shader* shader, Mesh* mesh, Material material)
 	{
 		if (this->renderableTrackers.exists(name))
 		{

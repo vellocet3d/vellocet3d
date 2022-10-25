@@ -550,9 +550,14 @@ namespace vel
 		this->materialsInUse.push_back(App::get().getAssetManager().addMaterial(m));
 	}
 	
-	void Scene::addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material)
+	void Scene::addRenderable(std::string name, Shader* shader, Mesh* mesh, Material material)
 	{
 		this->renderablesInUse.push_back(App::get().getAssetManager().addRenderable(name, shader, mesh, material));
+	}
+
+	void Scene::addRenderable(std::string name, Shader* shader, Mesh* mesh)
+	{
+		this->renderablesInUse.push_back(App::get().getAssetManager().addRenderable(name, shader, mesh));
 	}
 
 	Shader* Scene::getShader(std::string name)
@@ -570,7 +575,7 @@ namespace vel
 		return App::get().getAssetManager().getTexture(name);
 	}
 
-	Material* Scene::getMaterial(std::string name)
+	Material Scene::getMaterial(std::string name)
 	{
 		return App::get().getAssetManager().getMaterial(name);
 	}
@@ -600,6 +605,42 @@ namespace vel
 
 	/* Misc
 	--------------------------------------------------*/
+	void Scene::updateMaterialAnimations(double frameTime)
+	{
+		for (auto& s : this->stages.getAll())
+		{
+			for (auto am : s->animatedMaterials.getAll())
+			{
+				//std::cout << "here001\n";
+				am->materialAnimator->update(frameTime);
+			}
+		}
+			
+
+		//for (auto& s : this->stages.getAll())
+		//{
+		//	for (auto r : s->getRenderables())
+		//	{
+		//		// renderable has a material and that material has a material animator
+		//		if (r->getMaterial().has_value() && r->getMaterial()->materialAnimator.has_value())
+		//		{
+		//			r->getMaterial()->materialAnimator->update(frameTime);
+		//		}
+		//		// renderable does not have a material, so we assume that it's actors do
+		//		else if (!r->getMaterial().has_value())
+		//		{
+		//			for (auto a : r->actors.getAll())
+		//			{
+		//				if (a->getMaterial().has_value() && a->getMaterial()->materialAnimator.has_value())
+		//				{
+		//					a->getMaterial()->materialAnimator->update(frameTime);
+		//				}
+		//			}
+		//		}
+		//	}
+		//}
+	}
+
 	void Scene::updateFixedAnimations(double delta)
 	{
 		this->fixedAnimationTime += delta;
@@ -685,7 +726,8 @@ namespace vel
 
 				for (auto r : s->getRenderables())
 				{
-					if (r->getMaterialHasAlpha())
+					//if (r->getMaterialHasAlpha())
+					if(r->getMaterial().has_value() && r->getMaterial()->hasAlphaChannel)
 					{
 						for (auto a : r->actors.getAll())
 						{
@@ -700,13 +742,15 @@ namespace vel
 					// RESET GPU STATE FOR THIS RENDERABLE
 					gpu->useShader(r->getShader());
 					gpu->useMesh(r->getMesh());
-					gpu->useMaterial(r->getMaterial());
+
+					if(r->getMaterial().has_value())
+						gpu->useMaterial(&r->getMaterial().value());
 
 					for (auto a : r->actors.getAll())
 					{
 						// if this actor has a color with a transparent component less than fully opaque, push it onto
 						// transparentActors queue and continue the loop without drawing the actor
-						if (a->getColor().w < 1.0f)
+						if ((a->getColor().w < 1.0f) || (a->getMaterial().has_value() && a->getMaterial()->hasAlphaChannel))
 						{
 							float dist = glm::length(this->cameraPosition - a->getTransform().getTranslation());
 							this->transparentActors.push_back(std::pair<float, Actor*>(dist, a));
@@ -724,7 +768,7 @@ namespace vel
 				// from the current camera position
 				std::sort(transparentActors.begin(), transparentActors.end(), [](auto &left, auto &right) {
 					return left.first < right.first;
-					});
+				});
 
 				// Draw all transparent/translucent actors
 				for (std::vector<std::pair<float, Actor*>>::reverse_iterator it = transparentActors.rbegin(); it != transparentActors.rend(); ++it)
@@ -732,9 +776,14 @@ namespace vel
 					// Reset gpu state for this ACTOR and draw
 					auto r = it->second->getStageRenderable().value();
 
+					// TODO: have to reset entire state for each actor since they have to be rendered in order from
+					// distance to camera...need to come up with a better solution to this
+
 					gpu->useShader(r->getShader());
 					gpu->useMesh(r->getMesh());
-					gpu->useMaterial(r->getMaterial());
+
+					if (r->getMaterial().has_value())
+						gpu->useMaterial(&r->getMaterial().value());
 
 					this->drawActor(it->second, alpha);
 				}
@@ -799,6 +848,9 @@ namespace vel
 
 		if (a->isVisible())
 		{
+			if (a->getMaterial().has_value())
+				gpu->useMaterial(&a->getMaterial().value());
+
 			gpu->setShaderVec4("color", a->getColor());
 			gpu->setShaderMat4("mvp", this->cameraProjectionMatrix * this->cameraViewMatrix * a->getWorldRenderMatrix(alphaTime));
 

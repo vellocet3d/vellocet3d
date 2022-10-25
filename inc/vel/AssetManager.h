@@ -47,9 +47,6 @@ namespace vel
 		sac<Material>										materials;
 		sac<MaterialTracker> 								materialTrackers;
 
-		sac<MaterialAnimator>								materialAnimators;
-		sac<MaterialAnimatorTracker> 						materialAnimatorTrackers;
-
 		sac<Renderable>										renderables;
 		sac<RenderableTracker> 								renderableTrackers;
 
@@ -94,19 +91,14 @@ namespace vel
         
 
 		std::string					addMaterial(Material m);
-		Material*					getMaterial(std::string name);
+		Material					getMaterial(std::string name);
 		void						removeMaterial(std::string name);
-
-
-		std::string					addMaterialAnimator(MaterialAnimator m);
-		MaterialAnimator			getMaterialAnimator(std::string name);
-		void						removeMaterialAnimator(std::string name);
-
 		
 
 		Animation*					addAnimation(Animation a);
 
-		std::string					addRenderable(std::string name, Shader* shader, Mesh* mesh, Material* material);
+		std::string					addRenderable(std::string name, Shader* shader, Mesh* mesh);
+		std::string					addRenderable(std::string name, Shader* shader, Mesh* mesh, Material material);
 		Renderable					getRenderable(std::string name);
 		void						removeRenderable(std::string name);
 

@@ -13,6 +13,7 @@
 #include "vel/Mesh.h"
 #include "vel/Transform.h"
 #include "vel/Renderable.h"
+#include "vel/Material.h"
 
 
 namespace vel
@@ -53,7 +54,7 @@ namespace vel
 		
 		glm::vec4										color; // overwrites material color property, defaults to 1.0
 
-
+		std::optional<Material>							material; // overwrites renderable material
 
 
 	public:
@@ -120,6 +121,10 @@ namespace vel
 
 		void											setColor(glm::vec4 c);
 		const glm::vec4&								getColor();
+
+		void											setMaterial(Material m);
+		std::optional<Material>&						getMaterial();
+
 
 	};
 }

@@ -367,8 +367,14 @@ namespace vel
                     this->accumulator -= this->fixedLogicTime;
                 }
 				
+				this->activeScene->updateMaterialAnimations(this->frameTime);
 
 				//this->activeScene->updateAnimations(this->frameTime); // not sure why this was commented out, but probably shouldn't be
+																		// i believe this is where we would update a skeletal animation which
+																		// does not have a flag of shouldInterpolate...meaning it would be a realtime
+																		// animation, not required to be updated at a fixed rate for consistent logic
+																		// so yeah, this doesn't need to be commented out, but leaving for now until
+																		// we're done with what we're doing
 
 
 				float renderLerpInterval = (float)(this->accumulator / this->fixedLogicTime);

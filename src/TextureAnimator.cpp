@@ -9,9 +9,14 @@ namespace vel
 		currentFrame(0),
 		currentCycleTime(0.0f),
 		currentCycle(1),
-		paused(true),
+		paused(false),
 		pauseAfterCycles(0)
 	{}
+
+	unsigned int TextureAnimator::getCurrentFrame()
+	{
+		return this->currentFrame;
+	}
 
 	void TextureAnimator::setPaused(bool p)
 	{

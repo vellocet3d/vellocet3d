@@ -23,6 +23,16 @@ namespace vel
 		color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))
 	{}
 
+	void Actor::setMaterial(Material m)
+	{
+		this->material = m;
+	}
+
+	std::optional<Material>& Actor::getMaterial()
+	{
+		return this->material;
+	}
+
 	void Actor::setColor(glm::vec4 c)
 	{
 		this->color = c;

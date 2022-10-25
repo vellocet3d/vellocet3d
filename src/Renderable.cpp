@@ -7,24 +7,22 @@
 namespace vel
 {
 
-    Renderable::Renderable(std::string rn, Shader* shader, Mesh* mesh, Material* material) :
+    Renderable::Renderable(std::string rn, Shader* shader, Mesh* mesh, Material material) :
 		name(rn),
 		shader(shader),
 		mesh(mesh),
-		material(material),
-		materialHasAlpha((material->hasAlphaChannel ? 1 : 0)),
-		materialAnimator(nullptr),
-		materialAnimatorUpdatedByActor(false)
+		material(material)
+	{}
+
+	Renderable::Renderable(std::string rn, Shader* shader, Mesh* mesh) :
+		name(rn),
+		shader(shader),
+		mesh(mesh)
 	{}
 
 	const std::string& Renderable::getName()
 	{
 		return this->name;
-	}
-    
-	const size_t& Renderable::getMaterialHasAlpha() const
-	{
-		return this->materialHasAlpha;
 	}
 
 	Shader*	Renderable::getShader()
@@ -32,7 +30,7 @@ namespace vel
 		return this->shader;
 	}
 
-	Material* Renderable::getMaterial()
+	std::optional<Material>& Renderable::getMaterial()
 	{
 		return this->material;
 	}

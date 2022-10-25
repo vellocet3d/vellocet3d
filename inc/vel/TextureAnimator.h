@@ -23,5 +23,7 @@ namespace vel
 		void				setPauseAfterCycles(unsigned int c);
 		void				setPaused(bool p);
 
+		unsigned int		getCurrentFrame();
+
 	};
 }

@@ -45,11 +45,6 @@ namespace vel
 		size_t 			usageCount = 0;
 	};
 
-	struct MaterialAnimatorTracker {
-		MaterialAnimator* 	ptr = nullptr;
-		size_t 				usageCount = 0;
-	};
-
 	struct RenderableTracker{
 		Renderable* 	ptr = nullptr;
 		size_t 			usageCount = 0;

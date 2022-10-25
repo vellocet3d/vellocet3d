@@ -8,6 +8,7 @@
 #include "glm/glm.hpp"
 
 #include "vel/sac.h"
+#include "vel/ptrsac.h"
 #include "vel/Actor.h"
 #include "vel/Camera.h"
 #include "vel/Renderable.h"
@@ -66,6 +67,8 @@ namespace vel
 		const std::string&								getName() const;
 		
 		Armature*										getArmature(std::string armatureName);	
+
+		ptrsac<Material*>								animatedMaterials;
 
 	};
 }

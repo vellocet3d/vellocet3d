@@ -21,27 +21,19 @@ namespace vel
 		std::string						name;
 		Shader*							shader;
 		Mesh*							mesh;
-		Material*						material;
-		size_t							materialHasAlpha;
+		std::optional<Material>			material;
 
-		//MaterialAnimator*				materialAnimator;
-		//bool							materialAnimatorUpdatedByActor;
 
 
     public:
-									Renderable(std::string rn, Shader* shader, Mesh* mesh, Material* material);
-		const size_t&				getMaterialHasAlpha() const;
+									Renderable(std::string rn, Shader* shader, Mesh* mesh, Material material);
+									Renderable(std::string rn, Shader* shader, Mesh* mesh);
 		const std::string&			getName();
 		Shader*						getShader();
-		Material*					getMaterial();
+		std::optional<Material>&	getMaterial();
 		Mesh*						getMesh();
 
 		ptrsac<Actor*>				actors;
-
-		//void								setMaterialAnimator(MaterialAnimator ma);
-		//MaterialAnimator*					getMaterialAnimator();
-		//void								setMaterialAnimatorUpdatedByActor(bool b);
-		//bool								getMaterialAnimatorUpdatedByActor();
 
     };
 }

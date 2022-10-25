@@ -4,6 +4,8 @@
 #include <optional>
 #include <vector>
 
+#include "vel/MaterialAnimator.h"
+
 
 namespace vel
 {
@@ -16,9 +18,20 @@ namespace vel
 		std::vector<Texture*>	textures;
 		bool					hasAlphaChannel = false;
 
+		std::optional<MaterialAnimator> materialAnimator;
+
 		void addTexture(Texture* t) 
 		{
 			this->textures.push_back(t);
+		}
+
+		void addAnimatedTexture(Texture* t, float fps)
+		{
+			if (!this->materialAnimator.has_value())
+				this->materialAnimator = MaterialAnimator();
+			
+			this->addTexture(t);
+			this->materialAnimator->addTextureAnimator(t->frames.size(), fps);
 		}
 	};
 }

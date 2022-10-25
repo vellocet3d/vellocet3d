@@ -562,8 +562,26 @@ namespace vel
 
 		this->setShaderVec4("color", m->color);
 
-		for (unsigned int i = 0; i < m->textures.size(); i++)
-			this->updateTextureUBO(i, m->textures.at(i)->dsaHandle);
+		//for (unsigned int i = 0; i < m->textures.size(); i++)
+		//	this->updateTextureUBO(i, m->textures.at(i)->dsaHandle);
+
+		if (!m->materialAnimator.has_value())
+		{
+			for (unsigned int i = 0; i < m->textures.size(); i++)
+				this->updateTextureUBO(i, m->textures.at(i)->frames.at(0).dsaHandle);
+		}
+		else
+		{
+			//std::cout << "here004\n";
+			for (unsigned int i = 0; i < m->textures.size(); i++)
+			{
+				//std::cout << "here005\n";
+				auto currentTextureFrame = m->materialAnimator->getTextureCurrentFrame(i);
+				//std::cout << currentTextureFrame << "\n";
+				this->updateTextureUBO(i, m->textures.at(i)->frames.at(currentTextureFrame).dsaHandle);
+			}
+		}
+
 	}
 
 	void GPU::drawGpuMesh()
