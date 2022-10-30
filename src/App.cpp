@@ -244,12 +244,12 @@ namespace vel
 
     void App::displayAverageFrameTime()
     {
-        if (this->canDisplayAverageFrameTime)
-        {    
-			std::string message = "FrameTime: " + std::to_string(this->averageFrameRate) + " | FPS: " + std::to_string(this->averageFrameRate);
+        //if (this->canDisplayAverageFrameTime)
+        //{
+			std::string message = "CurrentTime: " + std::to_string(this->currentTime) + " | FPS: " + std::to_string(this->averageFrameRate);
 
 			this->window->setTitle(message);
-        }
+        //}
     }
 
 	bool App::getPauseBufferClearAndSwap()
@@ -260,6 +260,11 @@ namespace vel
 	void App::setPauseBufferClearAndSwap(bool in)
 	{
 		this->pauseBufferClearAndSwap = in;
+	}
+
+	double App::getCurrentTime()
+	{
+		return this->currentTime;
 	}
 
     void App::execute()

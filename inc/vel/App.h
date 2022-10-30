@@ -89,5 +89,7 @@ namespace vel
 
 		Scene*											getActiveScene();
 
+		double											getCurrentTime();
+
     };
 };
