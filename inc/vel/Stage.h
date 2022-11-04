@@ -32,7 +32,6 @@ namespace vel
 		sac<Renderable>									renderables;
 		bool											clearDepthBuffer;
 		std::string										name;
-		bool											useSceneCameraPositionForLighting;
 
 		
 

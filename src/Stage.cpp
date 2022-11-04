@@ -18,8 +18,7 @@ namespace vel
 	Stage::Stage(std::string name) :
 		visible(true),
 		clearDepthBuffer(false),
-		name(name),
-		useSceneCameraPositionForLighting(true)
+		name(name)
 	{}
 
 	Stage::~Stage()
