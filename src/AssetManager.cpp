@@ -109,23 +109,8 @@ namespace vel
 	Log::toCliAndFile("Existing Shader, bypass reload: " + name);
 #endif
 			
-			// if usage count is not greater than zero then the asset is being deleted on the main thread
-			// so we will need to re-create it. This could still potentially be a race condition, although
-			// I would think it would be unlikely, putting a TODO here until we thoroughly test some 
-			// real world use cases to verify
-			if(this->shaderTrackers.get(name)->usageCount > 0)
-			{
-				this->shaderTrackers.get(name)->usageCount++;
-				return name;
-			}
-			// if name exists in map, AND usage count IS EQUAL TO 0, then we must have called this method
-			// from a thread other than the main thread. Therefore, let us poll until the name no longer 
-			// exists within the map so we do not recreate the asset while it's being deleted
-			else
-			{
-				std::this_thread::sleep_for(100ms);
-				return this->loadShader(name, vertFile, fragFile);
-			}			
+			this->shaderTrackers.get(name)->usageCount++;
+			return name;
 		}
 		
 #ifdef DEBUG_LOG
@@ -242,16 +227,8 @@ if (!this->shaderTrackers.exists(name))
 		if(this->meshTrackers.exists(name))
 		{
 			auto t = this->meshTrackers.get(name);
-			if(t->usageCount > 0)
-			{
-				t->usageCount++;
-				return t;
-			}
-			else
-			{
-				std::this_thread::sleep_for(100ms); //tf? Guessing I did this as some form of ghetto thread-safety? why not use mutex?
-				return this->getMeshTracker(name);
-			}
+			t->usageCount++;
+			return t;
 		}
 		
 		return nullptr;
@@ -353,17 +330,8 @@ if (!this->meshTrackers.exists(name))
 #ifdef DEBUG_LOG
 	Log::toCliAndFile("Existing Texture, bypass reload: " + name);
 #endif
-			auto t = this->textureTrackers.get(name);
-			if(t->usageCount > 0)
-			{
-				t->usageCount++;
-				return name;
-			}
-			else
-			{
-				std::this_thread::sleep_for(100ms);
-				return this->loadTexture(name, path);
-			}			
+			this->textureTrackers.get(name)->usageCount++;
+			return name;
 		}
 
 #ifdef DEBUG_LOG
@@ -375,17 +343,10 @@ if (!this->meshTrackers.exists(name))
 		// Determine if path is a directory or file, if directory then load each file in the directory as
 		// a texture frame
 		if (std::filesystem::is_directory(path))
-		{
 			for (const auto & entry : std::filesystem::directory_iterator(path))
-			{
-				//std::cout << entry.path().string() << "\n";
 				texture.frames.push_back(this->generateTextureData(entry.path().string()));
-			}
-		}
 		else
-		{
 			texture.frames.push_back(this->generateTextureData(path));
-		}
 
 		// loop over all frames and if any of them have alpha channel, set alpha channel member of texture to true
 		texture.alphaChannel = false;
@@ -475,17 +436,8 @@ if (!this->meshTrackers.exists(name))
 #ifdef DEBUG_LOG
 			Log::toCliAndFile("Existing Camera, bypass reload: " + c.getName());
 #endif
-			auto t = this->cameraTrackers.get(c.getName());
-			if (t->usageCount > 0)
-			{
-				t->usageCount++;
-				return c.getName();
-			}
-			else
-			{
-				std::this_thread::sleep_for(100ms);
-				return this->addCamera(c);
-			}
+			this->cameraTrackers.get(c.getName())->usageCount++;
+			return c.getName();
 		}
 
 #ifdef DEBUG_LOG
@@ -556,17 +508,8 @@ if (!this->meshTrackers.exists(name))
 #ifdef DEBUG_LOG
 	Log::toCliAndFile("Existing Material, bypass reload: " + m.name);
 #endif
-			auto t = this->materialTrackers.get(m.name);
-			if(t->usageCount > 0)
-			{
-				t->usageCount++;
-				return m.name;
-			}
-			else
-			{
-				std::this_thread::sleep_for(100ms);
-				return this->addMaterial(m);
-			}			
+			this->materialTrackers.get(m.name)->usageCount++;
+			return m.name;
 		}
 
 #ifdef DEBUG_LOG
@@ -653,17 +596,8 @@ if (!this->meshTrackers.exists(name))
 #ifdef DEBUG_LOG
 			Log::toCliAndFile("Existing Renderable, bypass reload: " + name);
 #endif
-			auto t = this->renderableTrackers.get(name);
-			if (t->usageCount > 0)
-			{
-				t->usageCount++;
-				return name;
-			}
-			else
-			{
-				std::this_thread::sleep_for(100ms);
-				return this->addRenderable(name, shader, mesh);
-			}
+			this->renderableTrackers.get(name)->usageCount++;
+			return name;
 		}
 
 #ifdef DEBUG_LOG
@@ -688,17 +622,8 @@ if (!this->meshTrackers.exists(name))
 #ifdef DEBUG_LOG
 	Log::toCliAndFile("Existing Renderable, bypass reload: " + name);
 #endif
-			auto t = this->renderableTrackers.get(name);
-			if(t->usageCount > 0)
-			{
-				t->usageCount++;
-				return name;
-			}
-			else
-			{
-				std::this_thread::sleep_for(100ms);
-				return this->addRenderable(name, shader, mesh, material);
-			}			
+			this->renderableTrackers.get(name)->usageCount++;
+			return name;		
 		}
 
 #ifdef DEBUG_LOG
@@ -756,16 +681,8 @@ if (!this->meshTrackers.exists(name))
 		if(this->armatureTrackers.exists(name))
 		{
 			auto t = this->armatureTrackers.get(name);
-			if(t->usageCount > 0)
-			{
-				t->usageCount++;
-				return t;
-			}
-			else
-			{
-				std::this_thread::sleep_for(100ms);
-				return this->getArmatureTracker(name);
-			}
+			t->usageCount++;
+			return t;
 		}
 		
 		return nullptr;

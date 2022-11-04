@@ -3,9 +3,6 @@
 #include <string>
 #include <unordered_map>
 
-//#include "plf_colony/plf_colony.h"
-//#include "robin_hood/robin_hood.h"
-
 #include "sac.h"
 
 #include "vel/Shader.h"
