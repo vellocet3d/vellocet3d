@@ -272,9 +272,6 @@ namespace vel
 
 	void App::stepSimulation(float dt)
 	{
-		if (this->activeScene == nullptr)
-			return;
-
 		// check if there is a scene loading on the loading thread, and if so and it is complete,
 		// and it should be swapped to when loaded, then swap the active scene with this one and
 		// clear it from the loading queue
@@ -292,6 +289,9 @@ namespace vel
 				this->sceneLoadingQueue.pop_front();
 			}
 		}
+
+		if (this->activeScene == nullptr)
+			return;
 
 		//// step physics simulation
 		this->activeScene->stepPhysics(dt);
