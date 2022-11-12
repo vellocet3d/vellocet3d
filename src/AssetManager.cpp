@@ -26,7 +26,11 @@ namespace vel
 
 	void AssetManager::sendAllToGpu()
 	{
-		for(auto& s : this->shadersThatNeedGpuLoad)
+		// should never be called without having a gpu member, but check here just in case for now
+		if (this->gpu == nullptr)
+			return;
+
+		for (auto& s : this->shadersThatNeedGpuLoad)
 		{
 			this->gpu->loadShader(s->ptr);
 			s->gpuLoaded = true;
@@ -43,7 +47,7 @@ namespace vel
 
 			this->shadersThatNeedGpuLoad.pop_front();
 		}
-		
+
 		for (auto& t : this->texturesThatNeedGpuLoad)
 		{
 			this->gpu->loadTexture(t->ptr);
@@ -51,7 +55,7 @@ namespace vel
 			this->texturesThatNeedGpuLoad.pop_front();
 		}
 
-		for(auto& m : this->meshesThatNeedGpuLoad)
+		for (auto& m : this->meshesThatNeedGpuLoad)
 		{
 			this->gpu->loadMesh(m->ptr);
 			m->gpuLoaded = true;
@@ -61,6 +65,10 @@ namespace vel
 
 	void AssetManager::sendNextToGpu()
 	{
+		// should never be called without having a gpu member, but check here just in case for now
+		if (this->gpu == nullptr)
+			return;
+
 		if (this->shadersThatNeedGpuLoad.size() > 0)
 		{
 			auto shaderTracker = this->shadersThatNeedGpuLoad.at(0);
@@ -97,7 +105,12 @@ namespace vel
 			this->meshesThatNeedGpuLoad.pop_front();
 			return;
 		}
+		
 	}
+
+	//TODO//////////////////////////////////////////////////////////////
+	// LEFT OFF RIGHT HERE
+	////////////////////////////////////////////////////////////////////
 
 	/* Shaders
 	--------------------------------------------------*/

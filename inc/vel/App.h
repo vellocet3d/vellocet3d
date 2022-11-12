@@ -91,5 +91,7 @@ namespace vel
 
 		double											getCurrentTime();
 
+		void											stepSimulation(float dt);
+
     };
 };

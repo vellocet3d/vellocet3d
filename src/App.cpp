@@ -33,36 +33,39 @@ namespace vel
 
     App::App(Config conf) :
         config(conf),
-		window(std::make_unique<Window>(this->config)),
-		gpu(std::make_unique<GPU>(this->window.get())),
-		assetManager(AssetManager(this->gpu.get())),
+		window(conf.HEADLESS ? nullptr : std::make_unique<Window>(this->config)),
+		gpu(conf.HEADLESS ? nullptr : std::make_unique<GPU>()),
+		assetManager(AssetManager(conf.HEADLESS ? nullptr : this->gpu.get())),
 		activeScene(nullptr),
         startTime(std::chrono::high_resolution_clock::now())
-    {        
-        /* load default shaders and textures
+    {
+
+        /* load default shaders and textures if not in headless mode
 		***************************************************************/
-        this->assetManager.loadShader("defaultDebug", 
-        "data/shaders/defaults/debug.vert", "data/shaders/defaults/debug.frag");
+		if (!conf.HEADLESS)
+		{
+			this->assetManager.loadShader("defaultDebug",
+				"data/shaders/defaults/debug.vert", "data/shaders/defaults/debug.frag");
 
-		this->assetManager.loadShader("default",
-			"data/shaders/defaults/default.vert", "data/shaders/defaults/default.frag");
+			this->assetManager.loadShader("default",
+				"data/shaders/defaults/default.vert", "data/shaders/defaults/default.frag");
 
-		this->assetManager.loadShader("defaultInvertUV",
-			"data/shaders/defaults/default.vert", "data/shaders/defaults/defaultInvertUV.frag");
+			this->assetManager.loadShader("defaultInvertUV",
+				"data/shaders/defaults/default.vert", "data/shaders/defaults/defaultInvertUV.frag");
 
-		this->assetManager.loadShader("defaultSkinned",
-			"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/default.frag");
+			this->assetManager.loadShader("defaultSkinned",
+				"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/default.frag");
+
+			// used for rendering texture to screen buffer
+			this->assetManager.loadShader("defaultScreen",
+				"data/shaders/defaults/screen.vert", "data/shaders/defaults/screen.frag");
+
+			// send all these shaders and textures to gpu
+			this->assetManager.sendAllToGpu();
+
+			this->gpu->setDefaultShader(this->assetManager.getShader("defaultScreen"));
+		}
         
-		// used for rendering texture to screen buffer
-		this->assetManager.loadShader("defaultScreen",
-			"data/shaders/defaults/screen.vert", "data/shaders/defaults/screen.frag");
-
-        // send all these shaders and textures to gpu
-        this->assetManager.sendAllToGpu();
-       
-		this->gpu->setDefaultShader(this->assetManager.getShader("defaultScreen"));
-        
-
 
 		//create separate thread that will poll scenes and load them into system memory asynchronously
 		std::thread t([this] {
@@ -158,7 +161,7 @@ namespace vel
     {
 		// TODO: this was required before to get imgui to work correctly, but that was when we could only ever load
 		// one scene at a time. Need to figure out how to integrate imgui into the new api
-		if(this->window->getImguiFrameOpen())
+		if(this->window != nullptr && this->window->getImguiFrameOpen())
 			this->forceImguiRender();
         //this->scene = std::move(std::move(std::unique_ptr<Scene>(scene)));
 
@@ -265,6 +268,51 @@ namespace vel
 	double App::getCurrentTime()
 	{
 		return this->currentTime;
+	}
+
+	void App::stepSimulation(float dt)
+	{
+		if (this->activeScene == nullptr)
+			return;
+
+		// check if there is a scene loading on the loading thread, and if so and it is complete,
+		// and it should be swapped to when loaded, then swap the active scene with this one and
+		// clear it from the loading queue
+		if (this->sceneLoadingQueue.size() > 0)
+		{
+			if (this->sceneLoadingQueue.at(0)->mainMemoryloaded)
+			{
+				if (this->sceneLoadingQueue.at(0)->swapWhenLoaded)
+				{
+					this->activeScene = this->sceneLoadingQueue.at(0).get();
+				}
+
+				this->scenes.push_back(std::move(this->sceneLoadingQueue.at(0)));
+
+				this->sceneLoadingQueue.pop_front();
+			}
+		}
+
+		//// step physics simulation
+		this->activeScene->stepPhysics(dt);
+
+		// TODO: at some point we will probably want to break dynamic actors out into
+		// their own container so we're not looping over and checking static actors,
+		// which there could be many of and would never need to have their transforms
+		// updated
+		this->activeScene->applyTransformations();
+
+		// execute all contact triggers
+		this->activeScene->processSensors();
+
+		// execute inner loop (fixed rate) logic
+		this->activeScene->innerLoop(dt);
+
+		// update animations
+		this->activeScene->updateFixedAnimations(dt);
+
+		// call postPhysics method to allow correction of any issues caused by collision solver
+		this->activeScene->postPhysics(dt);
 	}
 
     void App::execute()

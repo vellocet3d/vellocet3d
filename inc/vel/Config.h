@@ -31,6 +31,7 @@ namespace vel
         bool                                OPENGL_DEBUG_CONTEXT = true;
 		std::string							APP_EXE_NAME = "MyApp.exe";
 		std::string							APP_NAME = "MyApp";
+		bool								HEADLESS = false;
 		
 
 		std::vector<ImGuiFont>				imguiFonts;

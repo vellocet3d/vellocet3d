@@ -21,12 +21,9 @@ typedef uint64_t GLuint64;
 
 namespace vel
 {
-	class Window;
-
 	class GPU
 	{
 	private:
-		Window*								window;
         Shader*								defaultShader;
 		Shader*								activeShader;
 		Mesh*								activeMesh;
@@ -42,7 +39,7 @@ namespace vel
 
 
 	public:
-		GPU(Window* w);
+		GPU();
 		~GPU();
 		GPU(GPU&&) = default;
         void								enableDepthTest();

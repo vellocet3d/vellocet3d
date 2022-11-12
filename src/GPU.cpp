@@ -19,8 +19,7 @@
 
 namespace vel
 {
-	GPU::GPU(Window* w) :
-		window(w),
+	GPU::GPU() :
 		defaultShader(nullptr),
 		activeShader(nullptr),
 		activeMesh(nullptr),
