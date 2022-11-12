@@ -108,10 +108,6 @@ namespace vel
 		
 	}
 
-	//TODO//////////////////////////////////////////////////////////////
-	// LEFT OFF RIGHT HERE
-	////////////////////////////////////////////////////////////////////
-
 	/* Shaders
 	--------------------------------------------------*/
 	std::string AssetManager::loadShader(std::string name, std::string vertFile, std::string fragFile)
@@ -230,7 +226,8 @@ if (!this->shaderTrackers.exists(name))
 		
 		auto meshTrackerPtr = this->meshTrackers.insert(m.getName(), t);
 
-		this->meshesThatNeedGpuLoad.push_back(meshTrackerPtr);
+		if(this->gpu != nullptr)
+			this->meshesThatNeedGpuLoad.push_back(meshTrackerPtr);
 
 		return meshTrackerPtr;
 	}
@@ -275,13 +272,16 @@ if (!this->meshTrackers.exists(name))
 #ifdef DEBUG_LOG
 	Log::toCliAndFile("Full remove Mesh: " + name);
 #endif
-			if(!t->gpuLoaded)
-				for (size_t i = 0; i < this->meshesThatNeedGpuLoad.size(); i++)
-					if (this->meshesThatNeedGpuLoad.at(i) == t)
-						this->meshesThatNeedGpuLoad.erase(this->meshesThatNeedGpuLoad.begin() + i);
-			else
-				this->gpu->clearMesh(t->ptr);
-			
+			if (this->gpu != nullptr)
+			{
+				if (!t->gpuLoaded)
+					for (size_t i = 0; i < this->meshesThatNeedGpuLoad.size(); i++)
+						if (this->meshesThatNeedGpuLoad.at(i) == t)
+							this->meshesThatNeedGpuLoad.erase(this->meshesThatNeedGpuLoad.begin() + i);
+						else
+							this->gpu->clearMesh(t->ptr);
+			}
+
 			this->meshes.erase(name);
 			this->meshTrackers.erase(name);
 		}

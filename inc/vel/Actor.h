@@ -66,6 +66,7 @@ namespace vel
 		void											setName(std::string newName);
 
 		void											addRenderable(Renderable r);
+		void											addMesh(Mesh* m);
 		std::optional<Renderable>&						getTempRenderable();
 		void											clearTempRenderable();
 		void											setStageRenderable(Renderable* r);

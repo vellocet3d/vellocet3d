@@ -157,6 +157,11 @@ namespace vel
 		this->name = newName;
 	}
 
+	void Actor::addMesh(Mesh* m)
+	{
+		this->mesh = m;
+	}
+
 	void Actor::addRenderable(Renderable r)
 	{
 		this->tempRenderable = r;
