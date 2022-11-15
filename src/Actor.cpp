@@ -23,6 +23,16 @@ namespace vel
 		color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))
 	{}
 
+	void* Actor::getUserPointer()
+	{
+		return this->userPointer;
+	}
+
+	void Actor::setUserPointer(void* p)
+	{
+		this->userPointer = p;
+	}
+
 	void Actor::setMaterial(Material m)
 	{
 		this->material = m;

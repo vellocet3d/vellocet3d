@@ -55,7 +55,8 @@ namespace vel
 		glm::vec4										color; // overwrites material color property, defaults to 1.0
 
 		std::optional<Material>							material; // overwrites renderable material
-
+		
+		void*											userPointer;
 
 	public:
 		Actor(std::string name);
@@ -126,6 +127,8 @@ namespace vel
 		void											setMaterial(Material m);
 		std::optional<Material>&						getMaterial();
 
+		void*											getUserPointer();
+		void											setUserPointer(void* p);
 
 	};
 }
