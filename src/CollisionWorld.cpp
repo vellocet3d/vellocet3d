@@ -230,7 +230,7 @@ namespace vel
 		return staticCollisionShape;
 	}
 
-	btRigidBody* CollisionWorld::addStaticCollisionBody(Actor* actor)
+	btRigidBody* CollisionWorld::addStaticCollisionBody(Actor* actor, int collisionFilterGroup, int collisionFilterMask)
 	{
 		auto staticCollisionShape = this->collisionShapeFromActor(actor);
 		
@@ -253,7 +253,7 @@ namespace vel
 		body->setUserPointer(actor);
 		actor->setRigidBody(body);
 
-		this->dynamicsWorld->addRigidBody(body);
+		this->dynamicsWorld->addRigidBody(body, collisionFilterGroup, collisionFilterMask);
 
 		return body;
 	}

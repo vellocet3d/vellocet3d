@@ -53,7 +53,7 @@ namespace vel
 		btDiscreteDynamicsWorld* const			getDynamicsWorld();
 		void									addCollisionShape(std::string name, btCollisionShape* shape);
 		
-		btRigidBody*							addStaticCollisionBody(Actor* actor);
+		btRigidBody*							addStaticCollisionBody(Actor* actor, int collisionFilterGroup, int collisionFilterMask);
 		btCollisionShape* 						collisionShapeFromActor(Actor* actor);
 
 		void									removeRigidBody(btRigidBody* rb);
