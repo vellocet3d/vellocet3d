@@ -38,17 +38,10 @@ namespace vel
 																	// the glue between an armature and a mesh (index is mesh bone index, value is armature bone index)
 																	// TODO: could this be part of Renderable instead...?
 																				
-
 		std::optional<Renderable>						tempRenderable;
 		std::optional<Renderable*>						stageRenderable;
 
 		Mesh*											mesh; // pointer to mesh used by this Actor independant of renderable. required for headless mode since there will be no renderable instance
-
-		CollisionWorld*									collisionWorld;
-		btRigidBody*									rigidBody;
-		btPairCachingGhostObject*						ghostObject;
-		bool											autoTransform;
-		
 		
 		glm::vec4										color; // overwrites material color property, defaults to 1.0
 
@@ -96,19 +89,6 @@ namespace vel
 		glm::vec3										getInterpolatedTranslation(float alpha);
 		glm::quat										getInterpolatedRotation(float alpha);
 		glm::vec3										getInterpolatedScale(float alpha);
-
-
-		void											setCollisionWorld(CollisionWorld* cw);
-		CollisionWorld*									getCollisionWorld();
-		void											setRigidBody(btRigidBody* rb);
-		btRigidBody*									getRigidBody();
-		void											setGhostObject(btPairCachingGhostObject* go);
-		btPairCachingGhostObject*						getGhostObject();
-		void											setAutoTransform(bool mt);
-		bool											getAutoTransform();
-
-
-		void											processTransform();
 
 		void											removeParentActor(bool calledFromRemoveChildActor = false);
 		void											removeChildActor(Actor* a, bool calledFromRemoveParentActor = false);

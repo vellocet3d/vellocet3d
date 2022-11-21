@@ -124,10 +124,11 @@ namespace vel
 				a->updateAnimation(runTime);
 	}
 
-	void Stage::applyTransformations()
+	void Stage::updatePreviousTransforms()
 	{
 		for (auto a : this->actors.getAll())
-			a->processTransform();
+			if (a->isDynamic())
+				a->updatePreviousTransform();
 	}
 
 	Actor* Stage::addActor(Actor a)
@@ -178,21 +179,6 @@ namespace vel
 		// free actor slot in renderable
 		if(a->getStageRenderable())
 			a->getStageRenderable().value()->actors.erase(a->getName());
-		
-		// remove rigidbody and ghost objects if they exist
-		auto arb = a->getRigidBody();
-		if (arb != nullptr)
-		{
-			a->getCollisionWorld()->removeRigidBody(arb);
-			a->setRigidBody(nullptr);
-		}
-
-		auto ago = a->getGhostObject();
-		if (ago != nullptr)
-		{
-			a->getCollisionWorld()->removeGhostObject(ago);
-			a->setGhostObject(nullptr);
-		}
 
 		// remove pointer to animated material if actor had a unique animated material
 		if (a->getMaterial().has_value() && a->getMaterial()->materialAnimator.has_value())

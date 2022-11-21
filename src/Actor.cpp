@@ -16,10 +16,7 @@ namespace vel
 		parentArmatureBone(nullptr),
 		armature(nullptr),
 		mesh(nullptr),
-		collisionWorld(nullptr),
-		rigidBody(nullptr),
-		ghostObject(nullptr),
-		autoTransform(true), // this is needed so that we don't update a static actor that has a rigidbody association
+		userPointer(nullptr),
 		color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))
 	{}
 
@@ -52,31 +49,6 @@ namespace vel
 		return this->color;
 	}
 
-	void Actor::setCollisionWorld(CollisionWorld* cw)
-	{
-		this->collisionWorld = cw;
-	}
-
-	CollisionWorld* Actor::getCollisionWorld()
-	{
-		return this->collisionWorld;
-	}
-
-	void Actor::processTransform()
-	{
-		this->updatePreviousTransform();
-
-		// TODO: this can be avoided by deriving our own motionstate class from btMotionState, 
-		// but will need to put thought into how that will affect our current interpolation process
-		// for framerate independent logic
-		// https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=1205
-		if (this->autoTransform && this->rigidBody != nullptr)
-		{
-			this->transform.setTranslation(bulletToGlmVec3(this->rigidBody->getWorldTransform().getOrigin()));
-			this->transform.setRotation(bulletToGlmQuat(this->rigidBody->getWorldTransform().getRotation()));
-		}
-	}
-
 	void Actor::clearPreviousTransform()
 	{
 		this->previousTransform.reset();
@@ -107,21 +79,6 @@ namespace vel
 		}
 	}
 
-	void Actor::setDynamic(bool dynamic)
-	{
-		this->dynamic = dynamic;
-	}
-
-	void Actor::setGhostObject(btPairCachingGhostObject* go)
-	{
-		this->ghostObject = go;
-	}
-
-	btPairCachingGhostObject* Actor::getGhostObject()
-	{
-		return this->ghostObject;
-	}
-
 	Actor Actor::cleanCopy(std::string newName)
 	{
 		// TODO: this might need some more work
@@ -133,16 +90,11 @@ namespace vel
 		newActor.setParentActor(nullptr);
 		newActor.setParentArmatureBone(nullptr);
 
-		// Clear rigidbody pointer, ghost pointer, and transform flag
-		newActor.setRigidBody(nullptr);
-		newActor.setGhostObject(nullptr);
-		newActor.setAutoTransform(true);
+		// Clear armature
 		newActor.setArmature(nullptr);
-
 
 		// TODO: In the future we may need to implement methods for:
 		// > automatically duplicating an entire actor hierarchy including all of it's children
-		// > automatically copying the rigidbody component and adding to collision world
 
 		return newActor;
 	}
@@ -245,6 +197,11 @@ namespace vel
 		return this->transform.getScale();
 	}
 
+	void Actor::setDynamic(bool dynamic)
+	{
+		this->dynamic = dynamic;
+	}
+
 	const bool Actor::isDynamic() const
 	{
 		return this->dynamic;
@@ -327,26 +284,6 @@ namespace vel
 	void Actor::setDeleted(bool d)
 	{
 		this->deleted = d;
-	}
-
-	void Actor::setRigidBody(btRigidBody* rb)
-	{
-		this->rigidBody = rb;
-	}
-
-	void Actor::setAutoTransform(bool mt)
-	{
-		this->autoTransform = mt;
-	}
-
-	btRigidBody* Actor::getRigidBody()
-	{
-		return this->rigidBody;
-	}
-
-	bool Actor::getAutoTransform()
-	{
-		return this->autoTransform;
 	}
 
 	const bool Actor::isVisible() const

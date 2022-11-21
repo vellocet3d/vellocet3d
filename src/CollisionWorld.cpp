@@ -213,13 +213,7 @@ namespace vel
 		gContactAddedCallback = &CollisionWorld::contactAddedCallback;
 		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 		btTriangleInfoMap* triangleInfoMap = new btTriangleInfoMap();
-		//btGenerateInternalEdgeInfo(bvhShape, triangleInfoMap);
-		//TODO: make sure this works
 		btGenerateInternalEdgeInfo((btBvhTriangleMeshShape*)staticCollisionShape, triangleInfoMap);
-		/////////
-
-		body->setUserPointer(actor);
-		actor->setRigidBody(body);
 
 		this->dynamicsWorld->addRigidBody(body, collisionFilterGroup, collisionFilterMask);
 

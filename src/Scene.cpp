@@ -236,10 +236,10 @@ namespace vel
 
 	void Scene::postPhysics(float delta) {}
 
-	void Scene::applyTransformations()
+	void Scene::updatePreviousTransforms()
 	{
 		for (auto& s : this->stages.getAll())
-			s->applyTransformations();
+			s->updatePreviousTransforms();
 	}
 
 	void Scene::draw(float alpha)

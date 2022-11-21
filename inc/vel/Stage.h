@@ -59,7 +59,7 @@ namespace vel
 		const bool										isVisible();
 		void											setClearDepthBuffer(bool b);
 		bool											getClearDepthBuffer();
-		void											applyTransformations();
+		void											updatePreviousTransforms();
 
 		Armature*										addArmature(Armature a, std::string defaultAnimation, std::vector<std::string> actors);	
 		const std::string&								getName() const;

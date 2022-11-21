@@ -296,11 +296,8 @@ namespace vel
 		//// step physics simulation
 		this->activeScene->stepPhysics(dt);
 
-		// TODO: at some point we will probably want to break dynamic actors out into
-		// their own container so we're not looping over and checking static actors,
-		// which there could be many of and would never need to have their transforms
-		// updated
-		this->activeScene->applyTransformations();
+		// TODO: this just updates previous transform now, i would rename it
+		this->activeScene->updatePreviousTransforms();
 
 		// execute inner loop (fixed rate) logic
 		this->activeScene->innerLoop(dt);
@@ -385,26 +382,17 @@ namespace vel
                 // process update logic
                 while (this->accumulator >= this->fixedLogicTime)
                 {
-					//// update animations
-					//this->scene->updateAnimations(this->fixedLogicTime);
-
 					//// step physics simulation
 					this->activeScene->stepPhysics((float)this->fixedLogicTime);
 
-					// TODO: at some point we will probably want to break dynamic actors out into
-					// their own container so we're not looping over and checking static actors,
-					// which there could be many of and would never need to have their transforms
-					// updated
-					this->activeScene->applyTransformations();
+					// TODO: this just updates the previous transform, i would rename it
+					this->activeScene->updatePreviousTransforms();
 
 					// execute inner loop (fixed rate) logic
 					this->activeScene->innerLoop((float)this->fixedLogicTime);
 
 					// update animations
 					this->activeScene->updateFixedAnimations(this->fixedLogicTime);
-
-					// step physics simulation
-					//this->activeScene->stepPhysics((float)this->fixedLogicTime);
 
 					// call postPhysics method to allow correction of any issues caused by collision solver
 					this->activeScene->postPhysics((float)this->fixedLogicTime);
