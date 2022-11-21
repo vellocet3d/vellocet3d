@@ -178,12 +178,6 @@ namespace vel
 		// free actor slot in renderable
 		if(a->getStageRenderable())
 			a->getStageRenderable().value()->actors.erase(a->getName());
-
-		// remove all sensors associated with this actor
-		for(auto s : a->getContactSensors())
-			a->getCollisionWorld()->removeSensor(s);
-		
-		a->clearContactSensors();
 		
 		// remove rigidbody and ghost objects if they exist
 		auto arb = a->getRigidBody();

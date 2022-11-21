@@ -302,9 +302,6 @@ namespace vel
 		// updated
 		this->activeScene->applyTransformations();
 
-		// execute all contact triggers
-		this->activeScene->processSensors();
-
 		// execute inner loop (fixed rate) logic
 		this->activeScene->innerLoop(dt);
 
@@ -399,9 +396,6 @@ namespace vel
 					// which there could be many of and would never need to have their transforms
 					// updated
 					this->activeScene->applyTransformations();
-
-					// execute all contact triggers
-					this->activeScene->processSensors();
 
 					// execute inner loop (fixed rate) logic
 					this->activeScene->innerLoop((float)this->fixedLogicTime);

@@ -19,7 +19,6 @@
 namespace vel
 {
 	class	Stage;
-	struct	Sensor;
 	class	CollisionWorld;
 
 	class Actor
@@ -50,7 +49,6 @@ namespace vel
 		btPairCachingGhostObject*						ghostObject;
 		bool											autoTransform;
 		
-		std::vector<Sensor*>							contactSensors;
 		
 		glm::vec4										color; // overwrites material color property, defaults to 1.0
 
@@ -116,10 +114,6 @@ namespace vel
 		void											removeChildActor(Actor* a, bool calledFromRemoveParentActor = false);
 
 		Mesh*											getMesh();
-		
-		void											addContactSensor(Sensor* s);
-		void											clearContactSensors();
-		std::vector<Sensor*>& 							getContactSensors();
 
 		void											setColor(glm::vec4 c);
 		const glm::vec4&								getColor();

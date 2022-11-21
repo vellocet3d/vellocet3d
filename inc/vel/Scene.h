@@ -100,7 +100,6 @@ namespace vel
 		void								draw(float alpha);
 		void								stepPhysics(float delta);
 		void								applyTransformations();
-		void								processSensors();
 
 		CollisionWorld*						addCollisionWorld(std::string name, float gravity = -10.0f);
 		CollisionWorld*						getCollisionWorld(std::string name);

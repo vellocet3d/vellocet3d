@@ -15,7 +15,6 @@
 
 #include "sac.h"
 #include "vel/Actor.h"
-#include "vel/Sensor.h"
 #include "vel/RaycastResult.h"
 #include "vel/CollisionDebugDrawer.h"
 #include "vel/CollisionObjectTemplate.h"
@@ -37,8 +36,7 @@ namespace vel
 		btSequentialImpulseConstraintSolver*	solver;
 		btDiscreteDynamicsWorld*				dynamicsWorld;
 		std::unordered_map<std::string, btCollisionShape*> collisionShapes;
-		sac<Sensor>								sensors;
-		Camera*									camera;
+		Camera*									camera; // matrices used for debug drawer
 		CollisionDebugDrawer* 					collisionDebugDrawer;
 		std::unordered_map<std::string, CollisionObjectTemplate> collisionObjectTemplates;
 
@@ -58,9 +56,6 @@ namespace vel
 
 		void									removeRigidBody(btRigidBody* rb);
 		void									removeGhostObject(btPairCachingGhostObject* go);
-		Sensor*									addSensor(Sensor s);
-		void									removeSensor(Sensor* s);
-		void									processSensors();
 
 
 		std::optional<RaycastResult>			rayTest(btVector3 from, btVector3 to, std::vector<btCollisionObject*> blackList = {});

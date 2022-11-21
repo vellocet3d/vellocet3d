@@ -62,21 +62,6 @@ namespace vel
 		return this->collisionWorld;
 	}
 
-	void Actor::addContactSensor(Sensor* s)
-	{
-		this->contactSensors.push_back(s);
-	}
-	
-	void Actor::clearContactSensors()
-	{
-		this->contactSensors.clear();
-	}
-
-	std::vector<Sensor*>& Actor::getContactSensors()
-	{
-		return this->contactSensors;
-	}
-
 	void Actor::processTransform()
 	{
 		this->updatePreviousTransform();
@@ -153,7 +138,7 @@ namespace vel
 		newActor.setGhostObject(nullptr);
 		newActor.setAutoTransform(true);
 		newActor.setArmature(nullptr);
-		newActor.clearContactSensors();
+
 
 		// TODO: In the future we may need to implement methods for:
 		// > automatically duplicating an entire actor hierarchy including all of it's children

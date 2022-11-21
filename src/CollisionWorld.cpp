@@ -104,28 +104,6 @@ namespace vel
 		return this->collisionObjectTemplates[name];
 	}
 
-	//TODO feels terrible to be looping through every sensor for every contact manifold, there might
-	// be some way to hook into the collisions when they happen within the bullet api???? which in turn
-	// would be substantially quicker, but will require a complete reworking of our current "Sensors" logic
-	void CollisionWorld::processSensors()
-	{
-		for (int i = 0; i < this->dispatcher->getNumManifolds(); i++)
-		{
-			btPersistentManifold* contactManifold = this->dispatcher->getManifoldByIndexInternal(i);
-			if (contactManifold->getNumContacts() > 0)
-			{
-				for (auto sen : this->sensors.getAll())
-				{
-					if (!sen->matchingManifold(contactManifold->getBody0(), contactManifold->getBody1()))
-						continue;
-
-					sen->onContactDiscovered(contactManifold, sen->contactPair);
-				}
-			}
-		}
-
-	}
-
 	void CollisionWorld::useDebugDrawer(Shader* s, int debugMode)
 	{
 		this->collisionDebugDrawer = new CollisionDebugDrawer();
@@ -143,16 +121,6 @@ namespace vel
 	bool CollisionWorld::getDebugEnabled()
 	{
 		return this->collisionDebugDrawer != nullptr;
-	}
-
-	Sensor* CollisionWorld::addSensor(Sensor s)
-	{
-		return this->sensors.insert(s.name, s);
-	}
-
-	void CollisionWorld::removeSensor(Sensor* s)
-	{
-		this->sensors.erase(s);
 	}
 
 	void CollisionWorld::removeGhostObject(btPairCachingGhostObject* go)

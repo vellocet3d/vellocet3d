@@ -242,13 +242,6 @@ namespace vel
 			s->applyTransformations();
 	}
 
-	void Scene::processSensors()
-	{
-		for (auto cw : this->collisionWorlds.getAll())
-			if (cw->getIsActive())
-				cw->processSensors();
-	}
-
 	void Scene::draw(float alpha)
 	{
 		//Log::toCli("----------------------------------------------------");

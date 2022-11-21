@@ -12,7 +12,6 @@
 #include "vel/Actor.h"
 #include "vel/Camera.h"
 #include "vel/Renderable.h"
-#include "vel/Sensor.h"
 #include "vel/GPU.h"
 
 
