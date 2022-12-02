@@ -58,8 +58,8 @@ namespace vel
 		void									removeGhostObject(btPairCachingGhostObject* go);
 
 
-		std::optional<RaycastResult>			rayTest(btVector3 from, btVector3 to, std::vector<btCollisionObject*> blackList = {});
-		std::optional<ConvexCastResult>			convexSweepTest(btConvexShape* castShape, btVector3 from, btVector3 to, std::vector<btCollisionObject*> blackList = {});
+		std::optional<RaycastResult>			rayTest(btVector3 from, btVector3 to, int collisionFilterMask = 1, std::vector<btCollisionObject*> blackList = {});
+		std::optional<ConvexCastResult>			convexSweepTest(btConvexShape* castShape, btVector3 from, btVector3 to, int collisionFilterMask = 1, std::vector<btCollisionObject*> blackList = {});
 
 		void									useDebugDrawer(Shader* s, int debugMode = 1);
 		CollisionDebugDrawer* 					getDebugDrawer();

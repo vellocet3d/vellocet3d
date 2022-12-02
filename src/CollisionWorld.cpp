@@ -220,9 +220,11 @@ namespace vel
 		return body;
 	}
 
-	std::optional<RaycastResult> CollisionWorld::rayTest(btVector3 from, btVector3 to, std::vector<btCollisionObject*> blackList)
+	std::optional<RaycastResult> CollisionWorld::rayTest(btVector3 from, btVector3 to, int collisionFilterMask, std::vector<btCollisionObject*> blackList)
 	{
 		RaycastCallback raycast = RaycastCallback(from, to, blackList);
+		raycast.m_collisionFilterGroup = 1;
+		raycast.m_collisionFilterMask = collisionFilterMask;
 		this->dynamicsWorld->rayTest(from, to, raycast);
 
 		if (!raycast.hasHit() || !raycast.m_collisionObject)
@@ -238,7 +240,7 @@ namespace vel
 		return r;
 	}
 
-	std::optional<ConvexCastResult> CollisionWorld::convexSweepTest(btConvexShape* castShape, btVector3 from, btVector3 to, std::vector<btCollisionObject*> blackList)
+	std::optional<ConvexCastResult> CollisionWorld::convexSweepTest(btConvexShape* castShape, btVector3 from, btVector3 to, int collisionFilterMask, std::vector<btCollisionObject*> blackList)
 	{
 		btTransform convexFromWorld;
 		convexFromWorld.setIdentity();
@@ -249,6 +251,8 @@ namespace vel
 		convexToWorld.setOrigin(to);
 
 		ConvexCastCallback convexCast(from, to, blackList);
+		convexCast.m_collisionFilterGroup = 1;
+		convexCast.m_collisionFilterMask = collisionFilterMask;
 
 		this->dynamicsWorld->convexSweepTest(castShape, convexFromWorld, convexToWorld, convexCast);
 
