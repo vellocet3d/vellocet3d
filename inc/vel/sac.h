@@ -34,8 +34,6 @@ private:
 public:
 	sac(size_t blockSize);
 	sac();
-	//~sac();
-	//sac(const sac<T>& old);
 	T*									insert(std::string name, T dataObject);
 	void								erase(std::string name);
 	void								erase(T* slotPtr);
@@ -46,31 +44,13 @@ public:
 
 };
 
-//template <typename T>
-//sac<T>::sac(const sac<T>& old) :
-//	blockSize(old.blockSize),
-//	blockIndex(old.blockIndex),
-//	slots(old.slots),
-//	activeSlots(old.activeSlots),
-//	freeSlots(old.freeSlots),
-//	trackerMap(old.trackerMap),
-//	ptrackerMap(old.ptrackerMap),
-//	activeSlotTrackerMap(old.activeSlotTrackerMap)
-//{
-//	
-//}
+
 
 template <typename T>
 sac<T>::sac() :
 	data(std::make_shared<sac_data<T>>())
 {
-	size_t blockSize = 10000;
-
-	//std::stringstream ss;
-	//ss << std::this_thread::get_id();
-	//uint64_t id = std::stoull(ss.str());
-
-	//std::cout << id << ":Initializing:" << this << std::endl;
+	size_t blockSize = 1000;
 
 	this->data->blockSize = blockSize;
 	this->data->blockIndex = 0;
@@ -84,12 +64,6 @@ template <typename T>
 sac<T>::sac(size_t blockSize) :
 	data(std::make_shared<sac_data<T>>())
 {
-	//std::stringstream ss;
-	//ss << std::this_thread::get_id();
-	//uint64_t id = std::stoull(ss.str());
-
-	//std::cout << id << ":Initializing:" << this << std::endl;
-
 	this->data->blockSize = blockSize;
 	this->data->blockIndex = 0;
 	this->data->slots.push_back(std::vector<T>());
@@ -98,25 +72,9 @@ sac<T>::sac(size_t blockSize) :
 	this->data->freeSlots.reserve(blockSize);
 }
 
-//template <typename T>
-//sac<T>::~sac()
-//{
-//	std::stringstream ss;
-//	ss << std::this_thread::get_id();
-//	uint64_t id = std::stoull(ss.str());
-//
-//	std::cout << id << ":Destructing:" << this << std::endl;
-//}
-
 template <typename T>
 T* sac<T>::insert(std::string name, T dataObject)
 {
-	//std::stringstream ss;
-	//ss << std::this_thread::get_id();
-	//uint64_t id = std::stoull(ss.str());
-
-	//std::cout << id << ":sac.h:" << name << ":" << this << std::endl;
-
 	// if this key already exists within the sac, bypass insertion and return pointer to existing item.
 	// This could be a cause of confusion
 	if (this->data->trackerMap.count(name) == 1)
@@ -158,8 +116,6 @@ T* sac<T>::insert(std::string name, T dataObject)
 
 	// TODO activeSlots reallocating on every entry if blockSize has been reached,
 	// need to reserve additional block size when this happens like we do for slots.back()
-
-	//std::cout << "sac003:" << slotPointer << std::endl;
 
 	this->data->activeSlots.push_back(slotPointer);
 	this->data->activeSlotTrackerMap[slotPointer] = this->data->activeSlots.size() - 1;
