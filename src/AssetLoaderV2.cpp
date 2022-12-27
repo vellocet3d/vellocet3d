@@ -224,43 +224,7 @@ namespace vel
 	Log::toCliAndFile("Loading new Mesh: " + nodeName);
 #endif
 
-				// add each generated mesh to a vector
-				
-				/* // this comment block was working code, commented to experiment
-				std::vector<Mesh> subMeshes = {};
-
-				auto meshCount = node->mNumMeshes;
-
-				while (meshCount > 0)
-				{
-					std::string subMeshName = nodeName + "_" + std::to_string(meshCount - 1);
-					
-					subMeshes.push_back(Mesh(subMeshName));
-
-					this->processMesh(this->impScene->mMeshes[node->mMeshes[(meshCount - 1)]], subMeshes.back());
-
-					this->currentMeshTextureId++;
-					meshCount--;
-				}
-				*/
-
-				// after we've converted all assimp meshes into our mesh format, loop through all meshes
-				// and join them into a single mesh object
-				//Mesh finalMesh = Mesh(nodeName);
-				//unsigned int indiceOffset = 0;
-
-				//for (auto& m : subMeshes)
-				//{
-				//	//std::vector<Vertex>
-
-				//	// bone indexes are screwing us right now, have to figure out how we'll handle these
-				//	// when merging multiple meshes
-
-				//}
-
-				// trying something different, lets see if we can just create one single mesh from data that we generate
-				// from all of the aiMeshes
-				
+				// create one single mesh from all of the aiMeshes
 
 				std::vector<Vertex> meshVertices = {};
 				std::vector<unsigned int> meshIndices = {};
@@ -268,12 +232,39 @@ namespace vel
 
 				auto meshCount = node->mNumMeshes;
 
-				while (meshCount > 0)
+				// if more than one mesh then we need to sort these meshes by the names of their
+				// materials, unless the name of their material is "DefaultMaterial", then we process
+				// those after the named material meshes
+				std::vector<aiMesh*> defaultMaterialMeshes;
+				std::vector<std::pair<std::string, aiMesh*>> customMaterialMeshes;
+				for(unsigned int i = 0; i < meshCount; i++)
 				{
-					this->processMesh(this->impScene->mMeshes[node->mMeshes[(meshCount - 1)]], meshVertices, meshIndices, meshBones);
+					auto tmpMesh = this->impScene->mMeshes[node->mMeshes[(i)]];
+					auto matName = this->impScene->mMaterials[tmpMesh->mMaterialIndex]->GetName().C_Str();
+					if (matName == "DefaultMaterial")
+					{
+						defaultMaterialMeshes.push_back(tmpMesh);
+						continue;
+					}
+						
+					customMaterialMeshes.push_back(std::pair<std::string, aiMesh*>(matName, tmpMesh));
+				}
 
+				// now sort meshes based on material names
+				std::sort(customMaterialMeshes.begin(), customMaterialMeshes.end());
+
+				// process all custom material meshes
+				for (auto& cm : customMaterialMeshes)
+				{
+					this->processMesh(cm.second, meshVertices, meshIndices, meshBones);
 					this->currentMeshTextureId++;
-					meshCount--;
+				}
+
+				// process all "DefaultMaterial" meshes
+				for (auto& dm : defaultMaterialMeshes)
+				{
+					this->processMesh(dm, meshVertices, meshIndices, meshBones);
+					this->currentMeshTextureId++;
 				}
 
 				Mesh finalMesh = Mesh(nodeName);
@@ -283,16 +274,6 @@ namespace vel
 				finalMesh.setGlobalInverseMatrix(this->currentGlobalInverseMatrix);
 				
 				this->meshTrackers.push_back(this->assetManager->addMesh(finalMesh));
-
-
-
-
-
-
-				//mesh.setGlobalInverseMatrix(this->currentGlobalInverseMatrix);
-
-				// then send to asset manager
-				//this->assetManager->addMesh();
 			}
 		}
 
@@ -307,6 +288,8 @@ namespace vel
 		std::vector<MeshBone>& meshBones)
 	{
 		unsigned int indiceOffset = meshVertices.size();
+
+		//std::cout << this->impScene->mMaterials[aiMesh->mMaterialIndex]->GetName().C_Str() << std::endl;
 
 		// walk through each of the aimesh's vertices
 		for (unsigned int i = 0; i < aiMesh->mNumVertices; i++)
