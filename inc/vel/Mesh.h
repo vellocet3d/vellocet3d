@@ -54,7 +54,7 @@ namespace vel
 
 		//bool								getIsOpaque();
 
-		unsigned int						textureId;
+		//unsigned int						textureId;
 
 	};
     
