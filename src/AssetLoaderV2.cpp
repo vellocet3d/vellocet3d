@@ -253,6 +253,9 @@ namespace vel
 				// now sort meshes based on material names
 				std::sort(customMaterialMeshes.begin(), customMaterialMeshes.end());
 
+				// reset mesh texture id... this was a fun little bug to figure out
+				this->currentMeshTextureId = 0;
+
 				// process all custom material meshes
 				for (auto& cm : customMaterialMeshes)
 				{
