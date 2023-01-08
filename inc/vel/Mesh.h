@@ -13,6 +13,7 @@
 #include "vel/Texture.h"
 #include "vel/GpuMesh.h"
 #include "vel/MeshBone.h"
+#include "vel/AABB.h"
 
 
 namespace vel
@@ -27,6 +28,7 @@ namespace vel
 		std::vector<MeshBone>				bones;
 		std::optional<GpuMesh>              gpuMesh;
 		glm::mat4							globalInverseMatrix;
+		std::optional<AABB>					aabb;
 
 
 	public:
@@ -48,13 +50,7 @@ namespace vel
 		MeshBone*							getBone(std::string boneName);
 		const std::vector<MeshBone>&		getBones() const;
 
-		//void								setTexture(Texture* t);
-		//Texture*							getTexture();
-		//void								finalize();
-
-		//bool								getIsOpaque();
-
-		//unsigned int						textureId;
+		const AABB&							getAABB();
 
 	};
     

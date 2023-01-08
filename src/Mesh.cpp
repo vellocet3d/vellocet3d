@@ -9,33 +9,17 @@ namespace vel
 
     Mesh::Mesh(std::string name) :
         name(name)
-		//,texture(nullptr),
-		//isOpaque(true)
     {}
 
-	//bool Mesh::getIsOpaque()
-	//{
-	//	return this->isOpaque;
-	//}
+	const AABB& Mesh::getAABB()
+	{
+		if (this->aabb.has_value())
+			return this->aabb.value();
 
-	//void Mesh::finalize()
-	//{
-	//	for (auto& v : this->vertices)
-	//		v.textureId = this->texture->dsaIdIndex;
+		this->aabb = AABB(this->getVertices());
 
-	//	if (this->texture->alphaChannel)
-	//		this->isOpaque = false;
-	//}
-
-	//void Mesh::setTexture(Texture* t)
-	//{
-	//	this->texture = t;
-	//}
-
-	//Texture* Mesh::getTexture()
-	//{
-	//	return this->texture;
-	//}
+		return this->aabb.value();
+	}
 
 	const std::vector<MeshBone>& Mesh::getBones() const
 	{
