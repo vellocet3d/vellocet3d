@@ -11,7 +11,7 @@ namespace vel
         name(name)
     {}
 
-	const AABB& Mesh::getAABB()
+	AABB& Mesh::getAABB()
 	{
 		if (this->aabb.has_value())
 			return this->aabb.value();

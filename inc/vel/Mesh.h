@@ -50,7 +50,7 @@ namespace vel
 		MeshBone*							getBone(std::string boneName);
 		const std::vector<MeshBone>&		getBones() const;
 
-		const AABB&							getAABB();
+		AABB&								getAABB();
 
 	};
     
