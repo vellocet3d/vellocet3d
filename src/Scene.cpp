@@ -408,11 +408,26 @@ namespace vel
 
 		if (a->isVisible())
 		{
+			//std::cout << "drawing actor: " << a->getName() << std::endl;
+
 			if (a->getMaterial().has_value())
 				gpu->useMaterial(&a->getMaterial().value());
 
 			gpu->setShaderVec4("color", a->getColor());
 			gpu->setShaderMat4("mvp", this->cameraProjectionMatrix * this->cameraViewMatrix * a->getWorldRenderMatrix(alphaTime));
+
+			if (a->getLightMapTexture() == nullptr)
+			{
+				//gpu->setShaderUInt("lightMapTexId", App::get().getAssetManager().getTexture("defaultWhite")->frames.at(0).dsaHandle);
+				gpu->updateLightMapTextureUBO(App::get().getAssetManager().getTexture("defaultWhite")->frames.at(0).dsaHandle);
+			}	
+			else
+			{
+				//std::cout << a->getLightMapTexture()->frames.at(0).dsaHandle << std::endl;
+				//gpu->setShaderUInt("lightMapTexId", a->getLightMapTexture()->frames.at(0).dsaHandle);
+				gpu->updateLightMapTextureUBO(a->getLightMapTexture()->frames.at(0).dsaHandle);
+			}
+				
 
 			// If this actor is animated, send the bone transforms of it's armature to the shader
 			if (a->isAnimated())
@@ -440,7 +455,7 @@ namespace vel
 
 				gpu->updateBonesUBO(boneData);
 			}
-
+			
 			gpu->drawGpuMesh();
 		}
 	}

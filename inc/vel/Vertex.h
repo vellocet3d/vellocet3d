@@ -12,6 +12,7 @@ namespace vel
 		glm::vec3		position;
 		glm::vec3		normal;
 		glm::vec2		textureCoordinates;
+		glm::vec2		lightmapCoordinates;
 		unsigned int	textureId;
 		VertexBoneData	weights;
 

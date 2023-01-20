@@ -30,6 +30,7 @@ namespace vel
 		this->enableBackfaceCulling();
 		this->initBoneUBO();
 		this->initTextureUBO();
+		this->initLightMapTextureUBO();
 		this->initScreenSpaceMesh();
 
 	}
@@ -53,6 +54,9 @@ namespace vel
 
 		// send texture dsa id to ubo
 		this->updateTextureUBO(0, dsaHandle);
+
+		// clear the active lightmap texture
+		this->updateLightMapTextureUBO(App::get().getAssetManager().getTexture("defaultWhite")->frames.at(0).dsaHandle);
 
 		// set mesh
 		//this->activeMesh = &this->screenSpaceMesh;
@@ -85,6 +89,7 @@ namespace vel
 		v0.position = glm::vec3(-1.0f, 1.0f, 0.0f);
 		v0.normal = glm::vec3(0.0f, 0.0f, 1.0f);
 		v0.textureCoordinates = glm::vec2(0.0f, 1.0f);
+		v0.lightmapCoordinates = glm::vec2(0.0f, 0.0f);
 		v0.textureId = 0;
 
 		// bottom left
@@ -92,6 +97,7 @@ namespace vel
 		v1.position = glm::vec3(-1.0f, -1.0f, 0.0f);
 		v1.normal = glm::vec3(0.0f, 0.0f, 1.0f);
 		v1.textureCoordinates = glm::vec2(0.0f, 0.0f);
+		v1.lightmapCoordinates = glm::vec2(0.0f, 0.0f);
 		v1.textureId = 0;
 
 		// bottom right
@@ -99,6 +105,7 @@ namespace vel
 		v2.position = glm::vec3(1.0f, -1.0f, 0.0f);
 		v2.normal = glm::vec3(0.0f, 0.0f, 1.0f);
 		v2.textureCoordinates = glm::vec2(1.0f, 0.0f);
+		v2.lightmapCoordinates = glm::vec2(0.0f, 0.0f);
 		v2.textureId = 0;
 
 		// top right
@@ -106,6 +113,7 @@ namespace vel
 		v3.position = glm::vec3(1.0f, 1.0f, 0.0f);
 		v3.normal = glm::vec3(0.0f, 0.0f, 1.0f);
 		v3.textureCoordinates = glm::vec2(1.0f, 1.0f);
+		v3.lightmapCoordinates = glm::vec2(0.0f, 0.0f);
 		v3.textureId = 0;
 
 		std::vector<Vertex> vs = { v0, v1, v2, v3 };
@@ -134,27 +142,36 @@ namespace vel
 		this->activeMaterial = nullptr;
 	}
 
+	void GPU::initLightMapTextureUBO()
+	{
+		glGenBuffers(1, &this->lightmapTextureUBO);
+		glBindBuffer(GL_UNIFORM_BUFFER, this->lightmapTextureUBO);
+		glBufferData(GL_UNIFORM_BUFFER, sizeof(GLuint64) * 2, NULL, GL_STATIC_DRAW);
+		glBindBufferBase(GL_UNIFORM_BUFFER, 2, this->lightmapTextureUBO);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
+
+	void GPU::updateLightMapTextureUBO(GLuint64 dsaHandle)
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, this->lightmapTextureUBO);
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(GLuint64) * 2, (void*)&dsaHandle);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
+
 	void GPU::initTextureUBO()
 	{
-		
 		const int MAX_SUPPORTED_TEXTURES = 250;
 		glGenBuffers(1, &this->texturesUBO);
 		glBindBuffer(GL_UNIFORM_BUFFER, this->texturesUBO);
-		//glBufferData(GL_UNIFORM_BUFFER, MAX_SUPPORTED_TEXTURES * sizeof(GLuint64), NULL, GL_STATIC_DRAW);
 		glBufferData(GL_UNIFORM_BUFFER, MAX_SUPPORTED_TEXTURES * sizeof(GLuint64) * 2, NULL, GL_STATIC_DRAW);
 		glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->texturesUBO);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-		//std::cout << "textureUBO: " << this->texturesUBO << std::endl;
 	}
 
 	void GPU::updateTextureUBO(unsigned int index, GLuint64 dsaHandle)
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, this->texturesUBO);
-
-		//glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLuint64) * index, sizeof(GLuint64), (void*)&dsaHandle);
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(GLuint64) * index * 2, sizeof(GLuint64) * 2, (void*)&dsaHandle);
-
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
@@ -408,21 +425,25 @@ namespace vel
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureCoordinates));
 
-		// Assign texture id to location = 3
+		// Assign vertex lightmap texture coordinates to location = 3
 		glEnableVertexAttribArray(3);
-		glVertexAttribIPointer(3, 1, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, textureId));
+		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, lightmapCoordinates));
 
-		// Assign vertex bone ids to location = 4 (and 5 for second array element)
+		// Assign texture id to location = 4
 		glEnableVertexAttribArray(4);
-		glVertexAttribIPointer(4, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, weights.ids));
-		glEnableVertexAttribArray(5);
-		glVertexAttribIPointer(5, 4, GL_INT, sizeof(Vertex), (void*)(offsetof(Vertex, weights.ids) + 16));
+		glVertexAttribIPointer(4, 1, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, textureId));
 
-		// Assign vertex weights to location = 6 (and 7 for second array element)
+		// Assign vertex bone ids to location = 5 (and 6 for second array element)
+		glEnableVertexAttribArray(5);
+		glVertexAttribIPointer(5, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, weights.ids));
 		glEnableVertexAttribArray(6);
-		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, weights.weights));
+		glVertexAttribIPointer(6, 4, GL_INT, sizeof(Vertex), (void*)(offsetof(Vertex, weights.ids) + 16));
+
+		// Assign vertex weights to location = 7 (and 8 for second array element)
 		glEnableVertexAttribArray(7);
-		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, weights.weights) + 16));
+		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, weights.weights));
+		glEnableVertexAttribArray(8);
+		glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, weights.weights) + 16));
 
 		// Unbind the vertex array to prevent accidental operations
 		glBindVertexArray(0);
@@ -506,6 +527,14 @@ namespace vel
 			this->activeShader->uniformLocations[name] = glGetUniformLocation(this->activeShader->id, name.c_str());
 
 		glUniform1i(this->activeShader->uniformLocations[name], value);
+	}
+
+	void GPU::setShaderUInt(const std::string &name, uint64_t value) const
+	{
+		if (!this->activeShader->uniformLocations.count(name) == 1)
+			this->activeShader->uniformLocations[name] = glGetUniformLocation(this->activeShader->id, name.c_str());
+
+		glUniform1ui(this->activeShader->uniformLocations[name], value);
 	}
 
 	void GPU::setShaderFloat(const std::string& name, float value) const

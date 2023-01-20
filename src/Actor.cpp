@@ -17,8 +17,19 @@ namespace vel
 		armature(nullptr),
 		mesh(nullptr),
 		userPointer(nullptr),
-		color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))
+		color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+		lightMapTexture(nullptr)
 	{}
+
+	void Actor::setLightMapTexture(Texture* t)
+	{
+		this->lightMapTexture = t;
+	}
+
+	Texture* Actor::getLightMapTexture()
+	{
+		return this->lightMapTexture;
+	}
 
 	void* Actor::getUserPointer()
 	{

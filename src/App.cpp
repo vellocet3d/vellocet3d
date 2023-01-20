@@ -60,6 +60,9 @@ namespace vel
 			this->assetManager.loadShader("defaultScreen",
 				"data/shaders/defaults/screen.vert", "data/shaders/defaults/screen.frag");
 
+			// load default white texture
+			this->assetManager.loadTexture("defaultWhite", "data/textures/defaults/default.jpg");
+
 			// send all these shaders and textures to gpu
 			this->assetManager.sendAllToGpu();
 

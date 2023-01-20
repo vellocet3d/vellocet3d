@@ -317,7 +317,7 @@ namespace vel
 			{
 				glm::vec2 vec;
 				// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
-				// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
+				// use models where a vertex can have more than 2 texture coordinates.
 				vec.x = aiMesh->mTextureCoords[0][i].x;
 				vec.y = aiMesh->mTextureCoords[0][i].y;
 				vertex.textureCoordinates = vec;
@@ -328,6 +328,19 @@ namespace vel
 			else
 			{
 				vertex.textureCoordinates = glm::vec2(0.0f, 0.0f);
+			}
+
+			// secondary texture coordinates
+			if (aiMesh->mTextureCoords[1]) // does the mesh contain texture coordinates?
+			{
+				glm::vec2 vec;
+				vec.x = aiMesh->mTextureCoords[1][i].x;
+				vec.y = aiMesh->mTextureCoords[1][i].y;
+				vertex.lightmapCoordinates = vec;
+			}
+			else
+			{
+				vertex.lightmapCoordinates = glm::vec2(0.0f, 0.0f);
 			}
 
 			meshVertices.push_back(vertex);

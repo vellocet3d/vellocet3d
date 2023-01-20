@@ -34,6 +34,9 @@ namespace vel
 		unsigned int						texturesUBO;
 		void								initTextureUBO();
 
+		unsigned int						lightmapTextureUBO;
+		void								initLightMapTextureUBO();
+
 		Mesh								screenSpaceMesh;
 		void								initScreenSpaceMesh();
 
@@ -66,6 +69,7 @@ namespace vel
 
 		void								setShaderBool(const std::string &name, bool value) const;
 		void								setShaderInt(const std::string &name, int value) const;
+		void								setShaderUInt(const std::string &name, uint64_t value) const;
 		void								setShaderFloat(const std::string &name, float value) const;
 		void								setShaderFloatArray(const std::string &name, std::vector<float> value);
 		void								setShaderMat4(const std::string &name, glm::mat4 value) const;
@@ -92,6 +96,7 @@ namespace vel
 		void								disableBackfaceCulling();
 
 		void								updateTextureUBO(unsigned int index, GLuint64 dsaHandle);
+		void								updateLightMapTextureUBO(GLuint64 dsaHandle);
 
 		void								updateViewportSize(unsigned int width, unsigned int height);
 		void								setRenderTarget(unsigned int FBO, bool depth);
