@@ -271,30 +271,37 @@ DESTINATION
 set(JSON_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libJson})
 
 
-# SETUP STB_IMAGE, doesn't look like they do releases, but using master for this shouldn't be an issue
-set(libStbImage stb_image)
-FetchContent_Declare(${libStbImage}
+# SETUP STB_IMAGE and STB_TRUETYPE, doesn't look like they do releases, but using master for this shouldn't be an issue
+set(libStbHeaders stb_headers)
+FetchContent_Declare(${libStbHeaders}
 	GIT_REPOSITORY https://github.com/nothings/stb.git
 	GIT_TAG origin/master
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND ""
 )
 
-FetchContent_GetProperties(${libStbImage})
-if(NOT ${libStbImage})
-  FetchContent_Populate(${libStbImage})
+FetchContent_GetProperties(${libStbHeaders})
+if(NOT ${libStbHeaders})
+  FetchContent_Populate(${libStbHeaders})
 endif()
 
-add_library(${libStbImage} INTERFACE)
+add_library(${libStbHeaders} INTERFACE)
 
 file(
 COPY
-	${${libStbImage}_SOURCE_DIR}/stb_image.h
+	${${libStbHeaders}_SOURCE_DIR}/stb_image.h
 DESTINATION
-	${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libStbImage}/include/${libStbImage}
+	${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libStbHeaders}/include/${libStbHeaders}
 )
 
-set(STBIMAGE_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libStbImage})
+file(
+COPY
+	${${libStbHeaders}_SOURCE_DIR}/stb_truetype.h
+DESTINATION
+	${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libStbHeaders}/include/${libStbHeaders}
+)
+
+set(STBHEADERS_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/installs/${libStbHeaders})
 
 
 
@@ -393,7 +400,7 @@ file(GLOB_RECURSE headers CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/inc/*.h
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_library(${PROJECT_NAME} STATIC ${headers} ${sources})
-add_dependencies(${PROJECT_NAME} ${libGLFW} ${libGLAD} ${libGLM} ${libAssimp} ${libBullet} ${libJson} ${libStbImage} ${libCDT} IMGUI_LIBRARY)
+add_dependencies(${PROJECT_NAME} ${libGLFW} ${libGLAD} ${libGLM} ${libAssimp} ${libBullet} ${libJson} ${libStbHeaders} ${libCDT} IMGUI_LIBRARY)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 
@@ -412,7 +419,7 @@ target_include_directories(${PROJECT_NAME}
 	PUBLIC ${ASSIMP_INSTALL_DIR}/include
 	PUBLIC ${BULLET_INSTALL_DIR}/include/bullet
 	PUBLIC ${JSON_INSTALL_DIR}/include 
-	PUBLIC ${STBIMAGE_INSTALL_DIR}/include
+	PUBLIC ${STBHEADERS_INSTALL_DIR}/include
 	PUBLIC ${IMGUI_INSTALL_DIR}/include
 )
 

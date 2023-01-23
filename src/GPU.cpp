@@ -9,7 +9,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include <glm/gtx/string_cast.hpp>
-#include "stb_image/stb_image.h"
+#include "stb_headers/stb_image.h"
 
 #include "vel/GPU.h"
 #include "vel/Vertex.h"
