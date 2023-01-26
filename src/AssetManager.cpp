@@ -1,10 +1,15 @@
 #include <thread> 
 #include <chrono>
 #include <iostream>
+#include <fstream>
 #include <filesystem>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_headers/stb_image.h"
+
+#define STB_TRUETYPE_IMPLEMENTATION
+#include "stb_headers/stb_truetype.h"
+
 #include "glad/glad.h"
 
 #include "vel/AssetManager.h"
@@ -30,12 +35,18 @@ namespace vel
 		if (this->gpu == nullptr)
 			return;
 
+		// TODO: whoa whoa whoa....how is this working if I'm poping elements off the containers while I'm
+		// looping through them...this is probably a horrible runtime bug that I just haven't hit yet...
+		// simple fix is to just clear the containers outside of their loops...lets do that...
+		//
+		// DONE, but leaving this comment here until it's been tested
 		for (auto& s : this->shadersThatNeedGpuLoad)
 		{
 			this->gpu->loadShader(s->ptr);
 			s->gpuLoaded = true;
-			this->shadersThatNeedGpuLoad.pop_front();
+			//this->shadersThatNeedGpuLoad.pop_front();
 		}
+		this->shadersThatNeedGpuLoad.clear();
 
 		for (auto& c : this->camerasThatNeedGpuLoad)
 		{
@@ -45,22 +56,33 @@ namespace vel
 			c->ptr->getRenderTarget()->texture.name = c->ptr->getName() + "_RT";
 			c->ptr->getRenderTarget()->texture.alphaChannel = false;
 
-			this->shadersThatNeedGpuLoad.pop_front();
+			//this->shadersThatNeedGpuLoad.pop_front();
 		}
+		this->shadersThatNeedGpuLoad.clear();
 
 		for (auto& t : this->texturesThatNeedGpuLoad)
 		{
 			this->gpu->loadTexture(t->ptr);
 			t->gpuLoaded = true;
-			this->texturesThatNeedGpuLoad.pop_front();
+			//this->texturesThatNeedGpuLoad.pop_front();
 		}
+		this->texturesThatNeedGpuLoad.clear();
+
+		for (auto& fb : this->fontBitmapsThatNeedGpuLoad)
+		{
+			this->gpu->loadFontBitmapTexture(fb->ptr);
+			fb->gpuLoaded = true;
+			//this->fontBitmapsThatNeedGpuLoad.pop_front();
+		}
+		this->fontBitmapsThatNeedGpuLoad.clear();
 
 		for (auto& m : this->meshesThatNeedGpuLoad)
 		{
 			this->gpu->loadMesh(m->ptr);
 			m->gpuLoaded = true;
-			this->meshesThatNeedGpuLoad.pop_front();
+			//this->meshesThatNeedGpuLoad.pop_front();
 		}
+		this->meshesThatNeedGpuLoad.clear();
 	}
 
 	void AssetManager::sendNextToGpu()
@@ -94,6 +116,15 @@ namespace vel
 			this->gpu->loadTexture(textureTracker->ptr);
 			textureTracker->gpuLoaded = true;
 			this->texturesThatNeedGpuLoad.pop_front();
+			return;
+		}
+
+		if (this->fontBitmapsThatNeedGpuLoad.size() > 0)
+		{
+			auto fbTracker = this->fontBitmapsThatNeedGpuLoad.at(0);
+			this->gpu->loadFontBitmapTexture(fbTracker->ptr);
+			fbTracker->gpuLoaded = true;
+			this->fontBitmapsThatNeedGpuLoad.pop_front();
 			return;
 		}
 
@@ -213,7 +244,7 @@ if (!this->shaderTrackers.exists(name))
 		return out;
 	}
 
-	MeshTracker* AssetManager::addMesh(Mesh m)
+	MeshTracker* AssetManager::addMesh(Mesh& m, bool queue)
 	{
 		// AssetLoader checks for existing mesh by name, therefore if we have
 		// made it this far, assume that m is a new Mesh
@@ -226,10 +257,27 @@ if (!this->shaderTrackers.exists(name))
 		
 		auto meshTrackerPtr = this->meshTrackers.insert(m.getName(), t);
 
-		if(this->gpu != nullptr)
-			this->meshesThatNeedGpuLoad.push_back(meshTrackerPtr);
+		if (this->gpu != nullptr)
+		{
+			if (queue)
+			{
+				this->meshesThatNeedGpuLoad.push_back(meshTrackerPtr);
+			}
+			else
+			{
+				this->gpu->loadMesh(meshTrackerPtr->ptr);
+				meshTrackerPtr->gpuLoaded = true;
+			}
+		}
 
 		return meshTrackerPtr;
+	}
+
+	void AssetManager::updateMesh(Mesh& m)
+	{
+		MeshTracker* mt = this->getMeshTracker(m.getName());
+		*mt->ptr = m;
+		this->gpu->updateMesh(mt->ptr);
 	}
 	
 	MeshTracker* AssetManager::getMeshTracker(std::string name)
@@ -438,6 +486,154 @@ if (!this->meshTrackers.exists(name))
 	else
 		Log::toCliAndFile("Decrement Texture usageCount, retain: " + name);
 #endif	
+	}
+
+	/* FontBitmaps
+	--------------------------------------------------*/
+	std::string	AssetManager::loadFontBitmap(FontBitmap fb)
+	{
+		if (this->fontBitmapTrackers.exists(fb.fontName))
+		{
+#ifdef DEBUG_LOG
+			Log::toCliAndFile("Existing FontBitmap, bypass reload: " + fb.fontName);
+#endif
+			this->fontBitmapTrackers.get(fb.fontName)->usageCount++;
+			return fb.fontName;
+		}
+
+#ifdef DEBUG_LOG
+		Log::toCliAndFile("Load new FontBitmap: " + fb.fontName);
+#endif
+
+		// Read in bytes from file on disc
+		std::ifstream file(fb.fontPath, std::ios::binary | std::ios::ate);
+		if (!file.is_open())
+			Log::crash("Failed to open file: " + fb.fontPath);
+
+		const auto size = file.tellg();
+		file.seekg(0, std::ios::beg);
+		auto bytes = std::vector<uint8_t>(size);
+		file.read(reinterpret_cast<char *>(&bytes[0]), size);
+		file.close();
+
+		// Build texture data using read in bytes
+		auto fontData = bytes;
+		//fb.data = std::make_shared<uint8_t[]>(fb.textureWidth * fb.textureHeight);
+		//fb.data = new unsigned char(fb.textureWidth * fb.textureHeight);
+		//fb.charInfo = new fb_packedchar;
+
+		//fb.data = std::make_unique<unsigned char[]>(fb.textureWidth * fb.textureHeight);
+		//fb.charInfo = std::make_unique<fb_packedchar[]>(fb.charCount);
+
+		auto tmpData = std::make_unique<unsigned char[]>(fb.textureWidth * fb.textureHeight);
+		auto tmpCharInfo = std::make_unique<fb_packedchar[]>(fb.charCount);
+
+		fb.data = tmpData.release();
+		fb.charInfo = tmpCharInfo.release();
+
+
+
+
+		stbtt_pack_context context;
+		if (!stbtt_PackBegin(&context, fb.data, fb.textureWidth, fb.textureHeight, 0, 1, nullptr))
+			Log::crash("Failed to initialize font");
+
+		stbtt_PackSetOversampling(&context, fb.oversampleX, fb.oversampleY);
+		if (!stbtt_PackFontRange(&context, fontData.data(), 0, fb.fontSize, fb.firstChar, fb.charCount, (stbtt_packedchar*)fb.charInfo))
+			Log::crash("Failed to pack font");
+
+		stbtt_PackEnd(&context);
+
+		FontBitmap* pFb = this->fontBitmaps.insert(fb.fontName, fb);
+
+		FontBitmapTracker fbt;
+		fbt.ptr = pFb;
+		fbt.usageCount++;
+
+		this->fontBitmapsThatNeedGpuLoad.push_back(this->fontBitmapTrackers.insert(fb.fontName, fbt));
+
+		return fb.fontName;
+	}
+
+	FontBitmap* AssetManager::getFontBitmap(std::string name)
+	{
+#ifdef DEBUG_LOG
+		if (!this->fontBitmapTrackers.exists(name))
+			Log::crash("AssetManager::getFontBitmap(): Attempting to get font bitmap that does not exist: " + name);
+#endif
+
+		return this->fontBitmapTrackers.get(name)->ptr;
+	}
+
+	bool AssetManager::fontBitmapIsGpuLoaded(std::string name)
+	{
+		return this->fontBitmapTrackers.get(name)->gpuLoaded;
+	}
+
+	void AssetManager::removeFontBitmap(std::string name)
+	{
+#ifdef DEBUG_LOG
+		if (!this->fontBitmapTrackers.exists(name))
+			Log::crash("AssetManager::removeFontBitmap(): Attempting to remove font bitmap that does not exist: " + name);
+#endif
+
+		auto fbt = this->fontBitmapTrackers.get(name);
+		fbt->usageCount--;
+		if (fbt->usageCount == 0)
+		{
+#ifdef DEBUG_LOG
+			Log::toCliAndFile("Full remove FontBitmap: " + name);
+#endif
+			if (!fbt->gpuLoaded)
+			{
+				for (size_t i = 0; i < this->fontBitmapsThatNeedGpuLoad.size(); i++)
+				{
+					if (this->fontBitmapsThatNeedGpuLoad.at(i) == fbt)
+					{
+						this->fontBitmapsThatNeedGpuLoad.erase(this->fontBitmapsThatNeedGpuLoad.begin() + i);
+					}
+				}
+			}
+			else
+			{
+				this->gpu->clearTexture(&fbt->ptr->texture);
+			}
+
+
+			this->fontBitmaps.erase(name);
+			this->fontBitmapTrackers.erase(name);
+		}
+#ifdef DEBUG_LOG
+		else
+			Log::toCliAndFile("Decrement FontBitmap usageCount, retain: " + name);
+#endif	
+	}
+
+	FontGlyphInfo AssetManager::getFontGlyphInfo(uint32_t character, float offsetX, float offsetY, FontBitmap* fb)
+	{
+		stbtt_aligned_quad quad;
+
+		stbtt_GetPackedQuad((stbtt_packedchar*)fb->charInfo, fb->textureWidth, fb->textureHeight,
+			character - fb->firstChar, &offsetX, &offsetY, &quad, 1);
+		const auto xmin = quad.x0;
+		const auto xmax = quad.x1;
+		const auto ymin = -quad.y1;
+		const auto ymax = -quad.y0;
+
+
+		FontGlyphInfo info{};
+		info.offsetX = offsetX;
+		info.offsetY = offsetY;
+		info.positions[0] = { xmin, ymin, 0 };
+		info.positions[1] = { xmin, ymax, 0 };
+		info.positions[2] = { xmax, ymax, 0 };
+		info.positions[3] = { xmax, ymin, 0 };
+		info.uvs[0] = { quad.s0, quad.t1 };
+		info.uvs[1] = { quad.s0, quad.t0 };
+		info.uvs[2] = { quad.s1, quad.t0 };
+		info.uvs[3] = { quad.s1, quad.t1 };
+
+		return info;
 	}
 
 	/* Cameras

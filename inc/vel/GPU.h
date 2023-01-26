@@ -16,6 +16,7 @@
 #include "vel/Material.h"
 #include "vel/CollisionDebugDrawer.h"
 #include "vel/RenderTarget.h"
+#include "vel/FontBitmap.h"
 
 typedef uint64_t GLuint64;
 
@@ -56,7 +57,9 @@ namespace vel
 
 		void								loadShader(Shader* s);
 		void								loadMesh(Mesh* m);
+		void								updateMesh(Mesh* m);
 		void								loadTexture(Texture* t);
+		void								loadFontBitmapTexture(FontBitmap* fb);
 
 		RenderTarget						createRenderTarget(unsigned int width, unsigned int height);
 		void								updateRenderTarget(RenderTarget* rt);

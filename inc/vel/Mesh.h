@@ -38,7 +38,7 @@ namespace vel
 		void								setVertices(std::vector<Vertex>& vertices);
 		void								setIndices(std::vector<unsigned int>& indices);
 		void								setBones(std::vector<MeshBone>& bones);
-		const std::optional<GpuMesh>&       getGpuMesh() const;
+		std::optional<GpuMesh>&				getGpuMesh();
 		const std::string                   getName() const;
 		const std::vector<Vertex>&			getVertices() const;
 		const std::vector<unsigned int>&	getIndices() const;

@@ -17,6 +17,8 @@
 #include "vel/AssetTrackers.h"
 #include "vel/CollisionWorld.h"
 #include "vel/CollisionDebugDrawer.h"
+#include "vel/FontBitmap.h"
+#include "vel/FontGlyphInfo.h"
 
 
 namespace vel
@@ -33,6 +35,7 @@ namespace vel
 		std::vector<std::string>			shadersInUse;
 		std::vector<std::string>			meshesInUse;
 		std::vector<std::string> 			texturesInUse;
+		std::vector<std::string> 			fontBitmapsInUse;
 		std::vector<std::string> 			materialsInUse;
 		std::vector<std::string> 			renderablesInUse;
 		std::vector<std::string>			armaturesInUse;
@@ -45,11 +48,12 @@ namespace vel
 		glm::mat4							cameraProjectionMatrix;
 		glm::mat4							cameraViewMatrix;
 
-
 		std::string							name = "";
+
 
 		// these used to be protected before we started working on level builders where we needed to be able to generate
 		// and add things to scenes from outside of a child scene
+		//TODO: can these be set back to protected?
 	//protected:
 	public:
 		
@@ -58,6 +62,7 @@ namespace vel
 		void								loadShader(std::string name, std::string vertFile, std::string fragFile);
 		void								loadMesh(std::string path);
 		void								loadTexture(std::string name, std::string path);
+		void								loadFontBitmap(FontBitmap fb);
 
 		void								addCamera(Camera m);
 		void								addMaterial(Material m);
@@ -68,6 +73,7 @@ namespace vel
 		Shader*								getShader(std::string name);
 		Mesh*								getMesh(std::string name);
 		Texture*							getTexture(std::string name);
+		FontBitmap*							getFontBitmap(std::string name);
 		Camera*								getCamera(std::string name);
 		Material							getMaterial(std::string name);
 		Renderable							getRenderable(std::string name);
@@ -107,6 +113,15 @@ namespace vel
 		void								clearAllRenderTargetBuffers();
 
 		void								updateMaterialAnimations(double frameTime);
+
+		
+		Mesh								generateTextActorMesh(TextActor* ta);
+		void								updateTextActors();
+
+		TextActor*							addTextActor(Stage* stage, std::string name, std::string theText, 
+															FontBitmap* fb, glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), bool queue = false);
+
+		
 
 	};
 

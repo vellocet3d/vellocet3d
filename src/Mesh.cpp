@@ -114,7 +114,7 @@ namespace vel
         return this->gpuMesh.has_value();
     }
 
-    const std::optional<GpuMesh>& Mesh::getGpuMesh() const
+    std::optional<GpuMesh>& Mesh::getGpuMesh()
     {
         return this->gpuMesh;
     }

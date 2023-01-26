@@ -70,6 +70,9 @@ namespace vel
 		
 		for(auto& name : this->texturesInUse)
 			App::get().getAssetManager().removeTexture(name);
+
+		for (auto& name : this->fontBitmapsInUse)
+			App::get().getAssetManager().removeFontBitmap(name);
 		
 		for(auto& name : this->meshesInUse)
 			App::get().getAssetManager().removeMesh(name);
@@ -103,6 +106,11 @@ namespace vel
 				return false;
 
 		return true;
+	}
+
+	void Scene::loadFontBitmap(FontBitmap fb)
+	{
+		this->fontBitmapsInUse.push_back(App::get().getAssetManager().loadFontBitmap(fb));
 	}
 
 	CollisionWorld* Scene::addCollisionWorld(std::string name, float gravity)
@@ -171,6 +179,11 @@ namespace vel
 		return App::get().getAssetManager().getTexture(name);
 	}
 
+	FontBitmap* Scene::getFontBitmap(std::string name)
+	{
+		return App::get().getAssetManager().getFontBitmap(name);
+	}
+
 	Material Scene::getMaterial(std::string name)
 	{
 		return App::get().getAssetManager().getMaterial(name);
@@ -220,6 +233,126 @@ namespace vel
 		this->animationTime += delta;
 		for (auto& s : this->stages.getAll())
 			s->updateArmatureAnimations(this->animationTime);
+	}
+
+	Mesh Scene::generateTextActorMesh(TextActor* ta)
+	{
+		std::vector<Vertex> meshVertices = {};
+		std::vector<unsigned int> meshIndices = {};
+
+		unsigned int lastIndex = 0;
+		float offsetX = 0;
+		float offsetY = 0;
+
+		for (auto c : ta->text)
+		{
+			const auto glyphInfo = App::get().getAssetManager().getFontGlyphInfo(c, offsetX, offsetY, ta->fontBitmap);
+			offsetX = glyphInfo.offsetX;
+			offsetY = glyphInfo.offsetY;
+
+			Vertex v1;
+			v1.position = glyphInfo.positions[0];
+			v1.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+			v1.textureCoordinates = glyphInfo.uvs[0];
+			v1.textureId = 0;
+			meshVertices.push_back(v1);
+
+			Vertex v2;
+			v2.position = glyphInfo.positions[1];
+			v2.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+			v2.textureCoordinates = glyphInfo.uvs[1];
+			v2.textureId = 0;
+			meshVertices.push_back(v2);
+
+			Vertex v3;
+			v3.position = glyphInfo.positions[2];
+			v3.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+			v3.textureCoordinates = glyphInfo.uvs[2];
+			v3.textureId = 0;
+			meshVertices.push_back(v3);
+
+			Vertex v4;
+			v4.position = glyphInfo.positions[3];
+			v4.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+			v4.textureCoordinates = glyphInfo.uvs[3];
+			v4.textureId = 0;
+			meshVertices.push_back(v4);
+
+			// Add indices with correct winding
+			meshIndices.push_back(lastIndex + 1); // 1
+			meshIndices.push_back(lastIndex); // 0
+			meshIndices.push_back(lastIndex + 3); // 3
+			meshIndices.push_back(lastIndex + 1); // 1
+			meshIndices.push_back(lastIndex + 3); // 3
+			meshIndices.push_back(lastIndex + 2); // 2
+
+			lastIndex += 4;
+		}
+
+		Mesh m = Mesh(ta->name + "_mesh");
+		m.setVertices(meshVertices);
+		m.setIndices(meshIndices);
+
+		return m;
+	}
+
+	TextActor* Scene::addTextActor(Stage* stage, std::string name, std::string theText, FontBitmap* fb, glm::vec4 color, bool queue)
+	{
+		// create the TextActor
+		TextActor ta;
+		ta.name = name;
+		ta.text = theText;
+		ta.fontBitmap = fb;
+
+		// create the mesh using provided FontBitmap and text string
+		Mesh* pTam = App::get().getAssetManager().addMesh(this->generateTextActorMesh(&ta), queue)->ptr;
+		this->meshesInUse.push_back(pTam->getName());
+
+		// create material
+		vel::Material taMaterial;
+		taMaterial.name = name + "_material";
+		//taMaterial.color = color;
+		taMaterial.hasAlphaChannel = true;
+		taMaterial.addTexture(&fb->texture);
+		this->addMaterial(taMaterial);
+
+		// create renderable
+		std::string renderableName = name + "_renderable";
+		this->addRenderable(
+			renderableName,
+			this->getShader("textShader"),
+			pTam,
+			this->getMaterial(taMaterial.name)
+		);
+
+		// create actor
+		auto textActor = Actor(name);
+		textActor.setColor(color);
+		textActor.setDynamic(false);
+		textActor.setVisible(true);
+		textActor.addRenderable(this->getRenderable(renderableName));
+		Actor* pTextActor = stage->addActor(textActor);
+
+		// add actor pointer to TextActor.actor
+		ta.actor = pTextActor;
+
+		// add new text actor to stage and return pointer
+		return stage->addTextActor(ta);
+	}
+
+	void Scene::updateTextActors()
+	{
+		for (auto& s : this->stages.getAll())
+		{
+			for (auto& ta : s->getTextActors())
+			{
+				if (ta->requiresUpdate)
+				{
+					App::get().getAssetManager().updateMesh(this->generateTextActorMesh(ta));
+					ta->requiresUpdate = false;
+				}
+			}
+		}
 	}
 	
 	std::string Scene::getName()

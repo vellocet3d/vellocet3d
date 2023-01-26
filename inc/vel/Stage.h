@@ -13,14 +13,12 @@
 #include "vel/Camera.h"
 #include "vel/Renderable.h"
 #include "vel/GPU.h"
-
+#include "vel/TextActor.h"
 
 namespace vel
 {
-	class Scene;
+	class Scene; // ?
 	
-
-
 	class Stage
 	{
 	private:
@@ -29,6 +27,7 @@ namespace vel
 		sac<Actor>										actors;
 		sac<Armature>									armatures;
 		sac<Renderable>									renderables;
+		sac<TextActor>									textActors;
 		bool											clearDepthBuffer;
 		std::string										name;
 
@@ -43,12 +42,20 @@ namespace vel
 														~Stage();
 		void											updateFixedArmatureAnimations(double runTime);
 		void											updateArmatureAnimations(double runTime);
+
 		Actor*											addActor(Actor a);
 		void											removeActor(std::string name);
 		void											removeActor(Actor* a);
 		Actor*											getActor(std::string name);
 		std::vector<Actor*>&							getActors();
 		std::vector<Renderable*>& 						getRenderables();
+
+		TextActor*										addTextActor(TextActor ta);
+		TextActor*										getTextActor(std::string name);
+		std::vector<TextActor*>&						getTextActors();
+		void											removeTextActor(TextActor*);
+		void											removeTextActor(std::string name);
+		
 
 		void											addCamera(Camera* c);
 		Camera*											getCamera(std::string name);

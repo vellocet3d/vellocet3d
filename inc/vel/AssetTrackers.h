@@ -11,6 +11,7 @@
 #include "vel/Renderable.h"
 #include "vel/Animation.h"
 #include "vel/Armature.h"
+#include "vel/FontBitmap.h"
 
 
 
@@ -36,6 +37,12 @@ namespace vel
 	
 	struct TextureTracker{
 		Texture* 		ptr = nullptr;
+		bool 			gpuLoaded = false;
+		size_t 			usageCount = 0;
+	};
+
+	struct FontBitmapTracker {
+		FontBitmap* 	ptr = nullptr;
 		bool 			gpuLoaded = false;
 		size_t 			usageCount = 0;
 	};

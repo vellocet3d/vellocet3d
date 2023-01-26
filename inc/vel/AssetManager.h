@@ -13,6 +13,8 @@
 #include "vel/Renderable.h"
 #include "vel/Animation.h"
 #include "vel/Armature.h"
+#include "vel/FontBitmap.h"
+#include "vel/FontGlyphInfo.h"
 
 #include "vel/AssetTrackers.h"
 
@@ -40,6 +42,10 @@ namespace vel
 		sac<Texture>										textures;
 		sac<TextureTracker> 								textureTrackers;
 		std::deque<TextureTracker*>							texturesThatNeedGpuLoad;
+
+		sac<FontBitmap>										fontBitmaps;
+		sac<FontBitmapTracker> 								fontBitmapTrackers;
+		std::deque<FontBitmapTracker*>						fontBitmapsThatNeedGpuLoad;
 
 		sac<Material>										materials;
 		sac<MaterialTracker> 								materialTrackers;
@@ -76,7 +82,8 @@ namespace vel
 		void						removeCamera(std::string name);
 
 		std::pair<std::vector<std::string>, std::string> loadMesh(std::string path);
-		MeshTracker*				addMesh(Mesh m);
+		MeshTracker*				addMesh(Mesh& m, bool queue = true);
+		void						updateMesh(Mesh& m); // should only ever be called from main thread
 		Mesh*						getMesh(std::string name);
 		bool						meshIsGpuLoaded(std::string name);
 		void						removeMesh(std::string name);
@@ -86,6 +93,10 @@ namespace vel
 		bool						textureIsGpuLoaded(std::string name);
 		void						removeTexture(std::string name);
         
+		std::string					loadFontBitmap(FontBitmap fb);
+		FontBitmap*					getFontBitmap(std::string name);
+		bool						fontBitmapIsGpuLoaded(std::string name);
+		void						removeFontBitmap(std::string name);
 
 		std::string					addMaterial(Material m);
 		Material					getMaterial(std::string name);
@@ -105,6 +116,8 @@ namespace vel
 
 		MeshTracker*				getMeshTracker(std::string name);
 		ArmatureTracker*			getArmatureTracker(std::string name);
+
+		FontGlyphInfo				getFontGlyphInfo(uint32_t character, float offsetX, float offsetY, FontBitmap* fb);
 
 	};
 

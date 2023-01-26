@@ -451,6 +451,18 @@ namespace vel
 		m->setGpuMesh(gm);
 	}
 
+	void GPU::updateMesh(Mesh* m)
+	{
+		auto& gm = m->getGpuMesh().value();
+		gm.indiceCount = (GLsizei)m->getIndices().size();
+
+		glBindBuffer(GL_ARRAY_BUFFER, gm.VBO);
+		glBufferData(GL_ARRAY_BUFFER, m->getVertices().size() * sizeof(Vertex), &m->getVertices()[0], GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gm.EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->getIndices().size() * sizeof(unsigned int), &m->getIndices()[0], GL_STATIC_DRAW);
+	}
+
 	void GPU::loadTexture(Texture* t)
 	{
 		for (auto& td : t->frames)
@@ -488,8 +500,47 @@ namespace vel
 			glMakeTextureHandleResidentARB(td.dsaHandle);
 
 			stbi_image_free(td.primaryImageData.data);
-		}
-		
+		}	
+	}
+
+	void GPU::loadFontBitmapTexture(FontBitmap* fb)
+	{
+		Texture t;
+		t.name = fb->fontName + "_fontTexture";
+
+		TextureData td;
+		glGenTextures(1, &td.id);
+		glBindTexture(GL_TEXTURE_2D, td.id);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			GL_R8,
+			fb->textureWidth,
+			fb->textureHeight,
+			0,
+			GL_RED,
+			GL_UNSIGNED_BYTE,
+			fb->data
+		);
+		// TODO: verify these don't cause trouble
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		// reset pack alignment to default
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+		// obtain texture's DSA handle
+		td.dsaHandle = glGetTextureHandleARB(td.id);
+
+		// set texture's DSA handle as resident so it can be accessed in shaders
+		glMakeTextureHandleResidentARB(td.dsaHandle);
+
+		// push this texture data object as a frame into texture
+		t.frames.push_back(td);
+
+		fb->texture = t;
 	}
 
 	const Shader* const GPU::getActiveShader() const

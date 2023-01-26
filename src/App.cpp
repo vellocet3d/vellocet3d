@@ -60,6 +60,10 @@ namespace vel
 			this->assetManager.loadShader("defaultScreen",
 				"data/shaders/defaults/screen.vert", "data/shaders/defaults/screen.frag");
 
+			// used for rendering text
+			this->assetManager.loadShader("textShader",
+				"data/shaders/defaults/default.vert", "data/shaders/defaults/text.frag");
+
 			// load default white texture
 			this->assetManager.loadTexture("defaultWhite", "data/textures/defaults/default.jpg");
 
@@ -393,6 +397,9 @@ namespace vel
 
 					// execute inner loop (fixed rate) logic
 					this->activeScene->innerLoop((float)this->fixedLogicTime);
+
+					// update text actors
+					this->activeScene->updateTextActors();
 
 					// update animations
 					this->activeScene->updateFixedAnimations(this->fixedLogicTime);

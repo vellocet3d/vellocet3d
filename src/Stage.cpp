@@ -199,11 +199,35 @@ namespace vel
 		this->_removeActor(this->actors.get(name));
 	}
 
+	TextActor* Stage::addTextActor(TextActor ta)
+	{
+		return this->textActors.insert(ta.name, ta);
+	}
+
+	TextActor* Stage::getTextActor(std::string name)
+	{
+		return this->textActors.get(name);
+	}
+
+	std::vector<TextActor*>& Stage::getTextActors()
+	{
+		return this->textActors.getAll();
+	}
+
+	void Stage::removeTextActor(TextActor* ta)
+	{
+		this->_removeActor(ta->actor);
+		this->textActors.erase(ta);
+	}
+
+	void Stage::removeTextActor(std::string name)
+	{
+		this->removeTextActor(this->textActors.get(name));
+	}
+
 	std::vector<Renderable*>& Stage::getRenderables()
 	{
 		return this->renderables.getAll();
 	}
-
-	
 
 }
