@@ -402,6 +402,11 @@ namespace vel
 			if (!s->isVisible())
 				continue;
 
+			//std::cout << s->getName() << std::endl;
+
+			//if (s->getName() == "worldStage")
+			//	continue;
+
 			if (s->getClearDepthBuffer())
 				gpu->clearDepthBuffer();
 
@@ -464,6 +469,9 @@ namespace vel
 
 				// DRAW TRANSPARENTS/TRANSLUCENTS
 				gpu->enableBlend2();
+
+				//TODO: debugging: apparently all actors are being treated as transparents, HAVE to fix this
+				//std::cout << transparentActors.size() << std::endl;
 
 				// not proud of this, but it gets the job done for the time being, loop through all transparent actors and sort by their distance
 				// from the current camera position
@@ -546,6 +554,8 @@ namespace vel
 	void Scene::drawActor(Actor* a, float alphaTime)
 	{
 		auto gpu = App::get().getGPU();
+
+		//std::cout << "actor predraw: " << a->getName() << std::endl;
 
 		if (a->isVisible())
 		{
