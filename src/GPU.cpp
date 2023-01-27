@@ -459,9 +459,11 @@ namespace vel
 		// Generate and bind vertex attribute array
 		glBindVertexArray(gm.VAO);
 
+		// Bind and update vertex buffer
 		glBindBuffer(GL_ARRAY_BUFFER, gm.VBO);
 		glBufferData(GL_ARRAY_BUFFER, m->getVertices().size() * sizeof(Vertex), &m->getVertices()[0], GL_STATIC_DRAW);
 
+		// Bind and update indices buffer
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gm.EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->getIndices().size() * sizeof(unsigned int), &m->getIndices()[0], GL_STATIC_DRAW);
 

@@ -355,6 +355,7 @@ namespace vel
 					// update the mesh data associated with text actor
 					Mesh updatedMesh = this->generateTextActorMesh(ta);
 					ta->actor->getMesh()->setVertices(updatedMesh.getVertices());
+					ta->actor->getMesh()->setIndices(updatedMesh.getIndices());
 
 					App::get().getAssetManager().updateMesh(ta->actor->getMesh());
 					ta->requiresUpdate = false;
