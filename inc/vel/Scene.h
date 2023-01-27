@@ -118,8 +118,9 @@ namespace vel
 		Mesh								generateTextActorMesh(TextActor* ta);
 		void								updateTextActors();
 
-		TextActor*							addTextActor(Stage* stage, std::string name, std::string theText, 
-															FontBitmap* fb, glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), bool queue = false);
+		TextActor*							addTextActor(Stage* stage, std::string name, std::string theText, FontBitmap* fb, 
+												TextActorAlignment alignment = TextActorAlignment::LEFT_ALIGN, 
+												glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), bool queue = false);
 
 		
 

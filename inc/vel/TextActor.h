@@ -7,15 +7,22 @@
 
 namespace vel 
 {
+	enum TextActorAlignment {
+		LEFT_ALIGN,
+		CENTER_ALIGN,
+		RIGHT_ALIGN
+	};
+
 	struct TextActor 
 	{
-		std::string		name;
-		std::string 	text;
-		FontBitmap*		fontBitmap;
-		Actor*			actor = nullptr;
-		bool			requiresUpdate = false;
+		std::string				name;
+		std::string 			text;
+		FontBitmap*				fontBitmap;
+		TextActorAlignment		alignment;
+		Actor*					actor = nullptr;
+		bool					requiresUpdate = false;
 
-		void			updateText(std::string updatedText)
+		void					updateText(std::string updatedText)
 		{
 			this->text = updatedText;
 			this->requiresUpdate = true;

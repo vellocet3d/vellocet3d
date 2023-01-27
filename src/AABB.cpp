@@ -120,4 +120,15 @@ namespace vel
 
 		return returnVector;
 	}
+
+	glm::vec3 AABB::getMinEdge()
+	{
+		return this->minEdge;
+	}
+
+	glm::vec3 AABB::getMaxEdge()
+	{
+		return this->maxEdge;
+	}
+
 }

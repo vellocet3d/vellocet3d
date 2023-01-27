@@ -24,6 +24,8 @@ namespace vel
 		glm::vec3						getFarthestCorner();
 		glm::vec3						getSize();
 		glm::vec3						getHalfExtents();
+		glm::vec3						getMinEdge();
+		glm::vec3						getMaxEdge();
 
 	};
 }

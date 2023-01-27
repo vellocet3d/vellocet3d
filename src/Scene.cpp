@@ -297,16 +297,37 @@ namespace vel
 		m.setVertices(meshVertices);
 		m.setIndices(meshIndices);
 
+		// recalculate vertex positions for center alignment (origin of mesh at center)
+		if (ta->alignment == TextActorAlignment::CENTER_ALIGN)
+		{
+			AABB maabb = m.getAABB();
+			float offsetAmount = maabb.getMaxEdge().x * 0.5f;
+			for (auto& v : m.getVertices())
+				v.position = glm::vec3((v.position.x - offsetAmount), v.position.y, v.position.z);
+		}
+
+		// recalculate vertex positions for right alignment (origin of mesh at right edge)
+		if (ta->alignment == TextActorAlignment::RIGHT_ALIGN)
+		{
+			AABB maabb = m.getAABB();
+			float offsetAmount = maabb.getMaxEdge().x;
+			for (auto& v : m.getVertices())
+				v.position = glm::vec3((v.position.x - offsetAmount), v.position.y, v.position.z);
+		}
+
+		// default alignment is left
 		return m;
 	}
 
-	TextActor* Scene::addTextActor(Stage* stage, std::string name, std::string theText, FontBitmap* fb, glm::vec4 color, bool queue)
+	TextActor* Scene::addTextActor(Stage* stage, std::string name, std::string theText,
+		FontBitmap* fb, TextActorAlignment alignment, glm::vec4 color, bool queue)
 	{
 		// create the TextActor
 		TextActor ta;
 		ta.name = name;
 		ta.text = theText;
 		ta.fontBitmap = fb;
+		ta.alignment = alignment;
 
 		// create the mesh using provided FontBitmap and text string
 		Mesh* pTam = App::get().getAssetManager().addMesh(this->generateTextActorMesh(&ta), queue)->ptr;
