@@ -94,12 +94,12 @@ namespace vel
 		this->gpuMesh = gm;
     }
 
-    const std::vector<Vertex>& Mesh::getVertices() const
+    std::vector<Vertex>& Mesh::getVertices()
     {
         return this->vertices;
     }
 
-    const std::vector<unsigned int>& Mesh::getIndices() const
+    std::vector<unsigned int>& Mesh::getIndices()
     {
         return this->indices;
     }

@@ -273,10 +273,10 @@ if (!this->shaderTrackers.exists(name))
 		return meshTrackerPtr;
 	}
 
-	void AssetManager::updateMesh(Mesh& m)
+	void AssetManager::updateMesh(Mesh* m)
 	{
-		MeshTracker* mt = this->getMeshTracker(m.getName());
-		*mt->ptr = m;
+		MeshTracker* mt = this->getMeshTracker(m->getName());
+		*mt->ptr = *m;
 		this->gpu->updateMesh(mt->ptr);
 	}
 	

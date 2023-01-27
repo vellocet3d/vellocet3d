@@ -83,7 +83,7 @@ namespace vel
 
 		std::pair<std::vector<std::string>, std::string> loadMesh(std::string path);
 		MeshTracker*				addMesh(Mesh& m, bool queue = true);
-		void						updateMesh(Mesh& m); // should only ever be called from main thread
+		void						updateMesh(Mesh* m); // should only ever be called from main thread
 		Mesh*						getMesh(std::string name);
 		bool						meshIsGpuLoaded(std::string name);
 		void						removeMesh(std::string name);

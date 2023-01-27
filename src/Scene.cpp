@@ -105,6 +105,10 @@ namespace vel
 			if (!App::get().getAssetManager().textureIsGpuLoaded(t))
 				return false;
 
+		for (auto& fb : this->fontBitmapsInUse)
+			if (!App::get().getAssetManager().fontBitmapIsGpuLoaded(fb))
+				return false;
+
 		return true;
 	}
 
@@ -348,7 +352,11 @@ namespace vel
 			{
 				if (ta->requiresUpdate)
 				{
-					App::get().getAssetManager().updateMesh(this->generateTextActorMesh(ta));
+					// update the mesh data associated with text actor
+					Mesh updatedMesh = this->generateTextActorMesh(ta);
+					ta->actor->getMesh()->setVertices(updatedMesh.getVertices());
+
+					App::get().getAssetManager().updateMesh(ta->actor->getMesh());
 					ta->requiresUpdate = false;
 				}
 			}

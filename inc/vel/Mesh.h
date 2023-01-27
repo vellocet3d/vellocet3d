@@ -40,8 +40,8 @@ namespace vel
 		void								setBones(std::vector<MeshBone>& bones);
 		std::optional<GpuMesh>&				getGpuMesh();
 		const std::string                   getName() const;
-		const std::vector<Vertex>&			getVertices() const;
-		const std::vector<unsigned int>&	getIndices() const;
+		std::vector<Vertex>&				getVertices();
+		std::vector<unsigned int>&			getIndices();
 		const bool                          isRenderable() const;
 		const bool                          hasBones() const;
 		void								setGlobalInverseMatrix(glm::mat4 gim);

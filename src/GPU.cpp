@@ -456,11 +456,17 @@ namespace vel
 		auto& gm = m->getGpuMesh().value();
 		gm.indiceCount = (GLsizei)m->getIndices().size();
 
+		// Generate and bind vertex attribute array
+		glBindVertexArray(gm.VAO);
+
 		glBindBuffer(GL_ARRAY_BUFFER, gm.VBO);
 		glBufferData(GL_ARRAY_BUFFER, m->getVertices().size() * sizeof(Vertex), &m->getVertices()[0], GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gm.EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->getIndices().size() * sizeof(unsigned int), &m->getIndices()[0], GL_STATIC_DRAW);
+
+		// Unbind the vertex array to prevent accidental operations
+		glBindVertexArray(0);
 	}
 
 	void GPU::loadTexture(Texture* t)
