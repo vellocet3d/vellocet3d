@@ -192,6 +192,7 @@ namespace vel
 		}
 
 		btBvhTriangleMeshShape* bvhShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);
+		bvhShape->setMargin(0);
 		btCollisionShape* staticCollisionShape = bvhShape;
 		this->collisionShapes[actor->getName() + "_shape"] = staticCollisionShape;
 		
@@ -202,7 +203,7 @@ namespace vel
 	{
 		auto staticCollisionShape = this->collisionShapeFromActor(actor);
 		
-		btScalar mass(0.0);
+		btScalar mass(0);
 		btVector3 localInertia(0, 0, 0);
 		btDefaultMotionState* defaultMotionState = new btDefaultMotionState();
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, defaultMotionState, staticCollisionShape, localInertia);

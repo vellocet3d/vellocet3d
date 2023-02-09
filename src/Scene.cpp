@@ -648,8 +648,8 @@ namespace vel
 
 		// clear default screen buffer
 		gpu->setRenderTarget(0, false);
-		//gpu->clearBuffers(0.0f, 0.0f, 0.0f, 0.1f);
-		gpu->clearBuffers(1.0f, 1.0f, 0.0f, 1.0f);
+		gpu->clearBuffers(0.0f, 0.0f, 0.0f, 1.0f);
+		//gpu->clearBuffers(1.0f, 1.0f, 0.0f, 1.0f);
 
 	}
 
