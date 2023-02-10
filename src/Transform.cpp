@@ -51,6 +51,11 @@ namespace vel
 		this->rotation = glm::angleAxis(glm::radians(angle), axis);
     }
 
+	void Transform::appendRotation(float angle, glm::vec3 axis)
+	{
+		this->rotation *= glm::angleAxis(glm::radians(angle), axis);
+	}
+
     void Transform::setScale(glm::vec3 scale)
     {
         this->scale = scale;

@@ -23,8 +23,9 @@ namespace vel
 	Scene::Scene() :
 		mainMemoryloaded(false),
 		swapWhenLoaded(false),
+		fixedAnimationTime(0.0),
 		animationTime(0.0),
-		fixedAnimationTime(0.0)
+		screenColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))
 	{
 		this->transparentActors.reserve(1000); // reserve space for 1000 transparent actors (won't reallocate until that limit reached)
 	}
@@ -110,6 +111,16 @@ namespace vel
 				return false;
 
 		return true;
+	}
+
+	void Scene::setScreenColor(glm::vec4 c)
+	{
+		this->screenColor = c;
+	}
+
+	void Scene::clearScreenColor()
+	{
+		this->screenColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	void Scene::loadFontBitmap(FontBitmap fb)
@@ -545,7 +556,7 @@ namespace vel
 				if (c->isFinalRenderCam())
 				{
 					gpu->updateViewportSize(c->getViewportSize().x, c->getViewportSize().y); // TODO: can probably do this outside of this loop since this render is the screen size
-					gpu->drawScreen(c->getRenderTarget()->texture.frames.at(0).dsaHandle);
+					gpu->drawScreen(c->getRenderTarget()->texture.frames.at(0).dsaHandle, this->screenColor);
 				}
 			}
 		}

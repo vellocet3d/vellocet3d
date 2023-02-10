@@ -20,6 +20,7 @@ namespace vel
 		void				setTranslation(glm::vec3 translation);
 		void				setRotation(float angle, glm::vec3 axis);
 		void				setRotation(glm::quat rotation);
+		void				appendRotation(float angle, glm::vec3 axis);
 		void				setScale(glm::vec3 scale);
 		const glm::vec3&	getTranslation() const;
 		const glm::quat&	getRotation() const;

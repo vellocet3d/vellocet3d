@@ -25,7 +25,7 @@ namespace vel
 	class GPU
 	{
 	private:
-        Shader*								defaultShader;
+        Shader*								defaultScreenShader;
 		Shader*								activeShader;
 		Mesh*								activeMesh;
 		Material*							activeMaterial;
@@ -104,7 +104,7 @@ namespace vel
 		void								updateViewportSize(unsigned int width, unsigned int height);
 		void								setRenderTarget(unsigned int FBO, bool depth);
 
-		void								drawScreen(GLuint64 dsaHandle);
+		void								drawScreen(GLuint64 dsaHandle, glm::vec4 screenColor);
 
 		void								setDefaultShader(Shader* s);
 

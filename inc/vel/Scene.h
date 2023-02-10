@@ -30,6 +30,7 @@ namespace vel
 		ptrsac<CollisionWorld*> 			collisionWorlds;
 		double								fixedAnimationTime;
 		double								animationTime;
+		glm::vec4							screenColor;
 
 		std::vector<std::string>			camerasInUse;
 		std::vector<std::string>			shadersInUse;
@@ -121,6 +122,9 @@ namespace vel
 		TextActor*							addTextActor(Stage* stage, std::string name, std::string theText, FontBitmap* fb, 
 												TextActorAlignment alignment = TextActorAlignment::LEFT_ALIGN, 
 												glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), bool queue = false);
+
+		void								setScreenColor(glm::vec4 c);
+		void								clearScreenColor();
 
 		
 

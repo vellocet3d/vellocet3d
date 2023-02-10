@@ -20,7 +20,7 @@
 namespace vel
 {
 	GPU::GPU() :
-		defaultShader(nullptr),
+		defaultScreenShader(nullptr),
 		activeShader(nullptr),
 		activeMesh(nullptr),
 		activeMaterial(nullptr),
@@ -42,18 +42,21 @@ namespace vel
 
 	void GPU::setDefaultShader(Shader* s)
 	{
-		this->defaultShader = s;
+		this->defaultScreenShader = s;
 	}
 
-	void GPU::drawScreen(GLuint64 dsaHandle)
+	void GPU::drawScreen(GLuint64 dsaHandle, glm::vec4 screenColor)
 	{
-		this->useShader(this->defaultShader);
+		this->useShader(this->defaultScreenShader);
 
 		//this->setShaderVec4("color", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 		//this->setShaderMat4("mvp", glm::mat4(1.0f));
 
 		// send texture dsa id to ubo
 		this->updateTextureUBO(0, dsaHandle);
+
+		// send color to uniform
+		this->setShaderVec4("color", screenColor);
 
 		// clear the active lightmap texture
 		this->updateLightMapTextureUBO(App::get().getAssetManager().getTexture("defaultWhite")->frames.at(0).dsaHandle);
@@ -500,6 +503,10 @@ namespace vel
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			
 
 			// obtain texture's DSA handle
 			td.dsaHandle = glGetTextureHandleARB(td.id);
