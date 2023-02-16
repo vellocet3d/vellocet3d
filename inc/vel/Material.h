@@ -4,34 +4,40 @@
 #include <optional>
 #include <vector>
 
+#include "glm/glm.hpp"
+
+#include "vel/Texture.h"
 #include "vel/MaterialAnimator.h"
 
 
 namespace vel
 {
-	struct Texture;
-
-	struct Material
+	class Material
 	{
-		std::string				name;
-		glm::vec4				color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		std::vector<Texture*>	textures;
-		bool					hasAlphaChannel = false;
+	private:
+		std::string							name;
+		glm::vec4							color;
+		std::vector<Texture*>				textures;
+		bool								hasAlphaChannel;
 
-		std::optional<MaterialAnimator> materialAnimator;
+		std::optional<MaterialAnimator>		materialAnimator;
 
-		void addTexture(Texture* t) 
-		{
-			this->textures.push_back(t);
-		}
+	public:
+		Material(std::string name);
 
-		void addAnimatedTexture(Texture* t, float fps)
-		{
-			if (!this->materialAnimator.has_value())
-				this->materialAnimator = MaterialAnimator();
-			
-			this->addTexture(t);
-			this->materialAnimator->addTextureAnimator(t->frames.size(), fps);
-		}
+		void								setColor(glm::vec4 c);
+		void								addTexture(Texture* t);
+		void								addAnimatedTexture(Texture* t, float fps);
+		void								setHasAlphaChannel(bool b);
+
+		void								pauseAnimatedTextureAfterCycles(unsigned int textureId, unsigned int cycles);
+		void								setAnimatedTexturePause(unsigned int textureId, bool isPaused);
+		bool								getAnimatedTexturePause(unsigned int textureId);
+
+		std::string&						getName();
+		glm::vec4&							getColor();
+		std::vector<Texture*>&				getTextures();
+		std::optional<MaterialAnimator>&	getMaterialAnimator();
+		bool								getHasAlphaChannel();
 	};
 }

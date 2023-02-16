@@ -233,7 +233,7 @@ namespace vel
 	{
 		for (auto& s : this->stages.getAll())
 			for (auto am : s->animatedMaterials.getAll())
-				am->materialAnimator->update(frameTime);
+				am->getMaterialAnimator()->update(frameTime);
 	}
 
 	void Scene::updateFixedAnimations(double delta)
@@ -345,10 +345,8 @@ namespace vel
 		this->meshesInUse.push_back(pTam->getName());
 
 		// create material
-		vel::Material taMaterial;
-		taMaterial.name = name + "_material";
-		//taMaterial.color = color;
-		taMaterial.hasAlphaChannel = true;
+		vel::Material taMaterial(name + "_material");
+		taMaterial.setHasAlphaChannel(true);
 		taMaterial.addTexture(&fb->texture);
 		this->addMaterial(taMaterial);
 
@@ -358,7 +356,7 @@ namespace vel
 			renderableName,
 			this->getShader("textShader"),
 			pTam,
-			this->getMaterial(taMaterial.name)
+			this->getMaterial(taMaterial.getName())
 		);
 
 		// create actor
@@ -466,7 +464,7 @@ namespace vel
 				for (auto r : s->getRenderables())
 				{
 					//if (r->getMaterialHasAlpha())
-					if(r->getMaterial().has_value() && r->getMaterial()->hasAlphaChannel)
+					if(r->getMaterial().has_value() && r->getMaterial()->getHasAlphaChannel())
 					{
 						for (auto a : r->actors.getAll())
 						{
@@ -489,7 +487,7 @@ namespace vel
 					{
 						// if this actor has a color with a transparent component less than fully opaque, push it onto
 						// transparentActors queue and continue the loop without drawing the actor
-						if ((a->getColor().w < 1.0f) || (a->getMaterial().has_value() && a->getMaterial()->hasAlphaChannel))
+						if ((a->getColor().w < 1.0f) || (a->getMaterial().has_value() && a->getMaterial()->getHasAlphaChannel()))
 						{
 							float dist = glm::length(this->cameraPosition - a->getTransform().getTranslation());
 							this->transparentActors.push_back(std::pair<float, Actor*>(dist, a));

@@ -151,8 +151,8 @@ namespace vel
 			actorStageRenderable->actors.insert(actor->getName(), actor);
 
 			// new renderable, so check if it has an animated material and if so add pointer to it to animatedMaterials
-			if (actorStageRenderable->getMaterial().has_value() && actorStageRenderable->getMaterial()->materialAnimator.has_value())
-				this->animatedMaterials.insert(actorStageRenderable->getName() + "_" + actorStageRenderable->getMaterial()->name, &actorStageRenderable->getMaterial().value());
+			if (actorStageRenderable->getMaterial().has_value() && actorStageRenderable->getMaterial()->getMaterialAnimator().has_value())
+				this->animatedMaterials.insert(actorStageRenderable->getName() + "_" + actorStageRenderable->getMaterial()->getName(), &actorStageRenderable->getMaterial().value());
 		}
 		// if adding an actor that does not have a tempRenderable pointer, BUT DOES have a 
 		// stageRenderable value, then we assume that this actor was derived from an existing
@@ -163,8 +163,8 @@ namespace vel
 		}
 
 		// if actor has an animated material, add it to animatedMaterials
-		if (actor->getMaterial().has_value() && actor->getMaterial()->materialAnimator.has_value())
-			this->animatedMaterials.insert(actor->getName() + "_" + actor->getMaterial()->name, &actor->getMaterial().value());
+		if (actor->getMaterial().has_value() && actor->getMaterial()->getMaterialAnimator().has_value())
+			this->animatedMaterials.insert(actor->getName() + "_" + actor->getMaterial()->getName(), &actor->getMaterial().value());
 
 		return actor;
 	}
@@ -181,7 +181,7 @@ namespace vel
 			a->getStageRenderable().value()->actors.erase(a->getName());
 
 		// remove pointer to animated material if actor had a unique animated material
-		if (a->getMaterial().has_value() && a->getMaterial()->materialAnimator.has_value())
+		if (a->getMaterial().has_value() && a->getMaterial()->getMaterialAnimator().has_value())
 			this->animatedMaterials.erase(&a->getMaterial().value());
 
 		// mark actor as deleted (since it's value will persist in memory) and "remove" from sac

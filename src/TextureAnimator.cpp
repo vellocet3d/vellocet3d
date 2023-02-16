@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "vel\TextureAnimator.h"
 
 namespace vel
@@ -23,6 +25,11 @@ namespace vel
 		this->paused = p;
 	}
 
+	bool TextureAnimator::getPaused()
+	{
+		return this->paused;
+	}
+
 	void TextureAnimator::setFramesPerSecond(float fps)
 	{
 		this->framesPerSecond = fps;
@@ -42,12 +49,18 @@ namespace vel
 
 		unsigned int nextFrame = (unsigned int)(this->currentCycleTime / numberOfFramesToPlayPerSecond);
 
-		if (nextFrame == this->frameCount) // since we're 0 based
+		if (nextFrame == this->frameCount) // 0 based
 		{
 			if (this->pauseAfterCycles == this->currentCycle)
+			{
 				this->paused = true;
-
-			this->currentCycle += 1;
+				this->currentCycle = 1;
+			}
+			else
+			{
+				this->currentCycle += 1;
+			}
+			
 			this->currentCycleTime = 0.0f;
 
 			return this->currentFrame;

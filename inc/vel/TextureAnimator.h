@@ -22,6 +22,7 @@ namespace vel
 		void				setFramesPerSecond(float fps);
 		void				setPauseAfterCycles(unsigned int c);
 		void				setPaused(bool p);
+		bool				getPaused();
 
 		unsigned int		getCurrentFrame();
 

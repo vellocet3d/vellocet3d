@@ -653,26 +653,19 @@ namespace vel
 	void GPU::useMaterial(Material* m)
 	{
 		this->activeMaterial = m;
+		this->setShaderVec4("color", m->getColor());
 
-		this->setShaderVec4("color", m->color);
-
-		//for (unsigned int i = 0; i < m->textures.size(); i++)
-		//	this->updateTextureUBO(i, m->textures.at(i)->dsaHandle);
-
-		if (!m->materialAnimator.has_value())
+		if (!m->getMaterialAnimator().has_value())
 		{
-			for (unsigned int i = 0; i < m->textures.size(); i++)
-				this->updateTextureUBO(i, m->textures.at(i)->frames.at(0).dsaHandle);
+			for (unsigned int i = 0; i < m->getTextures().size(); i++)
+				this->updateTextureUBO(i, m->getTextures().at(i)->frames.at(0).dsaHandle);
 		}
 		else
 		{
-			//std::cout << "here004\n";
-			for (unsigned int i = 0; i < m->textures.size(); i++)
+			for (unsigned int i = 0; i < m->getTextures().size(); i++)
 			{
-				//std::cout << "here005\n";
-				auto currentTextureFrame = m->materialAnimator->getTextureCurrentFrame(i);
-				//std::cout << currentTextureFrame << "\n";
-				this->updateTextureUBO(i, m->textures.at(i)->frames.at(currentTextureFrame).dsaHandle);
+				auto currentTextureFrame = m->getMaterialAnimator()->getTextureCurrentFrame(i);
+				this->updateTextureUBO(i, m->getTextures().at(i)->frames.at(currentTextureFrame).dsaHandle);
 			}
 		}
 

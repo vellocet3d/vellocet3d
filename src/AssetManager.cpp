@@ -712,48 +712,48 @@ if (!this->meshTrackers.exists(name))
 	--------------------------------------------------*/
 	std::string AssetManager::addMaterial(Material m)
 	{
-		if (this->materialTrackers.exists(m.name))
+		if (this->materialTrackers.exists(m.getName()))
 		{
 #ifdef DEBUG_LOG
-	Log::toCliAndFile("Existing Material, bypass reload: " + m.name);
+	Log::toCliAndFile("Existing Material, bypass reload: " + m.getName());
 #endif
-			this->materialTrackers.get(m.name)->usageCount++;
-			return m.name;
+			this->materialTrackers.get(m.getName())->usageCount++;
+			return m.getName();
 		}
 
 #ifdef DEBUG_LOG
-	Log::toCliAndFile("Loading new Material: " + m.name);
+	Log::toCliAndFile("Loading new Material: " + m.getName());
 #endif		
 
 		//// assign default texture to material if a material is not provided at this time
 		//if (m.diffuse == nullptr)
 		//	m.diffuse = this->getTexture("__default__");
 
-		if (m.color.w < 1.0f)
+		if (m.getColor().w < 1.0f)
 		{
-			m.hasAlphaChannel = true;
+			m.setHasAlphaChannel(true);
 		}
 		else
 		{
 			//if (!m.hasAlphaChannel && m.diffuse && m.diffuse->alphaChannel)
 			//	m.hasAlphaChannel = true;
-			for (auto& t : m.textures)
+			for (auto& t : m.getTextures())
 			{
 				if (t->alphaChannel)
-					m.hasAlphaChannel = true;
+					m.setHasAlphaChannel(true);
 			}
 		}
 			
 
-		auto materialPtr = this->materials.insert(m.name, m);
+		auto materialPtr = this->materials.insert(m.getName(), m);
 		
 		MaterialTracker t;
 		t.ptr = materialPtr;
 		t.usageCount++;
 
-		this->materialTrackers.insert(m.name, t);
+		this->materialTrackers.insert(m.getName(), t);
 
-		return m.name;
+		return m.getName();
 	}
 
 	Material AssetManager::getMaterial(std::string name)

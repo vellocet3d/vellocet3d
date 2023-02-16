@@ -26,7 +26,21 @@ namespace vel
 			//std::cout << "here002\n";
 			ta.update(frameTime);
 		}
-			
+	}
+
+	void MaterialAnimator::setTextureAnimatorPauseAfterCycles(unsigned int textureId, unsigned int cycles)
+	{
+		this->textureAnimators.at(textureId).setPauseAfterCycles(cycles);
+	}
+
+	void MaterialAnimator::setTextureAnimatorPause(unsigned int textureId, bool isPaused)
+	{
+		this->textureAnimators.at(textureId).setPaused(isPaused);
+	}
+
+	bool MaterialAnimator::getTexturePaused(unsigned int textureId)
+	{
+		return this->textureAnimators.at(textureId).getPaused();
 	}
 
 }
