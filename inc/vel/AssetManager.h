@@ -88,7 +88,7 @@ namespace vel
 		bool						meshIsGpuLoaded(std::string name);
 		void						removeMesh(std::string name);
 
-		std::string					loadTexture(std::string name, std::string path);
+		std::string					loadTexture(std::string name, std::string path, unsigned int uvWrapping = 1);
 		Texture*					getTexture(std::string name);
 		bool						textureIsGpuLoaded(std::string name);
 		void						removeTexture(std::string name);

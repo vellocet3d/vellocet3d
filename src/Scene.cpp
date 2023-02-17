@@ -159,9 +159,9 @@ namespace vel
 			this->armaturesInUse.push_back(tts.second);
 	}
 	
-	void Scene::loadTexture(std::string name, std::string path)
+	void Scene::loadTexture(std::string name, std::string path, unsigned int uvWrapping)
 	{
-		this->texturesInUse.push_back(App::get().getAssetManager().loadTexture(name, path));
+		this->texturesInUse.push_back(App::get().getAssetManager().loadTexture(name, path, uvWrapping));
 	}
 	
 	void Scene::addMaterial(Material m)

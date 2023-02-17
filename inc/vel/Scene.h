@@ -62,7 +62,7 @@ namespace vel
 
 		void								loadShader(std::string name, std::string vertFile, std::string fragFile);
 		void								loadMesh(std::string path);
-		void								loadTexture(std::string name, std::string path);
+		void								loadTexture(std::string name, std::string path, unsigned int uvWrapping = 1);
 		void								loadFontBitmap(FontBitmap fb);
 
 		void								addCamera(Camera m);
