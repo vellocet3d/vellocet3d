@@ -50,11 +50,16 @@ namespace vel
 			this->assetManager.loadShader("default",
 				"data/shaders/defaults/default.vert", "data/shaders/defaults/default.frag");
 
+			this->assetManager.loadShader("defaultGI",
+				"data/shaders/defaults/default.vert", "data/shaders/defaults/defaultGI.frag");
+
 			this->assetManager.loadShader("defaultInvertUV",
 				"data/shaders/defaults/default.vert", "data/shaders/defaults/defaultInvertUV.frag");
 
+			//this->assetManager.loadShader("defaultSkinned",
+			//	"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/default.frag");
 			this->assetManager.loadShader("defaultSkinned",
-				"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/default.frag");
+				"data/shaders/defaults/default_skinned.vert", "data/shaders/defaults/defaultGI.frag");
 
 			// used for rendering texture to screen buffer
 			this->assetManager.loadShader("defaultScreen",

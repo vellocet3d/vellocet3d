@@ -644,6 +644,14 @@ namespace vel
 		glUniform3fv(this->activeShader->uniformLocations[name], 1, &value[0]);
 	}
 
+	void GPU::setShaderVec3Array(const std::string &name, std::vector<glm::vec3>& value)
+	{
+		if (!this->activeShader->uniformLocations.count(name) == 1)
+			this->activeShader->uniformLocations[name] = glGetUniformLocation(this->activeShader->id, name.c_str());
+
+		glUniform3fv(this->activeShader->uniformLocations[name], value.size(), glm::value_ptr(value[0]));
+	}
+
 	void GPU::setShaderVec4(const std::string &name, glm::vec4 value) const
 	{
 		if (!this->activeShader->uniformLocations.count(name) == 1)

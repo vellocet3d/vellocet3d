@@ -46,7 +46,10 @@ namespace vel
 		glm::vec4										color; // overwrites material color property, defaults to 1.0
 
 		std::optional<Material>							material; // overwrites renderable material
+
 		Texture*										lightMapTexture;
+
+		std::vector<glm::vec3>							giColors;
 		
 		void*											userPointer;
 
@@ -108,5 +111,8 @@ namespace vel
 		void*											getUserPointer();
 		void											setUserPointer(void* p);
 
+		void											updateGIColors(std::vector<glm::vec3>& colors);
+
+		std::vector<glm::vec3>&							getGIColors();
 	};
 }

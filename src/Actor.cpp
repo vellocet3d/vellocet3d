@@ -21,6 +21,16 @@ namespace vel
 		lightMapTexture(nullptr)
 	{}
 
+	std::vector<glm::vec3>& Actor::getGIColors()
+	{
+		return this->giColors;
+	}
+
+	void Actor::updateGIColors(std::vector<glm::vec3>& colors)
+	{
+		this->giColors = colors;
+	}
+
 	void Actor::setLightMapTexture(Texture* t)
 	{
 		this->lightMapTexture = t;
@@ -211,6 +221,10 @@ namespace vel
 	void Actor::setDynamic(bool dynamic)
 	{
 		this->dynamic = dynamic;
+		if (dynamic)
+			this->giColors = { glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f) };
+		else
+			this->giColors.clear();
 	}
 
 	const bool Actor::isDynamic() const

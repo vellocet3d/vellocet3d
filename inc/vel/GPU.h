@@ -77,6 +77,7 @@ namespace vel
 		void								setShaderFloatArray(const std::string &name, std::vector<float> value);
 		void								setShaderMat4(const std::string &name, glm::mat4 value) const;
 		void								setShaderVec3(const std::string &name, glm::vec3 value) const;
+		void								setShaderVec3Array(const std::string &name, std::vector<glm::vec3>& value);
 		void								setShaderVec4(const std::string &name, glm::vec4 value) const;
 
 		void								drawGpuMesh();
