@@ -218,11 +218,17 @@ namespace vel
 		return this->transform.getScale();
 	}
 
+	void Actor::setEmptyGIColors()
+	{
+		this->giColors = { glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f) };
+	}
+
 	void Actor::setDynamic(bool dynamic)
 	{
 		this->dynamic = dynamic;
+		// TODO: do we want to be setting these here, what if we want to go from dynamic to none dynamic and retain current giColor...????
 		if (dynamic)
-			this->giColors = { glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f) };
+			this->setEmptyGIColors();
 		else
 			this->giColors.clear();
 	}

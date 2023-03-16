@@ -49,7 +49,7 @@ namespace vel
 
 		Texture*										lightMapTexture;
 
-		std::vector<glm::vec3>							giColors;
+		std::vector<glm::vec3>							giColors;// -x, +x, -y, +y, -z, +z
 		
 		void*											userPointer;
 
@@ -113,6 +113,7 @@ namespace vel
 
 		void											updateGIColors(std::vector<glm::vec3>& colors);
 
+		void											setEmptyGIColors();
 		std::vector<glm::vec3>&							getGIColors();
 	};
 }
