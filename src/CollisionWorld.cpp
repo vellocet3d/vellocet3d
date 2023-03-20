@@ -229,23 +229,35 @@ namespace vel
 		for (int triCounter = 0; triCounter < tmpInds.size() / 3; triCounter++)
 		{
 			p0 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter]]);
-			p1 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 1]]);
-			p2 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 2]]);
+			CustomTriangleMeshData p0CD;
+			p0CD.textureUVs = tmpTextureCoords[tmpInds[3 * triCounter]];
+			p0CD.lightmapUVs = tmpLightmapCoords[tmpInds[3 * triCounter]];
+			p0CD.texture = nullptr;
+			p0CD.lightmapTexture = actor->getLightMapTexture();
 
-			CustomTriangleMeshData ctmd;
-			ctmd.textureUVs = tmpTextureCoords[tmpInds[3 * triCounter]];
-			ctmd.lightmapUVs = tmpLightmapCoords[tmpInds[3 * triCounter]];
-			
-			ctmd.texture = nullptr;
+			p1 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 1]]);
+			CustomTriangleMeshData p1CD;
+			p1CD.textureUVs = tmpTextureCoords[tmpInds[3 * triCounter + 1]];
+			p1CD.lightmapUVs = tmpLightmapCoords[tmpInds[3 * triCounter + 1]];
+			p1CD.texture = nullptr;
+			p1CD.lightmapTexture = actor->getLightMapTexture();
+
+			p2 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 2]]);
+			CustomTriangleMeshData p2CD;
+			p2CD.textureUVs = tmpTextureCoords[tmpInds[3 * triCounter + 2]];
+			p2CD.lightmapUVs = tmpLightmapCoords[tmpInds[3 * triCounter + 2]];
+			p2CD.texture = nullptr;
+			p2CD.lightmapTexture = actor->getLightMapTexture();
+
 			if (actor->getStageRenderable() && actor->getStageRenderable().value()->getMaterial() && 
 				actor->getStageRenderable().value()->getMaterial().value().getTextures().size() > 0)
 			{
-				ctmd.texture = actor->getStageRenderable().value()->getMaterial().value().getTextures().at(0);
+				p0CD.texture = actor->getStageRenderable().value()->getMaterial().value().getTextures().at(0);
+				p1CD.texture = actor->getStageRenderable().value()->getMaterial().value().getTextures().at(0);
+				p2CD.texture = actor->getStageRenderable().value()->getMaterial().value().getTextures().at(0);
 			}
 
-			ctmd.lightmapTexture = actor->getLightMapTexture();
-
-			mergedTriangleMesh->addTriangle(p0, p1, p2, ctmd);
+			mergedTriangleMesh->addTriangle(p0, p1, p2, p0CD, p1CD, p2CD);
 		}
 
 		btBvhTriangleMeshShape* bvhShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);

@@ -18,7 +18,10 @@ namespace vel
 				return 1.0f;
 		}
 
-		this->m_triangleIndex = rayResult.m_localShapeInfo->m_triangleIndex;
+		if (rayResult.m_localShapeInfo == nullptr)
+			this->m_triangleIndex = -1;
+		else
+			this->m_triangleIndex = rayResult.m_localShapeInfo->m_triangleIndex;
 
 		return ClosestRayResultCallback::addSingleResult(rayResult, normalInWorldSpace);
 	}
