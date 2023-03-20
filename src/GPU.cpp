@@ -523,7 +523,8 @@ namespace vel
 			// set texture's DSA handle as resident so it can be accessed in shaders
 			glMakeTextureHandleResidentARB(td.dsaHandle);
 
-			stbi_image_free(td.primaryImageData.data);
+			if(t->freeAfterGPULoad)
+				stbi_image_free(td.primaryImageData.data);
 		}	
 	}
 

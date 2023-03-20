@@ -15,5 +15,6 @@ namespace vel
 		btVector3					normal;
 		float						distance;
 		float						normalUpDot;
+		int							triangleIndex;
 	};
 }

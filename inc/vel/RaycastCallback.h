@@ -16,8 +16,10 @@ namespace vel
 		std::vector<btCollisionObject*> blackList;
 
 	public:
+		int m_triangleIndex;
 		RaycastCallback(btVector3 from, btVector3 to, std::vector<btCollisionObject*> blackList = {});
 		btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace);
+		
 	};
 
 }

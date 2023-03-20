@@ -18,6 +18,8 @@ namespace vel
 				return 1.0f;
 		}
 
+		this->m_triangleIndex = rayResult.m_localShapeInfo->m_triangleIndex;
+
 		return ClosestRayResultCallback::addSingleResult(rayResult, normalInWorldSpace);
 	}
 

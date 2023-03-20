@@ -384,7 +384,7 @@ if (!this->meshTrackers.exists(name))
 		return td;
 	}
 
-	std::string AssetManager::loadTexture(std::string name, std::string path, unsigned int uvWrapping)
+	std::string AssetManager::loadTexture(std::string name, std::string path, bool freeAfterGPULoad, unsigned int uvWrapping)
 	{	
 		if (this->textureTrackers.exists(name))
 		{
@@ -401,6 +401,7 @@ if (!this->meshTrackers.exists(name))
 		Texture texture;
 		texture.name = name;
 		texture.uvWrapping = uvWrapping;
+		texture.freeAfterGPULoad = freeAfterGPULoad;
 
 		// Determine if path is a directory or file, if directory then load each file in the directory as
 		// a texture frame
@@ -478,7 +479,17 @@ if (!this->meshTrackers.exists(name))
 			{
 				this->gpu->clearTexture(t->ptr);
 			}
-				
+			
+			// texture remained in system ram after gpu load for use within engine,
+			// free it now
+			if (!t->ptr->freeAfterGPULoad)
+			{
+				for (auto& td : t->ptr->frames)
+				{
+					stbi_image_free(td.primaryImageData.data);
+				}
+			}
+						
 			
 			this->textures.erase(name);
 			this->textureTrackers.erase(name);

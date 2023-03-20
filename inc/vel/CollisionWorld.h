@@ -75,6 +75,8 @@ namespace vel
 		void									setCamera(Camera* c);
 		Camera*									getCamera();
 
+		static void								getTriangleVertices(const btStridingMeshInterface* meshInterface, int triangleIndex, btVector3& v0, btVector3& v1, btVector3& v2, int& index0, int& index1, int& index2);
+
 	};
 
 

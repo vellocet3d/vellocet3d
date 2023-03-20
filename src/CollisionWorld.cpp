@@ -7,7 +7,7 @@
 #include "vel/functions.h"
 #include "vel/RaycastCallback.h"
 #include "vel/ConvexCastCallback.h"
-
+#include "vel/CustomTriangleMesh.h"
 
 
 
@@ -161,6 +161,44 @@ namespace vel
 	}
 
 
+	//btCollisionShape* CollisionWorld::collisionShapeFromActor(Actor* actor)
+	//{
+	//	if (actor->getMesh() == nullptr)
+	//		return nullptr;
+
+	//	std::vector<glm::vec3> tmpVerts;
+	//	std::vector<size_t> tmpInds;
+
+	//	auto transformMatrix = actor->getWorldMatrix();
+	//	auto mesh = actor->getMesh();
+
+	//	size_t vertexOffset = tmpVerts.size();
+
+	//	for (auto& vert : mesh->getVertices())
+	//		tmpVerts.push_back(glm::vec3(transformMatrix * glm::vec4(vert.position, 1.0f)));
+
+	//	for (auto& ind : mesh->getIndices())
+	//		tmpInds.push_back(ind + vertexOffset);
+
+	//	btTriangleMesh* mergedTriangleMesh = new btTriangleMesh();
+	//	btVector3 p0, p1, p2;
+	//	for (int triCounter = 0; triCounter < tmpInds.size() / 3; triCounter++)
+	//	{
+	//		p0 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter]]);
+	//		p1 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 1]]);
+	//		p2 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 2]]);
+
+	//		mergedTriangleMesh->addTriangle(p0, p1, p2);
+	//	}
+
+	//	btBvhTriangleMeshShape* bvhShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);
+	//	bvhShape->setMargin(0);
+	//	btCollisionShape* staticCollisionShape = bvhShape;
+	//	this->collisionShapes[actor->getName() + "_shape"] = staticCollisionShape;
+	//	
+	//	return staticCollisionShape;
+	//}
+
 	btCollisionShape* CollisionWorld::collisionShapeFromActor(Actor* actor)
 	{
 		if (actor->getMesh() == nullptr)
@@ -168,6 +206,8 @@ namespace vel
 
 		std::vector<glm::vec3> tmpVerts;
 		std::vector<size_t> tmpInds;
+		std::vector<glm::vec2> tmpTextureCoords;
+		std::vector<glm::vec2> tmpLightmapCoords;
 
 		auto transformMatrix = actor->getWorldMatrix();
 		auto mesh = actor->getMesh();
@@ -175,12 +215,16 @@ namespace vel
 		size_t vertexOffset = tmpVerts.size();
 
 		for (auto& vert : mesh->getVertices())
+		{
 			tmpVerts.push_back(glm::vec3(transformMatrix * glm::vec4(vert.position, 1.0f)));
-
+			tmpTextureCoords.push_back(vert.textureCoordinates);
+			tmpLightmapCoords.push_back(vert.lightmapCoordinates);
+		}
+		
 		for (auto& ind : mesh->getIndices())
 			tmpInds.push_back(ind + vertexOffset);
 
-		btTriangleMesh* mergedTriangleMesh = new btTriangleMesh();
+		CustomTriangleMesh* mergedTriangleMesh = new CustomTriangleMesh();
 		btVector3 p0, p1, p2;
 		for (int triCounter = 0; triCounter < tmpInds.size() / 3; triCounter++)
 		{
@@ -188,14 +232,27 @@ namespace vel
 			p1 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 1]]);
 			p2 = glmToBulletVec3(tmpVerts[tmpInds[3 * triCounter + 2]]);
 
-			mergedTriangleMesh->addTriangle(p0, p1, p2);
+			CustomTriangleMeshData ctmd;
+			ctmd.textureUVs = tmpTextureCoords[tmpInds[3 * triCounter]];
+			ctmd.lightmapUVs = tmpLightmapCoords[tmpInds[3 * triCounter]];
+			
+			ctmd.texture = nullptr;
+			if (actor->getStageRenderable() && actor->getStageRenderable().value()->getMaterial() && 
+				actor->getStageRenderable().value()->getMaterial().value().getTextures().size() > 0)
+			{
+				ctmd.texture = actor->getStageRenderable().value()->getMaterial().value().getTextures().at(0);
+			}
+
+			ctmd.lightmapTexture = actor->getLightMapTexture();
+
+			mergedTriangleMesh->addTriangle(p0, p1, p2, ctmd);
 		}
 
 		btBvhTriangleMeshShape* bvhShape = new btBvhTriangleMeshShape(mergedTriangleMesh, true);
 		bvhShape->setMargin(0);
 		btCollisionShape* staticCollisionShape = bvhShape;
 		this->collisionShapes[actor->getName() + "_shape"] = staticCollisionShape;
-		
+
 		return staticCollisionShape;
 	}
 
@@ -237,6 +294,7 @@ namespace vel
 		r.normal = raycast.m_hitNormalWorld.normalized();
 		r.distance = btVector3(from - r.hitpoint).length();
 		r.normalUpDot = r.normal.dot(btVector3(0, 1, 0));
+		r.triangleIndex = raycast.m_triangleIndex;
 
 		return r;
 	}
@@ -267,6 +325,79 @@ namespace vel
 		ccr.normalUpDot = ccr.normal.dot(btVector3(0, 1, 0));
 		
 		return ccr;
+	}
+
+	void CollisionWorld::getTriangleVertices(const btStridingMeshInterface* meshInterface, int triangleIndex, btVector3& v0, btVector3& v1, btVector3& v2, int& index0, int& index1, int& index2) {
+		int numTrianglesTotal = 0;
+
+		for (int i = 0; i < meshInterface->getNumSubParts(); ++i) {
+			const unsigned char* vertexBase;
+			int numVerts;
+			PHY_ScalarType vertexType;
+			int vertexStride;
+			const unsigned char* indexBase;
+			int indexStride;
+			int numFaces;
+			PHY_ScalarType indexType;
+
+			meshInterface->getLockedReadOnlyVertexIndexBase(
+				&vertexBase, numVerts, vertexType, vertexStride,
+				&indexBase, indexStride, numFaces, indexType, i
+			);
+
+			numTrianglesTotal += numFaces;
+		}
+
+		if (triangleIndex < 0 || triangleIndex >= numTrianglesTotal) {
+			std::cerr << "Invalid triangle index." << std::endl;
+			return;
+		}
+
+		int currentTriangle = 0;
+
+		for (int part = 0; part < meshInterface->getNumSubParts(); ++part) {
+			const unsigned char* vertexBase;
+			int numVerts;
+			PHY_ScalarType vertexType;
+			int vertexStride;
+			const unsigned char* indexBase;
+			int indexStride;
+			int numFaces;
+			PHY_ScalarType indexType;
+
+			meshInterface->getLockedReadOnlyVertexIndexBase(
+				&vertexBase, numVerts, vertexType, vertexStride,
+				&indexBase, indexStride, numFaces, indexType, part
+			);
+
+			for (int face = 0; face < numFaces; ++face) {
+				if (currentTriangle == triangleIndex) {
+					int* triangleIndices = reinterpret_cast<int*>(const_cast<unsigned char*>(indexBase) + face * indexStride);
+
+					index0 = triangleIndices[0];
+					index1 = triangleIndices[1];
+					index2 = triangleIndices[2];
+
+					btScalar* vertex0 = reinterpret_cast<btScalar*>(const_cast<unsigned char*>(vertexBase) + index0 * vertexStride);
+					btScalar* vertex1 = reinterpret_cast<btScalar*>(const_cast<unsigned char*>(vertexBase) + index1 * vertexStride);
+					btScalar* vertex2 = reinterpret_cast<btScalar*>(const_cast<unsigned char*>(vertexBase) + index2 * vertexStride);
+
+					v0.setValue(vertex0[0], vertex0[1], vertex0[2]);
+					v1.setValue(vertex1[0], vertex1[1], vertex1[2]);
+					v2.setValue(vertex2[0], vertex2[1], vertex2[2]);
+
+					break;
+				}
+
+				currentTriangle++;
+			}
+
+			meshInterface->unLockReadOnlyVertexBase(part);
+
+			if (currentTriangle > triangleIndex) {
+				break;
+			}
+		}
 	}
 
 }
