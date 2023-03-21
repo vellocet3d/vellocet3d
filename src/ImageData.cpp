@@ -18,7 +18,8 @@ namespace vel
 	glm::vec3 ImageData::getPixelRGBFromUV(float u, float v)
 	{
 		int x = (int)round(u * width);
-		int y = (int)round(height - round(v * height));
+		//int y = (int)round(height - round(v * height));
+		int y = (int)round(v * height);
 
 		return this->getPixelRGB(x, y);
 	}
