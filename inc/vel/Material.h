@@ -34,6 +34,9 @@ namespace vel
 		void								setAnimatedTexturePause(unsigned int textureId, bool isPaused);
 		bool								getAnimatedTexturePause(unsigned int textureId);
 
+		void								setAnimatedTextureReverse(unsigned int textureId, bool reverse);
+		bool								getAnimatedTextureReversed(unsigned int textureId);
+
 		std::string&						getName();
 		glm::vec4&							getColor();
 		std::vector<Texture*>&				getTextures();

@@ -17,7 +17,7 @@ namespace vel
 		repeat(repeat),
 		shouldPause(false),
 		cycleComplete(false),
-		foundPause(false),
+		foundPause(true),
 		firstCycleStarted(false),
 		pauseAtPausePoint(true),
 		useClosestPausePoint(false),
@@ -37,7 +37,21 @@ namespace vel
 		this->currentVec = this->vecs[0];
 	};
 
+	bool MultiTweener::getShouldPause()
+	{
+		return this->shouldPause;
+	}
 
+	bool MultiTweener::atPausePoint()
+	{
+		//for (auto& ppi : this->pausePoints)
+		//	if (this->vecs.at(ppi) == this->currentVec)
+		//		return true;
+
+		//return false;
+
+		return this->foundPause;
+	}
 
 	void MultiTweener::updateSpeed(float newSpeed)
 	{

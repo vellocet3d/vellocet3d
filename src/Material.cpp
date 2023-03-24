@@ -59,6 +59,22 @@ namespace vel
 		return this->materialAnimator.value().getTexturePaused(textureId);
 	}
 
+	void Material::setAnimatedTextureReverse(unsigned int textureId, bool reverse)
+	{
+		if (!this->materialAnimator.has_value())
+			return;
+
+		this->materialAnimator.value().setAnimatedTextureReverse(textureId, reverse);
+	}
+
+	bool Material::getAnimatedTextureReversed(unsigned int textureId)
+	{
+		if (!this->materialAnimator.has_value())
+			return true;
+
+		return this->materialAnimator.value().getAnimatedTextureReversed(textureId);
+	}
+
 	std::string& Material::getName()
 	{
 		return this->name;

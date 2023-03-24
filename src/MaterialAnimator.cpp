@@ -43,4 +43,14 @@ namespace vel
 		return this->textureAnimators.at(textureId).getPaused();
 	}
 
+	void MaterialAnimator::setAnimatedTextureReverse(unsigned int textureId, bool reverse)
+	{
+		this->textureAnimators.at(textureId).setReverse(reverse);
+	}
+
+	bool MaterialAnimator::getAnimatedTextureReversed(unsigned int textureId)
+	{
+		return this->textureAnimators.at(textureId).getIsPlayingReversed();
+	}
+
 }

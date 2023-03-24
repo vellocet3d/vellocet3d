@@ -22,6 +22,9 @@ namespace vel
 		void setTextureAnimatorPause(unsigned int textureId, bool isPaused);
 		bool getTexturePaused(unsigned int textureId);
 
+		void setAnimatedTextureReverse(unsigned int textureId, bool reverse);
+		bool getAnimatedTextureReversed(unsigned int textureId);
+
 		unsigned int getTextureCurrentFrame(unsigned int index);
 		
 	};

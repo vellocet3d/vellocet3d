@@ -49,6 +49,9 @@ namespace vel
 
 		void		updateSpeed(float newSpeed);
 
+		bool		atPausePoint();
+		bool		getShouldPause();
+
 
 	};
 }

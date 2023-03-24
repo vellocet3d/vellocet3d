@@ -12,8 +12,19 @@ namespace vel
 		currentCycleTime(0.0f),
 		currentCycle(1),
 		paused(false),
-		pauseAfterCycles(0)
+		pauseAfterCycles(0),
+		reverse(false)
 	{}
+
+	void TextureAnimator::setReverse(bool r)
+	{
+		this->reverse = r;
+	}
+
+	bool TextureAnimator::getIsPlayingReversed()
+	{
+		return this->reverse;
+	}
 
 	unsigned int TextureAnimator::getCurrentFrame()
 	{
@@ -40,6 +51,39 @@ namespace vel
 		this->pauseAfterCycles = c;
 	}
 
+	//unsigned int TextureAnimator::update(float frameTime)
+	//{
+	//	if (this->paused)
+	//		return this->currentFrame;
+
+	//	float numberOfFramesToPlayPerSecond = 1.0f / this->framesPerSecond;
+
+	//	unsigned int nextFrame = (unsigned int)(this->currentCycleTime / numberOfFramesToPlayPerSecond);
+
+	//	if (nextFrame == this->frameCount) // 0 based
+	//	{
+	//		if (this->pauseAfterCycles == this->currentCycle)
+	//		{
+	//			this->paused = true;
+	//			this->currentCycle = 1;
+	//		}
+	//		else
+	//		{
+	//			this->currentCycle += 1;
+	//		}
+	//		
+	//		this->currentCycleTime = 0.0f;
+
+	//		return this->currentFrame;
+	//	}
+
+	//	this->currentCycleTime += frameTime;
+
+	//	this->currentFrame = nextFrame;
+
+	//	return this->currentFrame;
+	//}
+
 	unsigned int TextureAnimator::update(float frameTime)
 	{
 		if (this->paused)
@@ -48,6 +92,11 @@ namespace vel
 		float numberOfFramesToPlayPerSecond = 1.0f / this->framesPerSecond;
 
 		unsigned int nextFrame = (unsigned int)(this->currentCycleTime / numberOfFramesToPlayPerSecond);
+		unsigned int nextFrameReversed = (unsigned int)(this->frameCount - nextFrame);
+		nextFrameReversed = nextFrameReversed - 1; // zero based index
+
+		//std::cout << "nextFrame: " << nextFrame << "\n"
+		//	<< "nextFrameReversed: " << nextFrameReversed << std::endl;
 
 		if (nextFrame == this->frameCount) // 0 based
 		{
@@ -60,7 +109,7 @@ namespace vel
 			{
 				this->currentCycle += 1;
 			}
-			
+
 			this->currentCycleTime = 0.0f;
 
 			return this->currentFrame;
@@ -68,8 +117,16 @@ namespace vel
 
 		this->currentCycleTime += frameTime;
 
-		this->currentFrame = nextFrame;
+		if (!this->reverse)
+			this->currentFrame = nextFrame;
+		else
+			this->currentFrame = nextFrameReversed;
+
+		//std::cout << "this->currentFrame: " << this->currentFrame << std::endl;
 
 		return this->currentFrame;
 	}
+
+
+
 }

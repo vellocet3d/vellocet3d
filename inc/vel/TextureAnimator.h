@@ -13,6 +13,7 @@ namespace vel
 		unsigned int		currentCycle;
 		bool				paused;
 		unsigned int		pauseAfterCycles;
+		bool				reverse;
 
 	public:
 		TextureAnimator(float frameCount, float fps);
@@ -25,6 +26,9 @@ namespace vel
 		bool				getPaused();
 
 		unsigned int		getCurrentFrame();
+
+		void				setReverse(bool r);
+		bool				getIsPlayingReversed();
 
 	};
 }
