@@ -52,6 +52,8 @@ namespace vel
 		bool		atPausePoint();
 		bool		getShouldPause();
 
+		void		swapDirection();
+
 
 	};
 }

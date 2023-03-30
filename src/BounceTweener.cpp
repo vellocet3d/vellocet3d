@@ -7,24 +7,24 @@
 
 namespace vel
 {
-	/*
-		Smoothly translate from one glm::vec3 to another glm::vec3 at a given speed in units per second
-	*/
 	BounceTweener::BounceTweener(glm::vec3 from, glm::vec3 to, float speed) :
-		tweener(Tweener(from, to, speed))
+		tweener(Tweener(from, to, speed, TweenerDirection::Forward))
 	{};
 
 	glm::vec3 BounceTweener::update(float dt)
 	{
-		if (!this->tweener.isForwardComplete())
+		if (this->tweener.getDirection() == TweenerDirection::Forward && this->tweener.isComplete())
 		{
-			return this->tweener.updateForward(dt);
+			this->tweener.reset();
+			this->tweener.setDirection(TweenerDirection::Backward);
 		}
-		else
+		else if (this->tweener.getDirection() == TweenerDirection::Backward && this->tweener.isComplete())
 		{
-			return this->tweener.updateBackward(dt);
+			this->tweener.reset();
+			this->tweener.setDirection(TweenerDirection::Forward);
 		}
-			
+
+		return this->tweener.update(dt);
 	}
 
 	void BounceTweener::updateSpeed(float newSpeed)
