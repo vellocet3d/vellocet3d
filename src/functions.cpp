@@ -1,6 +1,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <random>
 
 #include "glm/gtc/type_ptr.hpp"
 
@@ -151,6 +152,15 @@ namespace vel
 	float lerpf(float a, float b, float f)
 	{
 		return (a * (1.0 - f)) + (b * f);
+	}
+
+	bool randomFiftyFifty()
+	{
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<> distrib(0, 1);
+
+		return distrib(gen) == 1;
 	}
 
 }
