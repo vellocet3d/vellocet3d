@@ -38,6 +38,7 @@ namespace vel
 		int						currentTweenIndex;
 		bool					closestPausePointForward;
 		bool					closestPausePointFound;
+		bool					directionSwapNeedsCleared;
 
 	public:
 		MultiTweener(std::vector<glm::vec3> vecs, float speed, bool repeat = false);

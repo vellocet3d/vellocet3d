@@ -19,12 +19,13 @@ namespace vel
 		cycleComplete(false),
 		foundPause(true),
 		firstCycleStarted(false),
+		shouldPlayForward(true),
 		pauseAtPausePoint(true),
 		useClosestPausePoint(false),
+		currentTweenIndex(0),
 		closestPausePointForward(true),
 		closestPausePointFound(false),
-		shouldPlayForward(true),
-		currentTweenIndex(0)
+		directionSwapNeedsCleared(false)
 	{
 		size_t i = 0;
 		for (auto& v : this->vecs)
@@ -91,6 +92,12 @@ namespace vel
 
 	void MultiTweener::unpause()
 	{
+		if (this->shouldPause && this->closestPausePointFound && !this->closestPausePointForward && this->directionSwapNeedsCleared)
+		{
+			this->swapDirection();
+			this->directionSwapNeedsCleared = false;
+		}
+
 		this->shouldPause = false;
 		this->foundPause = false;
 		this->closestPausePointFound = false;
@@ -155,7 +162,7 @@ namespace vel
 
 					if (this->tweens[this->currentTweenIndex].isComplete())
 					{
-						if (this->shouldPause && this->pausePointExists(this->currentTweenIndex))
+						if (this->pausePointExists(this->currentTweenIndex))
 						{
 							// we have reached our pause point after translating backwards, therefore we
 							// set this->foundPause to true and call this->swapDirection() to reset our
@@ -163,6 +170,8 @@ namespace vel
 							this->foundPause = true;
 
 							this->swapDirection();
+
+							this->directionSwapNeedsCleared = false;
 
 							return this->currentVec;
 						}
@@ -176,6 +185,8 @@ namespace vel
 					{
 						return this->currentVec;
 					}
+
+					return this->currentVec;
 				}
 				
 				/*
@@ -183,8 +194,8 @@ namespace vel
 					therefore we continue forward within the loop
 				*/
 				
-			}
-			
+			}			
+
 			// If we have made it here, then we should not be pausing, therefore we set this->currentVec equal to
 			// the value returned by the tween stored at this->currentTweenIndex
 			this->currentVec = this->tweens[this->currentTweenIndex].update(dt);
@@ -226,7 +237,7 @@ namespace vel
 			t.reset();
 			
 		this->currentTweenIndex = 0;
-		
+
 		return this->update(dt);
 	}
 
@@ -299,6 +310,7 @@ namespace vel
 		{
 			this->closestPausePointForward = false;
 			this->swapDirection();
+			this->directionSwapNeedsCleared = true;
 		}
 		else
 		{
