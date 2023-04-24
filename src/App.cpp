@@ -308,7 +308,7 @@ namespace vel
 		//// step physics simulation
 		this->activeScene->stepPhysics(dt);
 
-		// TODO: this just updates previous transform now, i would rename it
+		// update previous transforms
 		this->activeScene->updatePreviousTransforms();
 
 		// execute inner loop (fixed rate) logic
