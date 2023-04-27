@@ -131,40 +131,70 @@ namespace vel
 				a->updatePreviousTransform();
 	}
 
-	Actor* Stage::addActor(Actor a)
+	void Stage::addActorToRenderable(Actor* actor)
 	{
-		auto actor = this->actors.insert(a.getName(), a);
-		
+		// actors will have temp renderables if their renderable was added after the actor was added to the stage
 		if (actor->getTempRenderable())
 		{
 			auto& tempRenderable = actor->getTempRenderable().value();
 
+			bool newRenderable = false;
 			if (!this->renderables.exists(tempRenderable.getName()))
+			{
+				newRenderable = true;
 				this->renderables.insert(tempRenderable.getName(), tempRenderable);
-				
+			}
+
 			auto actorStageRenderable = this->renderables.get(tempRenderable.getName());
 
 			actor->setStageRenderable(actorStageRenderable);
-			
+
 			actor->clearTempRenderable();
-			
+
 			actorStageRenderable->actors.insert(actor->getName(), actor);
 
 			// new renderable, so check if it has an animated material and if so add pointer to it to animatedMaterials
-			if (actorStageRenderable->getMaterial().has_value() && actorStageRenderable->getMaterial()->getMaterialAnimator().has_value())
-				this->animatedMaterials.insert(actorStageRenderable->getName() + "_" + actorStageRenderable->getMaterial()->getName(), &actorStageRenderable->getMaterial().value());
+			if (newRenderable && actorStageRenderable->getMaterial().has_value() &&
+				actorStageRenderable->getMaterial()->getMaterialAnimator().has_value())
+			{
+				this->animatedMaterials.insert(actorStageRenderable->getName() + "_" +
+					actorStageRenderable->getMaterial()->getName(), &actorStageRenderable->getMaterial().value());
+			}
 		}
 		// if adding an actor that does not have a tempRenderable pointer, BUT DOES have a 
 		// stageRenderable value, then we assume that this actor was derived from an existing
 		// actor, and we simply need to add it to that existing stageRenderable.
-		else if(!actor->getTempRenderable().has_value() && actor->getStageRenderable().has_value())
+		else if (!actor->getTempRenderable().has_value() && actor->getStageRenderable().has_value())
 		{
-			actor->getStageRenderable().value()->actors.insert(actor->getName(), actor);
+			if (!actor->getStageRenderable().value()->actors.exists(actor->getName()))
+				actor->getStageRenderable().value()->actors.insert(actor->getName(), actor);
 		}
 
 		// if actor has an animated material, add it to animatedMaterials
 		if (actor->getMaterial().has_value() && actor->getMaterial()->getMaterialAnimator().has_value())
-			this->animatedMaterials.insert(actor->getName() + "_" + actor->getMaterial()->getName(), &actor->getMaterial().value());
+		{
+			std::string materialName = actor->getName() + "_" + actor->getMaterial()->getName();
+			if (!this->animatedMaterials.exists(materialName))
+				this->animatedMaterials.insert(materialName, &actor->getMaterial().value());
+		}
+	}
+
+	void Stage::refreshRenderables()
+	{
+		for (auto renderable : this->renderables.getAll())
+		{
+			for (auto actor : renderable->actors.getAll())
+			{
+				this->addActorToRenderable(actor);	
+			}
+		}
+	}
+
+	Actor* Stage::addActor(Actor a)
+	{
+		auto actor = this->actors.insert(a.getName(), a);
+		
+		this->addActorToRenderable(actor);
 
 		return actor;
 	}

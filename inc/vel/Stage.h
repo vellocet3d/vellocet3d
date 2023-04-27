@@ -29,12 +29,11 @@ namespace vel
 		sac<Renderable>									renderables;
 		sac<TextActor>									textActors;
 		bool											clearDepthBuffer;
-		std::string										name;
-
-		
+		std::string										name;	
 
 
 		void											_removeActor(Actor* a);
+		void											addActorToRenderable(Actor* actor);
 
 
 	public:
@@ -74,6 +73,18 @@ namespace vel
 		Armature*										getArmature(std::string armatureName);	
 
 		ptrsac<Material*>								animatedMaterials;
+
+		/*
+			After refactoring xd327 so that we can load either a headless or headful scene, it was discovered that
+			since we do not add renderables to actors before adding them to their stage, that renderable functionality
+			would be broken because renderables added to actors after the actor has been added to the stage would not be
+			processed, therefore we need a way to "refresh" those lists. Since this is something that should only ever need
+			to be done upon initialization of a scene, it shouldn't make much of a difference, although you would not want to
+			have to do this everytime you added a renderable...BUT...again...once the scene is loaded any actors that are created
+			during runtime should just be clones of existing preloaded renderables/actors, negating any reason for this to need to
+			be run multiple times after initialization
+		*/
+		void											refreshRenderables();
 
 	};
 }
