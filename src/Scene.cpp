@@ -256,14 +256,26 @@ namespace vel
 		std::vector<unsigned int> meshIndices = {};
 
 		unsigned int lastIndex = 0;
-		float offsetX = 0;
-		float offsetY = 0;
+
+		float lineMinY = 0.0f;
+		float lineMaxY = 0.0f;
+
+		float offsetX = 0.0f;
+		float offsetY = 0.0f;
 
 		for (auto c : ta->text)
 		{
+			if (c == '\n')
+			{
+				offsetX = 0.0f;
+				offsetY += fabsf(lineMinY - lineMaxY);
+				lineMinY = 0.0f;
+				lineMaxY = 0.0f;
+				continue;
+			}
+
 			const auto glyphInfo = App::get().getAssetManager().getFontGlyphInfo(c, offsetX, offsetY, ta->fontBitmap);
 			offsetX = glyphInfo.offsetX;
-			offsetY = glyphInfo.offsetY;
 
 			Vertex v1;
 			v1.position = glyphInfo.positions[0];
@@ -271,6 +283,11 @@ namespace vel
 			v1.textureCoordinates = glyphInfo.uvs[0];
 			v1.textureId = 0;
 			meshVertices.push_back(v1);
+			if (v1.position.y < lineMinY)
+				lineMinY = v1.position.y;
+			if (v1.position.y > lineMaxY)
+				lineMaxY = v1.position.y;
+
 
 			Vertex v2;
 			v2.position = glyphInfo.positions[1];
@@ -278,6 +295,11 @@ namespace vel
 			v2.textureCoordinates = glyphInfo.uvs[1];
 			v2.textureId = 0;
 			meshVertices.push_back(v2);
+			if (v2.position.y < lineMinY)
+				lineMinY = v2.position.y;
+			if (v2.position.y > lineMaxY)
+				lineMaxY = v2.position.y;
+
 
 			Vertex v3;
 			v3.position = glyphInfo.positions[2];
@@ -285,6 +307,11 @@ namespace vel
 			v3.textureCoordinates = glyphInfo.uvs[2];
 			v3.textureId = 0;
 			meshVertices.push_back(v3);
+			if (v3.position.y < lineMinY)
+				lineMinY = v3.position.y;
+			if (v3.position.y > lineMaxY)
+				lineMaxY = v3.position.y;
+
 
 			Vertex v4;
 			v4.position = glyphInfo.positions[3];
@@ -292,6 +319,11 @@ namespace vel
 			v4.textureCoordinates = glyphInfo.uvs[3];
 			v4.textureId = 0;
 			meshVertices.push_back(v4);
+			if (v4.position.y < lineMinY)
+				lineMinY = v4.position.y;
+			if (v4.position.y > lineMaxY)
+				lineMaxY = v4.position.y;
+
 
 			// Add indices with correct winding
 			meshIndices.push_back(lastIndex + 1); // 1
